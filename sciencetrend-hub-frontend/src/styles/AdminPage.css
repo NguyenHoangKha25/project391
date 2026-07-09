@@ -1,0 +1,14 @@
+.admin-page { --page-accent: var(--st-primary); }
+.admin-page .workspace-toolbar { color: #fff; border-color: rgba(255,255,255,.16); background: radial-gradient(circle at 10% 8%, rgba(100,215,229,.25), transparent 22rem), radial-gradient(circle at 100% 0%, rgba(200,131,44,.22), transparent 22rem), linear-gradient(135deg, #071b22 0%, #093945 58%, #0f6271 100%); box-shadow: 0 30px 80px rgba(9,35,45,.22); }
+.admin-page .workspace-toolbar-copy h2 { color: #fff; }
+.admin-page .workspace-toolbar-copy p { color: rgba(255,255,255,.68); }
+.admin-page .workspace-toolbar .workspace-button { color: #fff; border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.10); }
+.admin-page .workspace-toolbar .workspace-button:hover:not(:disabled) { background: rgba(255,255,255,.16); color: #fff; }
+.admin-page .workspace-toolbar .workspace-button.primary { color: #0b2e38; background: #fff; border-color: rgba(255,255,255,.58); }
+.admin-page .workspace-toolbar .workspace-button.primary:hover:not(:disabled) { color: #0b2e38; background: #eefbfc; }
+.admin-page .workspace-panel { border-top: 4px solid rgba(21,127,145,.55); }
+.admin-page .workspace-panel:nth-of-type(2) { border-top-color: rgba(200,131,44,.72); }
+.admin-page .workspace-list > div { border-color: rgba(230,222,211,.78) !important; border-radius: 14px; }
+.admin-page .workspace-empty { min-height: 230px; }
+.admin-page .workspace-empty::before { content: "⚙"; width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: 4px; border-radius: 16px; color: var(--st-primary); background: var(--st-primary-soft); font-size: 20px; }
+@media (max-width: 620px) { .admin-page .workspace-toolbar > div:last-child { width: 100%; flex-direction: column; } .admin-page .workspace-toolbar .workspace-button { width: 100%; } }

@@ -1,0 +1,4 @@
+.reports-page .workspace-toolbar { background: radial-gradient(circle at 7% 8%, rgba(200,131,44,.16), transparent 22rem), radial-gradient(circle at 100% 0%, rgba(21,127,145,.12), transparent 22rem), rgba(255,255,255,.90); }
+.reports-page .workspace-report-card { position: relative; overflow: hidden; }
+.reports-page .workspace-report-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: linear-gradient(90deg, var(--st-primary), var(--st-accent)); }
+.reports-page .workspace-report-card > * { position: relative; z-index: 1; }

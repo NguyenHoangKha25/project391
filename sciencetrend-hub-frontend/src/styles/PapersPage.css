@@ -1,0 +1,19 @@
+.papers-search-form { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; }
+.papers-search-wrap { position: relative; }
+.papers-search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--st-muted); pointer-events: none; }
+.papers-search-input { width: min(420px, 36vw) !important; padding-left: 44px !important; padding-right: 42px !important; }
+.papers-search-clear { position: absolute; right: 7px; top: 50%; width: 32px; height: 32px; display: grid; place-items: center; transform: translateY(-50%); border-radius: 11px; color: var(--st-muted); background: #f7f2ea; }
+.papers-search-clear:hover { color: var(--st-danger); background: var(--st-danger-soft); }
+.papers-search-clear svg { width: 16px; height: 16px; }
+.papers-page .workspace-panel { padding: 16px; }
+.papers-toast { position: fixed; right: 28px; bottom: 28px; z-index: 100; max-width: 320px; padding: 13px 15px; border-radius: 16px; font-size: 13px; font-weight: 760; box-shadow: var(--sh-lg); animation: st-rise 180ms var(--ease-out) both; }
+.papers-toast--success { color: var(--st-success); background: var(--st-success-soft); border: 1px solid rgba(35,132,91,.18); }
+.papers-toast--warning { color: var(--st-warning); background: var(--st-warning-soft); border: 1px solid rgba(157,105,0,.18); }
+.papers-toast--info { color: var(--st-primary); background: var(--st-primary-soft); border: 1px solid rgba(21,127,145,.18); }
+.cm-pagination { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 22px; }
+.cm-page-btn, .cm-page-ellipsis { min-width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid rgba(230,222,211,.90); border-radius: 13px; color: var(--st-muted-strong); background: #fff; box-shadow: var(--sh-xs); font-size: 13px; font-weight: 780; }
+.cm-page-btn:hover:not(:disabled) { color: var(--st-primary); border-color: rgba(21,127,145,.28); background: var(--st-primary-soft); }
+.cm-page-btn.active { color: #fff; border-color: var(--st-primary); background: linear-gradient(135deg, var(--st-primary), var(--st-primary-dark)); }
+.cm-page-btn:disabled { opacity: .48; }
+.cm-page-ellipsis { border: 0; background: transparent; box-shadow: none; color: var(--st-muted); }
+@media (max-width: 760px) { .papers-search-form { width: 100%; flex-direction: column; align-items: stretch; } .papers-search-input { width: 100% !important; } }

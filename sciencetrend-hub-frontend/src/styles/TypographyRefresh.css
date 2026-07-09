@@ -1,0 +1,553 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..760;1,14..32,400..720&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Manrope:wght@400;500;600;700;750;800&display=swap');
+
+:root {
+  --font-body: 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-display: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --type-heading-tracking: -0.012em;
+  --type-soft-tracking: -0.005em;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.65;
+  letter-spacing: -0.002em;
+}
+
+/* Form controls, UI controls, navigation links, and badges should use the clean, modern sans-serif font */
+button, input, select, textarea,
+.st-menu-link, .st-menu-label,
+.home-nav-links a, .home-nav-cta,
+.workspace-button, .workspace-select,
+.db-refresh-btn, .register-btn,
+.auth-primary-btn, .cm-btn,
+.auth-badge, .register-kicker, .auth-status-kicker,
+.auth-form-group label, .form-group label, .forgot-card label, .reset-form label, .cm-input-label,
+.st-sidebar-footer strong, .st-sidebar-footer small,
+.register-terms, .field-error, .cm-input-error {
+  font-family: var(--font-ui) !important;
+  letter-spacing: normal;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.st-navbar-heading h1,
+.st-brand strong,
+.st-user-copy strong,
+.st-account-summary strong,
+.home-brand strong,
+.home-hero-copy h1,
+.home-section-heading h2,
+.home-workflow-copy h2,
+.auth-brand-text h1,
+.auth-hero h2,
+.auth-card-header h2,
+.register-title,
+.register-header h2,
+.forgot-header h2,
+.reset-header h2,
+.workspace-toolbar-copy h2,
+.workspace-panel-header h2,
+.db-welcome-row h2,
+.db-panel-header h2,
+.db-stat-card strong,
+.workspace-report-card h3,
+.my-account-hero h2,
+.my-account-card h3 {
+  font-family: var(--font-display);
+  letter-spacing: var(--type-heading-tracking);
+  text-wrap: balance;
+}
+
+/* Navbar + sidebar: nhìn mềm hơn, không bị nặng chữ */
+.st-navbar-heading h1 {
+  font-size: clamp(24px, 2vw, 30px);
+  font-weight: 750;
+  line-height: 1.12;
+  letter-spacing: -0.028em;
+}
+.st-navbar-heading p {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 14.5px;
+  font-weight: 450;
+  letter-spacing: -0.004em;
+}
+.st-brand strong {
+  font-size: 17.5px;
+  font-weight: 720;
+  line-height: 1.13;
+}
+.st-brand small {
+  font-size: 12px;
+  font-weight: 520;
+  letter-spacing: -0.002em;
+}
+.st-menu-label {
+  font-size: 10.5px;
+  font-weight: 760;
+  letter-spacing: .13em;
+}
+.st-menu-link {
+  font-size: 14.5px;
+  font-weight: 640;
+  letter-spacing: -0.006em;
+}
+.st-sidebar-footer strong { font-size: 13px; font-weight: 670; }
+.st-sidebar-footer small { font-size: 11.5px; font-weight: 480; }
+.st-search-form input {
+  font-size: 14.5px;
+  font-weight: 450;
+  letter-spacing: -0.002em;
+}
+.st-search-form span {
+  font-size: 11px;
+  font-weight: 680;
+}
+.st-user-copy strong {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+}
+.st-user-copy small {
+  font-size: 12px;
+  font-weight: 520;
+}
+.st-account-summary strong {
+  font-size: 17px;
+  font-weight: 730;
+  letter-spacing: -0.024em;
+}
+.st-account-summary small {
+  font-size: 13.5px;
+  font-weight: 450;
+}
+.st-account-menu button {
+  font-size: 14.5px;
+  font-weight: 620;
+  letter-spacing: -0.006em;
+}
+
+/* Dashboard */
+.db-eyebrow {
+  font-size: 11.5px;
+  font-weight: 760;
+  letter-spacing: .11em;
+}
+.db-welcome-row h2 {
+  font-size: clamp(31px, 3vw, 43px);
+  font-weight: 760;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+.db-welcome-row p {
+  max-width: 720px;
+  color: #475569;
+  font-size: 15.5px;
+  font-weight: 430;
+  line-height: 1.68;
+}
+.db-refresh-btn {
+  font-size: 14px;
+  font-weight: 680;
+}
+.db-stat-card p {
+  font-size: 12px;
+  font-weight: 720;
+  letter-spacing: .05em;
+}
+.db-stat-card strong {
+  font-size: 32px;
+  font-weight: 760;
+  letter-spacing: -0.035em;
+}
+.db-stat-card small {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.db-panel-header h2 {
+  font-size: 22px;
+  font-weight: 760;
+  line-height: 1.18;
+  letter-spacing: -0.026em;
+}
+.db-panel-header-link,
+.db-range-badge,
+.db-stat-change {
+  font-size: 12.5px;
+  font-weight: 680;
+  letter-spacing: -0.003em;
+}
+.db-chart-value {
+  font-size: 12.2px;
+  font-weight: 680;
+}
+.db-chart-column small {
+  font-size: 11.5px;
+  font-weight: 560;
+  line-height: 1.32;
+}
+.db-paper-tag,
+.db-paper-source {
+  font-size: 11px;
+  font-weight: 680;
+  letter-spacing: .035em;
+}
+.db-paper-card h3 {
+  font-size: 16.5px;
+  font-weight: 710;
+  letter-spacing: -0.012em;
+  line-height: 1.42;
+}
+.db-paper-card p {
+  font-size: 13.5px;
+  line-height: 1.62;
+}
+.db-journal-card h3,
+.db-topic-heading strong {
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+  line-height: 1.34;
+}
+.db-journal-card p,
+.db-topic-heading small {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.db-journal-meta span,
+.db-quartile,
+.db-topic-rank,
+.db-topic-growth {
+  font-weight: 660;
+  letter-spacing: -0.002em;
+}
+
+/* Workspace pages: Papers, Library, Trends, Reports, Notifications, Admin */
+.workspace-toolbar-copy h2 {
+  font-size: clamp(28px, 3vw, 39px);
+  font-weight: 760;
+  line-height: 1.12;
+  letter-spacing: -0.034em;
+}
+.workspace-toolbar-copy p {
+  color: #475569;
+  font-size: 15px;
+  font-weight: 430;
+  line-height: 1.65;
+}
+.workspace-select,
+.workspace-button {
+  font-size: 13.5px;
+  font-weight: 620;
+  letter-spacing: -0.004em;
+}
+.workspace-panel-header h2 {
+  font-size: 18.5px;
+  font-weight: 740;
+  letter-spacing: -0.018em;
+  line-height: 1.24;
+}
+.workspace-panel-header span,
+.workspace-status,
+.workspace-report-meta span {
+  font-size: 11.5px;
+  font-weight: 670;
+  letter-spacing: .004em;
+}
+.workspace-empty {
+  font-size: 14px;
+  font-weight: 430;
+  line-height: 1.72;
+}
+.workspace-notice {
+  font-size: 13.5px;
+  font-weight: 540;
+}
+.workspace-notification h3,
+.workspace-report-card h3 {
+  font-size: 16px;
+  font-weight: 710;
+  letter-spacing: -0.012em;
+  line-height: 1.36;
+}
+.workspace-report-card h3 { font-size: 18px; }
+.workspace-notification p,
+.workspace-report-card p {
+  font-size: 13.5px;
+  font-weight: 430;
+  line-height: 1.68;
+}
+.workspace-notification time {
+  font-size: 12px;
+  font-weight: 500;
+}
+.workspace-profile-row span {
+  font-size: 11.5px;
+  font-weight: 650;
+  letter-spacing: .045em;
+}
+.workspace-profile-row strong {
+  font-size: 13.5px;
+  font-weight: 590;
+}
+
+/* Home */
+.home-brand strong {
+  font-size: 19px;
+  font-weight: 740;
+  letter-spacing: -0.028em;
+}
+.home-brand small,
+.home-topbar-note {
+  font-size: 12.5px;
+  font-weight: 450;
+}
+.home-nav-links a,
+.home-nav-cta {
+  font-size: 14.5px;
+  font-weight: 610;
+  letter-spacing: -0.004em;
+}
+.home-eyebrow,
+.home-preview-top strong {
+  font-size: 11.5px;
+  font-weight: 690;
+  letter-spacing: .095em;
+}
+.home-hero-copy h1 {
+  font-size: clamp(38px, 5.2vw, 60px);
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+.home-hero-copy p {
+  font-size: 17px;
+  font-weight: 430;
+  line-height: 1.8;
+  letter-spacing: -0.004em;
+}
+.home-preview-search,
+.home-topic-ticker span {
+  font-weight: 500;
+}
+.home-preview-card strong,
+.home-stat-strip strong {
+  font-weight: 750;
+  letter-spacing: -0.026em;
+}
+.home-stat-strip span {
+  font-weight: 650;
+  letter-spacing: .05em;
+}
+.home-section-heading h2,
+.home-workflow-copy h2 {
+  font-size: clamp(31px, 3.9vw, 49px);
+  font-weight: 760;
+  line-height: 1.12;
+  letter-spacing: -0.036em;
+}
+.home-section-heading p,
+.home-workflow-copy p {
+  font-size: 16px;
+  font-weight: 430;
+  line-height: 1.76;
+}
+.home-feature-card h3 {
+  font-size: 18px;
+  font-weight: 710;
+  letter-spacing: -0.014em;
+}
+.home-feature-card p {
+  font-size: 14.5px;
+  font-weight: 430;
+  line-height: 1.7;
+}
+.home-workflow-item strong { font-weight: 610; }
+.home-footer strong { font-weight: 690; }
+
+/* Auth pages */
+.auth-brand-text h1,
+.auth-flow-brand strong {
+  font-weight: 740;
+  letter-spacing: -0.026em;
+}
+.auth-brand-text p,
+.auth-flow-brand span {
+  font-weight: 430;
+}
+.auth-badge,
+.register-kicker,
+.auth-status-kicker {
+  font-size: 11.5px;
+  font-weight: 690;
+  letter-spacing: .095em;
+}
+.auth-hero h2,
+.register-title {
+  font-size: clamp(42px, 5.2vw, 66px);
+  font-weight: 770;
+  line-height: 1.02;
+  letter-spacing: -0.046em;
+}
+.auth-hero p,
+.register-desc {
+  font-size: 16px;
+  font-weight: 430;
+  line-height: 1.78;
+}
+.auth-card-header h2,
+.register-header h2,
+.forgot-header h2,
+.reset-header h2,
+.auth-status-card h2 {
+  font-size: 32px;
+  font-weight: 760;
+  line-height: 1.14;
+  letter-spacing: -0.034em;
+}
+.auth-card-header p,
+.register-header p,
+.forgot-header p,
+.reset-header p,
+.auth-status-card p {
+  font-size: 14.5px;
+  font-weight: 430;
+  line-height: 1.68;
+}
+.auth-form-group label,
+.form-group label,
+.forgot-card label,
+.reset-form label,
+.cm-input-label {
+  font-size: 13.5px;
+  font-weight: 640;
+  letter-spacing: -0.004em;
+}
+.auth-form-input,
+.cm-input,
+.forgot-card input,
+.reset-form input,
+.form-group input,
+.form-group select {
+  font-size: 14.5px;
+  font-weight: 450;
+  letter-spacing: -0.004em;
+}
+.auth-primary-btn,
+.register-btn,
+.forgot-card button[type="submit"],
+.reset-btn,
+.auth-status-card a,
+.cm-btn {
+  font-size: 14px;
+  font-weight: 690;
+  letter-spacing: -0.004em;
+}
+.auth-link,
+.login-link,
+.back-login-link,
+.login-link-btn {
+  font-weight: 680;
+}
+.auth-divider span,
+.register-progress span,
+.password-strength > span,
+.register-terms,
+.field-error,
+.cm-input-error {
+  font-weight: 520;
+}
+.role-card strong {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.role-card > span:not(.role-card-icon):not(.role-card-check) {
+  font-size: 12px;
+  font-weight: 430;
+  line-height: 1.5;
+}
+
+/* My account page */
+.my-account-hero h2 {
+  font-size: clamp(32px, 3.4vw, 44px);
+  font-weight: 760;
+  line-height: 1.12;
+  letter-spacing: -0.034em;
+}
+.my-account-hero p {
+  font-size: 15.5px;
+  font-weight: 430;
+  line-height: 1.68;
+}
+.my-account-card h3 {
+  font-weight: 730;
+  letter-spacing: -0.02em;
+}
+.my-account-field label {
+  font-size: 12px;
+  font-weight: 660;
+  letter-spacing: .035em;
+}
+.my-account-field strong {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.my-account-note,
+.my-account-card p {
+  font-size: 13.5px;
+  font-weight: 430;
+  line-height: 1.66;
+}
+
+/* Premium Heading Accent Styles: Làm nổi bật tiêu đề đặc biệt */
+.register-header h2,
+.auth-card-header h2,
+.forgot-header h2,
+.reset-header h2 {
+  color: var(--st-primary-strong) !important;
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+}
+
+
+
+.workspace-toolbar-copy h2,
+.db-welcome-row h2,
+.my-account-hero h2 {
+  color: var(--st-primary-strong) !important;
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.028em;
+}
+
+.workspace-toolbar-copy h2::after,
+.db-welcome-row h2::after,
+.my-account-hero h2::after {
+  content: "";
+  display: block;
+  width: 50px;
+  height: 4px;
+  background: var(--st-accent);
+  border-radius: 99px;
+  margin-top: 10px;
+}
+
+@media (max-width: 760px) {
+  body { font-size: 15px; }
+  .st-navbar-heading h1 { font-size: 23px; }
+  .db-welcome-row h2,
+  .workspace-toolbar-copy h2,
+  .my-account-hero h2 { font-size: 29px; }
+  .home-hero-copy h1,
+  .auth-hero h2,
+  .register-title { font-size: clamp(36px, 11vw, 52px); }
+}
