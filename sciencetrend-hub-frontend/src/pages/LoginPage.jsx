@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff, FiGrid, FiBookmark, FiFileText } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiUser, FiLock, FiLayers, FiBookOpen, FiPieChart } from "react-icons/fi";
 import logo from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { useAuth } from "../context/useAuth";
@@ -50,18 +50,14 @@ function LoginPage() {
     }
   };
 
-  // Backend (OAuth2RedirectOriginFilter) đọc param "redirect_origin" = origin FE
-  // rồi lưu vào cookie, OAuth2SuccessHandler đọc cookie đó để redirect về đúng domain.
   const handleGmailLogin = () => {
     const backendUrl = (
       import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:8080"
     ).replace(/\/$/, "");
 
-    // origin = scheme + host (không có path), ví dụ "http://localhost:5173"
     const frontendOrigin = window.location.origin;
 
     const googleLoginUrl = new URL(`${backendUrl}/oauth2/authorization/google`);
-    // Đây là param mà OAuth2RedirectOriginFilter của BE đang đọc
     googleLoginUrl.searchParams.set("redirect_origin", frontendOrigin);
 
     window.location.href = googleLoginUrl.toString();
@@ -74,58 +70,53 @@ function LoginPage() {
 
       <section className="auth-layout">
         <div className="auth-left">
-          <div className="auth-brand">
-            <div className="auth-logo-box">
-              <img
-                className="auth-logo-img"
-                src={logo}
-                alt="ScienceTrend Hub logo"
-              />
-            </div>
-
+          <Link to={ROUTE_PATHS.HOME} className="auth-brand" aria-label="ScienceTrend Hub home">
+            <span className="auth-logo-box">
+              <img src={logo} alt="ScienceTrend Hub logo" className="auth-logo-img" />
+            </span>
             <div className="auth-brand-text">
               <h1>ScienceTrend Hub</h1>
               <p>Scientific Journal Publication Tracking</p>
             </div>
-          </div>
+          </Link>
 
           <div className="auth-left-content">
             <div className="auth-hero">
               <span className="auth-badge">Research Dashboard</span>
               <h2>Welcome!</h2>
-              <p>
-                Explore scientific trends, manage papers, and track journals instantly.
-              </p>
+              <p>Explore scientific trends, manage papers, and track journals instantly.</p>
             </div>
 
-            <div className="auth-preview-card">
+            <div className="auth-preview-card" aria-label="Interactive trends snippet">
               <div className="preview-header">
                 <div>
                   <h3>Publication Trends</h3>
-                  <p>2020 - 2026</p>
+                  <p>2020 – 2026</p>
                 </div>
               </div>
-              <div className="preview-chart">
-                <div className="preview-bar bar-1"></div>
-                <div className="preview-bar bar-2"></div>
-                <div className="preview-bar bar-3"></div>
-                <div className="preview-bar bar-4"></div>
-                <div className="preview-bar bar-5"></div>
-                <div className="preview-bar bar-6"></div>
+
+              <div className="preview-chart" aria-hidden="true">
+                <span className="preview-bar bar-1" />
+                <span className="preview-bar bar-2" />
+                <span className="preview-bar bar-3" />
+                <span className="preview-bar bar-4" />
+                <span className="preview-bar bar-5" />
+                <span className="preview-bar bar-6" />
               </div>
-              <div className="preview-topics">
+
+              <div className="preview-topics" aria-label="Highlighted research areas">
                 <div className="preview-topic-row">
-                  <span className="topic-dot topic-blue"></span>
+                  <span className="topic-dot topic-blue" />
                   <p>Artificial Intelligence</p>
                   <strong>32%</strong>
                 </div>
                 <div className="preview-topic-row">
-                  <span className="topic-dot topic-green"></span>
+                  <span className="topic-dot topic-green" />
                   <p>Machine Learning</p>
                   <strong>28%</strong>
                 </div>
                 <div className="preview-topic-row">
-                  <span className="topic-dot topic-yellow"></span>
+                  <span className="topic-dot topic-yellow" />
                   <p>Cybersecurity</p>
                   <strong>21%</strong>
                 </div>
@@ -136,21 +127,21 @@ function LoginPage() {
           <div className="auth-stats">
             <div className="auth-stat-card">
               <div className="auth-stat-icon-wrapper">
-                <FiGrid />
+                <FiLayers />
               </div>
               <h3>Dashboard</h3>
               <p>Publication overview</p>
             </div>
             <div className="auth-stat-card">
               <div className="auth-stat-icon-wrapper">
-                <FiBookmark />
+                <FiBookOpen />
               </div>
               <h3>Library</h3>
               <p>Saved papers</p>
             </div>
             <div className="auth-stat-card">
               <div className="auth-stat-icon-wrapper">
-                <FiFileText />
+                <FiPieChart />
               </div>
               <h3>Reports</h3>
               <p>Research summaries</p>
@@ -178,24 +169,28 @@ function LoginPage() {
             <form className="auth-form" onSubmit={handleLogin} noValidate>
               <div className="auth-form-group">
                 <label htmlFor="username">Username</label>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  placeholder="Enter your username"
-                  autoComplete="username"
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    setErrorMessage("");
-                    setSuccessMessage("");
-                  }}
-                />
+                <div className="auth-input-wrapper">
+                  <FiUser className="auth-input-icon" />
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    autoComplete="username"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      setErrorMessage("");
+                      setSuccessMessage("");
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="auth-form-group">
                 <label htmlFor="password">Password</label>
-                <div className="auth-password-field">
+                <div className="auth-input-wrapper">
+                  <FiLock className="auth-input-icon" />
                   <input
                     id="password"
                     name="password"
