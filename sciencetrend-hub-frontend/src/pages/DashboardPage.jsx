@@ -478,7 +478,7 @@ function DashboardPage() {
                   <div key={idx} className="trend-topic-row">
                     <div className="trend-info-col">
                       <span className="trend-rank">{idx + 1}</span>
-                      <div>
+                      <div className="trend-text-box">
                         <h4>{t.name}</h4>
                         <p>{t.desc}</p>
                       </div>

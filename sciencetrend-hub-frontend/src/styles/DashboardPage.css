@@ -563,9 +563,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
   min-width: 0;
 }
-.trend-info-col h4 {
+.trend-text-box {
+  flex: 1;
+  min-width: 0;
+}
+.trend-text-box h4 {
   font-size: 13.5px;
   color: var(--st-heading);
   font-weight: 800;
@@ -573,9 +578,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 250px;
+  width: 100%;
+  max-width: 100%;
 }
-.trend-info-col p {
+.trend-text-box p {
   font-size: 11.5px;
   color: var(--st-muted-strong);
   margin: 2px 0 0 0;
@@ -583,7 +589,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 250px;
+  width: 100%;
+  max-width: 100%;
 }
 .trend-rank {
   width: 23px;
