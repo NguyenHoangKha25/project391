@@ -125,83 +125,92 @@
 .topic-green { background: #59d795; box-shadow: 0 0 8px #59d795; }
 .topic-yellow { background: #ffc067; box-shadow: 0 0 8px #ffc067; }
 
-.auth-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
-
-.auth-stat-card { 
-  padding: 20px 18px; 
-  border: 1px solid rgba(255, 255, 255, 0.08) !important; 
-  border-radius: 20px; 
-  background: rgba(255, 255, 255, 0.04) !important; 
-  backdrop-filter: blur(10px);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
+.auth-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 26px;
+  width: min(100%, 460px);
 }
 
-/* Individual accent themes on hover */
-.auth-stat-card:nth-child(1) {
-  --stat-glow: rgba(125, 235, 246, 0.26);
-  --stat-border: rgba(125, 235, 246, 0.45);
+.auth-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.auth-stat-card:nth-child(1) .auth-stat-icon-wrapper {
+
+/* Color-coded glow configurations for each list item */
+.auth-feature-item:nth-child(1) {
+  --feat-glow: rgba(125, 235, 246, 0.18);
+  --feat-border: rgba(125, 235, 246, 0.38);
+}
+.auth-feature-item:nth-child(1) .auth-feature-icon-wrapper {
   background: rgba(125, 235, 246, 0.1) !important;
   color: #7debf6 !important;
 }
 
-.auth-stat-card:nth-child(2) {
-  --stat-glow: rgba(89, 215, 149, 0.26);
-  --stat-border: rgba(89, 215, 149, 0.45);
+.auth-feature-item:nth-child(2) {
+  --feat-glow: rgba(89, 215, 149, 0.18);
+  --feat-border: rgba(89, 215, 149, 0.38);
 }
-.auth-stat-card:nth-child(2) .auth-stat-icon-wrapper {
+.auth-feature-item:nth-child(2) .auth-feature-icon-wrapper {
   background: rgba(89, 215, 149, 0.1) !important;
   color: #59d795 !important;
 }
 
-.auth-stat-card:nth-child(3) {
-  --stat-glow: rgba(255, 192, 103, 0.26);
-  --stat-border: rgba(255, 192, 103, 0.45);
+.auth-feature-item:nth-child(3) {
+  --feat-glow: rgba(255, 192, 103, 0.18);
+  --feat-border: rgba(255, 192, 103, 0.38);
 }
-.auth-stat-card:nth-child(3) .auth-stat-icon-wrapper {
+.auth-feature-item:nth-child(3) .auth-feature-icon-wrapper {
   background: rgba(255, 192, 103, 0.1) !important;
   color: #ffc067 !important;
 }
 
-.auth-stat-icon-wrapper {
-  width: 42px;
-  height: 42px;
+.auth-feature-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
   font-size: 19px;
-  margin-bottom: 16px;
-  transition: all 0.3s ease;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
 }
 
-.auth-stat-card h3 { 
-  color: #fff; 
-  font-size: 17px; 
-  font-weight: 800; 
-  letter-spacing: -.03em; 
-  margin: 0 0 4px 0;
+.auth-feature-text h3 {
+  color: #fff;
+  font-size: 15.5px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 2px 0;
 }
-.auth-stat-card p { 
-  color: rgba(255,255,255,0.58); 
-  font-size: 11.5px; 
+
+.auth-feature-text p {
+  color: rgba(255, 255, 255, 0.54);
+  font-size: 12px;
+  line-height: 1.45;
   margin: 0;
-  line-height: 1.4;
 }
 
-.auth-stat-card:hover {
-  transform: translateY(-6px) scale(1.02) !important;
-  border-color: var(--stat-border) !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+/* Hover effects */
+.auth-feature-item:hover {
+  transform: translateX(6px) scale(1.01);
+  border-color: var(--feat-border) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.22),
-    0 0 20px var(--stat-glow) !important;
+    0 12px 28px rgba(0, 0, 0, 0.15),
+    0 0 15px var(--feat-glow) !important;
 }
 
-.auth-stat-card:hover .auth-stat-icon-wrapper {
-  transform: scale(1.15) rotate(5deg);
+.auth-feature-item:hover .auth-feature-icon-wrapper {
+  transform: scale(1.12) rotate(4deg);
 }
 
 .auth-right { display: flex; justify-content: center; }

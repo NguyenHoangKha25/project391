@@ -85,6 +85,36 @@ function LoginPage() {
               <span className="auth-badge">Research Dashboard</span>
               <h2>Welcome!</h2>
               <p>Explore scientific trends, manage papers, and track journals instantly.</p>
+
+              <div className="auth-features-list">
+                <div className="auth-feature-item">
+                  <div className="auth-feature-icon-wrapper">
+                    <FiLayers />
+                  </div>
+                  <div className="auth-feature-text">
+                    <h3>Dashboard</h3>
+                    <p>Access publication overview analytics.</p>
+                  </div>
+                </div>
+                <div className="auth-feature-item">
+                  <div className="auth-feature-icon-wrapper">
+                    <FiBookOpen />
+                  </div>
+                  <div className="auth-feature-text">
+                    <h3>Library</h3>
+                    <p>Save and organize research papers.</p>
+                  </div>
+                </div>
+                <div className="auth-feature-item">
+                  <div className="auth-feature-icon-wrapper">
+                    <FiPieChart />
+                  </div>
+                  <div className="auth-feature-text">
+                    <h3>Reports</h3>
+                    <p>Generate clean research summaries.</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="auth-preview-card" aria-label="Interactive trends snippet">
@@ -121,30 +151,6 @@ function LoginPage() {
                   <strong>21%</strong>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="auth-stats">
-            <div className="auth-stat-card">
-              <div className="auth-stat-icon-wrapper">
-                <FiLayers />
-              </div>
-              <h3>Dashboard</h3>
-              <p>Publication overview</p>
-            </div>
-            <div className="auth-stat-card">
-              <div className="auth-stat-icon-wrapper">
-                <FiBookOpen />
-              </div>
-              <h3>Library</h3>
-              <p>Saved papers</p>
-            </div>
-            <div className="auth-stat-card">
-              <div className="auth-stat-icon-wrapper">
-                <FiPieChart />
-              </div>
-              <h3>Reports</h3>
-              <p>Research summaries</p>
             </div>
           </div>
         </div>
