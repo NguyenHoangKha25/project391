@@ -94,7 +94,7 @@ function DashboardPage() {
             <span className="db-eyebrow">Overview</span>
             <h2>Good to see you, {displayName}</h2>
             <p>
-              Explore scientific trends, manage papers, and track journals instantly.
+              {formatRoleForDisplay(user.role)} — here's what's happening across your research workspace.
             </p>
           </div>
           <button
