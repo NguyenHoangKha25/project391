@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiEye, FiEyeOff, FiCheck } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiCheck, FiUser, FiMail, FiLock, FiUsers } from "react-icons/fi";
 import logoLogin from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { register } from "../services/authService";
@@ -13,19 +13,13 @@ const REGISTER_ROLES = [
 ];
 
 function getPasswordStrength(password) {
-  if (!password) return { score: 0, label: "", color: "" };
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^a-zA-Z0-9]/.test(password)) score++;
-
-  if (score <= 1) return { score: 1, label: "Too weak", color: "#c0372a" };
-  if (score === 2) return { score: 2, label: "Weak", color: "#d97706" };
-  if (score === 3) return { score: 3, label: "Fair", color: "#ca8a04" };
-  if (score === 4) return { score: 4, label: "Good", color: "#16a34a" };
-  return { score: 5, label: "Strong", color: "#0d9488" };
+  if (!password) return { label: "", color: "transparent" };
+  if (password.length < 6) return { label: "Weak", color: "#ef4444" };
+  const hasLetters = /[a-zA-Z]/.test(password);
+  const hasNumbers = /[0-9]/.test(password);
+  const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+  if (hasLetters && hasNumbers && hasSpecial) return { label: "Strong", color: "#10b981" };
+  return { label: "Medium", color: "#f59e0b" };
 }
 
 function RegisterPage() {
@@ -39,87 +33,88 @@ function RegisterPage() {
     role: "",
   });
 
+  const [fieldErrors, setFieldErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const passwordStrength = useMemo(
-    () => getPasswordStrength(form.password),
-    [form.password]
-  );
+  const passwordStrength = useMemo(() => getPasswordStrength(form.password), [form.password]);
 
-  const fieldErrors = useMemo(() => {
-    const errors = {};
-    if (touched.username && !form.username.trim()) errors.username = "Username is required.";
-    if (touched.email) {
-      if (!form.email.trim()) errors.email = "Email is required.";
-      else if (!form.email.includes("@")) errors.email = "Enter a valid email address.";
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "username") {
+      if (!value.trim()) {
+        error = "Tài khoản là bắt buộc.";
+      } else if (value.trim().length < 3) {
+        error = "Tài khoản phải từ 3 ký tự trở lên.";
+      }
+    } else if (name === "email") {
+      if (!value.trim()) {
+        error = "Email là bắt buộc.";
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value.trim())) {
+          error = "Định dạng email không hợp lệ.";
+        }
+      }
+    } else if (name === "password") {
+      if (!value) {
+        error = "Mật khẩu là bắt buộc.";
+      } else if (value.length < 8) {
+        error = "Mật khẩu phải từ 8 ký tự trở lên.";
+      }
+    } else if (name === "confirmPassword") {
+      if (!value) {
+        error = "Xác nhận mật khẩu là bắt buộc.";
+      } else if (value !== form.password) {
+        error = "Mật khẩu xác nhận không khớp.";
+      }
+    } else if (name === "role") {
+      if (!value) {
+        error = "Loại tài khoản là bắt buộc.";
+      }
     }
-    if (touched.password) {
-      if (!form.password) errors.password = "Password is required.";
-      else if (form.password.length < 8) errors.password = "Password must be at least 8 characters.";
-    }
-    if (touched.confirmPassword && form.confirmPassword && form.password !== form.confirmPassword) {
-      errors.confirmPassword = "Passwords don't match.";
-    }
-    if (touched.role && !form.role) {
-      errors.role = "Account type is required.";
-    }
-    return errors;
-  }, [form, touched]);
+    return error;
+  };
 
-  function handleChange(event) {
-    const { name, value } = event.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    setMessage("");
-  }
 
-  function handleBlur(event) {
-    const { name } = event.target;
+    if (touched[name]) {
+      const error = validateField(name, value);
+      setFieldErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
     setTouched((prev) => ({ ...prev, [name]: true }));
-  }
+    const error = validateField(name, value);
+    setFieldErrors((prev) => ({ ...prev, [name]: error }));
+  };
 
-  function getRegisterErrorMessage(error) {
-    const raw = (error?.message || "").toLowerCase();
-    if (raw.includes("email")) return "That email is already in use.";
-    if (raw.includes("username")) return "That username is already taken.";
-    return error?.message || "Registration failed. Check your info and try again.";
-  }
+  const handleRegister = async (e) => {
+    e.preventDefault();
 
-  async function handleRegister(event) {
-    event.preventDefault();
+    const newTouched = {};
+    const newErrors = {};
+    let hasError = false;
 
-    // Mark all fields as touched to show errors
-    setTouched({ username: true, email: true, password: true, confirmPassword: true, role: true });
+    Object.keys(form).forEach((key) => {
+      newTouched[key] = true;
+      const error = validateField(key, form[key]);
+      newErrors[key] = error;
+      if (error) hasError = true;
+    });
 
-    if (!form.username.trim() || !form.email.trim() || !form.password || !form.confirmPassword) {
-      setMessage("Please fill in all fields.");
-      setMessageType("error");
-      return;
-    }
-    if (!form.email.includes("@")) {
-      setMessage("Enter a valid email address.");
-      setMessageType("error");
-      return;
-    }
-    if (form.password.length < 8) {
-      setMessage("Password must be at least 8 characters.");
-      setMessageType("error");
-      return;
-    }
-    if (form.password !== form.confirmPassword) {
-      setMessage("Passwords don't match.");
-      setMessageType("error");
-      return;
-    }
-    if (!form.role) {
-      setMessage("Choose an account type to continue.");
-      setMessageType("error");
-      return;
-    }
+    setTouched(newTouched);
+    setFieldErrors(newErrors);
+
+    if (hasError) return;
 
     try {
       setLoading(true);
@@ -129,26 +124,39 @@ function RegisterPage() {
         username: form.username.trim(),
         email: form.email.trim(),
         password: form.password,
-        confirmPassword: form.confirmPassword,
         role: form.role,
       });
 
-      navigate(ROUTE_PATHS.LOGIN, {
-        state: { successMessage: "Account created — you can sign in now." },
+      setForm({
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "",
       });
+      setTouched({});
+      setFieldErrors({});
+      setMessage("Đăng ký thành công! Đang chuyển hướng sang trang đăng nhập...");
+      setMessageType("success");
+
+      setTimeout(() => {
+        navigate(ROUTE_PATHS.LOGIN, {
+          state: { successMessage: "Đăng ký tài khoản thành công! Vui lòng đăng nhập." },
+        });
+      }, 2000);
     } catch (error) {
-      setMessage(getRegisterErrorMessage(error));
+      console.error("Registration error details:", error);
+      const msg = error.response?.data?.message || "Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.";
+      setMessage(msg);
       setMessageType("error");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="register-page">
       <div className="register-wrapper">
-
-        {/* ── Left branding panel ── */}
         <div className="register-left">
           <Link to={ROUTE_PATHS.HOME} className="brand-box">
             <img src={logoLogin} alt="ScienceTrend Hub" className="brand-logo-img" />
@@ -178,7 +186,6 @@ function RegisterPage() {
           </div>
         </div>
 
-        {/* ── Right form panel ── */}
         <div className="register-card">
           <div className="register-header">
             <h2>Create account</h2>
@@ -192,10 +199,10 @@ function RegisterPage() {
 
           <form className="register-form" onSubmit={handleRegister} noValidate>
 
-            {/* Username */}
-            <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username ? "is-valid" : ""}`}>
+            <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username && !fieldErrors.username ? "is-valid" : ""}`}>
               <label htmlFor="username">Username</label>
               <div className="input-wrap">
+                <FiUser className="input-field-icon" />
                 <input
                   id="username"
                   name="username"
@@ -206,17 +213,14 @@ function RegisterPage() {
                   onBlur={handleBlur}
                   autoComplete="username"
                 />
-                {touched.username && form.username && !fieldErrors.username && (
-                  <span className="input-valid-icon"><FiCheck /></span>
-                )}
               </div>
               {fieldErrors.username && <p className="field-error">{fieldErrors.username}</p>}
             </div>
 
-            {/* Email */}
-            <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email.includes("@") ? "is-valid" : ""}`}>
+            <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email && !fieldErrors.email ? "is-valid" : ""}`}>
               <label htmlFor="email">Email address</label>
               <div className="input-wrap">
+                <FiMail className="input-field-icon" />
                 <input
                   id="email"
                   name="email"
@@ -227,17 +231,14 @@ function RegisterPage() {
                   onBlur={handleBlur}
                   autoComplete="email"
                 />
-                {touched.email && form.email.includes("@") && !fieldErrors.email && (
-                  <span className="input-valid-icon"><FiCheck /></span>
-                )}
               </div>
               {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
             </div>
 
-            {/* Password */}
-            <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password.length >= 8 ? "is-valid" : ""}`}>
+            <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
               <label htmlFor="password">Password</label>
               <div className="input-wrap">
+                <FiLock className="input-field-icon" />
                 <input
                   id="password"
                   name="password"
@@ -253,14 +254,12 @@ function RegisterPage() {
                   className="input-toggle-btn"
                   onClick={() => setShowPassword((v) => !v)}
                   tabIndex={-1}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <FiEyeOff /> : <FiEye />}
                 </button>
               </div>
               {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
 
-              {/* Strength indicator */}
               {form.password && (
                 <div className="password-strength-text" style={{ marginTop: 6, fontSize: "12px", fontWeight: 650 }}>
                   Password strength: <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
@@ -268,10 +267,10 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Confirm Password */}
-            <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && form.password === form.confirmPassword ? "is-valid" : ""}`}>
+            <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
               <label htmlFor="confirmPassword">Confirm password</label>
               <div className="input-wrap">
+                <FiLock className="input-field-icon" />
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -287,7 +286,6 @@ function RegisterPage() {
                   className="input-toggle-btn"
                   onClick={() => setShowConfirm((v) => !v)}
                   tabIndex={-1}
-                  aria-label={showConfirm ? "Hide password" : "Show password"}
                 >
                   {showConfirm ? <FiEyeOff /> : <FiEye />}
                 </button>
@@ -297,10 +295,10 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Role selector — clean select dropdown */}
-            <div className={`form-group ${fieldErrors.role ? "has-error" : touched.role && form.role ? "is-valid" : ""}`}>
+            <div className={`form-group ${fieldErrors.role ? "has-error" : touched.role && form.role && !fieldErrors.role ? "is-valid" : ""}`}>
               <label htmlFor="role">Account type</label>
               <div className="select-wrap">
+                <FiUsers className="input-field-icon" />
                 <select
                   id="role"
                   name="role"

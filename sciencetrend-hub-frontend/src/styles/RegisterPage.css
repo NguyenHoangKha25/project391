@@ -208,7 +208,7 @@
 .input-wrap input {
   width: 100%;
   height: 50px;
-  padding: 0 44px 0 14px;
+  padding: 0 44px 0 44px !important;
   border: 1px solid rgba(230,222,211,.96);
   border-radius: 15px;
   outline: 0;
@@ -274,7 +274,7 @@
 .select-wrap select {
   width: 100%;
   height: 50px;
-  padding: 0 36px 0 14px;
+  padding: 0 36px 0 44px !important;
   border: 1px solid rgba(230,222,211,.96);
   border-radius: 15px;
   outline: 0;
@@ -404,4 +404,22 @@
 .register-signin-redirect .login-link:hover {
   color: #3730a3 !important;
   text-decoration: underline !important;
+}
+
+/* Redesign: Input field left icon */
+.input-field-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a8a095;
+  font-size: 17px;
+  pointer-events: none;
+  transition: color var(--t-base) ease;
+  z-index: 2;
+}
+
+.input-wrap:focus-within .input-field-icon,
+.select-wrap:focus-within .input-field-icon {
+  color: var(--st-primary);
 }
