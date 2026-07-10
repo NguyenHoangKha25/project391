@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff, FiGrid, FiBookmark, FiFileText } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiUser, FiLock, FiLayers, FiBookOpen, FiPieChart } from "react-icons/fi";
 import logo from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { useAuth } from "../context/useAuth";
@@ -50,18 +50,14 @@ function LoginPage() {
     }
   };
 
-  // Backend (OAuth2RedirectOriginFilter) đọc param "redirect_origin" = origin FE
-  // rồi lưu vào cookie, OAuth2SuccessHandler đọc cookie đó để redirect về đúng domain.
   const handleGmailLogin = () => {
     const backendUrl = (
       import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:8080"
     ).replace(/\/$/, "");
 
-    // origin = scheme + host (không có path), ví dụ "http://localhost:5173"
     const frontendOrigin = window.location.origin;
 
     const googleLoginUrl = new URL(`${backendUrl}/oauth2/authorization/google`);
-    // Đây là param mà OAuth2RedirectOriginFilter của BE đang đọc
     googleLoginUrl.searchParams.set("redirect_origin", frontendOrigin);
 
     window.location.href = googleLoginUrl.toString();
@@ -73,96 +69,115 @@ function LoginPage() {
       <div className="auth-bg-blur auth-bg-blur-right"></div>
 
       <section className="auth-layout">
+        {/* ── Left branding panel ── */}
         <div className="auth-left">
-          <div className="auth-brand">
-            <div className="auth-logo-box">
-              <img
-                className="auth-logo-img"
-                src={logo}
-                alt="ScienceTrend Hub logo"
-              />
-            </div>
-
+          <Link to={ROUTE_PATHS.HOME} className="auth-brand" aria-label="ScienceTrend Hub home">
+            <span className="auth-logo-box">
+              <img src={logo} alt="ScienceTrend Hub logo" className="auth-logo-img" />
+            </span>
             <div className="auth-brand-text">
-              <h1>ScienceTrend Hub</h1>
-              <p>Scientific Journal Publication Tracking</p>
+              <h1 style={{ color: "#ffffff", fontWeight: "900" }}>ScienceTrend Hub</h1>
+              <p style={{ color: "#bdf2f8", fontWeight: "600", opacity: 0.95 }}>Scientific Journal Publication Tracking</p>
             </div>
-          </div>
+          </Link>
 
-          <div className="auth-left-content">
-            <div className="auth-hero">
+          <div className="auth-left-premium-content">
+            <div className="auth-premium-hero">
               <span className="auth-badge">Research Dashboard</span>
-              <h2>Welcome!</h2>
-              <p>
+              <h2 style={{
+                fontFamily: "var(--font-display)",
+                background: "linear-gradient(135deg, #ffc067 0%, #f97316 100%)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+                fontSize: "44px",
+                fontWeight: "950",
+                letterSpacing: "-0.05em",
+                margin: "18px 0 12px"
+              }}>Welcome!</h2>
+              <p style={{ color: "#ffffff", fontWeight: "600", fontSize: "16px", lineHeight: "1.7", opacity: 0.95 }}>
                 Explore scientific trends, manage papers, and track journals instantly.
               </p>
+
+              <div className="auth-premium-features-row">
+                <div className="auth-premium-feature-tag tag-blue">
+                  <FiLayers />
+                  <span>Dashboard</span>
+                </div>
+                <div className="auth-premium-feature-tag tag-green">
+                  <FiBookOpen />
+                  <span>Library</span>
+                </div>
+                <div className="auth-premium-feature-tag tag-yellow">
+                  <FiPieChart />
+                  <span>Reports</span>
+                </div>
+              </div>
             </div>
 
-            <div className="auth-preview-card">
-              <div className="preview-header">
-                <div>
-                  <h3>Publication Trends</h3>
-                  <p>2020 - 2026</p>
-                </div>
+            <div className="auth-premium-preview-card" aria-label="Interactive trends snippet">
+              <div className="mockup-search-box">
+                <FiUser style={{ marginRight: "10px", color: "rgba(255, 255, 255, 0.6)", fontSize: "16px" }} />
+                <span style={{ color: "rgba(255, 255, 255, 0.8)", fontWeight: "600" }}>Search 12,000+ scientific papers...</span>
               </div>
-              <div className="preview-chart">
-                <div className="preview-bar bar-1"></div>
-                <div className="preview-bar bar-2"></div>
-                <div className="preview-bar bar-3"></div>
-                <div className="preview-bar bar-4"></div>
-                <div className="preview-bar bar-5"></div>
-                <div className="preview-bar bar-6"></div>
-              </div>
-              <div className="preview-topics">
-                <div className="preview-topic-row">
-                  <span className="topic-dot topic-blue"></span>
-                  <p>Artificial Intelligence</p>
-                  <strong>32%</strong>
-                </div>
-                <div className="preview-topic-row">
-                  <span className="topic-dot topic-green"></span>
-                  <p>Machine Learning</p>
-                  <strong>28%</strong>
-                </div>
-                <div className="preview-topic-row">
-                  <span className="topic-dot topic-yellow"></span>
-                  <p>Cybersecurity</p>
-                  <strong>21%</strong>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div className="auth-stats">
-            <div className="auth-stat-card">
-              <div className="auth-stat-icon-wrapper">
-                <FiGrid />
+              <div className="mockup-paper-card">
+                <div className="mockup-paper-header">
+                  <span className="mockup-badge badge-q1">Q1 Journal</span>
+                  <span className="mockup-badge badge-citation">9.4k Citations</span>
+                </div>
+                <h4 style={{ color: "#ffffff", fontWeight: "850" }}>Deep Learning in Neural Networks</h4>
+                <p style={{ color: "rgba(255, 255, 255, 0.75)", fontWeight: "600" }}>J. Schmidhuber • AI Review</p>
               </div>
-              <h3>Dashboard</h3>
-              <p>Publication overview</p>
-            </div>
-            <div className="auth-stat-card">
-              <div className="auth-stat-icon-wrapper">
-                <FiBookmark />
+
+              <div className="mockup-trend-stats">
+                <div className="mockup-trend-row">
+                  <span className="topic-dot topic-blue" />
+                  <p style={{ color: "#ffffff", fontWeight: "600" }}>Computer Vision</p>
+                  <strong style={{ color: "#7debf6", fontWeight: "800" }}>+32%</strong>
+                </div>
+                <div className="mockup-trend-row">
+                  <span className="topic-dot topic-green" />
+                  <p style={{ color: "#ffffff", fontWeight: "600" }}>Bioinformatics</p>
+                  <strong style={{ color: "#59d795", fontWeight: "800" }}>+18%</strong>
+                </div>
               </div>
-              <h3>Library</h3>
-              <p>Saved papers</p>
-            </div>
-            <div className="auth-stat-card">
-              <div className="auth-stat-icon-wrapper">
-                <FiFileText />
-              </div>
-              <h3>Reports</h3>
-              <p>Research summaries</p>
             </div>
           </div>
         </div>
 
         <div className="auth-right">
-          <div className="auth-card">
+          <div className="auth-premium-card-box" style={{ position: "relative" }}>
+            {/* Top Border Gradient Line - Perfect mathematical overlay covering the top border */}
+            <div style={{
+              position: "absolute",
+              top: "-1px",
+              left: "-1px",
+              right: "-1px",
+              height: "30px",
+              backgroundImage: "linear-gradient(90deg, var(--st-primary), var(--st-accent))",
+              backgroundSize: "100% 6px",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "top left",
+              borderRadius: "30px 30px 0 0",
+              zIndex: 5,
+              pointerEvents: "none"
+            }} />
+
             <div className="auth-card-header">
-              <h2>Sign in</h2>
-              <p>Enter your username and password to continue.</p>
+              <h2 style={{
+                fontFamily: "var(--font-display)",
+                color: "#082733",
+                fontSize: "38px",
+                fontWeight: "950",
+                letterSpacing: "-0.04em",
+                margin: 0,
+                display: "block"
+              }}>Sign in</h2>
+              <p style={{ color: "#475569", fontSize: "15px", fontWeight: "600", marginTop: "6px", lineHeight: "1.5" }}>
+                Enter your username and password to continue.
+              </p>
               {successMessage && (
                 <p className="auth-success-message" role="status">
                   {successMessage}
@@ -177,25 +192,30 @@ function LoginPage() {
 
             <form className="auth-form" onSubmit={handleLogin} noValidate>
               <div className="auth-form-group">
-                <label htmlFor="username">Username</label>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  placeholder="Enter your username"
-                  autoComplete="username"
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    setErrorMessage("");
-                    setSuccessMessage("");
-                  }}
-                />
+                <label htmlFor="username" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
+                <div className="auth-input-wrapper">
+                  <FiUser className="auth-input-icon" />
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    autoComplete="username"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      setErrorMessage("");
+                      setSuccessMessage("");
+                    }}
+                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
+                  />
+                </div>
               </div>
 
               <div className="auth-form-group">
-                <label htmlFor="password">Password</label>
-                <div className="auth-password-field">
+                <label htmlFor="password" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
+                <div className="auth-input-wrapper">
+                  <FiLock className="auth-input-icon" />
                   <input
                     id="password"
                     name="password"
@@ -208,6 +228,7 @@ function LoginPage() {
                       setErrorMessage("");
                       setSuccessMessage("");
                     }}
+                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
                   />
                   <button
                     type="button"
@@ -221,17 +242,18 @@ function LoginPage() {
               </div>
 
               <div className="auth-options">
-                <label className="auth-remember">
+                <label className="auth-remember" style={{ color: "#334155", fontWeight: "600" }}>
                   <input type="checkbox" />
                   <span>Remember me</span>
                 </label>
-                <Link to={ROUTE_PATHS.FORGOT_PASSWORD}>Forgot password?</Link>
+                <Link to={ROUTE_PATHS.FORGOT_PASSWORD} style={{ fontWeight: "750" }}>Forgot password?</Link>
               </div>
 
               <button
                 type="submit"
                 className="auth-login-btn"
                 disabled={isSubmitting}
+                style={{ fontSize: "15px", fontWeight: "850", height: "52px" }}
               >
                 {isSubmitting ? "Logging in..." : "Login"}
               </button>
@@ -245,14 +267,15 @@ function LoginPage() {
               type="button"
               className="auth-google-btn"
               onClick={handleGmailLogin}
+              style={{ fontSize: "15px", fontWeight: "750", height: "52px" }}
             >
               <FcGoogle className="auth-google-icon" />
               <span>Continue with Google</span>
             </button>
 
-            <p className="auth-register-text">
+            <p className="auth-register-text" style={{ color: "#475569", fontWeight: "600" }}>
               Do not have an account?{" "}
-              <Link to={ROUTE_PATHS.REGISTER}>Create account</Link>
+              <Link to={ROUTE_PATHS.REGISTER} style={{ fontWeight: "800" }}>Create account</Link>
             </p>
           </div>
         </div>
