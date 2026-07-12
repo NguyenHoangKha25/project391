@@ -186,10 +186,12 @@
 .register-right {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  padding: clamp(30px, 4vw, 44px);
+  padding: clamp(20px, 3vw, 30px);
   background: transparent;
+  height: 680px;
+  overflow-y: auto;
 }
 
 /* Flat Form Container */
