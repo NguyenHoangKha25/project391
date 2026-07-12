@@ -201,12 +201,12 @@ function DashboardPage() {
   const donutSegments = useMemo(() => {
     const sliceJournals = topJournals.slice(0, 5);
     const sum = sliceJournals.reduce((acc, curr) => acc + curr.value, 0);
-    const radius = 30;
-    const circumference = 2 * Math.PI * radius; // ~188.5
+    const radius = 38;
+    const circumference = 2 * Math.PI * radius; // ~238.76
     let cumulativePercent = 0;
 
     return sliceJournals.map((j, i) => {
-      const percent = j.value / sum;
+      const percent = sum > 0 ? j.value / sum : 0;
       const strokeLength = percent * circumference;
       const strokeOffset = circumference - (cumulativePercent * circumference);
       cumulativePercent += percent;
@@ -371,30 +371,34 @@ function DashboardPage() {
                   <circle 
                     cx="50" 
                     cy="50" 
-                    r="30" 
+                    r="38" 
                     fill="transparent" 
                     stroke="rgba(255,255,255,0.06)" 
-                    strokeWidth="10" 
+                    strokeWidth="7" 
                   />
                   {donutSegments.map((seg, idx) => (
                     <circle
-                      key={idx}
-                      cx="50"
-                      cy="50"
-                      r="30"
-                      fill="transparent"
-                      stroke={seg.color}
-                      strokeWidth="10"
-                      strokeDasharray={`${seg.strokeLength} 188.5`}
-                      strokeDashoffset={seg.strokeOffset}
-                      transform="rotate(-90 50 50)"
-                      className="donut-segment"
+                       key={idx}
+                       cx="50"
+                       cy="50"
+                       r="38"
+                       fill="transparent"
+                       stroke={seg.color}
+                       strokeWidth="7"
+                       strokeDasharray={`${seg.strokeLength} 238.76`}
+                       strokeDashoffset={seg.strokeOffset}
+                       transform="rotate(-90 50 50)"
+                       className="donut-segment"
                     />
                   ))}
                 </svg>
                 <div className="donut-center-text">
-                  <strong>Nature</strong>
-                  <span>Top Pub</span>
+                  <strong>{donutSegments[0] ? `${donutSegments[0].percent}%` : "0%"}</strong>
+                  <span>{donutSegments[0] 
+                    ? (donutSegments[0].label.length > 10 
+                        ? donutSegments[0].label.substring(0, 8) + ".." 
+                        : donutSegments[0].label)
+                    : "Top Share"}</span>
                 </div>
               </div>
 
