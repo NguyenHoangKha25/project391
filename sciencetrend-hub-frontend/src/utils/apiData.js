@@ -60,20 +60,23 @@ export function formatRelativeTime(value) {
   return formatDateTime(value);
 }
 
-// PaperResponse từ backend:
-// { researchPaperId, externalId, title, abstractText, year, doi, citationCount, sourceApi, authors, keywords[] }
 export function normalizePaper(paper = {}, index = 0) {
+  const kwList = Array.isArray(paper.keywords) 
+    ? paper.keywords 
+    : (paper.keyword ? [paper.keyword] : []);
   return {
     id: paper.researchPaperId ?? paper.id ?? index,
     title: paper.title ?? "Untitled paper",
     source: paper.sourceApi ?? paper.source ?? "Unknown source",
     authors: Array.isArray(paper.authors) ? paper.authors.join(", ") : (paper.authors ?? ""),
     year: paper.year ?? "",
-    tag: Array.isArray(paper.keywords) && paper.keywords.length > 0 ? paper.keywords[0] : "Paper",
+    tag: kwList.length > 0 ? kwList[0] : "Paper",
     href: paper.doi ? `https://doi.org/${paper.doi}` : (paper.externalId ?? ""),
     saved: Boolean(paper.saved ?? paper.bookmarked ?? false),
-    abstract: paper.abstractText ?? "",
+    abstract: paper.abstractText ?? paper.abstract ?? "",
     citationCount: paper.citationCount ?? 0,
+    keywords: kwList,
+    doi: paper.doi ?? "",
   };
 }
 

@@ -1,34 +1,53 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { FiSearch, FiX } from "react-icons/fi";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams, Link } from "react-router-dom";
+import { FiSearch, FiX, FiFilter, FiBookmark, FiChevronDown, FiPlus } from "react-icons/fi";
 import PaperCard from "../components/PaperCard";
 import MainLayout from "../components/layout/MainLayout";
-import { getPapers, searchPapers } from "../services/paperService";
+import { getPapers } from "../services/paperService";
 import { toggleBookmark } from "../services/bookmarkService";
-import { normalizePaper, toArray } from "../utils/apiData";
+import { getAllTopics } from "../services/topicService";
+import { getAllKeywords } from "../services/keywordService";
+import { normalizePaper, toArray, formatNumber } from "../utils/apiData";
 import "../styles/WorkspacePages.css";
 import "../styles/PapersPage.css";
 
-/* ── tiny toast hook ── */
+/* ── Toast Hook ── */
 function useToast() {
   const [toast, setToast] = useState(null);
-  const timerRef = useRef(null);
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   function showToast(message, type = "info") {
-    clearTimeout(timerRef.current);
     setToast({ message, type });
-    timerRef.current = setTimeout(() => setToast(null), 3000);
   }
 
   return { toast, showToast };
 }
 
 function PapersPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
 
-  const [query, setQuery] = useState(searchQuery);
-  const [inputValue, setInputValue] = useState(searchQuery);
+  // Dynamic filter states
+  const [searchVal, setSearchVal] = useState(searchQuery);
+  const [keywordInput, setKeywordInput] = useState("");
+  const [authorInput, setAuthorInput] = useState("");
+  const [journalInput, setJournalInput] = useState("");
+  const [topicInput, setTopicInput] = useState("all");
+  const [yearFrom, setYearFrom] = useState("");
+  const [yearTo, setYearTo] = useState("");
+  const [sortBy, setSortBy] = useState("citationCount"); // default sorted by citations for premium mockup look
+  const [resultsPerPage, setResultsPerPage] = useState(10);
+
+  // Lists for dropdown options
+  const [availableTopics, setAvailableTopics] = useState([]);
+  const [availableKeywords, setAvailableKeywords] = useState([]);
+
+  // Data states
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -37,18 +56,57 @@ function PapersPage() {
   const [totalElements, setTotalElements] = useState(0);
   const { toast, showToast } = useToast();
 
-  const loadPapers = useCallback(async (keyword = "", pageNum = 0) => {
+  // Load available keywords and topics for filters
+  useEffect(() => {
+    async function fetchMetadata() {
+      try {
+        const [topicsRes, keywordsRes] = await Promise.allSettled([
+          getAllTopics(),
+          getAllKeywords(),
+        ]);
+        if (topicsRes.status === "fulfilled") {
+          setAvailableTopics(toArray(topicsRes.value));
+        }
+        if (keywordsRes.status === "fulfilled") {
+          setAvailableKeywords(toArray(keywordsRes.value));
+        }
+      } catch (err) {
+        console.error("Cannot load metadata options", err);
+      }
+    }
+    fetchMetadata();
+  }, []);
+
+  // Fetch papers from backend based on dynamic active filters
+  const loadPapers = useCallback(async (pageNum = 0, currentSearchQuery = searchVal) => {
     try {
       setLoading(true);
       setErrorMessage("");
 
-      const trimmed = keyword.trim();
-      const response = trimmed
-        ? await searchPapers(trimmed, { page: pageNum, size: 10 })
-        : await getPapers({ page: pageNum, size: 10 });
+      const params = {
+        page: pageNum,
+        size: resultsPerPage,
+        sortBy: sortBy,
+        sortDir: "desc",
+      };
 
+      if (currentSearchQuery.trim()) params.search = currentSearchQuery.trim();
+      if (keywordInput.trim()) params.keyword = keywordInput.trim();
+      if (authorInput.trim()) params.author = authorInput.trim();
+      if (journalInput.trim()) params.journal = journalInput.trim();
+      if (topicInput && topicInput !== "all") params.topic = topicInput;
+      if (yearFrom) params.yearFrom = parseInt(yearFrom);
+      if (yearTo) params.yearTo = parseInt(yearTo);
+
+      const response = await getPapers(params);
       const items = toArray(response);
-      setPapers(items.map(normalizePaper));
+
+      setPapers(
+        items.map((p, idx) => ({
+          ...normalizePaper(p, idx),
+          rank: pageNum * resultsPerPage + idx + 1,
+        }))
+      );
       setTotalPages(response?.totalPages ?? 0);
       setTotalElements(response?.totalElements ?? items.length);
       setPage(pageNum);
@@ -59,31 +117,72 @@ function PapersPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [keywordInput, authorInput, journalInput, topicInput, yearFrom, yearTo, sortBy, resultsPerPage, searchVal]);
 
+  // Trigger search on mount and whenever general searchQuery from URL changes
   useEffect(() => {
-    setQuery(searchQuery);
-    setInputValue(searchQuery);
-    loadPapers(searchQuery, 0);
-  }, [loadPapers, searchQuery]);
+    setSearchVal(searchQuery);
+    loadPapers(0, searchQuery);
+  }, [searchQuery]);
 
-  function handleSearchSubmit(event) {
-    event.preventDefault();
-    setQuery(inputValue);
-    loadPapers(inputValue, 0);
+  // Handle advanced filter submit
+  function handleFilterSubmit(e) {
+    e.preventDefault();
+    loadPapers(0);
   }
 
-  function handleClearSearch() {
-    setInputValue("");
-    setQuery("");
-    loadPapers("", 0);
+  // Reset all advanced filters
+  function handleResetFilters() {
+    setKeywordInput("");
+    setAuthorInput("");
+    setJournalInput("");
+    setTopicInput("all");
+    setYearFrom("");
+    setYearTo("");
+    setSortBy("citationCount");
+    setResultsPerPage(10);
+    setSearchVal("");
+    setSearchParams({}); // Clear query parameter from URL as well
+    
+    // Trigger load with empty filters
+    setTimeout(() => {
+      loadPapers(0, "");
+    }, 50);
+  }
+
+  // Clear single active filter chip
+  function clearFilter(type) {
+    if (type === "search") {
+      setSearchVal("");
+      setSearchParams({});
+      loadPapers(0, "");
+    } else if (type === "keyword") {
+      setKeywordInput("");
+      setTimeout(() => loadPapers(0), 50);
+    } else if (type === "author") {
+      setAuthorInput("");
+      setTimeout(() => loadPapers(0), 50);
+    } else if (type === "journal") {
+      setJournalInput("");
+      setTimeout(() => loadPapers(0), 50);
+    } else if (type === "topic") {
+      setTopicInput("all");
+      setTimeout(() => loadPapers(0), 50);
+    } else if (type === "year") {
+      setYearFrom("");
+      setYearTo("");
+      setTimeout(() => loadPapers(0), 50);
+    } else if (type === "sort") {
+      setSortBy("year");
+      setTimeout(() => loadPapers(0), 50);
+    }
   }
 
   async function handleToggleSaved(id) {
     const paper = papers.find((p) => p.id === id);
     if (!paper) return;
 
-    // Optimistic update
+    // Optimistic UI update
     setPapers((current) =>
       current.map((p) => (p.id === id ? { ...p, saved: !p.saved } : p))
     );
@@ -99,10 +198,11 @@ function PapersPage() {
       setPapers((current) =>
         current.map((p) => (p.id === id ? { ...p, saved: paper.saved } : p))
       );
-      showToast("Couldn't update bookmark — this feature may not be live yet.", "warning");
+      showToast("Couldn't update bookmark. Please try again.", "warning");
     }
   }
 
+  // Pagination page numbers list calculation
   const pageNumbers = [];
   if (totalPages <= 7) {
     for (let i = 0; i < totalPages; i++) pageNumbers.push(i);
@@ -116,112 +216,291 @@ function PapersPage() {
     pageNumbers.push(totalPages - 1);
   }
 
+  // Determine active filter chips
+  const activeChips = [];
+  if (searchVal) activeChips.push({ type: "search", label: `Search: "${searchVal}"` });
+  if (keywordInput) activeChips.push({ type: "keyword", label: `Keyword: "${keywordInput}"` });
+  if (authorInput) activeChips.push({ type: "author", label: `Author: "${authorInput}"` });
+  if (journalInput) activeChips.push({ type: "journal", label: `Journal: "${journalInput}"` });
+  if (topicInput && topicInput !== "all") {
+    const topicObj = availableTopics.find(t => String(t.id) === String(topicInput) || t.name === topicInput);
+    activeChips.push({ type: "topic", label: `Topic: "${topicObj ? topicObj.name : topicInput}"` });
+  }
+  if (yearFrom || yearTo) {
+    activeChips.push({ type: "year", label: `Year: ${yearFrom || "Min"} - ${yearTo || "Max"}` });
+  }
+  if (sortBy !== "year") {
+    const sortLabel = sortBy === "citationCount" ? "Most Cited" : sortBy === "title" ? "Title" : sortBy;
+    activeChips.push({ type: "sort", label: `Sort: ${sortLabel}` });
+  }
+
+  // Years options list
+  const currentYear = new Date().getFullYear() + 1;
+  const yearsList = [];
+  for (let y = currentYear; y >= 2000; y--) {
+    yearsList.push(y);
+  }
+
   return (
-    <MainLayout title="Papers" subtitle="Browse and search research papers">
-      <div className="workspace-page papers-page">
+    <MainLayout title="Search Papers" subtitle="Discover and explore scientific research papers">
+      <div className="search-papers-container">
+        
+        {/* Main Grid layout containing advanced filters and results columns */}
+        <div className="search-papers-grid">
+          
+          {/* Left Column: Advanced Filters form */}
+          <aside className="filters-sidebar-panel">
+            <div className="filters-panel-header">
+              <h3>
+                <FiFilter />
+                <span>Advanced Filters</span>
+              </h3>
+              <button type="button" className="filters-reset-btn" onClick={handleResetFilters}>
+                Reset
+              </button>
+            </div>
 
-        {/* Toolbar */}
-        <div className="workspace-toolbar">
-          <div className="workspace-toolbar-copy">
-            <h2>Research papers</h2>
-            <p>
-              {loading
-                ? "Searching…"
-                : errorMessage
-                  ? "Showing available results."
-                  : query
-                    ? `${totalElements} result${totalElements !== 1 ? "s" : ""} for "${query}"`
-                    : `${totalElements} papers indexed · page ${page + 1} of ${totalPages || 1}`}
-            </p>
-          </div>
+            <form onSubmit={handleFilterSubmit} className="filters-form-element">
+              
+              {/* Keyword Filter */}
+              <div className="filter-form-group">
+                <label htmlFor="keyword-filter">Keyword</label>
+                <div className="filter-input-wrapper">
+                  <input
+                    id="keyword-filter"
+                    type="text"
+                    placeholder="Search keywords..."
+                    value={keywordInput}
+                    onChange={(e) => setKeywordInput(e.target.value)}
+                  />
+                  <FiSearch />
+                </div>
+              </div>
 
-          <form className="papers-search-form" onSubmit={handleSearchSubmit}>
-            <div className="papers-search-wrap">
-              <FiSearch className="papers-search-icon" />
-              <input
-                type="search"
-                className="workspace-search papers-search-input"
-                placeholder="Search by title, author, keyword…"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-              />
-              {inputValue && (
+              {/* Author Filter */}
+              <div className="filter-form-group">
+                <label htmlFor="author-filter">Author</label>
+                <div className="filter-input-wrapper">
+                  <input
+                    id="author-filter"
+                    type="text"
+                    placeholder="Search authors..."
+                    value={authorInput}
+                    onChange={(e) => setAuthorInput(e.target.value)}
+                  />
+                  <FiSearch />
+                </div>
+              </div>
+
+              {/* Journal Filter */}
+              <div className="filter-form-group">
+                <label htmlFor="journal-filter">Journal</label>
+                <div className="filter-input-wrapper">
+                  <input
+                    id="journal-filter"
+                    type="text"
+                    placeholder="Search journals..."
+                    value={journalInput}
+                    onChange={(e) => setJournalInput(e.target.value)}
+                  />
+                  <FiSearch />
+                </div>
+              </div>
+
+              {/* Topic Select */}
+              <div className="filter-form-group">
+                <label htmlFor="topic-filter">Topic</label>
+                <div className="filter-select-wrapper">
+                  <select
+                    id="topic-filter"
+                    value={topicInput}
+                    onChange={(e) => setTopicInput(e.target.value)}
+                  >
+                    <option value="all">Select topics...</option>
+                    {availableTopics.map((t) => (
+                      <option key={t.id} value={t.name || t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                    {availableTopics.length === 0 && (
+                      <>
+                        <option value="Artificial Intelligence">Artificial Intelligence</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Bioinformatics">Bioinformatics</option>
+                      </>
+                    )}
+                  </select>
+                  <FiChevronDown />
+                </div>
+              </div>
+
+              {/* Year Range */}
+              <div className="filter-form-group">
+                <label>Year Range</label>
+                <div className="filter-year-range-row">
+                  <div className="filter-select-wrapper">
+                    <select value={yearFrom} onChange={(e) => setYearFrom(e.target.value)}>
+                      <option value="">Min</option>
+                      {yearsList.map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                    <FiChevronDown />
+                  </div>
+                  <span className="year-separator">to</span>
+                  <div className="filter-select-wrapper">
+                    <select value={yearTo} onChange={(e) => setYearTo(e.target.value)}>
+                      <option value="">Max</option>
+                      {yearsList.map((y) => (
+                        <option key={y} value={y}>
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                    <FiChevronDown />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sort By Option */}
+              <div className="filter-form-group">
+                <label htmlFor="sort-filter">Sort By</label>
+                <div className="filter-select-wrapper">
+                  <select
+                    id="sort-filter"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="citationCount">Most Cited</option>
+                    <option value="year">Publication Year</option>
+                    <option value="title">Alphabetical Title</option>
+                  </select>
+                  <FiChevronDown />
+                </div>
+              </div>
+
+              {/* Results Per Page */}
+              <div className="filter-form-group">
+                <label htmlFor="size-filter">Results Per Page</label>
+                <div className="filter-select-wrapper">
+                  <select
+                    id="size-filter"
+                    value={resultsPerPage}
+                    onChange={(e) => setResultsPerPage(parseInt(e.target.value))}
+                  >
+                    <option value={10}>10 results</option>
+                    <option value={25}>25 results</option>
+                    <option value={50}>50 results</option>
+                  </select>
+                  <FiChevronDown />
+                </div>
+              </div>
+
+              <button type="submit" className="filters-submit-btn-premium">
+                Apply Filters
+              </button>
+            </form>
+          </aside>
+
+          {/* Right Column: Search Results and Active Chips */}
+          <section className="results-list-section">
+            
+            {/* Active chips row */}
+            <div className="results-chips-toolbar">
+              <div className="chips-list-container">
+                {activeChips.length > 0 && <span className="chips-label-prefix">Active Filters:</span>}
+                {activeChips.map((chip, idx) => (
+                  <div key={idx} className="filter-active-chip">
+                    <span>{chip.label}</span>
+                    <button type="button" onClick={() => clearFilter(chip.type)}>
+                      <FiX />
+                    </button>
+                  </div>
+                ))}
+                {activeChips.length > 0 && (
+                  <button type="button" className="chips-clear-all-link" onClick={handleResetFilters}>
+                    Clear all
+                  </button>
+                )}
+              </div>
+
+              <div className="results-toolbar-actions">
+                <span className="results-found-count">
+                  {loading ? "Searching..." : `${formatNumber(totalElements)} results found`}
+                </span>
                 <button
                   type="button"
-                  className="papers-search-clear"
-                  onClick={handleClearSearch}
-                  aria-label="Clear search"
+                  className="save-search-btn-mock"
+                  onClick={() => showToast("Search filters saved to quick access!", "success")}
                 >
-                  <FiX />
+                  <FiBookmark />
+                  <span>Save Search</span>
                 </button>
-              )}
+              </div>
             </div>
-            <button type="submit" className="workspace-button primary" disabled={loading}>
-              Search
-            </button>
-          </form>
-        </div>
 
-        {/* Error */}
-        {errorMessage && (
-          <div className="workspace-notice warning" style={{ marginBottom: 14 }}>
-            {errorMessage}
-          </div>
-        )}
+            {/* Error notifications */}
+            {errorMessage && (
+              <div className="workspace-notice warning" style={{ marginBottom: 16 }}>
+                {errorMessage}
+              </div>
+            )}
 
-        {/* Toast */}
-        {toast && (
-          <div className={`papers-toast papers-toast--${toast.type}`}>
-            {toast.message}
-          </div>
-        )}
+            {/* Toast overlay */}
+            {toast && (
+              <div className={`papers-toast papers-toast--${toast.type}`}>
+                {toast.message}
+              </div>
+            )}
 
-        {/* Content */}
-        {loading ? (
-          <div className="workspace-empty" style={{ minHeight: 240 }}>
-            <span className="workspace-loading-spinner" />
-            Loading papers…
-          </div>
-        ) : papers.length === 0 ? (
-          <div className="workspace-empty">
-            {query
-              ? `No papers found for "${query}". Try a different term.`
-              : "No papers yet — run a sync to populate the database."}
-          </div>
-        ) : (
-          <>
-            <article className="workspace-panel">
-              <div className="workspace-list">
+            {/* Results block */}
+            {loading ? (
+              <div className="workspace-empty" style={{ minHeight: 340 }}>
+                <span className="workspace-loading-spinner" />
+                Loading papers…
+              </div>
+            ) : papers.length === 0 ? (
+              <div className="workspace-empty" style={{ minHeight: 340 }}>
+                No research papers match your current filters. Try relaxing your year range or keyword search.
+              </div>
+            ) : (
+              <div className="search-papers-list">
                 {papers.map((paper) => (
                   <PaperCard
                     key={paper.id}
                     {...paper}
+                    variant="rich"
                     onBookmark={() => handleToggleSaved(paper.id)}
                   />
                 ))}
               </div>
-            </article>
+            )}
 
-            {totalPages > 1 && (
-              <div className="cm-pagination">
+            {/* Pagination controls */}
+            {!loading && totalPages > 1 && (
+              <div className="cm-pagination" style={{ marginTop: 24 }}>
                 <button
                   type="button"
                   className="cm-page-btn"
                   disabled={page === 0}
-                  onClick={() => loadPapers(query, page - 1)}
+                  onClick={() => loadPapers(page - 1)}
                 >
-                  ← Prev
+                  Previous
                 </button>
 
                 {pageNumbers.map((p, i) =>
                   p === "..." ? (
-                    <span key={`ellipsis-${i}`} className="cm-page-ellipsis">…</span>
+                    <span key={`ellipsis-${i}`} className="cm-page-ellipsis">
+                      …
+                    </span>
                   ) : (
                     <button
                       key={p}
                       type="button"
                       className={`cm-page-btn ${p === page ? "active" : ""}`}
-                      onClick={() => loadPapers(query, p)}
+                      onClick={() => loadPapers(p)}
                     >
                       {p + 1}
                     </button>
@@ -232,14 +511,15 @@ function PapersPage() {
                   type="button"
                   className="cm-page-btn"
                   disabled={page >= totalPages - 1}
-                  onClick={() => loadPapers(query, page + 1)}
+                  onClick={() => loadPapers(page + 1)}
                 >
-                  Next →
+                  Next
                 </button>
               </div>
             )}
-          </>
-        )}
+          </section>
+
+        </div>
       </div>
     </MainLayout>
   );
