@@ -158,9 +158,9 @@ function MyAccountPage() {
             </p>
 
             <div className="account-actions">
-              <Link to={ROUTE_PATHS.LIBRARY}>
+              <Link to={ROUTE_PATHS.BOOKMARKS}>
                 <FiBookOpen />
-                Open my library
+                Open my bookmarks
               </Link>
               <Link to={ROUTE_PATHS.REPORTS}>
                 <FiFileText />

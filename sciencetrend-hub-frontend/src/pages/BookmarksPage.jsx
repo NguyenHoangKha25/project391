@@ -3,25 +3,25 @@ import JournalCard from "../components/JournalCard";
 import PaperCard from "../components/PaperCard";
 import MainLayout from "../components/layout/MainLayout";
 import { getBookmarkedPapers, removeBookmarkByPaperId } from "../services/bookmarkService";
-import { getJournals } from "../services/journalService";
+import { getFollowedJournals, unfollowJournal } from "../services/journalService";
 import { normalizeJournal, normalizePaper, toArray } from "../utils/apiData";
 import "../styles/WorkspacePages.css";
-import "../styles/LibraryPage.css";
+import "../styles/BookmarksPage.css";
 
-function LibraryPage() {
+function BookmarksPage() {
   const [savedPapers, setSavedPapers] = useState([]);
   const [trackedJournals, setTrackedJournals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const loadLibrary = useCallback(async () => {
+  const loadBookmarks = useCallback(async () => {
     try {
       setLoading(true);
       setErrorMessage("");
 
       const [paperResult, journalResult] = await Promise.allSettled([
         getBookmarkedPapers(),
-        getJournals({ tracked: true }),
+        getFollowedJournals(),
       ]);
 
       setSavedPapers(
@@ -38,10 +38,10 @@ function LibraryPage() {
 
       // Only block the whole page when both fail simultaneously
       if (paperResult.status === "rejected" && journalResult.status === "rejected") {
-        setErrorMessage("Couldn't connect to the library service. Try refreshing.");
+        setErrorMessage("Couldn't connect to the bookmarks service. Try refreshing.");
       }
     } catch (error) {
-      console.error("Cannot load library", error);
+      console.error("Cannot load bookmarks", error);
       setErrorMessage("Something went wrong. Try refreshing in a moment.");
     } finally {
       setLoading(false);
@@ -49,8 +49,8 @@ function LibraryPage() {
   }, []);
 
   useEffect(() => {
-    loadLibrary();
-  }, [loadLibrary]);
+    loadBookmarks();
+  }, [loadBookmarks]);
 
   async function handleRemoveSavedPaper(paperId) {
     const oldPapers = savedPapers;
@@ -64,29 +64,41 @@ function LibraryPage() {
     }
   }
 
+  async function handleUnfollowJournal(journalId) {
+    const oldJournals = trackedJournals;
+    setTrackedJournals((current) => current.filter((j) => j.id !== journalId));
+    try {
+      await unfollowJournal(journalId);
+    } catch (error) {
+      console.error("Cannot unfollow journal", error);
+      setTrackedJournals(oldJournals);
+      setErrorMessage("Couldn't untrack that journal. Please try again.");
+    }
+  }
+
   const totalItems = savedPapers.length + trackedJournals.length;
 
   return (
     <MainLayout
-      title="Library"
-      subtitle="Manage saved papers and tracked journals"
+      title="Bookmarks"
+      subtitle="Manage bookmarked papers and tracked journals"
     >
-      <section className="workspace-page library-page">
+      <section className="workspace-page bookmarks-page">
         <div className="workspace-toolbar">
           <div className="workspace-toolbar-copy">
-            <h2>My library</h2>
+            <h2>My bookmarks</h2>
             <p>
               {loading
                 ? "Loading your saved items…"
                 : totalItems > 0
                   ? `${totalItems} item${totalItems !== 1 ? "s" : ""} saved across papers and journals.`
-                  : "Your library is empty — save papers from the Papers page to get started."}
+                  : "Your bookmarks folder is empty — save papers from the Papers page to get started."}
             </p>
           </div>
           <button
             type="button"
             className="workspace-button"
-            onClick={loadLibrary}
+            onClick={loadBookmarks}
             disabled={loading}
           >
             Refresh
@@ -100,7 +112,7 @@ function LibraryPage() {
         )}
 
         {loading ? (
-          <div className="workspace-empty">Loading library…</div>
+          <div className="workspace-empty">Loading bookmarks…</div>
         ) : (
           <div className="workspace-grid">
             <article className="workspace-panel">
@@ -134,11 +146,15 @@ function LibraryPage() {
               <div className="workspace-list">
                 {trackedJournals.length > 0 ? (
                   trackedJournals.map((journal) => (
-                    <JournalCard key={journal.id} {...journal} />
+                    <JournalCard
+                      key={journal.id}
+                      {...journal}
+                      onUnfollow={() => handleUnfollowJournal(journal.id)}
+                    />
                   ))
                 ) : (
                   <div className="workspace-empty">
-                    No tracked journals yet. This feature is being rolled out — check back soon.
+                    No tracked journals yet. Track journals from the Search page to get updates here.
                   </div>
                 )}
               </div>
@@ -150,4 +166,4 @@ function LibraryPage() {
   );
 }
 
-export default LibraryPage;
+export default BookmarksPage;

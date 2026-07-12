@@ -9,7 +9,7 @@ export const ROUTE_PATHS = {
   MY_ACCOUNT: "/my-account",
   PAPERS: "/papers",
   TRENDS: "/trends",
-  LIBRARY: "/library",
+  BOOKMARKS: "/bookmarks",
   NOTIFICATIONS: "/notifications",
   REPORTS: "/reports",
   ADMIN: "/admin",

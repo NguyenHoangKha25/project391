@@ -278,7 +278,15 @@
 .home-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
 
 
-.home-hero-visual { min-height: 500px; position: relative; z-index: 2; }
+.home-hero-visual {
+  min-height: 500px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 30px;
+}
 .portal-mockup-app {
   width: 100%;
   min-height: 480px;
@@ -864,6 +872,146 @@
 .home-footer { width: min(1180px, calc(100% - 40px)); display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0 auto; padding: 30px 0 40px; border-top: 1px solid rgba(230,222,211,.86); }
 .home-footer strong { display: block; color: var(--st-heading); font-size: 15px; font-weight: 780; }
 .home-footer span { display: block; margin-top: 3px; color: var(--st-muted); font-size: 13px; }
+
+/* High fidelity live research board visual mockup styles */
+.home-preview-shell {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 30px 70px rgba(8, 26, 49, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  text-align: left;
+}
+.home-preview-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.home-preview-top span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.home-preview-top span:nth-child(1) { background: #ef4444; }
+.home-preview-top span:nth-child(2) { background: #f59e0b; }
+.home-preview-top span:nth-child(3) { background: #10b981; }
+.home-preview-top strong {
+  margin-left: 12px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.7) !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.home-preview-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.home-preview-search svg {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+.home-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.home-preview-card {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04) !important;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+.home-preview-card:hover {
+  border-color: rgba(125, 235, 246, 0.3) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  transform: translateY(-2px);
+}
+.home-preview-card svg {
+  font-size: 18px;
+  color: #7debf6;
+  margin-bottom: 2px;
+}
+.home-preview-card small {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.5) !important;
+  text-transform: uppercase;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+}
+.home-preview-card strong {
+  font-size: 15px;
+  color: #ffffff !important;
+  font-weight: 850;
+}
+.home-preview-card-large {
+  grid-column: span 2;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.home-preview-card-large > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.home-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 38px;
+}
+.home-bars span {
+  width: 5px;
+  background: linear-gradient(to top, #157f91, #7debf6);
+  border-radius: 2px;
+  display: inline-block;
+}
+.home-topic-ticker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  text-align: left;
+}
+.home-topic-ticker span {
+  font-size: 11.5px;
+  font-weight: 750;
+  color: #7debf6;
+  background: rgba(125, 235, 246, 0.08);
+  border: 1px solid rgba(125, 235, 246, 0.25) !important;
+  padding: 5px 12px;
+  border-radius: 99px;
+  transition: all 0.3s ease;
+}
+.home-topic-ticker span:hover {
+  background: rgba(125, 235, 246, 0.16);
+  border-color: rgba(125, 235, 246, 0.4) !important;
+  transform: scale(1.04);
+}
 
 @media (max-width: 1080px) {
   .home-navbar { grid-template-columns: 1fr auto; }

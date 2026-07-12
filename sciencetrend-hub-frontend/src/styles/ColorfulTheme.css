@@ -394,9 +394,7 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 .account-panel,
 .home-feature-card,
 .home-workflow-item,
-.auth-card,
 .login-card,
-.register-card,
 .forgot-card,
 .reset-card {
   border-color: rgba(226, 232, 240, 0.6);
@@ -415,7 +413,6 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 .account-panel:hover,
 .home-feature-card:hover,
 .home-workflow-item:hover,
-.auth-card:hover,
 .login-card:hover,
 .register-card:hover {
   transform: translateY(-5px);
@@ -710,9 +707,7 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   animation: float-nebula 20s ease-in-out infinite;
 }
 
-.auth-card,
 .login-card,
-.register-card,
 .forgot-card,
 .reset-card {
   border-color: rgba(226, 232, 240, 0.6) !important;
@@ -722,9 +717,7 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   overflow: hidden !important;
 }
 
-.auth-card::before,
 .login-card::before,
-.register-card::before,
 .forgot-card::before,
 .reset-card::before {
   content: "" !important;

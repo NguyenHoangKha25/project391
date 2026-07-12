@@ -4,7 +4,7 @@ import AdminPage from "../pages/AdminPage";
 import DashboardPage from "../pages/DashboardPage";
 import ForgotPassWordPage from "../pages/ForgotPassWordPage";
 import HomePage from "../pages/HomePage";
-import LibraryPage from "../pages/LibraryPage";
+import BookmarksPage from "../pages/BookmarksPage";
 import LoginPage from "../pages/LoginPage";
 import MyAccountPage from "../pages/MyAccountPage";
 import NotificationsPage from "../pages/NotificationsPage";
@@ -126,10 +126,10 @@ function AppRoutes() {
       />
 
       <Route
-        path={ROUTE_PATHS.LIBRARY}
+        path={ROUTE_PATHS.BOOKMARKS}
         element={
           <ProtectedRoute>
-            <LibraryPage />
+            <BookmarksPage />
           </ProtectedRoute>
         }
       />

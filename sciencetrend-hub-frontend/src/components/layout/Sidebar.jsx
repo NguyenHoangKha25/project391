@@ -17,7 +17,7 @@ const menuItems = [
   { label: "Dashboard", path: ROUTE_PATHS.DASHBOARD, icon: FiGrid },
   { label: "Papers", path: ROUTE_PATHS.PAPERS, icon: FiFileText },
   { label: "Trends", path: ROUTE_PATHS.TRENDS, icon: FiTrendingUp },
-  { label: "Library", path: ROUTE_PATHS.LIBRARY, icon: FiBookmark },
+  { label: "Bookmarks", path: ROUTE_PATHS.BOOKMARKS, icon: FiBookmark },
   { label: "Reports", path: ROUTE_PATHS.REPORTS, icon: FiBarChart2 },
   {
     label: "Notifications",

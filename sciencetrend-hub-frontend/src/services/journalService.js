@@ -24,3 +24,23 @@ export function getJournalById(id) {
 export function getPapersByJournal(journalId, page = 0, size = 10) {
   return apiRequest(`/journals/${journalId}/papers`, { params: { page, size }, auth: false });
 }
+
+// Connect to GET /api/journals/following
+export function getFollowedJournals() {
+  return apiRequest("/journals/following", { method: "GET" });
+}
+
+// Connect to POST /api/journals/{journalId}/follow
+export function followJournal(journalId) {
+  return apiRequest(`/journals/${journalId}/follow`, { method: "POST" });
+}
+
+// Connect to DELETE /api/journals/{journalId}/follow
+export function unfollowJournal(journalId) {
+  return apiRequest(`/journals/${journalId}/follow`, { method: "DELETE" });
+}
+
+// Connect to GET /api/journals/{journalId}/follow/check
+export function checkJournalFollowed(journalId) {
+  return apiRequest(`/journals/${journalId}/follow/check`, { method: "GET" });
+}

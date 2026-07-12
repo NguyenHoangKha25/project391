@@ -1,4 +1,4 @@
-import { FiBookOpen, FiCheckCircle } from "react-icons/fi";
+import { FiBookOpen, FiCheckCircle, FiMinusCircle } from "react-icons/fi";
 import "../styles/DashboardPage.css";
 
 function JournalCard({
@@ -8,14 +8,15 @@ function JournalCard({
   quartile,
   impactFactor,
   openAccess = false,
+  onUnfollow,
 }) {
   return (
-    <article className="db-journal-card">
+    <article className="db-journal-card" style={{ position: "relative" }}>
       <span className="db-journal-icon">
         <FiBookOpen aria-hidden="true" />
       </span>
 
-      <div className="db-journal-content">
+      <div className="db-journal-content" style={{ paddingRight: onUnfollow ? "40px" : "0" }}>
         <div className="db-journal-title-row">
           <div>
             <h3>{name}</h3>
@@ -34,6 +35,31 @@ function JournalCard({
           )}
         </div>
       </div>
+
+      {onUnfollow && (
+        <button
+          type="button"
+          onClick={onUnfollow}
+          style={{
+            position: "absolute",
+            right: "12px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            background: "none",
+            border: "none",
+            color: "var(--st-danger, #ef4444)",
+            cursor: "pointer",
+            fontSize: "18px",
+            padding: "6px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          title="Untrack journal"
+        >
+          <FiMinusCircle />
+        </button>
+      )}
     </article>
   );
 }

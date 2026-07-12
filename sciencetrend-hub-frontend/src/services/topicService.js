@@ -24,3 +24,23 @@ export function getTopicDetail(topicId) {
 export function getPapersByTopic(topicId, page = 0, size = 10) {
   return apiRequest(`/topics/${topicId}/papers`, { params: { page, size }, auth: false });
 }
+
+// Connect to GET /api/topics/following
+export function getFollowedTopics() {
+  return apiRequest("/topics/following", { method: "GET" });
+}
+
+// Connect to POST /api/topics/{topicId}/follow
+export function followTopic(topicId) {
+  return apiRequest(`/topics/${topicId}/follow`, { method: "POST" });
+}
+
+// Connect to DELETE /api/topics/{topicId}/follow
+export function unfollowTopic(topicId) {
+  return apiRequest(`/topics/${topicId}/follow`, { method: "DELETE" });
+}
+
+// Connect to GET /api/topics/{topicId}/follow/check
+export function checkTopicFollowed(topicId) {
+  return apiRequest(`/topics/${topicId}/follow/check`, { method: "GET" });
+}

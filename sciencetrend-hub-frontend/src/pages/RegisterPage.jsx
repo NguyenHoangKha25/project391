@@ -186,9 +186,33 @@ function RegisterPage() {
           </div>
         </div>
 
-        <div className="register-card">
+        <div className="register-premium-card-box" style={{ position: "relative" }}>
+          {/* Top Border Gradient Line - Perfect mathematical overlay covering the top border */}
+          <div style={{
+            position: "absolute",
+            top: "-1px",
+            left: "-1px",
+            right: "-1px",
+            height: "30px",
+            backgroundImage: "linear-gradient(90deg, var(--st-primary), var(--st-accent))",
+            backgroundSize: "100% 6px",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "top left",
+            borderRadius: "30px 30px 0 0",
+            zIndex: 5,
+            pointerEvents: "none"
+          }} />
+
           <div className="register-header">
-            <h2>Create account</h2>
+            <h2 style={{
+              fontFamily: "var(--font-display)",
+              color: "#082733",
+              fontSize: "38px",
+              fontWeight: "950",
+              letterSpacing: "-0.04em",
+              margin: 0,
+              display: "block"
+            }}>Create account</h2>
           </div>
 
           {message && (
@@ -200,7 +224,7 @@ function RegisterPage() {
           <form className="register-form" onSubmit={handleRegister} noValidate>
 
             <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username && !fieldErrors.username ? "is-valid" : ""}`}>
-              <label htmlFor="username">Username</label>
+              <label htmlFor="username" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
               <div className="input-wrap">
                 <FiUser className="input-field-icon" />
                 <input
@@ -212,13 +236,14 @@ function RegisterPage() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   autoComplete="username"
+                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
                 />
               </div>
               {fieldErrors.username && <p className="field-error">{fieldErrors.username}</p>}
             </div>
 
             <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email && !fieldErrors.email ? "is-valid" : ""}`}>
-              <label htmlFor="email">Email address</label>
+              <label htmlFor="email" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Email address</label>
               <div className="input-wrap">
                 <FiMail className="input-field-icon" />
                 <input
@@ -230,13 +255,14 @@ function RegisterPage() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   autoComplete="email"
+                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
                 />
               </div>
               {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
             </div>
 
             <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
               <div className="input-wrap">
                 <FiLock className="input-field-icon" />
                 <input
@@ -248,6 +274,7 @@ function RegisterPage() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   autoComplete="new-password"
+                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
                 />
                 <button
                   type="button"
@@ -268,7 +295,7 @@ function RegisterPage() {
             </div>
 
             <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
-              <label htmlFor="confirmPassword">Confirm password</label>
+              <label htmlFor="confirmPassword" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Confirm password</label>
               <div className="input-wrap">
                 <FiLock className="input-field-icon" />
                 <input
@@ -280,6 +307,7 @@ function RegisterPage() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   autoComplete="new-password"
+                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
                 />
                 <button
                   type="button"
@@ -296,7 +324,7 @@ function RegisterPage() {
             </div>
 
             <div className={`form-group ${fieldErrors.role ? "has-error" : touched.role && form.role && !fieldErrors.role ? "is-valid" : ""}`}>
-              <label htmlFor="role">Account type</label>
+              <label htmlFor="role" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Account type</label>
               <div className="select-wrap">
                 <FiUsers className="input-field-icon" />
                 <select
@@ -306,6 +334,7 @@ function RegisterPage() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   required
+                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
                 >
                   <option value="">Select account type...</option>
                   {REGISTER_ROLES.map((r) => (
@@ -326,8 +355,8 @@ function RegisterPage() {
               )}
             </button>
 
-            <p className="register-signin-redirect">
-              Already have one? <Link to={ROUTE_PATHS.LOGIN} className="login-link">Sign in</Link>
+            <p className="register-signin-redirect" style={{ color: "#475569", fontWeight: "600" }}>
+              Already have one? <Link to={ROUTE_PATHS.LOGIN} className="login-link" style={{ fontWeight: "800" }}>Sign in</Link>
             </p>
           </form>
 

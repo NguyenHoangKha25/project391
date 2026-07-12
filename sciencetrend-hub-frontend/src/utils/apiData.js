@@ -135,30 +135,41 @@ export function normalizeDashboard(data = {}) {
   };
 }
 
-// Report: chưa implement ở BE
+// Report:
 export function normalizeReport(report = {}, index = 0) {
+  const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api"
+  ).replace(/\/$/, "");
+  
+  let downloadUrl = report.downloadUrl ?? report.url ?? "";
+  if (downloadUrl && !downloadUrl.startsWith("http")) {
+    const cleanUrl = downloadUrl.startsWith("/api") ? downloadUrl.substring(4) : downloadUrl;
+    downloadUrl = `${API_BASE_URL}${cleanUrl.startsWith("/") ? "" : "/"}${cleanUrl}`;
+  }
+
   return {
-    id: report.id ?? report.reportId ?? index,
+    id: report.id ?? report.reportId ?? report.dashboardReportId ?? index,
     title: report.title ?? report.name ?? "Untitled report",
-    description: report.description ?? report.summary ?? "",
-    period: report.period ?? report.range ?? report.createdAt ?? "",
+    description: report.description ?? report.content ?? report.summary ?? "",
+    period: report.period ?? report.generatedAt ?? report.createdAt ?? "",
     format: String(report.format ?? report.fileType ?? "PDF").toUpperCase(),
     status: report.status ?? "Ready",
-    downloadUrl: report.downloadUrl ?? report.url ?? "",
+    downloadUrl,
   };
 }
 
-// Notification: chưa implement ở BE
+// Notification:
 export function normalizeNotification(notification = {}, index = 0) {
   let unread = false;
-  if (notification.unread !== undefined) unread = Boolean(notification.unread);
+  if (notification.isRead !== undefined) unread = !notification.isRead;
+  else if (notification.unread !== undefined) unread = Boolean(notification.unread);
   else if (notification.read !== undefined) unread = notification.read === false;
 
   return {
     id: notification.id ?? notification.notificationId ?? index,
     title: notification.title ?? notification.subject ?? "Notification",
     message: notification.message ?? notification.content ?? "",
-    time: notification.time ?? notification.createdAt ?? "",
+    time: notification.time ?? notification.sendAt ?? notification.createdAt ?? "",
     unread,
     type: notification.type ?? "default",
   };

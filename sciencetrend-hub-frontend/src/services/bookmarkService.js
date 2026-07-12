@@ -31,3 +31,23 @@ export function toggleBookmark(paperId, currentlySaved) {
   }
   return addBookmark(paperId);
 }
+
+// Backend: GET /api/bookmarks/keywords
+export function getBookmarkedKeywords() {
+  return apiRequest("/bookmarks/keywords", { method: "GET" });
+}
+
+// Backend: POST /api/bookmarks/keywords/{keywordId}
+export function addKeywordBookmark(keywordId) {
+  return apiRequest(`/bookmarks/keywords/${keywordId}`, { method: "POST" });
+}
+
+// Backend: DELETE /api/bookmarks/keywords/{keywordId}
+export function removeKeywordBookmark(keywordId) {
+  return apiRequest(`/bookmarks/keywords/${keywordId}`, { method: "DELETE" });
+}
+
+// Backend: GET /api/bookmarks/keywords/check/{keywordId}
+export function checkKeywordBookmarked(keywordId) {
+  return apiRequest(`/bookmarks/keywords/check/${keywordId}`, { method: "GET" });
+}
