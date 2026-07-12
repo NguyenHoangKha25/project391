@@ -197,7 +197,7 @@
   width: 100%;
   max-width: 440px;
   margin: 0 auto;
-  padding: clamp(28px, 4vw, 42px) !important;
+  padding: clamp(20px, 3vw, 30px) !important;
   border: 1px solid rgba(230,222,211,.92) !important;
   border-radius: 30px !important;
   background: #ffffff !important;
@@ -222,7 +222,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 .register-page .register-header h2,
 .register-page .register-premium-card-box .register-header h2 {
@@ -257,7 +257,7 @@
   grid-column: span 2;
 }
 .form-group {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 .form-group label {
   display: block;
@@ -277,7 +277,7 @@
 }
 .input-wrap input {
   width: 100%;
-  height: 50px;
+  height: 46px;
   padding: 0 15px 0 44px !important;
   border: 1px solid rgba(230, 222, 211, 0.95) !important;
   border-radius: 15px;
@@ -305,7 +305,7 @@
 /* Select Styles */
 .select-wrap select {
   width: 100%;
-  height: 50px;
+  height: 46px;
   padding: 0 36px 0 44px !important;
   border: 1px solid rgba(230, 222, 211, 0.95) !important;
   border-radius: 15px;
@@ -401,7 +401,7 @@
 /* Submit Action Button */
 .register-submit-btn {
   width: 100%;
-  height: 52px;
+  height: 48px;
   border: none;
   border-radius: 16px;
   font-size: 14.5px;
