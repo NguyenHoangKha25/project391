@@ -558,18 +558,18 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 .db-paper-card::after {
   content: "";
   position: absolute;
-  left: 0;
-  top: 10px;
-  bottom: 10px;
-  width: 4px;
-  background: linear-gradient(180deg, var(--st-primary), var(--st-primary-dark));
-  border-radius: 0 4px 4px 0;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.22s var(--ease-out);
+  left: 0 !important;
+  top: 10px !important;
+  bottom: 10px !important;
+  width: 4px !important;
+  background: linear-gradient(180deg, var(--st-primary), var(--st-primary-dark)) !important;
+  border-radius: 0 4px 4px 0 !important;
+  transform: scaleX(0) !important;
+  transform-origin: left center !important;
+  transition: transform 0.22s var(--ease-out) !important;
 }
 .db-paper-card:hover::after {
-  transform: scaleX(1);
+  transform: scaleX(1) !important;
 }
 .db-paper-card:hover {
   transform: translateY(-2px) translateX(1px);
