@@ -130,20 +130,25 @@ function DashboardPage() {
 
   // Fallback / mockup data for charts to guarantee the stunning look
   const papersByYear = useMemo(() => {
-    if (data?.papersByYear?.length) return data.papersByYear;
-    return [
-      { label: "2015", value: 18700 },
-      { label: "2016", value: 21300 },
-      { label: "2017", value: 24800 },
-      { label: "2018", value: 28700 },
-      { label: "2019", value: 32900 },
-      { label: "2020", value: 38000 },
-      { label: "2021", value: 47200 },
-      { label: "2022", value: 58000 },
-      { label: "2023", value: 66900 },
-      { label: "2024", value: 83100 },
-      { label: "2025", value: 128452 }
-    ];
+    let raw = data?.papersByYear || [];
+    if (!raw.length) {
+      raw = [
+        { label: "2015", value: 18700 },
+        { label: "2016", value: 21300 },
+        { label: "2017", value: 24800 },
+        { label: "2018", value: 28700 },
+        { label: "2019", value: 32900 },
+        { label: "2020", value: 38000 },
+        { label: "2021", value: 47200 },
+        { label: "2022", value: 58000 },
+        { label: "2023", value: 66900 },
+        { label: "2024", value: 83100 },
+        { label: "2025", value: 128452 }
+      ];
+    }
+    // Sort chronological and take the last 11 years to prevent X-axis labels from overlapping
+    const sorted = [...raw].sort((a, b) => parseInt(a.label || 0) - parseInt(b.label || 0));
+    return sorted.slice(-11);
   }, [data]);
 
   const topKeywords = useMemo(() => {
@@ -179,14 +184,17 @@ function DashboardPage() {
   }, [data]);
 
   const topCitedPapers = useMemo(() => {
-    if (data?.topCitedPapers?.length) return data.topCitedPapers;
-    return [
-      { id: 1, title: "Attention Is All You Need", authors: "A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones...", year: 2017, citationCount: 124670, citationPerYear: 15584 },
-      { id: 2, title: "Deep Residual Learning for Image Recognition", authors: "K. He, X. Zhang, S. Ren, J. Sun", year: 2016, citationCount: 112459, citationPerYear: 12495 },
-      { id: 3, title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", authors: "J. Devlin, M. Chang, K. Lee, K. Toutanova", year: 2018, citationCount: 98765, citationPerYear: 12346 },
-      { id: 4, title: "Generative Adversarial Nets", authors: "I. Goodfellow, J. Pouget-Abadie, M. Mirza, B. Xu, D. Warde-Farley...", year: 2014, citationCount: 92134, citationPerYear: 7679 },
-      { id: 5, title: "You Only Look Once: Unified, Real-Time Object Detection", authors: "J. Redmon, S. Divvala, R. Girshick, A. Farhadi", year: 2016, citationCount: 74552, citationPerYear: 8283 }
-    ];
+    let raw = data?.topCitedPapers || [];
+    if (!raw.length) {
+      raw = [
+        { id: 1, title: "Attention Is All You Need", authors: "A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones...", year: 2017, citationCount: 124670, citationPerYear: 15584 },
+        { id: 2, title: "Deep Residual Learning for Image Recognition", authors: "K. He, X. Zhang, S. Ren, J. Sun", year: 2016, citationCount: 112459, citationPerYear: 12495 },
+        { id: 3, title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", authors: "J. Devlin, M. Chang, K. Lee, K. Toutanova", year: 2018, citationCount: 98765, citationPerYear: 12346 },
+        { id: 4, title: "Generative Adversarial Nets", authors: "I. Goodfellow, J. Pouget-Abadie, M. Mirza, B. Xu, D. Warde-Farley...", year: 2014, citationCount: 92134, citationPerYear: 7679 },
+        { id: 5, title: "You Only Look Once: Unified, Real-Time Object Detection", authors: "J. Redmon, S. Divvala, R. Girshick, A. Farhadi", year: 2016, citationCount: 74552, citationPerYear: 8283 }
+      ];
+    }
+    return raw.slice(0, 3);
   }, [data]);
 
   // Calculate SVG Donut Chart parameters
@@ -471,7 +479,7 @@ function DashboardPage() {
             </div>
 
             <div className="trending-topics-list">
-              {DEFAULT_TRENDS.map((t, idx) => {
+              {DEFAULT_TRENDS.slice(0, 3).map((t, idx) => {
                 // Generate simple SVG path values for sparkline
                 const points = t.sparkline.map((val, i) => `${i * 12},${40 - val}`).join(" ");
                 return (
