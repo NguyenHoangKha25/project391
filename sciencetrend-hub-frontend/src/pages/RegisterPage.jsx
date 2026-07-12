@@ -146,7 +146,7 @@ function RegisterPage() {
       }, 2000);
     } catch (error) {
       console.error("Registration error details:", error);
-      const msg = error.response?.data?.message || "Registration failed. Please check your information.";
+      const msg = error.message || "Registration failed. Please check your information.";
       setMessage(msg);
       setMessageType("error");
     } finally {

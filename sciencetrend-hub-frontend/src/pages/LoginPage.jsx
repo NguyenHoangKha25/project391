@@ -44,7 +44,7 @@ function LoginPage() {
       navigate(getDefaultAuthenticatedPath(session.user.role), { replace: true });
     } catch (error) {
       console.error("Login failed", error);
-      setErrorMessage("Sai tài khoản hoặc mật khẩu.");
+      setErrorMessage(error.message || "Invalid username or password.");
     } finally {
       setIsSubmitting(false);
     }
