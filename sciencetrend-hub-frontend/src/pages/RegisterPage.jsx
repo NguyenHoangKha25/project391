@@ -158,26 +158,41 @@ function RegisterPage() {
     <div className="register-page">
       <div className="register-wrapper">
         <div className="register-left">
-          <Link to={ROUTE_PATHS.HOME} className="brand-box">
-            <img src={logoLogin} alt="ScienceTrend Hub" className="brand-logo-img" />
-            <div>
-              <h2>ScienceTrend Hub</h2>
+          <Link to={ROUTE_PATHS.HOME} className="register-brand">
+            <div className="register-logo-box">
+              <img src={logoLogin} alt="ScienceTrend Hub" className="register-logo-img" />
+            </div>
+            <div className="register-brand-text">
+              <h1>ScienceTrend Hub</h1>
               <p>Scientific Journal Publication Tracking</p>
             </div>
           </Link>
 
-          <h1>Start your research journey</h1>
-
-          <p className="register-desc">
-            One account to search papers, track journals, follow emerging topics,
-            and keep everything organised in your own workspace.
-          </p>
+          <div className="register-hero">
+            <h2>Start your research journey</h2>
+            <p>
+              One account to search papers, track journals, follow emerging topics,
+              and keep everything organised in your own workspace.
+            </p>
+          </div>
 
           <ul className="feature-list">
-            <li className="feature-item"><FiCheck /> Track publication trends</li>
-            <li className="feature-item"><FiCheck /> Save and annotate papers</li>
-            <li className="feature-item"><FiCheck /> Explore journals and topics</li>
-            <li className="feature-item"><FiCheck /> Download research reports</li>
+            <li className="feature-item">
+              <span className="feature-icon-box"><FiCheck /></span>
+              <p>Track publication trends</p>
+            </li>
+            <li className="feature-item">
+              <span className="feature-icon-box"><FiCheck /></span>
+              <p>Save and annotate papers</p>
+            </li>
+            <li className="feature-item">
+              <span className="feature-icon-box"><FiCheck /></span>
+              <p>Explore journals and topics</p>
+            </li>
+            <li className="feature-item">
+              <span className="feature-icon-box"><FiCheck /></span>
+              <p>Download research reports</p>
+            </li>
           </ul>
 
           <div className="register-testimonial">
