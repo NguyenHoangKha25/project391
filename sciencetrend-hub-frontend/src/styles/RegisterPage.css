@@ -189,6 +189,7 @@
   justify-content: flex-start;
   align-items: center;
   padding: clamp(20px, 3vw, 30px);
+  padding-bottom: 50px;
   background: transparent;
   height: 680px;
   overflow-y: auto;
