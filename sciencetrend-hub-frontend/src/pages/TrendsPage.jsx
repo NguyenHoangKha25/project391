@@ -10,6 +10,7 @@ import {
   FiArrowUpRight,
   FiInfo,
   FiLayers,
+  FiChevronDown,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { getTrendingTopics, getTrendStats } from "../services/trendService";
