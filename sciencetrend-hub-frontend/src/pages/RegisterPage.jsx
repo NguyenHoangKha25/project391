@@ -278,7 +278,14 @@ function RegisterPage() {
               </div>
 
               <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
-                <label htmlFor="password" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                  <label htmlFor="password" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Password</label>
+                  {form.password && (
+                    <span style={{ fontSize: "11px", fontWeight: "700", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Strength: <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
+                    </span>
+                  )}
+                </div>
                 <div className="input-wrap">
                   <FiLock className="input-field-icon" />
                   <input
@@ -302,12 +309,6 @@ function RegisterPage() {
                   </button>
                 </div>
                 {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
-
-                {form.password && (
-                  <div className="password-strength-text" style={{ marginTop: 6, fontSize: "12px", fontWeight: 650 }}>
-                    Password strength: <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
-                  </div>
-                )}
               </div>
 
               <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
