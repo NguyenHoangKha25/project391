@@ -211,7 +211,8 @@ function BookmarksPage() {
 
   return (
     <MainLayout title="My Library" subtitle="Your saved papers, followed content, and notifications">
-      <div className="library-container">
+      <div className="workspace-page bookmarks-page">
+        <div className="library-container">
         
         {/* Navigation Tabs Bar */}
         <nav className="library-tabs-bar" aria-label="Library navigation">
@@ -611,8 +612,9 @@ function BookmarksPage() {
         )}
 
       </div>
-    </MainLayout>
-  );
+    </div>
+  </MainLayout>
+);
 }
 
 export default BookmarksPage;
