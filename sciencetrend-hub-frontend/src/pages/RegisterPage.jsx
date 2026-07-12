@@ -186,184 +186,186 @@ function RegisterPage() {
           </div>
         </div>
 
-        <div className="register-premium-card-box" style={{ position: "relative" }}>
-          {/* Top Border Gradient Line - Perfect mathematical overlay covering the top border */}
-          <div style={{
-            position: "absolute",
-            top: "-1px",
-            left: "-1px",
-            right: "-1px",
-            height: "30px",
-            backgroundImage: "linear-gradient(90deg, var(--st-primary), var(--st-accent))",
-            backgroundSize: "100% 6px",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "top left",
-            borderRadius: "30px 30px 0 0",
-            zIndex: 5,
-            pointerEvents: "none"
-          }} />
+        <div className="register-right">
+          <div className="register-premium-card-box" style={{ position: "relative" }}>
+            {/* Top Border Gradient Line - Perfect mathematical overlay covering the top border */}
+            <div style={{
+              position: "absolute",
+              top: "-1px",
+              left: "-1px",
+              right: "-1px",
+              height: "30px",
+              backgroundImage: "linear-gradient(90deg, var(--st-primary), var(--st-accent))",
+              backgroundSize: "100% 6px",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "top left",
+              borderRadius: "30px 30px 0 0",
+              zIndex: 5,
+              pointerEvents: "none"
+            }} />
 
-          <div className="register-header">
-            <h2 style={{
-              fontFamily: "var(--font-display)",
-              color: "#082733",
-              fontSize: "38px",
-              fontWeight: "950",
-              letterSpacing: "-0.04em",
-              margin: 0,
-              display: "block"
-            }}>Create account</h2>
-          </div>
-
-          {message && (
-            <div className={`register-message ${messageType}`} role="alert">
-              {message}
-            </div>
-          )}
-
-          <form className="register-form" onSubmit={handleRegister} noValidate>
-
-            <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username && !fieldErrors.username ? "is-valid" : ""}`}>
-              <label htmlFor="username" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
-              <div className="input-wrap">
-                <FiUser className="input-field-icon" />
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  placeholder="e.g. john_doe"
-                  value={form.username}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  autoComplete="username"
-                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
-                />
-              </div>
-              {fieldErrors.username && <p className="field-error">{fieldErrors.username}</p>}
+            <div className="register-header">
+              <h2 style={{
+                fontFamily: "var(--font-display)",
+                color: "#082733",
+                fontSize: "38px",
+                fontWeight: "950",
+                letterSpacing: "-0.04em",
+                margin: 0,
+                display: "block"
+              }}>Create account</h2>
             </div>
 
-            <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email && !fieldErrors.email ? "is-valid" : ""}`}>
-              <label htmlFor="email" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Email address</label>
-              <div className="input-wrap">
-                <FiMail className="input-field-icon" />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={form.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  autoComplete="email"
-                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
-                />
+            {message && (
+              <div className={`${messageType}-msg`} role="alert">
+                {message}
               </div>
-              {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
-            </div>
+            )}
 
-            <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
-              <label htmlFor="password" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
-              <div className="input-wrap">
-                <FiLock className="input-field-icon" />
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="At least 8 characters"
-                  value={form.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  autoComplete="new-password"
-                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
-                />
-                <button
-                  type="button"
-                  className="input-toggle-btn"
-                  onClick={() => setShowPassword((v) => !v)}
-                  tabIndex={-1}
-                >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
-                </button>
-              </div>
-              {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
+            <form className="register-form" onSubmit={handleRegister} noValidate>
 
-              {form.password && (
-                <div className="password-strength-text" style={{ marginTop: 6, fontSize: "12px", fontWeight: 650 }}>
-                  Password strength: <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
+              <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username && !fieldErrors.username ? "is-valid" : ""}`}>
+                <label htmlFor="username" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
+                <div className="input-wrap">
+                  <FiUser className="input-field-icon" />
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="e.g. john_doe"
+                    value={form.username}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="username"
+                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
+                  />
                 </div>
-              )}
-            </div>
-
-            <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
-              <label htmlFor="confirmPassword" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Confirm password</label>
-              <div className="input-wrap">
-                <FiLock className="input-field-icon" />
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirm ? "text" : "password"}
-                  placeholder="Repeat your password"
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  autoComplete="new-password"
-                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
-                />
-                <button
-                  type="button"
-                  className="input-toggle-btn"
-                  onClick={() => setShowConfirm((v) => !v)}
-                  tabIndex={-1}
-                >
-                  {showConfirm ? <FiEyeOff /> : <FiEye />}
-                </button>
+                {fieldErrors.username && <p className="field-error">{fieldErrors.username}</p>}
               </div>
-              {fieldErrors.confirmPassword && (
-                <p className="field-error">{fieldErrors.confirmPassword}</p>
-              )}
-            </div>
 
-            <div className={`form-group ${fieldErrors.role ? "has-error" : touched.role && form.role && !fieldErrors.role ? "is-valid" : ""}`}>
-              <label htmlFor="role" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Account type</label>
-              <div className="select-wrap">
-                <FiUsers className="input-field-icon" />
-                <select
-                  id="role"
-                  name="role"
-                  value={form.role}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  required
-                  style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
-                >
-                  <option value="">Select account type...</option>
-                  {REGISTER_ROLES.map((r) => (
-                    <option key={r.value} value={r.value}>
-                      {r.label}
-                    </option>
-                  ))}
-                </select>
+              <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email && !fieldErrors.email ? "is-valid" : ""}`}>
+                <label htmlFor="email" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Email address</label>
+                <div className="input-wrap">
+                  <FiMail className="input-field-icon" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={form.email}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="email"
+                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
+                  />
+                </div>
+                {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
               </div>
-              {fieldErrors.role && <p className="field-error">{fieldErrors.role}</p>}
-            </div>
 
-            <button type="submit" className="register-btn" disabled={loading}>
-              {loading ? (
-                <span className="register-btn-spinner" />
-              ) : (
-                "Create account"
-              )}
-            </button>
+              <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
+                <label htmlFor="password" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
+                <div className="input-wrap">
+                  <FiLock className="input-field-icon" />
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="At least 8 characters"
+                    value={form.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="new-password"
+                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
+                  />
+                  <button
+                    type="button"
+                    className="eye-toggle"
+                    onClick={() => setShowPassword((v) => !v)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+                {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
 
-            <p className="register-signin-redirect" style={{ color: "#475569", fontWeight: "600" }}>
-              Already have one? <Link to={ROUTE_PATHS.LOGIN} className="login-link" style={{ fontWeight: "800" }}>Sign in</Link>
+                {form.password && (
+                  <div className="password-strength-text" style={{ marginTop: 6, fontSize: "12px", fontWeight: 650 }}>
+                    Password strength: <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
+                <label htmlFor="confirmPassword" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Confirm password</label>
+                <div className="input-wrap">
+                  <FiLock className="input-field-icon" />
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="Repeat your password"
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="new-password"
+                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
+                  />
+                  <button
+                    type="button"
+                    className="eye-toggle"
+                    onClick={() => setShowConfirm((v) => !v)}
+                    tabIndex={-1}
+                  >
+                    {showConfirm ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
+                {fieldErrors.confirmPassword && (
+                  <p className="field-error">{fieldErrors.confirmPassword}</p>
+                )}
+              </div>
+
+              <div className={`form-group ${fieldErrors.role ? "has-error" : touched.role && form.role && !fieldErrors.role ? "is-valid" : ""}`}>
+                <label htmlFor="role" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Account type</label>
+                <div className="select-wrap">
+                  <FiUsers className="input-field-icon" />
+                  <select
+                    id="role"
+                    name="role"
+                    value={form.role}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    required
+                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
+                  >
+                    <option value="">Select account type...</option>
+                    {REGISTER_ROLES.map((r) => (
+                      <option key={r.value} value={r.value}>
+                        {r.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {fieldErrors.role && <p className="field-error">{fieldErrors.role}</p>}
+              </div>
+
+              <button type="submit" className="register-submit-btn" disabled={loading}>
+                {loading ? (
+                  <span className="register-btn-spinner" />
+                ) : (
+                  "Create account"
+                )}
+              </button>
+
+              <p className="register-signin-redirect" style={{ color: "#475569", fontWeight: "600" }}>
+                Already have one? <Link to={ROUTE_PATHS.LOGIN} className="login-link" style={{ fontWeight: "800" }}>Sign in</Link>
+              </p>
+            </form>
+
+            <p className="register-terms">
+              By creating an account you agree to our{" "}
+              <span>Terms of Service</span> and <span>Privacy Policy</span>.
             </p>
-          </form>
-
-          <p className="register-terms">
-            By creating an account you agree to our{" "}
-            <span>Terms of Service</span> and <span>Privacy Policy</span>.
-          </p>
+          </div>
         </div>
       </div>
     </div>
