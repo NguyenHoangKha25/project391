@@ -381,12 +381,12 @@
 
 /* Terms Checkbox */
 .register-terms {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  margin: 4px 0 20px 0;
+  display: block;
+  margin: 16px 0 0 0;
   color: var(--st-muted-strong);
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
 }
 .register-terms input {
   width: 17px;
