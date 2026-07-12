@@ -208,6 +208,7 @@
   backdrop-filter: none;
   position: relative;
   overflow: hidden; /* Clips the top border gradient neatly at corners! */
+  flex-shrink: 0;
 }
 .register-premium-card-box::before {
   content: "";
