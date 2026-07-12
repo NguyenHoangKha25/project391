@@ -36,7 +36,7 @@ const featureItems = [
   },
   {
     icon: FiBookmark,
-    title: "Library Manager",
+    title: "Bookmarks Manager",
     description: "Save and organize references.",
   },
   {
@@ -54,7 +54,7 @@ const stats = [
 
 const workflowItems = [
   "Find relevant publications",
-  "Build your reference library",
+  "Save papers to bookmarks",
   "Export summary reports",
 ];
 

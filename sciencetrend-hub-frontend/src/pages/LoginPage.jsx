@@ -107,7 +107,7 @@ function LoginPage() {
                 </div>
                 <div className="auth-premium-feature-tag tag-green">
                   <FiBookOpen />
-                  <span>Library</span>
+                  <span>Bookmarks</span>
                 </div>
                 <div className="auth-premium-feature-tag tag-yellow">
                   <FiPieChart />

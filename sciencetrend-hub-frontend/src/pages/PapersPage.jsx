@@ -91,7 +91,7 @@ function PapersPage() {
     try {
       await toggleBookmark(id, paper.saved);
       showToast(
-        paper.saved ? "Removed from library." : "Saved to your library.",
+        paper.saved ? "Removed from bookmarks." : "Saved to your bookmarks.",
         paper.saved ? "info" : "success"
       );
     } catch {

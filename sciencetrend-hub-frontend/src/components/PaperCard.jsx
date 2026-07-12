@@ -40,10 +40,10 @@ function PaperCard({
         <button
           type="button"
           className={saved ? "is-saved" : ""}
-          aria-label={saved ? "Remove from library" : "Save to library"}
+          aria-label={saved ? "Remove from bookmarks" : "Save to bookmarks"}
           onClick={handleBookmark}
           disabled={bookmarking}
-          title={saved ? "Saved to library" : "Save to library"}
+          title={saved ? "Saved to bookmarks" : "Save to bookmarks"}
         >
           {bookmarking ? (
             <FiLoader className="is-spinning" />
