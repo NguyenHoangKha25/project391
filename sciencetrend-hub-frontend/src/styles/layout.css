@@ -315,15 +315,26 @@
   align-items: center;
   gap: 12px;
   min-height: 46px;
-  padding: 0 12px;
+  padding: 0 14px;
   border-radius: 14px;
-  color: #344054;
-  font-size: 15px;
-  font-weight: 650;
+  color: #1d2939; /* Dark charcoal for sharp, high-contrast text */
+  background: transparent; /* Explicitly reset browser background */
+  border: none; /* Explicitly remove browser border */
+  cursor: pointer;
+  font-size: 14.5px;
+  font-weight: 750; /* Bold to eliminate blurriness */
   letter-spacing: -.01em;
+  transition: all 0.15s ease;
 }
-.st-account-menu button:hover { color: var(--st-primary); background: var(--st-primary-soft); }
-.st-account-menu button svg { width: 18px; height: 18px; }
+.st-account-menu button:hover {
+  color: var(--st-primary);
+  background: var(--st-primary-soft);
+}
+.st-account-menu button svg {
+  width: 18px;
+  height: 18px;
+  color: #667085; /* Slightly darker gray for icons to improve visibility */
+}
 .st-account-divider { height: 1px; margin: 8px 4px; background: var(--st-border); }
 .st-account-logout { color: var(--st-danger) !important; }
 .st-account-logout:hover { background: var(--st-danger-soft) !important; }
