@@ -47,34 +47,34 @@ function RegisterPage() {
     let error = "";
     if (name === "username") {
       if (!value.trim()) {
-        error = "Tài khoản là bắt buộc.";
+        error = "Username is required.";
       } else if (value.trim().length < 3) {
-        error = "Tài khoản phải từ 3 ký tự trở lên.";
+        error = "Username must be at least 3 characters.";
       }
     } else if (name === "email") {
       if (!value.trim()) {
-        error = "Email là bắt buộc.";
+        error = "Email is required.";
       } else {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value.trim())) {
-          error = "Định dạng email không hợp lệ.";
+          error = "Invalid email format.";
         }
       }
     } else if (name === "password") {
       if (!value) {
-        error = "Mật khẩu là bắt buộc.";
+        error = "Password is required.";
       } else if (value.length < 8) {
-        error = "Mật khẩu phải từ 8 ký tự trở lên.";
+        error = "Password must be at least 8 characters.";
       }
     } else if (name === "confirmPassword") {
       if (!value) {
-        error = "Xác nhận mật khẩu là bắt buộc.";
+        error = "Confirm password is required.";
       } else if (value !== form.password) {
-        error = "Mật khẩu xác nhận không khớp.";
+        error = "Passwords do not match.";
       }
     } else if (name === "role") {
       if (!value) {
-        error = "Loại tài khoản là bắt buộc.";
+        error = "Account type is required.";
       }
     }
     return error;
@@ -136,17 +136,17 @@ function RegisterPage() {
       });
       setTouched({});
       setFieldErrors({});
-      setMessage("Đăng ký thành công! Đang chuyển hướng sang trang đăng nhập...");
+      setMessage("Registration successful! Redirecting to login page...");
       setMessageType("success");
 
       setTimeout(() => {
         navigate(ROUTE_PATHS.LOGIN, {
-          state: { successMessage: "Đăng ký tài khoản thành công! Vui lòng đăng nhập." },
+          state: { successMessage: "Registration successful! Please sign in." },
         });
       }, 2000);
     } catch (error) {
       console.error("Registration error details:", error);
-      const msg = error.response?.data?.message || "Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.";
+      const msg = error.response?.data?.message || "Registration failed. Please check your information.";
       setMessage(msg);
       setMessageType("error");
     } finally {
