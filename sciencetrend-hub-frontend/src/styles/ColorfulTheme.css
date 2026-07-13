@@ -253,9 +253,15 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 100%);
 }
 
+.st-account-menu button {
+  color: #1c2533 !important;
+  font-weight: 780 !important;
+  background: transparent !important;
+  border: none !important;
+}
 .st-account-menu button:hover {
-  color: #4f46e5;
-  background: #eef2ff;
+  color: #157f91 !important;
+  background: #eff8f9 !important;
 }
 
 /* Shared glassmorphic cards and headers */

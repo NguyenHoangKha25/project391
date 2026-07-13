@@ -317,12 +317,12 @@
   min-height: 46px;
   padding: 0 14px;
   border-radius: 14px;
-  color: #1d2939; /* Dark charcoal for sharp, high-contrast text */
-  background: transparent; /* Explicitly reset browser background */
-  border: none; /* Explicitly remove browser border */
+  color: #1c2533 !important; /* Dark charcoal for sharp, high-contrast text */
+  background: transparent !important; /* Explicitly reset browser background */
+  border: none !important; /* Explicitly remove browser border */
   cursor: pointer;
   font-size: 14.5px;
-  font-weight: 750; /* Bold to eliminate blurriness */
+  font-weight: 780 !important; /* Bold to eliminate blurriness */
   letter-spacing: -.01em;
   transition: all 0.15s ease;
 }
