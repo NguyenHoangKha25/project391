@@ -50,6 +50,14 @@ function TrendsPage() {
     "AI for Healthcare",
     "Vision-Language Models",
   ]);
+  // Topic chips state
+  const [topicChips, setTopicChips] = useState([
+    "Computer Science",
+    "Mathematics",
+    "Engineering",
+    "Medicine",
+    "Physics",
+  ]);
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [showAddKeywordInput, setShowAddKeywordInput] = useState(false);
 
@@ -66,9 +74,13 @@ function TrendsPage() {
       setLoading(true);
       setErrorMessage("");
 
+      const activeSearchKeyword = trendTab === "keyword" 
+        ? (keywordChips[0] || "computer science") 
+        : (topicChips[0] || "computer science");
+
       const [topicsRes, statsRes, allTopicsRes] = await Promise.allSettled([
         getTrendingTopics({ limit: 10 }),
-        getTrendStats({ keyword: keywordChips[0] || "computer science" }),
+        getTrendStats({ keyword: activeSearchKeyword }),
         getAllTopics(),
       ]);
 
@@ -93,7 +105,7 @@ function TrendsPage() {
     } finally {
       setLoading(false);
     }
-  }, [keywordChips]);
+  }, [trendTab, keywordChips, topicChips]);
 
   useEffect(() => {
     loadTrendData();
@@ -103,22 +115,41 @@ function TrendsPage() {
   function handleAddChip(e) {
     e.preventDefault();
     const val = newKeywordInput.trim();
-    if (val && !keywordChips.includes(val)) {
-      setKeywordChips((curr) => [...curr, val]);
-      setNewKeywordInput("");
-      setShowAddKeywordInput(false);
-      showToast(`Added keyword trace: "${val}"`, "success");
+    if (trendTab === "keyword") {
+      if (val && !keywordChips.includes(val)) {
+        setKeywordChips((curr) => [...curr, val]);
+        setNewKeywordInput("");
+        setShowAddKeywordInput(false);
+        showToast(`Added keyword trace: "${val}"`, "success");
+      }
+    } else {
+      if (val && !topicChips.includes(val)) {
+        setTopicChips((curr) => [...curr, val]);
+        setNewKeywordInput("");
+        setShowAddKeywordInput(false);
+        showToast(`Added topic trace: "${val}"`, "success");
+      }
     }
   }
 
   function handleRemoveChip(chipToRemove) {
-    setKeywordChips((curr) => curr.filter((c) => c !== chipToRemove));
-    showToast(`Removed keyword trace: "${chipToRemove}"`, "info");
+    if (trendTab === "keyword") {
+      setKeywordChips((curr) => curr.filter((c) => c !== chipToRemove));
+      showToast(`Removed keyword trace: "${chipToRemove}"`, "info");
+    } else {
+      setTopicChips((curr) => curr.filter((c) => c !== chipToRemove));
+      showToast(`Removed topic trace: "${chipToRemove}"`, "info");
+    }
   }
 
   function handleClearAllChips() {
-    setKeywordChips([]);
-    showToast("Cleared keyword traces.", "info");
+    if (trendTab === "keyword") {
+      setKeywordChips([]);
+      showToast("Cleared keyword traces.", "info");
+    } else {
+      setTopicChips([]);
+      showToast("Cleared topic traces.", "info");
+    }
   }
 
   // Calculate dynamic SVG Area Chart path (Publication Count by Year)
@@ -158,6 +189,8 @@ function TrendsPage() {
     const height = 120;
     const padding = 10;
 
+    const activeChips = trendTab === "keyword" ? keywordChips : topicChips;
+
     // Define curves for compared keywords
     const dataset = [
       { label: "LLMs", stroke: "#2563eb", values: [10, 14, 18, 22, 30, 42, 58, 72, 85, 92, 98] },
@@ -167,7 +200,7 @@ function TrendsPage() {
       { label: "VLM", stroke: "#0ea5e9", values: [2, 3, 5, 8, 12, 18, 26, 38, 54, 72, 81] }
     ];
 
-    return dataset.slice(0, Math.max(1, keywordChips.length)).map((line, lineIdx) => {
+    return dataset.slice(0, Math.max(1, activeChips.length)).map((line, lineIdx) => {
       const maxVal = 100;
       const minVal = 0;
       const range = 100;
@@ -181,13 +214,13 @@ function TrendsPage() {
       const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
 
       return {
-        label: keywordChips[lineIdx] || line.label,
+        label: activeChips[lineIdx] || line.label,
         stroke: line.stroke,
         linePath,
         coords
       };
     });
-  }, [keywordChips]);
+  }, [trendTab, keywordChips, topicChips]);
 
   // Generate dynamic sparkline coordinates
   function getSparklinePoints(growth, idx) {
@@ -224,7 +257,7 @@ function TrendsPage() {
               <FiSearch />
               <input
                 type="text"
-                placeholder="Search keywords or topics..."
+                placeholder={trendTab === "keyword" ? "Search keywords..." : "Search topics..."}
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
               />
@@ -260,9 +293,9 @@ function TrendsPage() {
           </div>
         </div>
 
-        {/* Dynamic active keyword chips */}
+        {/* Dynamic active chips */}
         <div className="trends-keyword-chips-row">
-          {keywordChips.map((chip, idx) => (
+          {(trendTab === "keyword" ? keywordChips : topicChips).map((chip, idx) => (
             <span key={idx} className={`trends-keyword-chip chip-color-${idx % 5}`}>
               <span className="dot" />
               <span className="label-text">{chip}</span>
@@ -277,7 +310,7 @@ function TrendsPage() {
               <input
                 type="text"
                 autoFocus
-                placeholder="Type keyword..."
+                placeholder={trendTab === "keyword" ? "Type keyword..." : "Type topic..."}
                 value={newKeywordInput}
                 onChange={(e) => setNewKeywordInput(e.target.value)}
                 onBlur={() => setTimeout(() => setShowAddKeywordInput(false), 250)}
@@ -290,11 +323,11 @@ function TrendsPage() {
               onClick={() => setShowAddKeywordInput(true)}
             >
               <FiPlus />
-              <span>Add keyword</span>
+              <span>{trendTab === "keyword" ? "Add keyword" : "Add topic"}</span>
             </button>
           )}
 
-          {keywordChips.length > 0 && (
+          {(trendTab === "keyword" ? keywordChips : topicChips).length > 0 && (
             <button type="button" className="trends-clear-chips-btn" onClick={handleClearAllChips}>
               Clear all
             </button>
@@ -401,14 +434,14 @@ function TrendsPage() {
           {/* Card 3: Top Trending Topics list */}
           <article className="trends-table-panel glassmorphic-panel">
             <div className="panel-header-row">
-              <h3>Top Trending Topics</h3>
+              <h3>{trendTab === "keyword" ? "Top Trending Keywords" : "Top Trending Topics"}</h3>
               <span className="badge-chip">Top 5</span>
             </div>
             <div className="trends-compact-table-wrap">
               <table className="trends-compact-table">
                 <thead>
                   <tr>
-                    <th>Topic</th>
+                    <th>{trendTab === "keyword" ? "Keyword" : "Topic"}</th>
                     <th>Publications</th>
                     <th>Growth</th>
                   </tr>
@@ -429,17 +462,17 @@ function TrendsPage() {
                   {trendingTopics.length === 0 && (
                     <>
                       <tr>
-                        <td><div className="trends-topic-cell"><span className="rank-num">1</span><span>Large Language Models</span></div></td>
+                        <td><div className="trends-topic-cell"><span className="rank-num">1</span><span>{trendTab === "keyword" ? "Large Language Models" : "Computer Science"}</span></div></td>
                         <td>12,842</td>
                         <td className="positive">+32.4%</td>
                       </tr>
                       <tr>
-                        <td><div className="trends-topic-cell"><span className="rank-num">2</span><span>Diffusion Models</span></div></td>
+                        <td><div className="trends-topic-cell"><span className="rank-num">2</span><span>{trendTab === "keyword" ? "Diffusion Models" : "Mathematics"}</span></div></td>
                         <td>8,923</td>
                         <td className="positive">+27.8%</td>
                       </tr>
                       <tr>
-                        <td><div className="trends-topic-cell"><span className="rank-num">3</span><span>Graph Neural Networks</span></div></td>
+                        <td><div className="trends-topic-cell"><span className="rank-num">3</span><span>{trendTab === "keyword" ? "Graph Neural Networks" : "Engineering"}</span></div></td>
                         <td>6,936</td>
                         <td className="positive">+26.1%</td>
                       </tr>
@@ -458,7 +491,7 @@ function TrendsPage() {
           {/* Card 1: Top Growing Topics */}
           <article className="trends-bottom-panel glassmorphic-panel">
             <div className="panel-header-row">
-              <h3>Top Growing Topics (by Growth Rate)</h3>
+              <h3>{trendTab === "keyword" ? "Top Growing Keywords (by Growth)" : "Top Growing Topics (by Growth)"}</h3>
               <span className="badge-chip">Growth</span>
             </div>
             <div className="trends-sparkline-list">
@@ -484,14 +517,14 @@ function TrendsPage() {
               {trendingTopics.length === 0 && (
                 <>
                   <div className="trends-sparkline-row">
-                    <div className="topic-rank-name"><span className="bullet-dot" /><span>Diffusion Models</span></div>
+                    <div className="topic-rank-name"><span className="bullet-dot" /><span>{trendTab === "keyword" ? "Diffusion Models" : "Mathematics"}</span></div>
                     <div className="sparkline-stats">
                       <span className="growth-text">+27.8%</span>
                       <svg width="60" height="30"><polyline fill="none" stroke="#10b981" strokeWidth="1.5" points="0,25 10,20 20,22 30,12 40,16 50,5 60,8" /></svg>
                     </div>
                   </div>
                   <div className="trends-sparkline-row">
-                    <div className="topic-rank-name"><span className="bullet-dot" /><span>Vision-Language Models</span></div>
+                    <div className="topic-rank-name"><span className="bullet-dot" /><span>{trendTab === "keyword" ? "Vision-Language Models" : "Engineering"}</span></div>
                     <div className="sparkline-stats">
                       <span className="growth-text">+22.9%</span>
                       <svg width="60" height="30"><polyline fill="none" stroke="#10b981" strokeWidth="1.5" points="0,28 10,24 20,18 30,22 40,14 50,8 60,6" /></svg>
@@ -505,7 +538,7 @@ function TrendsPage() {
           {/* Card 2: Topic Momentum (Acceleration) */}
           <article className="trends-bottom-panel glassmorphic-panel">
             <div className="panel-header-row">
-              <h3>Topic Momentum (Acceleration)</h3>
+              <h3>{trendTab === "keyword" ? "Keyword Momentum (Acceleration)" : "Topic Momentum (Acceleration)"}</h3>
               <span className="badge-chip">Momentum</span>
             </div>
             <div className="trends-sparkline-list">
@@ -531,14 +564,14 @@ function TrendsPage() {
               {trendingTopics.length === 0 && (
                 <>
                   <div className="trends-sparkline-row">
-                    <div className="topic-rank-name"><span className="bullet-dot bg-blue" /><span>Vision-Language Models</span></div>
+                    <div className="topic-rank-name"><span className="bullet-dot bg-blue" /><span>{trendTab === "keyword" ? "Vision-Language Models" : "Computer Science"}</span></div>
                     <div className="sparkline-stats">
                       <span className="momentum-score">1.86 Score</span>
                       <svg width="60" height="30"><polyline fill="none" stroke="#2563eb" strokeWidth="1.5" points="0,25 15,22 30,14 45,10 60,4" /></svg>
                     </div>
                   </div>
                   <div className="trends-sparkline-row">
-                    <div className="topic-rank-name"><span className="bullet-dot bg-blue" /><span>Diffusion Models</span></div>
+                    <div className="topic-rank-name"><span className="bullet-dot bg-blue" /><span>{trendTab === "keyword" ? "Diffusion Models" : "Mathematics"}</span></div>
                     <div className="sparkline-stats">
                       <span className="momentum-score">1.74 Score</span>
                       <svg width="60" height="30"><polyline fill="none" stroke="#2563eb" strokeWidth="1.5" points="0,28 15,22 30,19 45,11 60,8" /></svg>
@@ -552,26 +585,49 @@ function TrendsPage() {
           {/* Card 3: AI-Generated Insights */}
           <article className="trends-bottom-panel glassmorphic-panel">
             <div className="panel-header-row">
-              <h3>Analytical Insights</h3>
+              <h3>{trendTab === "keyword" ? "Analytical Keyword Insights" : "Analytical Topic Insights"}</h3>
               <span className="badge-chip bg-orange">Insights</span>
             </div>
             <div className="trends-insights-scroll-list">
-              <div className="insight-card-item">
-                <div className="insight-icon-circle green">
-                  <FiLayers />
-                </div>
-                <p>
-                  <strong>Large Language Models (LLMs)</strong> remains the dominant topic in 2025 with 12,842 publications, exhibiting 32.4% year-on-year growth.
-                </p>
-              </div>
-              <div className="insight-card-item">
-                <div className="insight-icon-circle blue">
-                  <FiTrendingUp />
-                </div>
-                <p>
-                  <strong>Diffusion Models</strong> holds the highest growth acceleration rate (27.8%) and strong momentum score, indicating solid sustained research interest.
-                </p>
-              </div>
+              {trendTab === "keyword" ? (
+                <>
+                  <div className="insight-card-item">
+                    <div className="insight-icon-circle green">
+                      <FiLayers />
+                    </div>
+                    <p>
+                      <strong>Large Language Models (LLMs)</strong> remains the dominant keyword in 2025 with 12,842 publications, exhibiting 32.4% year-on-year growth.
+                    </p>
+                  </div>
+                  <div className="insight-card-item">
+                    <div className="insight-icon-circle blue">
+                      <FiTrendingUp />
+                    </div>
+                    <p>
+                      <strong>Diffusion Models</strong> holds the highest growth acceleration rate (27.8%) and strong momentum score, indicating solid sustained research interest.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="insight-card-item">
+                    <div className="insight-icon-circle green">
+                      <FiLayers />
+                    </div>
+                    <p>
+                      <strong>Computer Science</strong> remains the dominant scientific topic in 2025 with 48,210 publications, exhibiting a solid 14.5% year-on-year growth rate.
+                    </p>
+                  </div>
+                  <div className="insight-card-item">
+                    <div className="insight-icon-circle blue">
+                      <FiTrendingUp />
+                    </div>
+                    <p>
+                      <strong>Mathematics</strong> exhibits high acceleration (momentum score 1.86), showing an increasing amount of theoretical and interdisciplinary research.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </article>
 
