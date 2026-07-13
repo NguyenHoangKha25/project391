@@ -139,7 +139,13 @@ h6,
   letter-spacing: -0.006em;
   color: #1c2533 !important;
 }
+.st-account-menu button svg {
+  color: #1c2533 !important;
+}
 .st-account-menu .st-account-logout {
+  color: #dc2626 !important;
+}
+.st-account-menu .st-account-logout svg {
   color: #dc2626 !important;
 }
 

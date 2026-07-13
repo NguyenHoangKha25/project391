@@ -281,9 +281,15 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   background: transparent !important;
   border: none !important;
 }
+.st-account-menu button svg {
+  color: #1c2533 !important;
+}
 .st-account-menu button:hover {
   color: #157f91 !important;
   background: #eff8f9 !important;
+}
+.st-account-menu button:hover svg {
+  color: #157f91 !important;
 }
 
 /* Shared glassmorphic cards and headers */
