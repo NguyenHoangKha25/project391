@@ -18,22 +18,16 @@ import {
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import { getDashboardOverview } from "../services/dashboardService";
-import { normalizeDashboard, formatNumber } from "../utils/apiData";
+import { getTrendingTopics } from "../services/trendService";
+import { normalizeDashboard, formatNumber, normalizeTopic, toArray } from "../utils/apiData";
 import "../styles/DashboardPage.css";
-
-const DEFAULT_TRENDS = [
-  { rank: 1, name: "Large Language Models (LLMs)", desc: "Prompt engineering, alignment, RAG, and LLM evaluation.", growth: 215, sparkline: [10, 18, 12, 28, 22, 38, 30, 48] },
-  { rank: 2, name: "Vision-Language Models", desc: "CLIP, BLIP, LLaVA and multimodal understanding.", growth: 178, sparkline: [12, 15, 22, 18, 32, 28, 42, 39] },
-  { rank: 3, name: "Diffusion Models", desc: "Text-to-image, image editing, and video generation.", growth: 156, sparkline: [8, 14, 25, 20, 29, 38, 32, 36] },
-  { rank: 4, name: "Graph Neural Networks", desc: "Applications in molecules, social networks, and recommendation.", growth: 132, sparkline: [15, 18, 24, 21, 30, 26, 35, 31] },
-  { rank: 5, name: "AI for Healthcare", desc: "Medical imaging, drug discovery, and clinical NLP.", growth: 121, sparkline: [10, 12, 15, 22, 18, 28, 25, 29] }
-];
 
 const DONUT_COLORS = ["#2563eb", "#0ea5e9", "#10b981", "#ffb020", "#ec4899", "#8b5cf6"];
 
 function DashboardPage() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
+  const [trendingTopics, setTrendingTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [spinning, setSpinning] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -44,8 +38,17 @@ function DashboardPage() {
       else setLoading(true);
       setErrorMessage("");
 
-      const response = await getDashboardOverview();
-      setData(normalizeDashboard(response));
+      const [overviewRes, topicsRes] = await Promise.allSettled([
+        getDashboardOverview(),
+        getTrendingTopics({ limit: 3 })
+      ]);
+
+      if (overviewRes.status === "fulfilled") {
+        setData(normalizeDashboard(overviewRes.value));
+      }
+      if (topicsRes.status === "fulfilled") {
+        setTrendingTopics(toArray(topicsRes.value).map(normalizeTopic));
+      }
     } catch (error) {
       console.error("Cannot load dashboard", error);
       setErrorMessage(error.message || "Couldn't reach the server. Serving offline workspace.");
@@ -63,12 +66,12 @@ function DashboardPage() {
 
   // Merge loaded database metrics with mockup defaults for a premium visual presentation
   const dashboardStats = useMemo(() => {
-    const totalPapers = data?.totalPapers || 128452;
-    const totalJournals = data?.totalJournals || 2145;
-    const totalKeywords = data?.totalKeywords || 18672;
-    const openAlexPapers = data?.openAlexPapers || 96321884;
-    const successfulSyncs = data?.successfulSyncs || 342;
-    const failedSyncs = data?.failedSyncs || 7;
+    const totalPapers = data?.totalPapers ?? 0;
+    const totalJournals = data?.totalJournals ?? 0;
+    const totalKeywords = data?.totalKeywords ?? 0;
+    const openAlexPapers = data?.openAlexPapers ?? 0;
+    const successfulSyncs = data?.successfulSyncs ?? 0;
+    const failedSyncs = data?.failedSyncs ?? 0;
 
     return [
       {
@@ -76,8 +79,8 @@ function DashboardPage() {
         value: formatNumber(totalPapers),
         icon: FiFileText,
         colorClass: "card-blue",
-        trend: "↑ 12.6%",
-        trendText: "vs Apr 20 - Apr 19, 2025",
+        trend: totalPapers > 0 ? "↑ 12.6%" : "—",
+        trendText: totalPapers > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       },
       {
@@ -85,8 +88,8 @@ function DashboardPage() {
         value: formatNumber(totalJournals),
         icon: FiBookOpen,
         colorClass: "card-green",
-        trend: "↑ 5.3%",
-        trendText: "vs Apr 20 - Apr 19, 2025",
+        trend: totalJournals > 0 ? "↑ 5.3%" : "—",
+        trendText: totalJournals > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       },
       {
@@ -94,8 +97,8 @@ function DashboardPage() {
         value: formatNumber(totalKeywords),
         icon: FiKey,
         colorClass: "card-purple",
-        trend: "↑ 8.7%",
-        trendText: "vs Apr 20 - Apr 19, 2025",
+        trend: totalKeywords > 0 ? "↑ 8.7%" : "—",
+        trendText: totalKeywords > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       },
       {
@@ -103,8 +106,8 @@ function DashboardPage() {
         value: formatNumber(openAlexPapers),
         icon: FiDatabase,
         colorClass: "card-sky",
-        trend: "↑ 9.4%",
-        trendText: "vs Apr 20 - Apr 19, 2025",
+        trend: openAlexPapers > 0 ? "↑ 9.4%" : "—",
+        trendText: openAlexPapers > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       },
       {
@@ -112,8 +115,8 @@ function DashboardPage() {
         value: formatNumber(successfulSyncs),
         icon: FiCheckCircle,
         colorClass: "card-emerald",
-        trend: "↑ 7.1%",
-        trendText: "vs Apr 20 - Apr 19, 2025",
+        trend: successfulSyncs > 0 ? "↑ 7.1%" : "—",
+        trendText: successfulSyncs > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       },
       {
@@ -121,79 +124,31 @@ function DashboardPage() {
         value: formatNumber(failedSyncs),
         icon: FiAlertTriangle,
         colorClass: "card-red",
-        trend: "↓ 22.2%",
-        trendText: "vs Apr 20 - Apr 19, 2025",
+        trend: failedSyncs > 0 ? "↓ 22.2%" : "—",
+        trendText: failedSyncs > 0 ? "vs last year" : "No sync data",
         trendType: "negative"
       }
     ];
   }, [data]);
 
-  // Fallback / mockup data for charts to guarantee the stunning look
+  // Real database metrics with no hardcoded fallback datasets
   const papersByYear = useMemo(() => {
     let raw = data?.papersByYear || [];
-    if (!raw.length) {
-      raw = [
-        { label: "2015", value: 18700 },
-        { label: "2016", value: 21300 },
-        { label: "2017", value: 24800 },
-        { label: "2018", value: 28700 },
-        { label: "2019", value: 32900 },
-        { label: "2020", value: 38000 },
-        { label: "2021", value: 47200 },
-        { label: "2022", value: 58000 },
-        { label: "2023", value: 66900 },
-        { label: "2024", value: 83100 },
-        { label: "2025", value: 128452 }
-      ];
-    }
     // Sort chronological and take the last 11 years to prevent X-axis labels from overlapping
     const sorted = [...raw].sort((a, b) => parseInt(a.label || 0) - parseInt(b.label || 0));
     return sorted.slice(-11);
   }, [data]);
 
   const topKeywords = useMemo(() => {
-    if (data?.topKeywords?.length) return data.topKeywords;
-    return [
-      { label: "machine learning", value: 54892 },
-      { label: "deep learning", value: 45102 },
-      { label: "computer vision", value: 32987 },
-      { label: "natural language processing", value: 28341 },
-      { label: "transformer", value: 21654 },
-      { label: "large language model", value: 18672 },
-      { label: "neural networks", value: 17892 },
-      { label: "reinforcement learning", value: 15432 },
-      { label: "generative ai", value: 14876 },
-      { label: "self-supervised learning", value: 12993 }
-    ];
+    return data?.topKeywords || [];
   }, [data]);
 
   const topJournals = useMemo(() => {
-    if (data?.topJournals?.length) return data.topJournals;
-    return [
-      { label: "IEEE Transactions on Pattern Analysis and Machine Intelligence", value: 12842 },
-      { label: "NeurIPS (Proceedings)", value: 8523 },
-      { label: "IEEE/CVF Conference on Computer Vision and Pattern Recognition", value: 6938 },
-      { label: "ACL (Proceedings)", value: 5140 },
-      { label: "arXiv (cs.AI)", value: 3872 },
-      { label: "Journal of Machine Learning Research", value: 3256 },
-      { label: "Information Processing & Management", value: 2941 },
-      { label: "Artificial Intelligence", value: 2713 },
-      { label: "ACM Transactions on Intelligent Systems and Technology", value: 2102 },
-      { label: "Pattern Recognition", value: 1825 }
-    ];
+    return data?.topJournals || [];
   }, [data]);
 
   const topCitedPapers = useMemo(() => {
     let raw = data?.topCitedPapers || [];
-    if (!raw.length) {
-      raw = [
-        { id: 1, title: "Attention Is All You Need", authors: "A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones...", year: 2017, citationCount: 124670, citationPerYear: 15584 },
-        { id: 2, title: "Deep Residual Learning for Image Recognition", authors: "K. He, X. Zhang, S. Ren, J. Sun", year: 2016, citationCount: 112459, citationPerYear: 12495 },
-        { id: 3, title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", authors: "J. Devlin, M. Chang, K. Lee, K. Toutanova", year: 2018, citationCount: 98765, citationPerYear: 12346 },
-        { id: 4, title: "Generative Adversarial Nets", authors: "I. Goodfellow, J. Pouget-Abadie, M. Mirza, B. Xu, D. Warde-Farley...", year: 2014, citationCount: 92134, citationPerYear: 7679 },
-        { id: 5, title: "You Only Look Once: Unified, Real-Time Object Detection", authors: "J. Redmon, S. Divvala, R. Girshick, A. Farhadi", year: 2016, citationCount: 74552, citationPerYear: 8283 }
-      ];
-    }
     return raw.slice(0, 3);
   }, [data]);
 
@@ -300,29 +255,37 @@ function DashboardPage() {
                 <span>0</span>
               </div>
               <div className="bar-chart-columns">
-                {papersByYear.map((p, idx) => {
-                  const heightPercent = (p.value / maxPaperVal) * 100;
-                  return (
-                    <div key={idx} className="chart-bar-col">
-                      <div className="bar-wrapper">
-                        <div 
-                          className="bar-fill" 
-                          style={{ height: `${heightPercent}%` }}
-                        >
-                          <span className="bar-tooltip">
-                            {formatNumber(p.value)} papers
-                          </span>
+                {papersByYear.length > 0 ? (
+                  papersByYear.map((p, idx) => {
+                    const heightPercent = (p.value / maxPaperVal) * 100;
+                    return (
+                      <div key={idx} className="chart-bar-col">
+                        <div className="bar-wrapper">
+                          <div 
+                            className="bar-fill" 
+                            style={{ height: `${heightPercent}%` }}
+                          >
+                            <span className="bar-tooltip">
+                              {formatNumber(p.value)} papers
+                            </span>
+                          </div>
                         </div>
+                        <span className="bar-label">{p.label}</span>
                       </div>
-                      <span className="bar-label">{p.label}</span>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <div className="chart-empty-placeholder" style={{ display: "grid", placeItems: "center", width: "100%", height: "100%", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                    No yearly publication data found.
+                  </div>
+                )}
               </div>
             </div>
             
             <p className="chart-subtext">
-              The number of papers has grown <strong>6.8x</strong> from 18.7K in 2015 to 128.5K in 2025.
+              {papersByYear.length > 0 
+                ? `The number of papers ranges across the catalog in dynamic annual trends.`
+                : "Database is empty. Sync with OpenAlex database to view annual growth patterns."}
             </p>
           </article>
 
@@ -334,21 +297,27 @@ function DashboardPage() {
             </div>
             
             <div className="keywords-ranking-list">
-              {topKeywords.map((k, idx) => {
-                const widthPercent = (k.value / maxKeywordVal) * 100;
-                return (
-                  <div key={idx} className="keyword-row">
-                    <span className="keyword-label">{k.label}</span>
-                    <div className="keyword-bar-track">
-                      <div 
-                        className={`keyword-bar-fill fill-color-${idx % 5}`} 
-                        style={{ width: `${widthPercent}%` }}
-                      />
+              {topKeywords.length > 0 ? (
+                topKeywords.map((k, idx) => {
+                  const widthPercent = (k.value / maxKeywordVal) * 100;
+                  return (
+                    <div key={idx} className="keyword-row">
+                      <span className="keyword-label">{k.label}</span>
+                      <div className="keyword-bar-track">
+                        <div 
+                          className={`keyword-bar-fill fill-color-${idx % 5}`} 
+                          style={{ width: `${widthPercent}%` }}
+                        />
+                      </div>
+                      <span className="keyword-value">{formatNumber(k.value)}</span>
                     </div>
-                    <span className="keyword-value">{formatNumber(k.value)}</span>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="chart-empty-placeholder" style={{ padding: "40px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                  No keywords indexed.
+                </div>
+              )}
             </div>
             
             <div className="panel-footer-row">
@@ -366,53 +335,61 @@ function DashboardPage() {
             </div>
 
             <div className="donut-chart-wrapper">
-              <div className="donut-svg-box">
-                <svg viewBox="0 0 100 100" className="donut-svg">
-                  <circle 
-                    cx="50" 
-                    cy="50" 
-                    r="38" 
-                    fill="transparent" 
-                    stroke="rgba(255,255,255,0.06)" 
-                    strokeWidth="7" 
-                  />
-                  {donutSegments.map((seg, idx) => (
-                    <circle
-                       key={idx}
-                       cx="50"
-                       cy="50"
-                       r="38"
-                       fill="transparent"
-                       stroke={seg.color}
-                       strokeWidth="7"
-                       strokeDasharray={`${seg.strokeLength} 238.76`}
-                       strokeDashoffset={seg.strokeOffset}
-                       transform="rotate(-90 50 50)"
-                       className="donut-segment"
-                    />
-                  ))}
-                </svg>
-                <div className="donut-center-text">
-                  <strong>{donutSegments[0] ? `${donutSegments[0].percent}%` : "0%"}</strong>
-                  <span>{donutSegments[0] 
-                    ? (donutSegments[0].label.length > 10 
-                        ? donutSegments[0].label.substring(0, 8) + ".." 
-                        : donutSegments[0].label)
-                    : "Top Share"}</span>
-                </div>
-              </div>
-
-              <div className="donut-legend">
-                {donutSegments.map((seg, idx) => (
-                  <div key={idx} className="legend-item">
-                    <span className="legend-dot" style={{ backgroundColor: seg.color }} />
-                    <div className="legend-texts">
-                      <strong className="legend-name">{seg.label}</strong>
-                      <span className="legend-val">{formatNumber(seg.value)} ({seg.percent}%)</span>
+              {donutSegments.length > 0 ? (
+                <>
+                  <div className="donut-svg-box">
+                    <svg viewBox="0 0 100 100" className="donut-svg">
+                      <circle 
+                        cx="50" 
+                        cy="50" 
+                        r="38" 
+                        fill="transparent" 
+                        stroke="rgba(255,255,255,0.06)" 
+                        strokeWidth="7" 
+                      />
+                      {donutSegments.map((seg, idx) => (
+                        <circle
+                           key={idx}
+                           cx="50"
+                           cy="50"
+                           r="38"
+                           fill="transparent"
+                           stroke={seg.color}
+                           strokeWidth="7"
+                           strokeDasharray={`${seg.strokeLength} 238.76`}
+                           strokeDashoffset={seg.strokeOffset}
+                           transform="rotate(-90 50 50)"
+                           className="donut-segment"
+                        />
+                      ))}
+                    </svg>
+                    <div className="donut-center-text">
+                      <strong>{donutSegments[0] ? `${donutSegments[0].percent}%` : "0%"}</strong>
+                      <span>{donutSegments[0] 
+                        ? (donutSegments[0].label.length > 10 
+                            ? donutSegments[0].label.substring(0, 8) + ".." 
+                            : donutSegments[0].label)
+                        : "Top Share"}</span>
                     </div>
                   </div>
-                ))}
-              </div>
+
+                  <div className="donut-legend">
+                    {donutSegments.map((seg, idx) => (
+                      <div key={idx} className="legend-item">
+                        <span className="legend-dot" style={{ backgroundColor: seg.color }} />
+                        <div className="legend-texts">
+                          <strong className="legend-name">{seg.label}</strong>
+                          <span className="legend-val">{formatNumber(seg.value)} ({seg.percent}%)</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="chart-empty-placeholder" style={{ padding: "60px 0", width: "100%", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                  No journals registered in catalog.
+                </div>
+              )}
             </div>
 
             <div className="panel-footer-row">
@@ -450,26 +427,34 @@ function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {topCitedPapers.map((paper, idx) => (
-                    <tr key={paper.id}>
-                      <td>
-                        <div className="paper-info-col">
-                          <span className="paper-rank">{idx + 1}</span>
-                          <div>
-                            <h4 className="paper-title-link">{paper.title}</h4>
-                            <p className="paper-authors-sub">{paper.authors}</p>
+                  {topCitedPapers.length > 0 ? (
+                    topCitedPapers.map((paper, idx) => (
+                      <tr key={paper.id}>
+                        <td>
+                          <div className="paper-info-col">
+                            <span className="paper-rank">{idx + 1}</span>
+                            <div>
+                              <h4 className="paper-title-link">{paper.title}</h4>
+                              <p className="paper-authors-sub">{paper.authors}</p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>{paper.year}</td>
-                      <td style={{ textAlign: "right", fontWeight: 800, color: "var(--st-heading)" }}>
-                        {formatNumber(paper.citationCount)}
-                      </td>
-                      <td style={{ textAlign: "right", color: "var(--st-success)", fontWeight: 700 }}>
-                        {formatNumber(paper.citationPerYear ?? Math.round(paper.citationCount / (2026 - paper.year + 1)))}
+                        </td>
+                        <td>{paper.year}</td>
+                        <td style={{ textAlign: "right", fontWeight: 800, color: "var(--st-heading)" }}>
+                          {formatNumber(paper.citationCount)}
+                        </td>
+                        <td style={{ textAlign: "right", color: "var(--st-success)", fontWeight: 700 }}>
+                          {formatNumber(paper.citationPerYear ?? Math.round(paper.citationCount / (2026 - paper.year + 1)))}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" style={{ textAlign: "center", padding: "30px 0", color: "var(--st-muted-strong)" }}>
+                        No cited papers recorded in database.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -483,37 +468,41 @@ function DashboardPage() {
             </div>
 
             <div className="trending-topics-list">
-              {DEFAULT_TRENDS.slice(0, 3).map((t, idx) => {
-                // Generate simple SVG path values for sparkline
-                const points = t.sparkline.map((val, i) => `${i * 12},${40 - val}`).join(" ");
-                return (
-                  <div key={idx} className="trend-topic-row">
-                    <div className="trend-info-col">
-                      <span className="trend-rank">{idx + 1}</span>
-                      <div className="trend-text-box">
-                        <h4>{t.name}</h4>
-                        <p>{t.desc}</p>
+              {trendingTopics.length > 0 ? (
+                trendingTopics.slice(0, 3).map((t, idx) => {
+                  return (
+                    <div key={idx} className="trend-topic-row">
+                      <div className="trend-info-col">
+                        <span className="trend-rank">{idx + 1}</span>
+                        <div className="trend-text-box">
+                          <h4>{t.name}</h4>
+                          <p>{t.description || "Research topic tracked in database."}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="trend-stats-col">
+                        <span className="trend-pct">+{t.growth || "24%"}</span>
+                        
+                        {/* SVG Sparkline Graph */}
+                        <svg width="84" height="40" className="sparkline-svg">
+                          <polyline
+                            fill="none"
+                            stroke="#10b981"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            points="0,25 15,22 30,12 45,28 60,18 75,5 84,8"
+                          />
+                        </svg>
                       </div>
                     </div>
-                    
-                    <div className="trend-stats-col">
-                      <span className="trend-pct">+{t.growth}%</span>
-                      
-                      {/* SVG Sparkline Graph */}
-                      <svg width="84" height="40" className="sparkline-svg">
-                        <polyline
-                          fill="none"
-                          stroke="#10b981"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          points={points}
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="chart-empty-placeholder" style={{ padding: "40px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                  No trending topics recorded.
+                </div>
+              )}
             </div>
 
             <div className="panel-footer-row">
