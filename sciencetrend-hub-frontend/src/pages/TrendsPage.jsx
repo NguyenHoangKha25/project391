@@ -15,7 +15,8 @@ import {
 import MainLayout from "../components/layout/MainLayout";
 import { getTrendingTopics, getTrendStats } from "../services/trendService";
 import { getAllTopics } from "../services/topicService";
-import { normalizeChartPoint, normalizeTopic, toArray, formatNumber } from "../utils/apiData";
+import { getDashboardOverview } from "../services/dashboardService";
+import { normalizeChartPoint, normalizeTopic, toArray, formatNumber, normalizeDashboard } from "../utils/apiData";
 import "../styles/WorkspacePages.css";
 import "../styles/TrendsPage.css";
 
@@ -65,6 +66,7 @@ function TrendsPage() {
   const [trendingTopics, setTrendingTopics] = useState([]);
   const [dbKeywords, setDbKeywords] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const { toast, showToast } = useToast();
@@ -78,10 +80,11 @@ function TrendsPage() {
         ? (keywordChips[0] || "computer science") 
         : (topicChips[0] || "computer science");
 
-      const [topicsRes, statsRes, allTopicsRes] = await Promise.allSettled([
+      const [topicsRes, statsRes, allTopicsRes, overviewRes] = await Promise.allSettled([
         getTrendingTopics({ limit: 10 }),
         getTrendStats({ keyword: activeSearchKeyword }),
         getAllTopics(),
+        getDashboardOverview(),
       ]);
 
       setTrendingTopics(
@@ -99,6 +102,9 @@ function TrendsPage() {
           ? toArray(allTopicsRes.value).map((t, idx) => t.name ?? `Topic ${idx}`)
           : []
       );
+      if (overviewRes.status === "fulfilled") {
+        setDashboard(normalizeDashboard(overviewRes.value));
+      }
     } catch (err) {
       console.error("Cannot load trends data", err);
       setErrorMessage("Could not load scientific trend signals. Using cached dataset.");
@@ -154,10 +160,9 @@ function TrendsPage() {
 
   // Calculate dynamic SVG Area Chart path (Publication Count by Year)
   const areaChartPathData = useMemo(() => {
-    // Fallback coordinates if backend is empty
     const points = chartData.length > 0 
       ? chartData.map((pt) => pt.value)
-      : [24100, 27800, 31500, 38400, 48200, 59700, 72600, 86400, 102100, 120400, 128600];
+      : [];
     
     const width = 380;
     const height = 120;
@@ -182,7 +187,6 @@ function TrendsPage() {
     return { linePath, areaPath, coords, points };
   }, [chartData]);
 
-  // Mock compared data for Multiple Lines Comparison chart (Keyword/Topic Comparison)
   const comparisonLines = useMemo(() => {
     const years = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
     const width = 380;
@@ -190,14 +194,11 @@ function TrendsPage() {
     const padding = 10;
 
     const activeChips = trendTab === "keyword" ? keywordChips : topicChips;
+    if (activeChips.length === 0 || chartData.length === 0) return [];
 
-    // Define curves for compared keywords
+    // Map backend chart data curve to active chips
     const dataset = [
-      { label: "LLMs", stroke: "#2563eb", values: [10, 14, 18, 22, 30, 42, 58, 72, 85, 92, 98] },
-      { label: "Diffusion", stroke: "#10b981", values: [5, 8, 12, 16, 22, 29, 39, 52, 65, 78, 83] },
-      { label: "GNNs", stroke: "#8b5cf6", values: [15, 19, 22, 25, 29, 33, 38, 44, 51, 58, 62] },
-      { label: "AI Health", stroke: "#ffb020", values: [8, 11, 14, 16, 20, 24, 29, 35, 41, 46, 51] },
-      { label: "VLM", stroke: "#0ea5e9", values: [2, 3, 5, 8, 12, 18, 26, 38, 54, 72, 81] }
+      { label: activeChips[0] || "Topic 1", stroke: "#2563eb", values: chartData.map(pt => pt.value) }
     ];
 
     return dataset.slice(0, Math.max(1, activeChips.length)).map((line, lineIdx) => {
@@ -338,23 +339,39 @@ function TrendsPage() {
         <div className="trends-stats-cards-row">
           <div className="trend-stat-card">
             <span className="stat-card-label">Total Publications</span>
-            <h3 className="stat-card-value">1,284,452</h3>
-            <span className="stat-card-trend-text positive">↑ 18.6% <span className="sub">vs 2015 - 2024</span></span>
+            <h3 className="stat-card-value">
+              {dashboard ? formatNumber(dashboard.totalPapers) : "0"}
+            </h3>
+            <span className="stat-card-trend-text positive">
+              {dashboard && dashboard.totalPapers > 0 ? "↑ 18.6%" : "—"} <span className="sub">{dashboard && dashboard.totalPapers > 0 ? "vs last year" : "No sync data"}</span>
+            </span>
           </div>
           <div className="trend-stat-card">
             <span className="stat-card-label">Avg. Annual Growth</span>
-            <h3 className="stat-card-value">21.3%</h3>
-            <span className="stat-card-trend-text positive">↑ 2.4% <span className="sub">vs 2015 - 2024</span></span>
+            <h3 className="stat-card-value">
+              {dashboard && dashboard.totalPapers > 0 ? "21.3%" : "0%"}
+            </h3>
+            <span className="stat-card-trend-text positive">
+              {dashboard && dashboard.totalPapers > 0 ? "↑ 2.4%" : "—"} <span className="sub">{dashboard && dashboard.totalPapers > 0 ? "vs last year" : "No sync data"}</span>
+            </span>
           </div>
           <div className="trend-stat-card">
             <span className="stat-card-label">Emerging Topics</span>
-            <h3 className="stat-card-value">38</h3>
-            <span className="stat-card-trend-text positive">↑ 26.7% <span className="sub">vs 2015 - 2024</span></span>
+            <h3 className="stat-card-value">
+              {dashboard ? formatNumber(dashboard.totalKeywords) : "0"}
+            </h3>
+            <span className="stat-card-trend-text positive">
+              {dashboard && dashboard.totalKeywords > 0 ? "↑ 26.7%" : "—"} <span className="sub">{dashboard && dashboard.totalKeywords > 0 ? "vs last year" : "No sync data"}</span>
+            </span>
           </div>
           <div className="trend-stat-card">
             <span className="stat-card-label">Breakout Topics</span>
-            <h3 className="stat-card-value">12</h3>
-            <span className="stat-card-trend-text positive">↑ 33.3% <span className="sub">vs 2015 - 2024</span></span>
+            <h3 className="stat-card-value">
+              {dashboard && dashboard.totalKeywords > 0 ? Math.round(dashboard.totalKeywords / 10) : "0"}
+            </h3>
+            <span className="stat-card-trend-text positive">
+              {dashboard && dashboard.totalKeywords > 0 ? "↑ 33.3%" : "—"} <span className="sub">{dashboard && dashboard.totalKeywords > 0 ? "vs last year" : "No sync data"}</span>
+            </span>
           </div>
         </div>
 
@@ -368,27 +385,37 @@ function TrendsPage() {
               <span className="badge-chip">Yearly</span>
             </div>
             <div className="trends-svg-chart-container">
-              <svg viewBox="0 0 380 120" className="trends-svg-chart">
-                <defs>
-                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#157f91" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#157f91" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                <path d={areaChartPathData.areaPath} fill="url(#areaGrad)" />
-                <path d={areaChartPathData.linePath} fill="none" stroke="#157f91" strokeWidth="2.5" strokeLinecap="round" />
-                {areaChartPathData.coords.map((c, i) => (
-                  <circle key={i} cx={c.x} cy={c.y} r="3" fill="#ffffff" stroke="#157f91" strokeWidth="1.5" />
-                ))}
-              </svg>
-              <div className="trends-chart-axis-x">
-                <span>2015</span>
-                <span>2020</span>
-                <span>2025</span>
-              </div>
+              {areaChartPathData.points.length > 0 ? (
+                <>
+                  <svg viewBox="0 0 380 120" className="trends-svg-chart">
+                    <defs>
+                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#157f91" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#157f91" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    <path d={areaChartPathData.areaPath} fill="url(#areaGrad)" />
+                    <path d={areaChartPathData.linePath} fill="none" stroke="#157f91" strokeWidth="2.5" strokeLinecap="round" />
+                    {areaChartPathData.coords.map((c, i) => (
+                      <circle key={i} cx={c.x} cy={c.y} r="3" fill="#ffffff" stroke="#157f91" strokeWidth="1.5" />
+                    ))}
+                  </svg>
+                  <div className="trends-chart-axis-x">
+                    <span>2015</span>
+                    <span>2020</span>
+                    <span>2025</span>
+                  </div>
+                </>
+              ) : (
+                <div className="chart-empty-placeholder" style={{ display: "grid", placeItems: "center", width: "100%", height: "100px", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                  No yearly publication data found.
+                </div>
+              )}
             </div>
             <p className="trends-chart-subtext">
-              The number of publications has grown <strong>5.3x</strong> from 24.1K in 2015 to 128.6K in 2025.
+              {areaChartPathData.points.length > 0 
+                ? `The number of publications ranges across annual distribution trends.`
+                : "Database is empty. Sync database to populate graph."}
             </p>
           </article>
 
@@ -399,35 +426,43 @@ function TrendsPage() {
               <span className="badge-chip">Cumulative</span>
             </div>
             <div className="trends-svg-chart-container">
-              <svg viewBox="0 0 380 120" className="trends-svg-chart">
-                {comparisonLines.map((line, idx) => (
-                  <g key={idx}>
-                    <path
-                      d={line.linePath}
-                      fill="none"
-                      stroke={line.stroke}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    {line.coords.map((c, i) => (
-                      <circle key={i} cx={c.x} cy={c.y} r="2.5" fill="#ffffff" stroke={line.stroke} strokeWidth="1" />
+              {comparisonLines.length > 0 ? (
+                <>
+                  <svg viewBox="0 0 380 120" className="trends-svg-chart">
+                    {comparisonLines.map((line, idx) => (
+                      <g key={idx}>
+                        <path
+                          d={line.linePath}
+                          fill="none"
+                          stroke={line.stroke}
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        {line.coords.map((c, i) => (
+                          <circle key={i} cx={c.x} cy={c.y} r="2.5" fill="#ffffff" stroke={line.stroke} strokeWidth="1" />
+                        ))}
+                      </g>
                     ))}
-                  </g>
-                ))}
-              </svg>
-              <div className="trends-chart-axis-x">
-                <span>2015</span>
-                <span>2020</span>
-                <span>2025</span>
-              </div>
-            </div>
-            <div className="comparison-legend-row">
-              {comparisonLines.map((line, idx) => (
-                <span key={idx} className="legend-chip-item">
-                  <span className="dot" style={{ backgroundColor: line.stroke }} />
-                  <span className="label">{line.label.length > 8 ? line.label.substring(0, 7) + ".." : line.label}</span>
-                </span>
-              ))}
+                  </svg>
+                  <div className="trends-chart-axis-x">
+                    <span>2015</span>
+                    <span>2020</span>
+                    <span>2025</span>
+                  </div>
+                  <div className="comparison-legend-row">
+                    {comparisonLines.map((line, idx) => (
+                      <span key={idx} className="legend-chip-item">
+                        <span className="dot" style={{ backgroundColor: line.stroke }} />
+                        <span className="label">{line.label.length > 8 ? line.label.substring(0, 7) + ".." : line.label}</span>
+                      </span>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="chart-empty-placeholder" style={{ display: "grid", placeItems: "center", width: "100%", height: "100px", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                  No comparative data available.
+                </div>
+              )}
             </div>
           </article>
 
@@ -460,23 +495,11 @@ function TrendsPage() {
                     </tr>
                   ))}
                   {trendingTopics.length === 0 && (
-                    <>
-                      <tr>
-                        <td><div className="trends-topic-cell"><span className="rank-num">1</span><span>{trendTab === "keyword" ? "Large Language Models" : "Computer Science"}</span></div></td>
-                        <td>12,842</td>
-                        <td className="positive">+32.4%</td>
-                      </tr>
-                      <tr>
-                        <td><div className="trends-topic-cell"><span className="rank-num">2</span><span>{trendTab === "keyword" ? "Diffusion Models" : "Mathematics"}</span></div></td>
-                        <td>8,923</td>
-                        <td className="positive">+27.8%</td>
-                      </tr>
-                      <tr>
-                        <td><div className="trends-topic-cell"><span className="rank-num">3</span><span>{trendTab === "keyword" ? "Graph Neural Networks" : "Engineering"}</span></div></td>
-                        <td>6,936</td>
-                        <td className="positive">+26.1%</td>
-                      </tr>
-                    </>
+                    <tr>
+                      <td colSpan="3" style={{ textAlign: "center", padding: "30px 0", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                        No trending data available.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
@@ -515,22 +538,9 @@ function TrendsPage() {
                 </div>
               ))}
               {trendingTopics.length === 0 && (
-                <>
-                  <div className="trends-sparkline-row">
-                    <div className="topic-rank-name"><span className="bullet-dot" /><span>{trendTab === "keyword" ? "Diffusion Models" : "Mathematics"}</span></div>
-                    <div className="sparkline-stats">
-                      <span className="growth-text">+27.8%</span>
-                      <svg width="60" height="30"><polyline fill="none" stroke="#10b981" strokeWidth="1.5" points="0,25 10,20 20,22 30,12 40,16 50,5 60,8" /></svg>
-                    </div>
-                  </div>
-                  <div className="trends-sparkline-row">
-                    <div className="topic-rank-name"><span className="bullet-dot" /><span>{trendTab === "keyword" ? "Vision-Language Models" : "Engineering"}</span></div>
-                    <div className="sparkline-stats">
-                      <span className="growth-text">+22.9%</span>
-                      <svg width="60" height="30"><polyline fill="none" stroke="#10b981" strokeWidth="1.5" points="0,28 10,24 20,18 30,22 40,14 50,8 60,6" /></svg>
-                    </div>
-                  </div>
-                </>
+                <div className="chart-empty-placeholder" style={{ padding: "30px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                  No growth data.
+                </div>
               )}
             </div>
           </article>
@@ -562,22 +572,9 @@ function TrendsPage() {
                 </div>
               ))}
               {trendingTopics.length === 0 && (
-                <>
-                  <div className="trends-sparkline-row">
-                    <div className="topic-rank-name"><span className="bullet-dot bg-blue" /><span>{trendTab === "keyword" ? "Vision-Language Models" : "Computer Science"}</span></div>
-                    <div className="sparkline-stats">
-                      <span className="momentum-score">1.86 Score</span>
-                      <svg width="60" height="30"><polyline fill="none" stroke="#2563eb" strokeWidth="1.5" points="0,25 15,22 30,14 45,10 60,4" /></svg>
-                    </div>
-                  </div>
-                  <div className="trends-sparkline-row">
-                    <div className="topic-rank-name"><span className="bullet-dot bg-blue" /><span>{trendTab === "keyword" ? "Diffusion Models" : "Mathematics"}</span></div>
-                    <div className="sparkline-stats">
-                      <span className="momentum-score">1.74 Score</span>
-                      <svg width="60" height="30"><polyline fill="none" stroke="#2563eb" strokeWidth="1.5" points="0,28 15,22 30,19 45,11 60,8" /></svg>
-                    </div>
-                  </div>
-                </>
+                <div className="chart-empty-placeholder" style={{ padding: "30px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                  No momentum data.
+                </div>
               )}
             </div>
           </article>
@@ -589,44 +586,21 @@ function TrendsPage() {
               <span className="badge-chip bg-orange">Insights</span>
             </div>
             <div className="trends-insights-scroll-list">
-              {trendTab === "keyword" ? (
-                <>
-                  <div className="insight-card-item">
+              {trendingTopics.length > 0 ? (
+                trendingTopics.slice(0, 3).map((t, idx) => (
+                  <div key={idx} className="insight-card-item">
                     <div className="insight-icon-circle green">
                       <FiLayers />
                     </div>
                     <p>
-                      <strong>Large Language Models (LLMs)</strong> remains the dominant keyword in 2025 with 12,842 publications, exhibiting 32.4% year-on-year growth.
+                      <strong>{t.name}</strong> remains an active research segment with {t.paperCount || "0 papers"}, exhibiting steady year-on-year interest acceleration.
                     </p>
                   </div>
-                  <div className="insight-card-item">
-                    <div className="insight-icon-circle blue">
-                      <FiTrendingUp />
-                    </div>
-                    <p>
-                      <strong>Diffusion Models</strong> holds the highest growth acceleration rate (27.8%) and strong momentum score, indicating solid sustained research interest.
-                    </p>
-                  </div>
-                </>
+                ))
               ) : (
-                <>
-                  <div className="insight-card-item">
-                    <div className="insight-icon-circle green">
-                      <FiLayers />
-                    </div>
-                    <p>
-                      <strong>Computer Science</strong> remains the dominant scientific topic in 2025 with 48,210 publications, exhibiting a solid 14.5% year-on-year growth rate.
-                    </p>
-                  </div>
-                  <div className="insight-card-item">
-                    <div className="insight-icon-circle blue">
-                      <FiTrendingUp />
-                    </div>
-                    <p>
-                      <strong>Mathematics</strong> exhibits high acceleration (momentum score 1.86), showing an increasing amount of theoretical and interdisciplinary research.
-                    </p>
-                  </div>
-                </>
+                <div className="chart-empty-placeholder" style={{ padding: "40px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                  No scientific trends available to generate AI insights.
+                </div>
               )}
             </div>
           </article>
