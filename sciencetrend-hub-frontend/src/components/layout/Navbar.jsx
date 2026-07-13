@@ -165,22 +165,38 @@ function Navbar({
                 </div>
               </div>
 
-              <button type="button" onClick={() => goTo(ROUTE_PATHS.MY_ACCOUNT)}>
-                <FiUser />
+              <button 
+                type="button" 
+                onClick={() => goTo(ROUTE_PATHS.MY_ACCOUNT)}
+                style={{ color: "#1c2533", fontWeight: "780" }}
+              >
+                <FiUser style={{ color: "#1c2533" }} />
                 My account
               </button>
-              <button type="button" onClick={() => goTo(ROUTE_PATHS.LIBRARY)}>
-                <FiFileText />
+              <button 
+                type="button" 
+                onClick={() => goTo(ROUTE_PATHS.LIBRARY)}
+                style={{ color: "#1c2533", fontWeight: "780" }}
+              >
+                <FiFileText style={{ color: "#1c2533" }} />
                 My library
               </button>
-              <button type="button" onClick={() => goTo(ROUTE_PATHS.REPORTS)}>
-                <FiSettings />
+              <button 
+                type="button" 
+                onClick={() => goTo(ROUTE_PATHS.REPORTS)}
+                style={{ color: "#1c2533", fontWeight: "780" }}
+              >
+                <FiSettings style={{ color: "#1c2533" }} />
                 Reports
               </button>
 
               {isAdminUser && (
-                <button type="button" onClick={() => goTo(ROUTE_PATHS.ADMIN)}>
-                  <FiSettings />
+                <button 
+                  type="button" 
+                  onClick={() => goTo(ROUTE_PATHS.ADMIN)}
+                  style={{ color: "#1c2533", fontWeight: "780" }}
+                >
+                  <FiSettings style={{ color: "#1c2533" }} />
                   Admin panel
                 </button>
               )}
@@ -191,8 +207,9 @@ function Navbar({
                 type="button"
                 className="st-account-logout"
                 onClick={handleLogout}
+                style={{ color: "#dc2626", fontWeight: "780" }}
               >
-                <FiLogOut />
+                <FiLogOut style={{ color: "#dc2626" }} />
                 Log out
               </button>
             </div>
