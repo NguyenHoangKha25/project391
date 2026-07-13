@@ -202,6 +202,10 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   -webkit-text-fill-color: #1c2533 !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+.st-search-form input::selection {
+  background: rgba(79, 70, 229, 0.2) !important;
+  color: #1c2533 !important;
+}
 
 .st-search-form svg {
   color: #64748b;

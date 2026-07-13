@@ -207,6 +207,10 @@
 }
 .st-search-form svg { width: 17px; height: 17px; color: var(--st-muted); }
 .st-search-form input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent !important; color: #1c2533 !important; font-size: 14px; font-weight: 700 !important; }
+.st-search-form input::selection {
+  background: rgba(79, 70, 229, 0.2) !important;
+  color: #1c2533 !important;
+}
 .st-search-form input::placeholder { color: #a59b8e; }
 .st-search-form input:-webkit-autofill,
 .st-search-form input:-webkit-autofill:hover, 
