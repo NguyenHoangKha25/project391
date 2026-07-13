@@ -14,6 +14,8 @@ import RegisterPage from "../pages/RegisterPage";
 import ReportsPage from "../pages/ReportsPage";
 import ResetPassWord from "../pages/ResetPassWord";
 import TrendsPage from "../pages/TrendsPage";
+import TopicsPage from "../pages/TopicsPage";
+import FollowingPage from "../pages/FollowingPage";
 import { ROUTE_PATHS } from "./routePaths";
 
 // Cho phép truy cập khi chưa đăng nhập.
@@ -126,10 +128,28 @@ function AppRoutes() {
       />
 
       <Route
+        path={ROUTE_PATHS.TOPICS}
+        element={
+          <ProtectedRoute>
+            <TopicsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path={ROUTE_PATHS.BOOKMARKS}
         element={
           <ProtectedRoute>
             <BookmarksPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path={ROUTE_PATHS.FOLLOWING}
+        element={
+          <ProtectedRoute>
+            <FollowingPage />
           </ProtectedRoute>
         }
       />

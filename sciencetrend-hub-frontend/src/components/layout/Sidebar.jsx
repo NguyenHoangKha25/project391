@@ -3,10 +3,12 @@ import {
   FiBarChart2,
   FiBell,
   FiBookmark,
-  FiFileText,
-  FiGrid,
   FiSettings,
   FiTrendingUp,
+  FiGrid,
+  FiSearch,
+  FiTag,
+  FiUsers,
 } from "react-icons/fi";
 import logo from "../../assets/images/logo-login.png";
 import { useAuth } from "../../context/useAuth";
@@ -15,15 +17,17 @@ import "../../styles/layout.css";
 
 const menuItems = [
   { label: "Dashboard", path: ROUTE_PATHS.DASHBOARD, icon: FiGrid },
-  { label: "Papers", path: ROUTE_PATHS.PAPERS, icon: FiFileText },
+  { label: "Search Papers", path: ROUTE_PATHS.PAPERS, icon: FiSearch },
   { label: "Trends", path: ROUTE_PATHS.TRENDS, icon: FiTrendingUp },
+  { label: "Topics", path: ROUTE_PATHS.TOPICS, icon: FiTag },
   { label: "Bookmarks", path: ROUTE_PATHS.BOOKMARKS, icon: FiBookmark },
-  { label: "Reports", path: ROUTE_PATHS.REPORTS, icon: FiBarChart2 },
+  { label: "Following", path: ROUTE_PATHS.FOLLOWING, icon: FiUsers },
   {
     label: "Notifications",
     path: ROUTE_PATHS.NOTIFICATIONS,
     icon: FiBell,
   },
+  { label: "Reports", path: ROUTE_PATHS.REPORTS, icon: FiBarChart2 },
   {
     label: "Admin",
     path: ROUTE_PATHS.ADMIN,
