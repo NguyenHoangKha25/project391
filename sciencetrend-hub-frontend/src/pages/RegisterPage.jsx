@@ -124,6 +124,7 @@ function RegisterPage() {
         username: form.username.trim(),
         email: form.email.trim(),
         password: form.password,
+        confirmPassword: form.confirmPassword,
         role: form.role,
       });
 
