@@ -65,6 +65,7 @@ function AdminPage() {
   const [dashboard, setDashboard] = useState(null);
   const [syncLogs, setSyncLogs] = useState([]);
   const [reports, setReports] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
@@ -79,10 +80,11 @@ function AdminPage() {
       setLoading(true);
       setErrorMessage("");
 
-      const [dashboardResult, logsResult, reportsResult] = await Promise.allSettled([
+      const [dashboardResult, logsResult, reportsResult, usersResult] = await Promise.allSettled([
         getDashboardOverview(),
         apiRequest("/admin/sync/logs"),
         getReports(),
+        apiRequest("/admin/users"),
       ]);
 
       if (dashboardResult.status === "fulfilled") {
@@ -96,6 +98,10 @@ function AdminPage() {
 
       if (reportsResult.status === "fulfilled") {
         setReports(toArray(reportsResult.value).map(normalizeReport));
+      }
+
+      if (usersResult.status === "fulfilled") {
+        setUsers(toArray(usersResult.value));
       }
     } catch (error) {
       console.error("Cannot load admin data", error);
@@ -137,6 +143,38 @@ function AdminPage() {
       showToast(err.message || "Report generation failed.", "warning");
     } finally {
       setGeneratingReport(false);
+    }
+  }
+
+  // Handle updating user role
+  async function handleUpdateRole(userId, newRole) {
+    try {
+      showToast("Updating user role...", "info");
+      await apiRequest(`/admin/users/${userId}/role`, {
+        method: "PUT",
+        body: { role: newRole }
+      });
+      showToast("User role updated successfully!", "success");
+      await loadAdminData(); // Reload to refresh list
+    } catch (err) {
+      console.error("Failed to update user role", err);
+      showToast(err.message || "Failed to update role.", "warning");
+    }
+  }
+
+  // Handle deleting user
+  async function handleDeleteUser(userId) {
+    if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
+    try {
+      showToast("Deleting user...", "info");
+      await apiRequest(`/admin/users/${userId}`, {
+        method: "DELETE"
+      });
+      showToast("User deleted successfully!", "success");
+      await loadAdminData(); // Reload to refresh list
+    } catch (err) {
+      console.error("Failed to delete user", err);
+      showToast(err.message || "Failed to delete user.", "warning");
     }
   }
 
@@ -244,14 +282,19 @@ function AdminPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {MOCK_USERS.slice(0, 4).map((u) => (
-                            <tr key={u.id}>
+                          {users.slice(0, 4).map((u) => (
+                            <tr key={u.userId || u.id}>
                               <td><strong>{u.username}</strong></td>
                               <td>{u.email}</td>
-                              <td><span className={`role-badge ${u.role.toLowerCase()}`}>{u.role}</span></td>
-                              <td><span className={`status-dot ${u.status.toLowerCase()}`} /> {u.status}</td>
+                              <td><span className={`role-badge ${(u.role || "").toLowerCase()}`}>{u.role}</span></td>
+                              <td><span className="status-dot active" /> Active</td>
                             </tr>
                           ))}
+                          {users.length === 0 && (
+                            <tr>
+                              <td colSpan="4" style={{ textAlign: "center" }}>No users registered.</td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -402,11 +445,7 @@ function AdminPage() {
             {adminTab === "users" && (
               <article className="admin-panel-detailed glassmorphic-panel">
                 <div className="panel-header-row">
-                  <h3>System User Base ({MOCK_USERS.length} accounts)</h3>
-                  <button type="button" className="admin-header-plus-btn" onClick={() => showToast("Mockup: Add User", "info")}>
-                    <FiPlus />
-                    <span>Create User Account</span>
-                  </button>
+                  <h3>System User Base ({users.length} accounts)</h3>
                 </div>
                 <div className="admin-detailed-table-wrap">
                   <table className="admin-detailed-table">
@@ -416,19 +455,46 @@ function AdminPage() {
                         <th>Email</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th>Action Rights</th>
+                        <th style={{ textAlign: "right" }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {MOCK_USERS.map((u) => (
-                        <tr key={u.id}>
+                      {users.map((u) => (
+                        <tr key={u.userId || u.id}>
                           <td><strong>{u.username}</strong></td>
                           <td>{u.email}</td>
-                          <td><span className={`role-badge ${u.role.toLowerCase()}`}>{u.role}</span></td>
-                          <td><span className={`status-label ${u.status.toLowerCase()}`}>{u.status}</span></td>
-                          <td>Edit / Delete</td>
+                          <td>
+                            <div className="trends-select-wrapper-custom" style={{ display: "inline-flex" }}>
+                              <select 
+                                value={u.role} 
+                                onChange={(e) => handleUpdateRole(u.userId || u.id, e.target.value)}
+                              >
+                                <option value="ADMIN">ADMIN</option>
+                                <option value="LECTURER">LECTURER</option>
+                                <option value="STUDENT">STUDENT</option>
+                                <option value="RESEARCHER">RESEARCHER</option>
+                              </select>
+                              <FiChevronDown />
+                            </div>
+                          </td>
+                          <td><span className="status-label connected">Active</span></td>
+                          <td style={{ textAlign: "right" }}>
+                            <button 
+                              type="button" 
+                              className="admin-delete-btn" 
+                              onClick={() => handleDeleteUser(u.userId || u.id)}
+                              style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", fontWeight: "bold" }}
+                            >
+                              Delete
+                            </button>
+                          </td>
                         </tr>
                       ))}
+                      {users.length === 0 && (
+                        <tr>
+                          <td colSpan="5" style={{ textAlign: "center" }}>No users registered.</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
