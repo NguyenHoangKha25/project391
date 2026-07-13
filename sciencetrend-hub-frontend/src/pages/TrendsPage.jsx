@@ -422,7 +422,7 @@ function TrendsPage() {
                           <span className="topic-name">{topic.name}</span>
                         </div>
                       </td>
-                      <td>{topic.paperCount.split(" ")[0]}</td>
+                      <td>{typeof topic.paperCount === "string" ? topic.paperCount.split(" ")[0] : (topic.paperCount ?? "0")}</td>
                       <td className="positive">{topic.growth || "+24%"}</td>
                     </tr>
                   ))}
