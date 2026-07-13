@@ -136,6 +136,10 @@ h6,
   font-size: 14.5px;
   font-weight: 780;
   letter-spacing: -0.006em;
+  color: #1c2533 !important;
+}
+.st-account-menu .st-account-logout {
+  color: #dc2626 !important;
 }
 
 /* Dashboard */

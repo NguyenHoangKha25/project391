@@ -65,7 +65,7 @@ export function normalizePaper(paper = {}, index = 0) {
     ? paper.keywords 
     : (paper.keyword ? [paper.keyword] : []);
   return {
-    id: paper.researchPaperId ?? paper.id ?? index,
+    id: paper.researchPaperId ?? paper.paperId ?? paper.id ?? index,
     title: paper.title ?? "Untitled paper",
     source: paper.sourceApi ?? paper.source ?? "Unknown source",
     authors: Array.isArray(paper.authors) ? paper.authors.join(", ") : (paper.authors ?? ""),
