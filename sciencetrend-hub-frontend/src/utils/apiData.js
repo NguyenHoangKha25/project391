@@ -64,11 +64,30 @@ export function normalizePaper(paper = {}, index = 0) {
   const kwList = Array.isArray(paper.keywords) 
     ? paper.keywords 
     : (paper.keyword ? [paper.keyword] : []);
+
+  // Robust parsing for authors supporting comma-separated string, array of strings, or array of author objects
+  let parsedAuthors = "";
+  if (Array.isArray(paper.authors)) {
+    parsedAuthors = paper.authors
+      .map(auth => {
+        if (!auth) return "";
+        if (typeof auth === "string") return auth.trim();
+        if (typeof auth === "object") {
+          return (auth.name ?? auth.fullName ?? auth.authorName ?? auth.displayName ?? auth.term ?? "").trim();
+        }
+        return "";
+      })
+      .filter(Boolean)
+      .join(", ");
+  } else if (typeof paper.authors === "string") {
+    parsedAuthors = paper.authors.trim();
+  }
+
   return {
     id: paper.researchPaperId ?? paper.paperId ?? paper.id ?? index,
     title: paper.title ?? "Untitled paper",
     source: paper.sourceApi ?? paper.source ?? "Unknown source",
-    authors: Array.isArray(paper.authors) ? paper.authors.join(", ") : (paper.authors ?? ""),
+    authors: parsedAuthors || "Unknown Authors",
     year: paper.year ?? "",
     tag: kwList.length > 0 ? kwList[0] : "Paper",
     href: paper.doi ? `https://doi.org/${paper.doi}` : (paper.externalId ?? ""),
