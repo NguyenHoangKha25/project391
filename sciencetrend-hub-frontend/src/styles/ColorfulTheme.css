@@ -690,11 +690,13 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 
 /* Home / Landing Page */
 .home-page {
-  background: #f8fafc;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.06), transparent 30rem),
+    #f8fafc !important;
 }
 
 .home-navbar {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.8) !important;
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
@@ -728,12 +730,14 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 .register-page,
 .forgot-page,
 .reset-page {
-  background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #eff6ff, #f5f3ff, #fdf2f8, #f8fafc);
-  background-size: 400% 400%;
-  animation: float-nebula 20s ease-in-out infinite;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.06), transparent 30rem),
+    #f8fafc !important;
+  animation: none !important;
 }
 
 .login-card,
+.register-card,
 .forgot-card,
 .reset-card {
   border-color: rgba(226, 232, 240, 0.6) !important;
@@ -744,6 +748,7 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 }
 
 .login-card::before,
+.register-card::before,
 .forgot-card::before,
 .reset-card::before {
   content: "" !important;
@@ -753,9 +758,7 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   right: 0 !important;
   height: 4px !important;
   margin: 0 !important;
-  border-radius: 0 !important;
-  background: var(--st-rainbow) !important;
-  z-index: 10 !important;
+  background: var(--st-primary) !important;
 }
 
 @media (max-width: 760px) {
