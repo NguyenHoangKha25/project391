@@ -16,9 +16,9 @@
 .trends-tab-buttons-group {
   display: inline-flex;
   padding: 4px;
-  background: rgba(230, 222, 211, 0.45);
+  background: #f0eae1; /* Solid warm sand background to ensure dark-mode extensions invert it properly */
   border-radius: 12px;
-  border: 1px solid rgba(230, 222, 211, 0.4);
+  border: 1px solid #e1d8cb;
 }
 .trends-btn-toggle {
   height: 32px;
@@ -27,14 +27,14 @@
   background: none;
   font-size: 13px;
   font-weight: 780;
-  color: var(--st-muted-strong);
+  color: var(--st-muted-strong) !important;
   border-radius: 9px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .trends-btn-toggle.active {
-  background: #ffffff;
-  color: var(--st-primary-dark);
+  background: #ffffff !important;
+  color: var(--st-primary-dark) !important;
   box-shadow: var(--sh-xs);
 }
 .trends-filter-inputs-group {

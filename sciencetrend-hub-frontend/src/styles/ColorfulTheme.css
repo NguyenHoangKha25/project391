@@ -1203,3 +1203,21 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   background: rgba(99, 102, 241, 0.16) !important;
   border-color: rgba(99, 102, 241, 0.4) !important;
 }
+
+/* Trends Page Tab Switcher in Colorful Theme */
+.trends-tab-buttons-group {
+  background: #f1f5f9 !important; /* Solid cool slate background */
+  border-color: rgba(226, 232, 240, 0.8) !important;
+}
+.trends-btn-toggle {
+  color: #475569 !important; /* Dark slate text for high contrast */
+  font-weight: 780 !important;
+}
+.trends-btn-toggle.active {
+  background: #ffffff !important; /* Solid white background */
+  color: #4f46e5 !important; /* Royal Indigo text */
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08) !important;
+}
+.trends-btn-toggle:hover:not(.active) {
+  color: #4f46e5 !important;
+}
