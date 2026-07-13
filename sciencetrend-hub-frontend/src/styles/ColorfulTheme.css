@@ -200,6 +200,7 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 }
 .st-search-form input {
   color: #1c2533 !important;
+  -webkit-text-fill-color: #1c2533 !important;
   font-weight: 700 !important;
 }
 .st-search-form input:-webkit-autofill,

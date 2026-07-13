@@ -124,6 +124,12 @@ function Navbar({
             onChange={(event) => setSearchValue(event.target.value)}
             placeholder="Search papers, journals…"
             aria-label="Search papers or journals"
+            style={{ 
+              color: "#1c2533", 
+              WebkitTextFillColor: "#1c2533", 
+              fontWeight: "800",
+              fontSize: "14.5px"
+            }}
           />
           <span>Enter</span>
         </form>
