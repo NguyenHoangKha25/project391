@@ -130,11 +130,11 @@ function AdminPage() {
   async function handleCreateReport() {
     try {
       setGeneratingReport(true);
-      await generateReport({ title: "System Analytics Report", format: "PDF", description: "Admin generated citations overview" });
-      showToast("Report generation started!", "success");
+      await generateReport({ type: "summary" });
+      showToast("Report generation started successfully!", "success");
       await loadAdminData(); // Reload reports list
     } catch (err) {
-      showToast("Report generation failed.", "warning");
+      showToast(err.message || "Report generation failed.", "warning");
     } finally {
       setGeneratingReport(false);
     }
