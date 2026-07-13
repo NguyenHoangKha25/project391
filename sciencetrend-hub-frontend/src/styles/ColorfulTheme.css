@@ -195,6 +195,13 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   color: #1c2533 !important;
   font-weight: 700 !important;
 }
+.st-search-form input:-webkit-autofill,
+.st-search-form input:-webkit-autofill:hover, 
+.st-search-form input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #1c2533 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 
 .st-search-form svg {
   color: #64748b;
