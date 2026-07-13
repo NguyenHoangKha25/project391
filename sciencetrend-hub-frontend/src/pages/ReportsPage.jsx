@@ -53,6 +53,25 @@ function ReportsPage() {
       window.open(report.downloadUrl, "_blank", "noopener,noreferrer");
       return;
     }
+    
+    // Fallback: If no backend download link, generate a download of the report content as a text file in the browser
+    if (report.content) {
+      try {
+        const blob = new Blob([report.content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${report.title.replace(/[\s\/:*?"<>|]+/g, "_")}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        return;
+      } catch (e) {
+        console.error("Browser download failed", e);
+      }
+    }
+    
     setErrorMessage("No download link available for this report yet.");
   }
 

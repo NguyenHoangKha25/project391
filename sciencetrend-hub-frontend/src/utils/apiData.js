@@ -154,6 +154,7 @@ export function normalizeReport(report = {}, index = 0) {
     id: report.id ?? report.reportId ?? report.dashboardReportId ?? index,
     title: report.title ?? report.name ?? "Untitled report",
     description: report.description ?? report.content ?? report.summary ?? "",
+    content: report.content ?? report.description ?? "",
     period: report.period ?? report.generatedAt ?? report.createdAt ?? "",
     format: String(report.format ?? report.fileType ?? "PDF").toUpperCase(),
     status: report.status ?? "Ready",
