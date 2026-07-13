@@ -12,6 +12,8 @@ import {
   FiDownload,
   FiPlus,
   FiSliders,
+  FiChevronDown,
+  FiArrowRight,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import StatCard from "../components/StatCard";
@@ -19,7 +21,7 @@ import { useAuth } from "../context/useAuth";
 import { getDashboardOverview } from "../services/dashboardService";
 import { getReports, generateReport } from "../services/reportService";
 import { apiRequest } from "../services/api";
-import { normalizeDashboard, normalizeReport, formatNumber, formatDateTime } from "../utils/apiData";
+import { normalizeDashboard, normalizeReport, formatNumber, formatDateTime, toArray } from "../utils/apiData";
 import { formatRoleForDisplay } from "../utils/authStorage";
 import "../styles/WorkspacePages.css";
 import "../styles/AdminPage.css";
