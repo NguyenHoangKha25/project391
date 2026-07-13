@@ -71,11 +71,11 @@ h6,
   font-weight: 800;
   line-height: 1.12;
   letter-spacing: -0.03em;
-  background: linear-gradient(135deg, var(--st-heading) 0%, var(--st-primary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  display: inline-block;
+  background: linear-gradient(135deg, #0f172a 0%, #4f46e5 60%, #06b6d4 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  display: inline-block !important;
 }
 .st-navbar-heading p {
   margin-top: 4px;

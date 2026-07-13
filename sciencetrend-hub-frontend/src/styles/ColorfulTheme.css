@@ -170,7 +170,14 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
-  -webkit-text-fill-color: transparent;
+}
+
+.st-navbar-heading h1 {
+  display: inline-block !important;
+  background: linear-gradient(135deg, #0f172a 0%, #4f46e5 60%, #06b6d4 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
 }
 
 /* Reset sub-panel headers to use solid elegant color instead of gradients */
