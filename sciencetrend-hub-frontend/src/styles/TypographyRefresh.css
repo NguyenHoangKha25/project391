@@ -67,16 +67,21 @@ h6,
 /* Navbar + sidebar: nhìn mềm hơn, không bị nặng chữ */
 .st-navbar-heading h1 {
   font-size: clamp(24px, 2vw, 30px);
-  font-weight: 750;
+  font-weight: 800;
   line-height: 1.12;
-  letter-spacing: -0.028em;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--st-heading) 0%, var(--st-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
 }
 .st-navbar-heading p {
-  margin-top: 2px;
-  color: #64748b;
-  font-size: 14.5px;
-  font-weight: 450;
-  letter-spacing: -0.004em;
+  margin-top: 4px;
+  color: #526071;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 .st-brand strong {
   font-size: 17.5px;
