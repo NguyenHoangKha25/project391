@@ -171,18 +171,23 @@
   gap: 4px;
 }
 .st-navbar-heading h1 {
-  color: var(--st-heading);
   font-family: var(--font-display);
   font-size: clamp(28px, 2.25vw, 34px);
   font-weight: 800;
-  letter-spacing: -.05em;
-  line-height: 1.02;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #093945 0%, #157f91 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
 }
 .st-navbar-heading p {
-  color: var(--st-muted-strong);
+  color: #526071;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.45;
+  letter-spacing: -0.01em;
 }
 .st-mobile-menu-btn { display: none; width: 40px; height: 40px; border-radius: 12px; color: var(--st-primary-dark); background: #fff; box-shadow: var(--sh-xs); }
 .st-mobile-menu-btn svg { width: 20px; height: 20px; margin: auto; }
