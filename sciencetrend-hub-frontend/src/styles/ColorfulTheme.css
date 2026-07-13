@@ -1173,3 +1173,32 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 .auth-login-btn:hover:not(:disabled), .register-btn:hover:not(:disabled) {
   box-shadow: 0 18px 40px rgba(79, 70, 229, 0.3) !important;
 }
+
+/* Home Page Colorful Theme Alignments */
+.home-topbar {
+  background: #0f172a !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.home-orb-one {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.22), transparent 66%) !important;
+}
+
+.home-orb-two {
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.22), transparent 66%) !important;
+}
+
+.home-preview-card svg {
+  color: #818cf8 !important;
+}
+
+.home-topic-ticker span {
+  color: #818cf8 !important;
+  background: rgba(99, 102, 241, 0.08) !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+.home-topic-ticker span:hover {
+  background: rgba(99, 102, 241, 0.16) !important;
+  border-color: rgba(99, 102, 241, 0.4) !important;
+}
