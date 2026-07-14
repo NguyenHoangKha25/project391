@@ -176,10 +176,9 @@
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1.1;
-  background: linear-gradient(135deg, #093945 0%, #157f91 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--st-primary-dark) !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--st-primary-dark) !important;
   display: inline-block;
 }
 .st-navbar-heading p {
