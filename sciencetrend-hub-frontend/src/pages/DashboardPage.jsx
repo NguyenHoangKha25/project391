@@ -134,9 +134,9 @@ function DashboardPage() {
   // Real database metrics with no hardcoded fallback datasets
   const papersByYear = useMemo(() => {
     let raw = data?.papersByYear || [];
-    // Sort chronological and take the last 11 years to prevent X-axis labels from overlapping
+    // Sort chronological and take the last 7 years to prevent X-axis labels from overlapping
     const sorted = [...raw].sort((a, b) => parseInt(a.label || 0) - parseInt(b.label || 0));
-    return sorted.slice(-11);
+    return sorted.slice(-7);
   }, [data]);
 
   const topKeywords = useMemo(() => {
