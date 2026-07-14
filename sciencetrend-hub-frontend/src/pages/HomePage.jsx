@@ -71,7 +71,6 @@ function HomePage() {
           <span>Publication intelligence for students and researchers</span>
         </div>
         <div>
-          <span>Mon - Fri 8.00 - 18.00</span>
           <span>English</span>
         </div>
       </div>

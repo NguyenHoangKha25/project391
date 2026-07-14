@@ -131,7 +131,6 @@ function Navbar({
               fontSize: "14.5px"
             }}
           />
-          <span>Enter</span>
         </form>
 
         <button
