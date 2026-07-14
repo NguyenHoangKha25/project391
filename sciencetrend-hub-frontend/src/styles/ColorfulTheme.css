@@ -36,10 +36,14 @@
   100% { background-position: 0% 50%; }
 }
 
-body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
+body {
+  background: #f8fafc;
+}
+
+.auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #eff6ff, #f5f3ff, #fdf2f8, #f8fafc);
   background-size: 400% 400%;
-  animation: float-nebula 20s ease-in-out infinite;
+  animation: float-nebula 120s ease-in-out infinite;
 }
 
 ::selection {
@@ -704,7 +708,7 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 .reset-page {
   background: linear-gradient(-45deg, #f8fafc, #f1f5f9, #eff6ff, #f5f3ff, #fdf2f8, #f8fafc);
   background-size: 400% 400%;
-  animation: float-nebula 20s ease-in-out infinite;
+  animation: float-nebula 120s ease-in-out infinite;
 }
 
 .login-card,

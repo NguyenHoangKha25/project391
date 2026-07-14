@@ -125,7 +125,6 @@ function Navbar({
             placeholder="Search papers, journals…"
             aria-label="Search papers or journals"
           />
-          <span>Enter</span>
         </form>
 
         <button
