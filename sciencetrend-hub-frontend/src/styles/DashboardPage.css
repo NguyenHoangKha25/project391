@@ -308,9 +308,10 @@
   transform: translateX(-50%) translateY(-10px);
 }
 .bar-label {
-  font-size: 10.5px;
+  font-size: 9.5px;
   color: var(--st-muted);
   font-weight: 750;
+  letter-spacing: 0.5px;
 }
 .chart-subtext {
   font-size: 11px;
