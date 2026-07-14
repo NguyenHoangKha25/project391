@@ -311,7 +311,10 @@
   font-size: 9.5px;
   color: var(--st-muted);
   font-weight: 750;
-  letter-spacing: 0.5px;
+  transform: rotate(-20deg);
+  transform-origin: center;
+  display: inline-block;
+  margin-top: 4px;
 }
 .chart-subtext {
   font-size: 11px;
