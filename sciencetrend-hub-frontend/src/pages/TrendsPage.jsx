@@ -59,6 +59,8 @@ function TrendsPage() {
     "Medicine",
     "Physics",
   ]);
+  const [activeKeyword, setActiveKeyword] = useState("Large Language Models");
+  const [activeTopicState, setActiveTopicState] = useState("Computer Science");
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [showAddKeywordInput, setShowAddKeywordInput] = useState(false);
 
@@ -77,8 +79,8 @@ function TrendsPage() {
       setErrorMessage("");
 
       const activeSearchKeyword = trendTab === "keyword" 
-        ? (keywordChips[0] || "computer science") 
-        : (topicChips[0] || "computer science");
+        ? (activeKeyword || "computer science") 
+        : (activeTopicState || "computer science");
 
       const [topicsRes, statsRes, allTopicsRes, overviewRes] = await Promise.allSettled([
         getTrendingTopics({ limit: 10 }),
@@ -111,7 +113,7 @@ function TrendsPage() {
     } finally {
       setLoading(false);
     }
-  }, [trendTab, keywordChips, topicChips]);
+  }, [trendTab, activeKeyword, activeTopicState]);
 
   useEffect(() => {
     loadTrendData();
@@ -124,6 +126,7 @@ function TrendsPage() {
     if (trendTab === "keyword") {
       if (val && !keywordChips.includes(val)) {
         setKeywordChips((curr) => [...curr, val]);
+        setActiveKeyword(val);
         setNewKeywordInput("");
         setShowAddKeywordInput(false);
         showToast(`Added keyword trace: "${val}"`, "success");
@@ -131,6 +134,7 @@ function TrendsPage() {
     } else {
       if (val && !topicChips.includes(val)) {
         setTopicChips((curr) => [...curr, val]);
+        setActiveTopicState(val);
         setNewKeywordInput("");
         setShowAddKeywordInput(false);
         showToast(`Added topic trace: "${val}"`, "success");
@@ -140,10 +144,22 @@ function TrendsPage() {
 
   function handleRemoveChip(chipToRemove) {
     if (trendTab === "keyword") {
-      setKeywordChips((curr) => curr.filter((c) => c !== chipToRemove));
+      setKeywordChips((curr) => {
+        const next = curr.filter((c) => c !== chipToRemove);
+        if (activeKeyword === chipToRemove) {
+          setActiveKeyword(next[0] || "");
+        }
+        return next;
+      });
       showToast(`Removed keyword trace: "${chipToRemove}"`, "info");
     } else {
-      setTopicChips((curr) => curr.filter((c) => c !== chipToRemove));
+      setTopicChips((curr) => {
+        const next = curr.filter((c) => c !== chipToRemove);
+        if (activeTopicState === chipToRemove) {
+          setActiveTopicState(next[0] || "");
+        }
+        return next;
+      });
       showToast(`Removed topic trace: "${chipToRemove}"`, "info");
     }
   }
@@ -151,9 +167,11 @@ function TrendsPage() {
   function handleClearAllChips() {
     if (trendTab === "keyword") {
       setKeywordChips([]);
+      setActiveKeyword("");
       showToast("Cleared keyword traces.", "info");
     } else {
       setTopicChips([]);
+      setActiveTopicState("");
       showToast("Cleared topic traces.", "info");
     }
   }
@@ -302,15 +320,37 @@ function TrendsPage() {
 
         {/* Dynamic active chips */}
         <div className="trends-keyword-chips-row">
-          {(trendTab === "keyword" ? keywordChips : topicChips).map((chip, idx) => (
-            <span key={idx} className={`trends-keyword-chip chip-color-${idx % 5}`}>
-              <span className="dot" />
-              <span className="label-text">{chip}</span>
-              <button type="button" onClick={() => handleRemoveChip(chip)}>
-                <FiX />
-              </button>
-            </span>
-          ))}
+          {(trendTab === "keyword" ? keywordChips : topicChips).map((chip, idx) => {
+            const isSelected = trendTab === "keyword" 
+              ? activeKeyword === chip 
+              : activeTopicState === chip;
+            return (
+              <span 
+                key={idx} 
+                className={`trends-keyword-chip chip-color-${idx % 5} ${isSelected ? "active" : ""}`}
+                onClick={() => {
+                  if (trendTab === "keyword") {
+                    setActiveKeyword(chip);
+                  } else {
+                    setActiveTopicState(chip);
+                  }
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <span className="dot" />
+                <span className="label-text" style={{ fontWeight: isSelected ? "bold" : "normal" }}>{chip}</span>
+                <button 
+                  type="button" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveChip(chip);
+                  }}
+                >
+                  <FiX />
+                </button>
+              </span>
+            );
+          })}
 
           {showAddKeywordInput ? (
             <form onSubmit={handleAddChip} className="trends-add-chip-form">
