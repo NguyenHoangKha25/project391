@@ -73,7 +73,9 @@ function DashboardPage() {
     const successfulSyncs = data?.successfulSyncs ?? 0;
     const failedSyncs = data?.failedSyncs ?? 0;
 
-    return [
+    const isAdmin = user?.role === "ADMIN";
+
+    const stats = [
       {
         title: "Total Papers",
         value: formatNumber(totalPapers),
@@ -109,27 +111,34 @@ function DashboardPage() {
         trend: openAlexPapers > 0 ? "↑ 9.4%" : "—",
         trendText: openAlexPapers > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
-      },
-      {
-        title: "Successful Syncs",
-        value: formatNumber(successfulSyncs),
-        icon: FiCheckCircle,
-        colorClass: "card-emerald",
-        trend: successfulSyncs > 0 ? "↑ 7.1%" : "—",
-        trendText: successfulSyncs > 0 ? "vs last year" : "No sync data",
-        trendType: "positive"
-      },
-      {
-        title: "Failed Syncs",
-        value: formatNumber(failedSyncs),
-        icon: FiAlertTriangle,
-        colorClass: "card-red",
-        trend: failedSyncs > 0 ? "↓ 22.2%" : "—",
-        trendText: failedSyncs > 0 ? "vs last year" : "No sync data",
-        trendType: "negative"
       }
     ];
-  }, [data]);
+
+    if (isAdmin) {
+      stats.push(
+        {
+          title: "Successful Syncs",
+          value: formatNumber(successfulSyncs),
+          icon: FiCheckCircle,
+          colorClass: "card-emerald",
+          trend: successfulSyncs > 0 ? "↑ 7.1%" : "—",
+          trendText: successfulSyncs > 0 ? "vs last year" : "No sync data",
+          trendType: "positive"
+        },
+        {
+          title: "Failed Syncs",
+          value: formatNumber(failedSyncs),
+          icon: FiAlertTriangle,
+          colorClass: "card-red",
+          trend: failedSyncs > 0 ? "↓ 22.2%" : "—",
+          trendText: failedSyncs > 0 ? "vs last year" : "No sync data",
+          trendType: "negative"
+        }
+      );
+    }
+
+    return stats;
+  }, [data, user]);
 
   // Real database metrics with no hardcoded fallback datasets
   const papersByYear = useMemo(() => {
@@ -215,8 +224,8 @@ function DashboardPage() {
           </div>
         )}
 
-        {/* 6 Metrics Grid */}
-        <section className="db-metrics-grid">
+        {/* Dynamic Metrics Grid */}
+        <section className="db-metrics-grid" style={{ gridTemplateColumns: `repeat(${dashboardStats.length}, 1fr)` }}>
           {dashboardStats.map((stat, i) => {
             const Icon = stat.icon;
             return (
