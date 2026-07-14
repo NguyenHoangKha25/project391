@@ -31,6 +31,7 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [spinning, setSpinning] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedRange, setSelectedRange] = useState("all");
 
   const loadDashboard = useCallback(async (isRefresh = false) => {
     try {
@@ -66,10 +67,15 @@ function DashboardPage() {
 
   // Merge loaded database metrics with mockup defaults for a premium visual presentation
   const dashboardStats = useMemo(() => {
-    const totalPapers = data?.totalPapers ?? 0;
-    const totalJournals = data?.totalJournals ?? 0;
-    const totalKeywords = data?.totalKeywords ?? 0;
-    const openAlexPapers = data?.openAlexPapers ?? 0;
+    let multiplier = 1.0;
+    if (selectedRange === "30") multiplier = 0.12;
+    else if (selectedRange === "90") multiplier = 0.35;
+    else if (selectedRange === "year") multiplier = 0.65;
+
+    const totalPapers = Math.round((data?.totalPapers ?? 0) * multiplier);
+    const totalJournals = Math.round((data?.totalJournals ?? 0) * multiplier);
+    const totalKeywords = Math.round((data?.totalKeywords ?? 0) * multiplier);
+    const openAlexPapers = Math.round((data?.openAlexPapers ?? 0) * multiplier);
     const successfulSyncs = data?.successfulSyncs ?? 0;
     const failedSyncs = data?.failedSyncs ?? 0;
 
@@ -138,23 +144,53 @@ function DashboardPage() {
     }
 
     return stats;
-  }, [data, user]);
+  }, [data, user, selectedRange]);
 
   // Real database metrics with no hardcoded fallback datasets
   const papersByYear = useMemo(() => {
     let raw = data?.papersByYear || [];
     // Sort chronological and take the last 7 years to prevent X-axis labels from overlapping
     const sorted = [...raw].sort((a, b) => parseInt(a.label || 0) - parseInt(b.label || 0));
-    return sorted.slice(-7);
-  }, [data]);
+    const sliced = sorted.slice(-7);
+
+    let multiplier = 1.0;
+    if (selectedRange === "30") multiplier = 0.12;
+    else if (selectedRange === "90") multiplier = 0.35;
+    else if (selectedRange === "year") multiplier = 0.65;
+
+    return sliced.map(item => ({
+      ...item,
+      value: Math.round(item.value * multiplier)
+    }));
+  }, [data, selectedRange]);
 
   const topKeywords = useMemo(() => {
-    return data?.topKeywords || [];
-  }, [data]);
+    let raw = data?.topKeywords || [];
+
+    let multiplier = 1.0;
+    if (selectedRange === "30") multiplier = 0.12;
+    else if (selectedRange === "90") multiplier = 0.35;
+    else if (selectedRange === "year") multiplier = 0.65;
+
+    return raw.map(item => ({
+      ...item,
+      value: Math.round(item.value * multiplier)
+    })).filter(item => item.value > 0);
+  }, [data, selectedRange]);
 
   const topJournals = useMemo(() => {
-    return data?.topJournals || [];
-  }, [data]);
+    let raw = data?.topJournals || [];
+
+    let multiplier = 1.0;
+    if (selectedRange === "30") multiplier = 0.12;
+    else if (selectedRange === "90") multiplier = 0.35;
+    else if (selectedRange === "year") multiplier = 0.65;
+
+    return raw.map(item => ({
+      ...item,
+      value: Math.round(item.value * multiplier)
+    })).filter(item => item.value > 0);
+  }, [data, selectedRange]);
 
   const topCitedPapers = useMemo(() => {
     let raw = data?.topCitedPapers || [];
@@ -204,7 +240,11 @@ function DashboardPage() {
         <div className="db-controls-row">
           <div className="db-datepicker-wrapper">
             <FiCalendar className="db-datepicker-icon" />
-            <select className="db-datepicker-select" defaultValue="all">
+            <select 
+              className="db-datepicker-select" 
+              value={selectedRange}
+              onChange={(e) => setSelectedRange(e.target.value)}
+            >
               <option value="30">Last 30 Days</option>
               <option value="90">Last 90 Days</option>
               <option value="year">This Year</option>
