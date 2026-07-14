@@ -202,9 +202,14 @@ function DashboardPage() {
         
         {/* Date Filter & Control bar */}
         <div className="db-controls-row">
-          <div className="db-datepicker">
-            <FiCalendar />
-            <span>Apr 20 – May 20, 2025</span>
+          <div className="db-datepicker-wrapper">
+            <FiCalendar className="db-datepicker-icon" />
+            <select className="db-datepicker-select" defaultValue="all">
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="year">This Year</option>
+              <option value="all">All Time</option>
+            </select>
           </div>
           <button
             type="button"
