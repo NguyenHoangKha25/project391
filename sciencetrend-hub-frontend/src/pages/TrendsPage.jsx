@@ -196,16 +196,22 @@ function TrendsPage() {
     const activeChips = trendTab === "keyword" ? keywordChips : topicChips;
     if (activeChips.length === 0 || chartData.length === 0) return [];
 
-    // Map backend chart data curve to active chips
+    // Map backend chart data curve by year label to align perfectly with years axis
+    const yearValuesMap = {};
+    chartData.forEach(pt => {
+      yearValuesMap[String(pt.label)] = pt.value;
+    });
+
+    const values = years.map(yr => yearValuesMap[String(yr)] || 0);
+    const maxVal = Math.max(...values, 10);
+    const minVal = 0;
+    const range = maxVal - minVal;
+
     const dataset = [
-      { label: activeChips[0] || "Topic 1", stroke: "#2563eb", values: chartData.map(pt => pt.value) }
+      { label: activeChips[0] || "Topic 1", stroke: "#2563eb", values }
     ];
 
-    return dataset.slice(0, Math.max(1, activeChips.length)).map((line, lineIdx) => {
-      const maxVal = 100;
-      const minVal = 0;
-      const range = 100;
-
+    return dataset.map((line, lineIdx) => {
       const coords = line.values.map((val, idx) => {
         const x = padding + (idx * (width - 2 * padding)) / (years.length - 1);
         const y = height - padding - ((val - minVal) * (height - 2 * padding)) / range;
@@ -221,7 +227,7 @@ function TrendsPage() {
         coords
       };
     });
-  }, [trendTab, keywordChips, topicChips]);
+  }, [trendTab, keywordChips, topicChips, chartData]);
 
   // Generate dynamic sparkline coordinates
   function getSparklinePoints(growth, idx) {
