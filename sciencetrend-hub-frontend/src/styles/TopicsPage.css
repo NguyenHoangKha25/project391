@@ -213,6 +213,9 @@
 .topic-card.trending-card {
   border-left: 4px solid #f59e0b;
 }
+.topic-card.trending-card h3 {
+  padding-right: 85px;
+}
 
 .trending-badge {
   position: absolute;
