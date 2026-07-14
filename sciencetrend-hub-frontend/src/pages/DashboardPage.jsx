@@ -294,7 +294,7 @@ function DashboardPage() {
             <p className="chart-subtext">
               {papersByYear.length > 0 
                 ? `The number of papers ranges across the catalog in dynamic annual trends.`
-                : "Database is empty. Sync with OpenAlex database to view annual growth patterns."}
+                : "No publication statistics recorded in the database yet."}
             </p>
           </article>
 

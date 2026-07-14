@@ -461,7 +461,7 @@ function TrendsPage() {
             <p className="trends-chart-subtext">
               {areaChartPathData.points.length > 0 
                 ? `The number of publications ranges across annual distribution trends.`
-                : "Database is empty. Sync database to populate graph."}
+                : "No publication statistics recorded in the database yet."}
             </p>
           </article>
 
