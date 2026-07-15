@@ -51,13 +51,13 @@ function LoginPage() {
   };
 
   const handleGmailLogin = () => {
-    const backendUrl = (
-      import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:8080"
-    ).replace(/\/$/, "");
+    const authUrl =
+      import.meta.env.VITE_GOOGLE_AUTH_URL ||
+      "http://localhost:8080/api/oauth2/authorization/google";
 
     const frontendOrigin = window.location.origin;
 
-    const googleLoginUrl = new URL(`${backendUrl}/oauth2/authorization/google`);
+    const googleLoginUrl = new URL(authUrl);
     googleLoginUrl.searchParams.set("redirect_origin", frontendOrigin);
 
     window.location.href = googleLoginUrl.toString();
