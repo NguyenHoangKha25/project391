@@ -7,13 +7,10 @@ import {
   FiKey,
   FiDatabase,
   FiArrowUpRight,
-  FiTrendingUp,
   FiCheckCircle,
   FiAlertTriangle,
   FiCalendar,
-  FiSearch,
-  FiArrowRight,
-  FiActivity
+  FiArrowRight
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
