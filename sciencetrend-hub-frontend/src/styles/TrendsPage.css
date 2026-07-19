@@ -517,3 +517,10 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.trend-chart-point:focus {
+  stroke: #2563eb;
+  stroke-width: 2.5px;
+  r: 5.5;
+  outline: none;
+}

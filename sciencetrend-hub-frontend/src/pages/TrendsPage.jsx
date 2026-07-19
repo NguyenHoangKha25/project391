@@ -224,7 +224,7 @@ function TrendsPage() {
     const coords = points.map((val, idx) => {
       const x = padding + (idx * (width - 2 * padding)) / (points.length - 1);
       const y = height - padding - ((val - minVal) * (height - 2 * padding)) / range;
-      return { x, y };
+      return { x, y, value: val, label: chartData[idx]?.label };
     });
 
     const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
@@ -486,7 +486,20 @@ function TrendsPage() {
                     <path d={areaChartPathData.areaPath} fill="url(#areaGrad)" />
                     <path d={areaChartPathData.linePath} fill="none" stroke="#157f91" strokeWidth="2.5" strokeLinecap="round" />
                     {areaChartPathData.coords.map((c, i) => (
-                      <circle key={i} cx={c.x} cy={c.y} r="3" fill="#ffffff" stroke="#157f91" strokeWidth="1.5" />
+                      <circle 
+                        key={i} 
+                        cx={c.x} 
+                        cy={c.y} 
+                        r="3.5" 
+                        fill="#ffffff" 
+                        stroke="#157f91" 
+                        strokeWidth="1.5"
+                        tabIndex="0"
+                        role="img"
+                        aria-label={`Năm ${c.label}: ${c.value} bài báo`}
+                        style={{ cursor: "pointer", transition: "all 0.15s ease" }}
+                        className="trend-chart-point"
+                      />
                     ))}
                   </svg>
                   <div className="trends-chart-axis-x">
