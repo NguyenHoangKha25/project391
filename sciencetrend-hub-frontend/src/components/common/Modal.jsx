@@ -40,12 +40,18 @@ function Modal({
 
   return (
     <div className="cm-modal-overlay" onClick={onClose}>
-      <div className="cm-modal" onClick={(e) => e.stopPropagation()}>
+      <div 
+        className="cm-modal" 
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
         <div 
           className="cm-modal-header"
           style={{ flexDirection: closeButtonPosition === "left" ? "row-reverse" : "row" }}
         >
-          <h3>{title}</h3>
+          <h3 id="modal-title">{title}</h3>
 
           <button 
             type="button" 
