@@ -89,7 +89,9 @@ function TopicsPage() {
         setFollowedIds(freshData.followedIds);
         setTrending(freshData.trending);
         setTopics(freshData.topics);
-        setCachedData(cacheKey, freshData);
+        if (freshData.topics.length > 0) {
+          setCachedData(cacheKey, freshData);
+        }
       });
       return;
     }
@@ -120,7 +122,7 @@ function TopicsPage() {
       setTrending(freshData.trending);
       setTopics(freshData.topics);
 
-      if (isDefaultLoad) {
+      if (isDefaultLoad && freshData.topics.length > 0) {
         setCachedData(cacheKey, freshData);
       }
     } catch (err) {

@@ -52,12 +52,16 @@ function DashboardPage() {
         if (overviewRes.status === "fulfilled") {
           const normOverview = normalizeDashboard(overviewRes.value);
           setData(normOverview);
-          setCachedData("dashboard_overview", normOverview);
+          if (normOverview.totalPapers > 0) {
+            setCachedData("dashboard_overview", normOverview);
+          }
         }
         if (topicsRes.status === "fulfilled") {
           const normTopics = toArray(topicsRes.value).map(normalizeTopic);
           setTrendingTopics(normTopics);
-          setCachedData("dashboard_trending_topics", normTopics);
+          if (normTopics.length > 0) {
+            setCachedData("dashboard_trending_topics", normTopics);
+          }
         }
       });
       return;
@@ -76,12 +80,16 @@ function DashboardPage() {
       if (overviewRes.status === "fulfilled") {
         const normOverview = normalizeDashboard(overviewRes.value);
         setData(normOverview);
-        setCachedData("dashboard_overview", normOverview);
+        if (normOverview.totalPapers > 0) {
+          setCachedData("dashboard_overview", normOverview);
+        }
       }
       if (topicsRes.status === "fulfilled") {
         const normTopics = toArray(topicsRes.value).map(normalizeTopic);
         setTrendingTopics(normTopics);
-        setCachedData("dashboard_trending_topics", normTopics);
+        if (normTopics.length > 0) {
+          setCachedData("dashboard_trending_topics", normTopics);
+        }
       }
     } catch (error) {
       console.error("Cannot load dashboard", error);
@@ -264,6 +272,17 @@ function DashboardPage() {
   const maxPaperVal = useMemo(() => {
     return Math.max(...papersByYear.map(p => p.value), 1);
   }, [papersByYear]);
+
+  if (loading) {
+    return (
+      <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
+        <div className="cm-loading" style={{ minHeight: "60vh" }}>
+          <div className="cm-spinner" />
+          <p style={{ fontWeight: "700", color: "var(--st-primary-dark)" }}>Loading dashboard overview...</p>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>

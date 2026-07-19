@@ -105,7 +105,9 @@ function TrendsPage() {
         setChartData(freshData.chartData);
         setDbKeywords(freshData.dbKeywords);
         setDashboard(freshData.dashboard);
-        setCachedData(cacheKey, freshData);
+        if (freshData.trendingTopics.length > 0 || freshData.chartData.length > 0) {
+          setCachedData(cacheKey, freshData);
+        }
       });
       return;
     }
@@ -134,7 +136,9 @@ function TrendsPage() {
       if (freshData.dashboard) {
         setDashboard(freshData.dashboard);
       }
-      setCachedData(cacheKey, freshData);
+      if (freshData.trendingTopics.length > 0 || freshData.chartData.length > 0) {
+        setCachedData(cacheKey, freshData);
+      }
     } catch (err) {
       console.error("Cannot load trends data", err);
       setErrorMessage("Could not load scientific trend signals. Using cached dataset.");
@@ -280,6 +284,17 @@ function TrendsPage() {
     const seed = parseFloat(growth) || 15;
     const base = [10, 15, 12, 20, 18, 28, 24, 35];
     return base.map((b, i) => `${i * 12},${40 - (b + idx * 2 + seed * 0.1)}`).join(" ");
+  }
+
+  if (loading) {
+    return (
+      <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
+        <div className="cm-loading" style={{ minHeight: "60vh" }}>
+          <div className="cm-spinner" />
+          <p style={{ fontWeight: "700", color: "var(--st-primary-dark)" }}>Loading scientific trends...</p>
+        </div>
+      </MainLayout>
+    );
   }
 
   return (

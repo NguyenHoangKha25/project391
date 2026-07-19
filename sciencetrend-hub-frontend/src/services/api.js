@@ -76,7 +76,18 @@ export async function apiRequest(endpoint, options = {}) {
 
   const res = await fetch(url, { ...fetchOptions, headers, body: requestBody });
 
-  if (res.status === 204) return null;
+  if (res.status === 204) {
+    const method = (fetchOptions.method || "GET").toUpperCase();
+    if (method !== "GET") {
+      try {
+        const { clearCache } = await import("../utils/apiCache");
+        clearCache();
+      } catch (e) {
+        console.error("Cache clear failed", e);
+      }
+    }
+    return null;
+  }
 
   const contentType = res.headers.get("content-type") || "";
   const responseBody = contentType.includes("application/json")
@@ -85,6 +96,17 @@ export async function apiRequest(endpoint, options = {}) {
 
   if (!res.ok) {
     throw new Error(buildErrorMessage(responseBody, res.status));
+  }
+
+  // If request is successful and is a mutating method, clear memory cache
+  const method = (fetchOptions.method || "GET").toUpperCase();
+  if (method !== "GET") {
+    try {
+      const { clearCache } = await import("../utils/apiCache");
+      clearCache();
+    } catch (e) {
+      console.error("Cache clear failed", e);
+    }
   }
 
   return responseBody;
