@@ -1,3 +1,4 @@
+import { useId } from "react";
 import "../../styles/common.css";
 
 /**
@@ -26,10 +27,13 @@ function Input({
   className = "",
   ...props
 }) {
+  const generatedId = useId();
+  const inputId = name || generatedId;
+
   return (
     <div className={["cm-input-group", className].filter(Boolean).join(" ")}>
       {label && (
-        <label className="cm-input-label" htmlFor={name}>
+        <label className="cm-input-label" htmlFor={inputId}>
           {label}
           {props.required && (
             <span 
@@ -44,7 +48,7 @@ function Input({
       )}
 
       <input
-        id={name}
+        id={inputId}
         name={name}
         type={type}
         value={value}
@@ -54,14 +58,14 @@ function Input({
         className={["cm-input", error ? "cm-input-danger" : ""].filter(Boolean).join(" ")}
         aria-invalid={error ? "true" : "false"}
         aria-describedby={[
-          error ? `${name}-error` : null,
+          error ? `${inputId}-error` : null,
           props["aria-describedby"] ? props["aria-describedby"] : null
         ].filter(Boolean).join(" ") || undefined}
         {...props}
       />
 
       {error && (
-        <p className="cm-input-error" id={`${name}-error`} role="alert">
+        <p className="cm-input-error" id={`${inputId}-error`} role="alert">
           {error}
         </p>
       )}
