@@ -71,7 +71,8 @@ function PapersPage() {
           setAvailableKeywords(toArray(keywordsRes.value));
         }
       } catch (err) {
-        console.error("Cannot load metadata options", err);
+        // Suppress verbose metadata errors in production logs
+        console.warn("Metadata options unavailable", err);
       }
     }
     fetchMetadata();
@@ -111,7 +112,8 @@ function PapersPage() {
       setTotalElements(response?.totalElements ?? items.length);
       setPage(pageNum);
     } catch (error) {
-      console.error("Cannot load papers", error);
+      // Gracefully capture query errors and warn
+      console.warn("Papers query load failed", error);
       setPapers([]);
       setErrorMessage(error.message || "Couldn't load papers. Try again in a moment.");
     } finally {
