@@ -43,6 +43,15 @@ function useToast() {
   return { toast, showToast };
 }
 
+const safeSplitDate = (value) => {
+  if (!value) return "Recent";
+  if (typeof value === "string") return value.split("T")[0];
+  if (Array.isArray(value)) {
+    return `${value[0]}-${String(value[1]).padStart(2, "0")}-${String(value[2]).padStart(2, "0")}`;
+  }
+  return "Recent";
+};
+
 // Mock User Data matching mockup design
 const MOCK_USERS = [
   { id: 1, username: "dr.researcher", email: "researcher@university.edu", role: "Admin", status: "Active" },
@@ -387,7 +396,7 @@ function AdminPage() {
                             <h4>{log.status === "SUCCESS" || log.status === "COMPLETED" ? "Data sync completed successfully" : "Scopus data sync failed"}</h4>
                             <p>{log.message ?? `${log.newRecords ?? 0} records indexed`}</p>
                           </div>
-                          <span className="log-time">{log.startedAt ? log.startedAt.split("T")[0] : "Recent"}</span>
+                          <span className="log-time">{safeSplitDate(log.startedAt)}</span>
                         </div>
                       ))}
                     </div>
@@ -463,7 +472,7 @@ function AdminPage() {
                             <tr key={rep.id}>
                               <td><strong>{rep.title}</strong></td>
                               <td><span className="report-type-badge">{rep.format}</span></td>
-                              <td>{rep.period ? rep.period.split("T")[0] : "Recent"}</td>
+                              <td>{safeSplitDate(rep.period)}</td>
                               <td style={{ textAlign: "right" }}>
                                 {rep.downloadUrl && (
                                   <a href={rep.downloadUrl} className="admin-download-btn" target="_blank" rel="noreferrer" title="Download file">
