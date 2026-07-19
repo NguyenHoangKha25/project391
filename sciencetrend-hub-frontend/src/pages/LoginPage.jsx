@@ -69,7 +69,6 @@ function LoginPage() {
       <div className="auth-bg-blur auth-bg-blur-right"></div>
 
       <section className="auth-layout">
-        {/* ── Left branding panel ── */}
         <div className="auth-left">
           <Link to={ROUTE_PATHS.HOME} className="auth-brand" aria-label="ScienceTrend Hub home">
             <span className="auth-logo-box">
@@ -149,7 +148,6 @@ function LoginPage() {
 
         <div className="auth-right">
           <div className="auth-premium-card-box" style={{ position: "relative" }}>
-            {/* Top Border Gradient Line - Perfect mathematical overlay covering the top border */}
             <div style={{
               position: "absolute",
               top: "-1px",
