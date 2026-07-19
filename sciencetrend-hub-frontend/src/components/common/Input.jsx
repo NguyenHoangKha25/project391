@@ -1,5 +1,19 @@
 import "../../styles/common.css";
 
+/**
+ * Common Input component with validation and accessibility support.
+ * 
+ * @param {Object} props - Component props
+ * @param {string} [props.label] - Input label text
+ * @param {string} props.name - Input name and identifier
+ * @param {string} [props.type="text"] - HTML input type (text, email, password, etc.)
+ * @param {string|number} props.value - Input value
+ * @param {Function} props.onChange - Change event handler function
+ * @param {string} [props.placeholder=""] - Input placeholder text
+ * @param {string} [props.error=""] - Validation error message
+ * @param {boolean} [props.disabled=false] - Disables the input field
+ * @param {string} [props.className=""] - Additional wrapper CSS classes
+ */
 function Input({
   label,
   name,
@@ -13,10 +27,19 @@ function Input({
   ...props
 }) {
   return (
-    <div className={`cm-input-group ${className}`}>
+    <div className={["cm-input-group", className].filter(Boolean).join(" ")}>
       {label && (
         <label className="cm-input-label" htmlFor={name}>
           {label}
+          {props.required && (
+            <span 
+              className="cm-input-required-star" 
+              style={{ color: "var(--st-danger, #ef4444)", marginLeft: "4px" }}
+              aria-hidden="true"
+            >
+              *
+            </span>
+          )}
         </label>
       )}
 
@@ -28,11 +51,17 @@ function Input({
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
-        className={`cm-input ${error ? "cm-input-danger" : ""}`}
+        className={["cm-input", error ? "cm-input-danger" : ""].filter(Boolean).join(" ")}
+        aria-invalid={error ? "true" : "false"}
+        aria-describedby={error ? `${name}-error` : undefined}
         {...props}
       />
 
-      {error && <p className="cm-input-error">{error}</p>}
+      {error && (
+        <p className="cm-input-error" id={`${name}-error`} role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
