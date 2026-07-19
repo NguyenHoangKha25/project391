@@ -189,8 +189,9 @@
 /* Tables inside admin panels */
 .admin-table-responsive {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 .admin-compact-table {
   width: 100%;
@@ -383,6 +384,7 @@
 .admin-detailed-table-wrap {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .admin-detailed-table {
   width: 100%;
