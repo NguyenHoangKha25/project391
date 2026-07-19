@@ -41,7 +41,7 @@ function Sidebar({ isOpen = false, onNavigate }) {
   const visibleMenuItems = menuItems.filter((item) => !item.adminOnly || isAdminUser);
 
   return (
-    <aside className={`st-sidebar ${isOpen ? "is-open" : ""}`}>
+    <nav className={`st-sidebar ${isOpen ? "is-open" : ""}`} aria-label="Sidebar navigation">
       <NavLink
         to={ROUTE_PATHS.DASHBOARD}
         className="st-brand"
@@ -58,7 +58,7 @@ function Sidebar({ isOpen = false, onNavigate }) {
 
       <div className="st-menu-label">Workspace</div>
 
-      <nav className="st-menu" aria-label="Main navigation">
+      <div className="st-menu" role="menubar">
         {visibleMenuItems.map((item) => {
           const Icon = item.icon;
 
@@ -70,13 +70,14 @@ function Sidebar({ isOpen = false, onNavigate }) {
               className={({ isActive }) =>
                 `st-menu-link ${isActive ? "active" : ""}`
               }
+              role="menuitem"
             >
               <Icon aria-hidden="true" />
               <span>{item.label}</span>
             </NavLink>
           );
         })}
-      </nav>
+      </div>
 
       <div className="st-sidebar-footer">
         <span className="st-status-dot" />
@@ -85,7 +86,7 @@ function Sidebar({ isOpen = false, onNavigate }) {
           <small>Workspace ready</small>
         </div>
       </div>
-    </aside>
+    </nav>
   );
 }
 
