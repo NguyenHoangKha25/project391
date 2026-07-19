@@ -53,7 +53,10 @@ function Input({
         disabled={disabled}
         className={["cm-input", error ? "cm-input-danger" : ""].filter(Boolean).join(" ")}
         aria-invalid={error ? "true" : "false"}
-        aria-describedby={error ? `${name}-error` : undefined}
+        aria-describedby={[
+          error ? `${name}-error` : null,
+          props["aria-describedby"] ? props["aria-describedby"] : null
+        ].filter(Boolean).join(" ") || undefined}
         {...props}
       />
 
