@@ -13,6 +13,7 @@ import "../../styles/common.css";
  * @param {boolean} [props.disabled=false] - Disables the button
  * @param {Function} [props.onClick] - Click handler function
  * @param {string} [props.className=""] - Additional CSS classes
+ * @param {boolean} [props.ariaPressed] - Controls aria-pressed attribute for toggle state
  */
 function Button({
   children,
@@ -24,6 +25,7 @@ function Button({
   disabled = false,
   onClick,
   className = "",
+  ariaPressed,
   ...props
 }) {
   return (
@@ -31,6 +33,7 @@ function Button({
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
+      aria-pressed={ariaPressed}
       className={[
         "cm-btn",
         `cm-btn-${variant}`,
