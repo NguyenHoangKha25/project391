@@ -245,7 +245,7 @@ function Navbar({
               if (suggestions.length > 0) setShowSuggestions(true);
             }}
             placeholder="Search papers, journals…"
-            aria-label="Search papers or journals"
+            aria-label="Search research papers, journals, and keywords"
             style={{ 
               color: "#1c2533", 
               WebkitTextFillColor: "#1c2533", 
@@ -274,7 +274,7 @@ function Navbar({
         <button
           type="button"
           className="st-icon-btn"
-          aria-label="Open notifications"
+          aria-label="Open notifications dashboard and system alerts"
           onClick={() => navigate(ROUTE_PATHS.NOTIFICATIONS)}
         >
           <FiBell />
