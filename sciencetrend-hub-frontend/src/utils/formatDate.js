@@ -1,3 +1,10 @@
+/**
+ * Formats a Date object or date-string into a clean, human-readable format.
+ * 
+ * @param {Date|string|number} value - The input date value to format.
+ * @param {Intl.DateTimeFormatOptions} [options={}] - Custom Intl.DateTimeFormat configuration overrides.
+ * @returns {string} The formatted localized date string, or a placeholder if invalid.
+ */
 export function formatDate(value, options = {}) {
   if (!value) return "—";
 
