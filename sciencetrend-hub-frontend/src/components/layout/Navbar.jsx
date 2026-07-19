@@ -9,6 +9,7 @@ import {
   FiSearch,
   FiSettings,
   FiUser,
+  FiTag,
 } from "react-icons/fi";
 import { useAuth } from "../../context/useAuth";
 import { ROUTE_PATHS } from "../../routes/routePaths";
@@ -260,7 +261,9 @@ function Navbar({
                   className="st-suggestion-item" 
                   onClick={() => handleSuggestionClick(sug)}
                 >
-                  <span className={`suggestion-tag ${sug.type}`}>{sug.type}</span>
+                  {sug.type === "title" && <FiFileText style={{ color: "#2563eb", flexShrink: 0 }} />}
+                  {sug.type === "author" && <FiUser style={{ color: "#10b981", flexShrink: 0 }} />}
+                  {sug.type === "keyword" && <FiTag style={{ color: "#8b5cf6", flexShrink: 0 }} />}
                   <span className="suggestion-text" title={sug.value}>{sug.value}</span>
                 </div>
               ))}
