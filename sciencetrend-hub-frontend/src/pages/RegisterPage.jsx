@@ -146,7 +146,7 @@ function RegisterPage() {
         });
       }, 2000);
     } catch (error) {
-      console.error("Registration error details:", error);
+      console.warn("Registration attempt failed:", error);
       const msg = error.message || "Registration failed. Please check your information.";
       setMessage(msg);
       setMessageType("error");
