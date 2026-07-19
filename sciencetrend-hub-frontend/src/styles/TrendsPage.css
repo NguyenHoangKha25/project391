@@ -223,12 +223,17 @@
 .trend-stat-card {
   background: #ffffff;
   border: 1px solid rgba(230, 222, 211, 0.8);
-  border-radius: 16px;
-  padding: 12px 14px;
+  border-radius: 18px;
+  padding: 16px 18px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.015);
   display: flex;
   flex-direction: column;
   gap: 2px;
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s ease;
+}
+.trend-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
 }
 .stat-card-label {
   font-size: 10px;
@@ -266,7 +271,18 @@
 .trends-bottom-panel {
   min-height: 230px;
   max-height: 250px;
-  padding: 12px 14px !important;
+  padding: 16px 18px !important;
+  border-radius: 20px;
+  border: 1px solid rgba(230, 222, 211, 0.8);
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.015);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s ease;
+}
+.trends-chart-panel:hover,
+.trends-table-panel:hover,
+.trends-bottom-panel:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
 }
 .trends-svg-chart-container {
   width: 100%;
