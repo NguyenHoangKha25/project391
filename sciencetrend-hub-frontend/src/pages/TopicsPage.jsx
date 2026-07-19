@@ -20,6 +20,7 @@ import {
   getPapersByTopic,
 } from "../services/topicService";
 import { normalizeTopic, toArray } from "../utils/apiData";
+import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/TopicsPage.css";
 
@@ -33,9 +34,9 @@ function useToast() {
     }
   }, [toast]);
 
-  function showToast(message, type = "info") {
+  const showToast = useCallback((message, type = "info") => {
     setToast({ message, type });
-  }
+  }, []);
 
   return { toast, showToast };
 }
@@ -58,6 +59,41 @@ function TopicsPage() {
 
   // Load topics & follow status
   const loadData = useCallback(async (search = "") => {
+    const isDefaultLoad = !search;
+    const cacheKey = "topics_default";
+    const cachedData = isDefaultLoad ? getCachedData(cacheKey) : null;
+
+    if (cachedData) {
+      setFollowedIds(cachedData.followedIds);
+      setTrending(cachedData.trending);
+      setTopics(cachedData.topics);
+      setLoading(false);
+
+      // Perform a silent background validation to refresh cache seamlessly
+      Promise.allSettled([
+        getFollowedTopics(),
+        getTrendingTopics(5),
+        getAllTopics(),
+      ]).then(([followedResult, trendingResult, listResult]) => {
+        const freshData = {
+          followedIds: followedResult.status === "fulfilled" 
+            ? new Set(toArray(followedResult.value).map(t => normalizeTopic(t)).map(t => String(t.id)))
+            : new Set(),
+          trending: trendingResult.status === "fulfilled"
+            ? toArray(trendingResult.value).map(t => normalizeTopic(t))
+            : [],
+          topics: listResult.status === "fulfilled"
+            ? toArray(listResult.value).map(t => normalizeTopic(t))
+            : []
+        };
+        setFollowedIds(freshData.followedIds);
+        setTrending(freshData.trending);
+        setTopics(freshData.topics);
+        setCachedData(cacheKey, freshData);
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -68,28 +104,32 @@ function TopicsPage() {
         search ? searchTopics(search) : getAllTopics(),
       ]);
 
-      // Parse followed IDs
-      if (followedResult.status === "fulfilled") {
-        const followedArray = toArray(followedResult.value).map((t) => normalizeTopic(t));
-        setFollowedIds(new Set(followedArray.map((t) => String(t.id))));
-      }
+      const freshData = {
+        followedIds: followedResult.status === "fulfilled" 
+          ? new Set(toArray(followedResult.value).map(t => normalizeTopic(t)).map(t => String(t.id)))
+          : new Set(),
+        trending: trendingResult.status === "fulfilled"
+          ? toArray(trendingResult.value).map(t => normalizeTopic(t))
+          : [],
+        topics: listResult.status === "fulfilled"
+          ? toArray(listResult.value).map(t => normalizeTopic(t))
+          : []
+      };
 
-      // Parse trending topics
-      if (trendingResult.status === "fulfilled") {
-        setTrending(toArray(trendingResult.value).map((t) => normalizeTopic(t)));
-      }
+      setFollowedIds(freshData.followedIds);
+      setTrending(freshData.trending);
+      setTopics(freshData.topics);
 
-      // Parse list topics
-      if (listResult.status === "fulfilled") {
-        setTopics(toArray(listResult.value).map((t) => normalizeTopic(t)));
+      if (isDefaultLoad) {
+        setCachedData(cacheKey, freshData);
       }
     } catch (err) {
-      console.error("Error loading topics data", err);
-      showToast("Could not load topics. Try again.", "warning");
+      console.error("Cannot load topics data", err);
+      showToast("Failed to retrieve topics registry.", "warning");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     loadData();

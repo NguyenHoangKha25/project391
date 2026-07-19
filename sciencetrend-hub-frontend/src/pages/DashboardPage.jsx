@@ -20,6 +20,7 @@ import { useAuth } from "../context/useAuth";
 import { getDashboardOverview } from "../services/dashboardService";
 import { getTrendingTopics } from "../services/trendService";
 import { normalizeDashboard, formatNumber, normalizeTopic, toArray } from "../utils/apiData";
+import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/DashboardPage.css";
 
 const DONUT_COLORS = ["#2563eb", "#0ea5e9", "#10b981", "#ffb020", "#ec4899", "#8b5cf6"];
@@ -34,6 +35,34 @@ function DashboardPage() {
   const [selectedRange, setSelectedRange] = useState("all");
 
   const loadDashboard = useCallback(async (isRefresh = false) => {
+    // Check client-side memory cache first if not explicitly refreshing
+    const cachedOverview = getCachedData("dashboard_overview");
+    const cachedTopics = getCachedData("dashboard_trending_topics");
+
+    if (cachedOverview && cachedTopics && !isRefresh) {
+      setData(cachedOverview);
+      setTrendingTopics(cachedTopics);
+      setLoading(false);
+
+      // Perform a silent background validation to refresh cache seamlessly
+      Promise.allSettled([
+        getDashboardOverview(),
+        getTrendingTopics({ limit: 3 })
+      ]).then(([overviewRes, topicsRes]) => {
+        if (overviewRes.status === "fulfilled") {
+          const normOverview = normalizeDashboard(overviewRes.value);
+          setData(normOverview);
+          setCachedData("dashboard_overview", normOverview);
+        }
+        if (topicsRes.status === "fulfilled") {
+          const normTopics = toArray(topicsRes.value).map(normalizeTopic);
+          setTrendingTopics(normTopics);
+          setCachedData("dashboard_trending_topics", normTopics);
+        }
+      });
+      return;
+    }
+
     try {
       if (isRefresh) setSpinning(true);
       else setLoading(true);
@@ -45,10 +74,14 @@ function DashboardPage() {
       ]);
 
       if (overviewRes.status === "fulfilled") {
-        setData(normalizeDashboard(overviewRes.value));
+        const normOverview = normalizeDashboard(overviewRes.value);
+        setData(normOverview);
+        setCachedData("dashboard_overview", normOverview);
       }
       if (topicsRes.status === "fulfilled") {
-        setTrendingTopics(toArray(topicsRes.value).map(normalizeTopic));
+        const normTopics = toArray(topicsRes.value).map(normalizeTopic);
+        setTrendingTopics(normTopics);
+        setCachedData("dashboard_trending_topics", normTopics);
       }
     } catch (error) {
       console.error("Cannot load dashboard", error);

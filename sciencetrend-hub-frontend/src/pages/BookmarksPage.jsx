@@ -39,6 +39,7 @@ import {
   toArray,
   formatDateTime,
 } from "../utils/apiData";
+import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/BookmarksPage.css";
 
@@ -52,9 +53,9 @@ function useToast() {
     }
   }, [toast]);
 
-  function showToast(message, type = "info") {
+  const showToast = useCallback((message, type = "info") => {
     setToast({ message, type });
-  }
+  }, []);
 
   return { toast, showToast };
 }
@@ -75,6 +76,45 @@ function BookmarksPage() {
   const { toast, showToast } = useToast();
 
   const loadLibraryData = useCallback(async () => {
+    const cacheKey = "library_data";
+    const cachedData = getCachedData(cacheKey);
+
+    if (cachedData) {
+      setSavedPapers(cachedData.savedPapers);
+      setSavedKeywords(cachedData.savedKeywords);
+      setFollowedJournals(cachedData.followedJournals);
+      setFollowedTopics(cachedData.followedTopics);
+      setNotifications(cachedData.notifications);
+      setLoading(false);
+
+      // Perform a silent background validation to refresh cache seamlessly
+      Promise.allSettled([
+        getBookmarkedPapers(),
+        getBookmarkedKeywords(),
+        getFollowedJournals(),
+        getFollowedTopics(),
+        getNotifications(),
+      ]).then(([papersRes, keywordsRes, journalsRes, topicsRes, notifsRes]) => {
+        const freshData = {
+          savedPapers: papersRes.status === "fulfilled" ? toArray(papersRes.value).map(normalizePaper) : [],
+          savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => ({
+            id: kw.keywordId ?? kw.id ?? i,
+            name: kw.name ?? kw.keyword ?? String(kw),
+          })) : [],
+          followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(normalizeJournal) : [],
+          followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
+          notifications: notifsRes.status === "fulfilled" ? toArray(notifsRes.value).map(normalizeNotification) : []
+        };
+        setSavedPapers(freshData.savedPapers);
+        setSavedKeywords(freshData.savedKeywords);
+        setFollowedJournals(freshData.followedJournals);
+        setFollowedTopics(freshData.followedTopics);
+        setNotifications(freshData.notifications);
+        setCachedData(cacheKey, freshData);
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       setErrorMessage("");
@@ -87,37 +127,26 @@ function BookmarksPage() {
         getNotifications(),
       ]);
 
-      setSavedPapers(
-        papersRes.status === "fulfilled"
-          ? toArray(papersRes.value).map(normalizePaper)
-          : []
-      );
-      setSavedKeywords(
-        keywordsRes.status === "fulfilled"
-          ? toArray(keywordsRes.value).map((kw, i) => ({
-              id: kw.keywordId ?? kw.id ?? i,
-              name: kw.name ?? kw.keyword ?? String(kw),
-            }))
-          : []
-      );
-      setFollowedJournals(
-        journalsRes.status === "fulfilled"
-          ? toArray(journalsRes.value).map(normalizeJournal)
-          : []
-      );
-      setFollowedTopics(
-        topicsRes.status === "fulfilled"
-          ? toArray(topicsRes.value).map(normalizeTopic)
-          : []
-      );
-      setNotifications(
-        notifsRes.status === "fulfilled"
-          ? toArray(notifsRes.value).map(normalizeNotification)
-          : []
-      );
+      const freshData = {
+        savedPapers: papersRes.status === "fulfilled" ? toArray(papersRes.value).map(normalizePaper) : [],
+        savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => ({
+          id: kw.keywordId ?? kw.id ?? i,
+          name: kw.name ?? kw.keyword ?? String(kw),
+        })) : [],
+        followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(normalizeJournal) : [],
+        followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
+        notifications: notifsRes.status === "fulfilled" ? toArray(notifsRes.value).map(normalizeNotification) : []
+      };
+
+      setSavedPapers(freshData.savedPapers);
+      setSavedKeywords(freshData.savedKeywords);
+      setFollowedJournals(freshData.followedJournals);
+      setFollowedTopics(freshData.followedTopics);
+      setNotifications(freshData.notifications);
+      setCachedData(cacheKey, freshData);
     } catch (err) {
       console.error("Cannot load library data", err);
-      setErrorMessage("Could not load library. The backend server might be offline.");
+      setErrorMessage("Could not load scientific library contents.");
     } finally {
       setLoading(false);
     }

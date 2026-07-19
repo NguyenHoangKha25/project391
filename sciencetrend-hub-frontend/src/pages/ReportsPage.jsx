@@ -3,6 +3,7 @@ import { FiDownload, FiPlus } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { generateReport, getReports } from "../services/reportService";
 import { normalizeReport, toArray } from "../utils/apiData";
+import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/ReportsPage.css";
 
@@ -13,11 +14,29 @@ function ReportsPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const loadReports = useCallback(async () => {
+    const cacheKey = "reports_my";
+    const cachedData = getCachedData(cacheKey);
+
+    if (cachedData) {
+      setReports(cachedData);
+      setLoading(false);
+
+      // Perform a silent background validation to refresh cache seamlessly
+      getReports().then((response) => {
+        const freshData = toArray(response, ["reports"]).map(normalizeReport);
+        setReports(freshData);
+        setCachedData(cacheKey, freshData);
+      }).catch(err => console.error("Silent background reports refresh failed", err));
+      return;
+    }
+
     try {
       setLoading(true);
       setErrorMessage("");
       const response = await getReports();
-      setReports(toArray(response, ["reports"]).map(normalizeReport));
+      const freshData = toArray(response, ["reports"]).map(normalizeReport);
+      setReports(freshData);
+      setCachedData(cacheKey, freshData);
     } catch (error) {
       console.error("Cannot load reports", error);
       setReports([]);

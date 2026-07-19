@@ -74,13 +74,45 @@ function TrendsPage() {
   const { toast, showToast } = useToast();
 
   const loadTrendData = useCallback(async () => {
+    const activeSearchKeyword = trendTab === "keyword" 
+      ? (activeKeyword || "computer science") 
+      : (activeTopicState || "computer science");
+
+    const cacheKey = `trends_${activeSearchKeyword}`;
+    const cachedData = getCachedData(cacheKey);
+
+    if (cachedData) {
+      setTrendingTopics(cachedData.trendingTopics);
+      setChartData(cachedData.chartData);
+      setDbKeywords(cachedData.dbKeywords);
+      setDashboard(cachedData.dashboard);
+      setLoading(false);
+
+      // Perform a silent background validation to refresh cache seamlessly
+      Promise.allSettled([
+        getTrendingTopics({ limit: 10 }),
+        getTrendStats({ keyword: activeSearchKeyword }),
+        getAllTopics(),
+        getDashboardOverview(),
+      ]).then(([topicsRes, statsRes, allTopicsRes, overviewRes]) => {
+        const freshData = {
+          trendingTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
+          chartData: statsRes.status === "fulfilled" ? toArray(statsRes.value).map(normalizeChartPoint) : [],
+          dbKeywords: allTopicsRes.status === "fulfilled" ? toArray(allTopicsRes.value).map((t, idx) => t.name ?? `Topic ${idx}`) : [],
+          dashboard: overviewRes.status === "fulfilled" ? normalizeDashboard(overviewRes.value) : null
+        };
+        setTrendingTopics(freshData.trendingTopics);
+        setChartData(freshData.chartData);
+        setDbKeywords(freshData.dbKeywords);
+        setDashboard(freshData.dashboard);
+        setCachedData(cacheKey, freshData);
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       setErrorMessage("");
-
-      const activeSearchKeyword = trendTab === "keyword" 
-        ? (activeKeyword || "computer science") 
-        : (activeTopicState || "computer science");
 
       const [topicsRes, statsRes, allTopicsRes, overviewRes] = await Promise.allSettled([
         getTrendingTopics({ limit: 10 }),
@@ -89,24 +121,20 @@ function TrendsPage() {
         getDashboardOverview(),
       ]);
 
-      setTrendingTopics(
-        topicsRes.status === "fulfilled"
-          ? toArray(topicsRes.value).map(normalizeTopic)
-          : []
-      );
-      setChartData(
-        statsRes.status === "fulfilled"
-          ? toArray(statsRes.value).map(normalizeChartPoint)
-          : []
-      );
-      setDbKeywords(
-        allTopicsRes.status === "fulfilled"
-          ? toArray(allTopicsRes.value).map((t, idx) => t.name ?? `Topic ${idx}`)
-          : []
-      );
-      if (overviewRes.status === "fulfilled") {
-        setDashboard(normalizeDashboard(overviewRes.value));
+      const freshData = {
+        trendingTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
+        chartData: statsRes.status === "fulfilled" ? toArray(statsRes.value).map(normalizeChartPoint) : [],
+        dbKeywords: allTopicsRes.status === "fulfilled" ? toArray(allTopicsRes.value).map((t, idx) => t.name ?? `Topic ${idx}`) : [],
+        dashboard: overviewRes.status === "fulfilled" ? normalizeDashboard(overviewRes.value) : null
+      };
+
+      setTrendingTopics(freshData.trendingTopics);
+      setChartData(freshData.chartData);
+      setDbKeywords(freshData.dbKeywords);
+      if (freshData.dashboard) {
+        setDashboard(freshData.dashboard);
       }
+      setCachedData(cacheKey, freshData);
     } catch (err) {
       console.error("Cannot load trends data", err);
       setErrorMessage("Could not load scientific trend signals. Using cached dataset.");

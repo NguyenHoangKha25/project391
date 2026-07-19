@@ -12,6 +12,7 @@ import MainLayout from "../components/layout/MainLayout";
 import { getFollowedTopics, unfollowTopic } from "../services/topicService";
 import { getFollowedJournals, unfollowJournal } from "../services/journalService";
 import { normalizeTopic, normalizeJournal, toArray } from "../utils/apiData";
+import { getCachedData, setCachedData } from "../utils/apiCache";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/FollowingPage.css";
@@ -26,9 +27,9 @@ function useToast() {
     }
   }, [toast]);
 
-  function showToast(message, type = "info") {
+  const showToast = useCallback((message, type = "info") => {
     setToast({ message, type });
-  }
+  }, []);
 
   return { toast, showToast };
 }
@@ -46,6 +47,30 @@ function FollowingPage() {
   const { toast, showToast } = useToast();
 
   const loadData = useCallback(async () => {
+    const cacheKey = "following_data";
+    const cachedData = getCachedData(cacheKey);
+
+    if (cachedData) {
+      setFollowedTopics(cachedData.followedTopics);
+      setFollowedJournals(cachedData.followedJournals);
+      setLoading(false);
+
+      // Perform a silent background validation to refresh cache seamlessly
+      Promise.allSettled([
+        getFollowedTopics(),
+        getFollowedJournals(),
+      ]).then(([topicsRes, journalsRes]) => {
+        const freshData = {
+          followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(t => normalizeTopic(t)) : [],
+          followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(j => normalizeJournal(j)) : []
+        };
+        setFollowedTopics(freshData.followedTopics);
+        setFollowedJournals(freshData.followedJournals);
+        setCachedData(cacheKey, freshData);
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       const [topicsRes, journalsRes] = await Promise.allSettled([
@@ -53,19 +78,20 @@ function FollowingPage() {
         getFollowedJournals(),
       ]);
 
-      if (topicsRes.status === "fulfilled") {
-        setFollowedTopics(toArray(topicsRes.value).map((t) => normalizeTopic(t)));
-      }
-      
-      if (journalsRes.status === "fulfilled") {
-        setFollowedJournals(toArray(journalsRes.value).map((j) => normalizeJournal(j)));
-      }
+      const freshData = {
+        followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(t => normalizeTopic(t)) : [],
+        followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(j => normalizeJournal(j)) : []
+      };
+
+      setFollowedTopics(freshData.followedTopics);
+      setFollowedJournals(freshData.followedJournals);
+      setCachedData(cacheKey, freshData);
     } catch (err) {
       showToast("Failed to load followed content.", "warning");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     loadData();
