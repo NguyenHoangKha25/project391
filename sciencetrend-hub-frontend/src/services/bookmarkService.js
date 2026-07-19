@@ -1,30 +1,61 @@
 import { apiRequest } from "./api";
 
-// Backend BookmarkController: GET /api/bookmarks
+/**
+ * Retrieves the list of bookmarked papers for the current logged-in user.
+ * 
+ * @returns {Promise<Array>} List of paper bookmark records from the server.
+ */
 export function getBookmarkedPapers() {
   return apiRequest("/bookmarks", { method: "GET" });
 }
 
-// Backend: POST /api/bookmarks/{paperId}
+/**
+ * Adds a paper to the user's bookmarks list.
+ * 
+ * @param {string|number} paperId - The target paper identifier.
+ * @returns {Promise<Object>} The bookmark creation response.
+ */
 export function addBookmark(paperId) {
   return apiRequest(`/bookmarks/${paperId}`, { method: "POST" });
 }
 
-// Backend: DELETE /api/bookmarks/{paperId}
+/**
+ * Removes a paper from the user's bookmarks list.
+ * 
+ * @param {string|number} paperId - The target paper identifier.
+ * @returns {Promise<Object>} Response indicating result of removal.
+ */
 export function removeBookmark(paperId) {
   return apiRequest(`/bookmarks/${paperId}`, { method: "DELETE" });
 }
 
-// Support paper ID toggle directly matching backend endpoint
+/**
+ * Helper to remove a bookmark by its paper ID.
+ * 
+ * @param {string|number} paperId - Target paper identifier.
+ * @returns {Promise<Object>} Response indicating result of removal.
+ */
 export function removeBookmarkByPaperId(paperId) {
   return removeBookmark(paperId);
 }
 
-// GET /api/bookmarks/check/{paperId} → returns Map<String, Boolean>
+/**
+ * Queries the bookmark status of a specific paper.
+ * 
+ * @param {string|number} paperId - Target paper identifier.
+ * @returns {Promise<Object>} Map of bookmark status validation flag.
+ */
 export function checkBookmarked(paperId) {
   return apiRequest(`/bookmarks/check/${paperId}`, { method: "GET" });
 }
 
+/**
+ * Toggles the bookmark status of a paper on/off.
+ * 
+ * @param {string|number} paperId - Target paper identifier.
+ * @param {boolean} currentlySaved - The active toggle state.
+ * @returns {Promise<Object>} Response of bookmark add or remove operation.
+ */
 export function toggleBookmark(paperId, currentlySaved) {
   if (currentlySaved) {
     return removeBookmark(paperId);
@@ -32,22 +63,41 @@ export function toggleBookmark(paperId, currentlySaved) {
   return addBookmark(paperId);
 }
 
-// Backend: GET /api/bookmarks/keywords
+/**
+ * Retrieves the list of followed keywords for the user.
+ * 
+ * @returns {Promise<Array>} List of bookmarked keywords.
+ */
 export function getBookmarkedKeywords() {
   return apiRequest("/bookmarks/keywords", { method: "GET" });
 }
 
-// Backend: POST /api/bookmarks/keywords/{keywordId}
+/**
+ * Follows/bookmarks a search keyword.
+ * 
+ * @param {string|number} keywordId - Target keyword identifier.
+ * @returns {Promise<Object>} Confirmation response from the server.
+ */
 export function addKeywordBookmark(keywordId) {
   return apiRequest(`/bookmarks/keywords/${keywordId}`, { method: "POST" });
 }
 
-// Backend: DELETE /api/bookmarks/keywords/{keywordId}
+/**
+ * Unfollows/removes bookmark for a keyword.
+ * 
+ * @param {string|number} keywordId - Target keyword identifier.
+ * @returns {Promise<Object>} Confirmation response from the server.
+ */
 export function removeKeywordBookmark(keywordId) {
   return apiRequest(`/bookmarks/keywords/${keywordId}`, { method: "DELETE" });
 }
 
-// Backend: GET /api/bookmarks/keywords/check/{keywordId}
+/**
+ * Queries the bookmark status of a specific keyword.
+ * 
+ * @param {string|number} keywordId - Target keyword identifier.
+ * @returns {Promise<Object>} Map of validation flag.
+ */
 export function checkKeywordBookmarked(keywordId) {
   return apiRequest(`/bookmarks/keywords/check/${keywordId}`, { method: "GET" });
 }
