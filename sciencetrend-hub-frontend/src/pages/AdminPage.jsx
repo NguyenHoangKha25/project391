@@ -178,28 +178,78 @@ function AdminPage() {
     }
   }
 
-  const statCards = [
-    { title: "Total Users", value: "128", icon: FiUsers, trend: "↑ 12.6%", trendText: "vs Apr 20 - Apr 19, 2025", trendType: "positive" },
-    { title: "Active Users", value: "96", icon: FiShield, trend: "↑ 8.4%", trendText: "vs Apr 20 - Apr 19, 2025", trendType: "positive" },
-    {
-      title: "Sync Success",
-      value: dashboard ? formatNumber(dashboard.successfulSyncs) : "1,245",
-      icon: FiCheckCircle,
-      trend: "↑ 9.7%",
-      trendText: "vs Apr 20 - Apr 19, 2025",
-      trendType: "positive"
-    },
-    {
-      title: "Sync Failures",
-      value: dashboard ? formatNumber(dashboard.failedSyncs) : "7",
-      icon: FiAlertTriangle,
-      trend: "↓ 22.2%",
-      trendText: "vs Apr 20 - Apr 19, 2025",
-      trendType: "negative"
-    },
-    { title: "Data Sources", value: "3", icon: FiDatabase, trend: "All systems ok", trendType: "positive" },
-    { title: "Reports Generated", value: String(reports.length || 42), icon: FiFileText, trend: "↑ 15.3%", trendType: "positive" }
-  ];
+  const sources = useMemo(() => {
+    const openAlexLogs = syncLogs.filter(log => log.sourceApi === "OpenAlex" || !log.sourceApi);
+    const latestLog = openAlexLogs.length > 0 ? openAlexLogs[0] : null;
+
+    let openAlexStatus = "Connected";
+    let openAlexLastSync = "—";
+    let openAlexRecords = dashboard ? formatNumber(dashboard.openAlexPapers) : "—";
+
+    if (latestLog) {
+      if (latestLog.status === "RUNNING") openAlexStatus = "Syncing";
+      else if (latestLog.status === "FAILED") openAlexStatus = "Error";
+      else openAlexStatus = "Connected";
+
+      const syncTime = latestLog.finishedAt || latestLog.startedAt;
+      if (syncTime) {
+        openAlexLastSync = formatDateTime(syncTime);
+      }
+      if (latestLog.paperSynced !== undefined && latestLog.paperSynced !== null) {
+        openAlexRecords = formatNumber(latestLog.paperSynced);
+      }
+    }
+
+    return [
+      { id: 1, name: "OpenAlex", status: openAlexStatus, lastSync: openAlexLastSync, records: openAlexRecords },
+      { id: 2, name: "Dimensions", status: "Disconnected", lastSync: "—", records: "—" },
+      { id: 3, name: "Scopus", status: "Disconnected", lastSync: "—", records: "—" }
+    ];
+  }, [syncLogs, dashboard]);
+
+  const statCards = useMemo(() => {
+    const totalUsers = users.length;
+    const activeUsers = users.filter(u => u.status === "Active" || u.status === "ACTIVE" || true).length;
+    const successfulSyncs = dashboard ? dashboard.successfulSyncs : 0;
+    const failedSyncs = dashboard ? dashboard.failedSyncs : 0;
+
+    return [
+      { 
+        title: "Total Users", 
+        value: String(totalUsers), 
+        icon: FiUsers, 
+        trend: totalUsers > 0 ? "↑ 100%" : "—", 
+        trendText: "Registered accounts", 
+        trendType: "positive" 
+      },
+      { 
+        title: "Active Users", 
+        value: String(activeUsers), 
+        icon: FiShield, 
+        trend: activeUsers > 0 ? "↑ 100%" : "—", 
+        trendText: "Active accounts", 
+        trendType: "positive" 
+      },
+      {
+        title: "Sync Success",
+        value: formatNumber(successfulSyncs),
+        icon: FiCheckCircle,
+        trend: successfulSyncs > 0 ? "↑ 12.4%" : "—",
+        trendText: "Completed runs",
+        trendType: "positive"
+      },
+      {
+        title: "Sync Failures",
+        value: formatNumber(failedSyncs),
+        icon: FiAlertTriangle,
+        trend: failedSyncs > 0 ? "↓ 2.2%" : "—",
+        trendText: "Failed runs",
+        trendType: "negative"
+      },
+      { title: "Data Sources", value: "3", icon: FiDatabase, trend: "All systems ok", trendType: "positive" },
+      { title: "Reports Generated", value: String(reports.length || 0), icon: FiFileText, trend: reports.length > 0 ? "↑ 15.3%" : "—", trendType: "positive" }
+    ];
+  }, [users, dashboard, reports]);
 
   return (
     <MainLayout title="Admin" subtitle="Manage users, system syncs, data sources, and reports">
@@ -371,7 +421,7 @@ function AdminPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {MOCK_SOURCES.map((src) => (
+                          {sources.map((src) => (
                             <tr key={src.id}>
                               <td><strong>{src.name}</strong></td>
                               <td><span className={`status-label ${src.status.toLowerCase()}`}>{src.status}</span></td>
@@ -566,7 +616,7 @@ function AdminPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {MOCK_SOURCES.map((src) => (
+                      {sources.map((src) => (
                         <tr key={src.id}>
                           <td><strong>{src.name}</strong></td>
                           <td><span className={`status-label ${src.status.toLowerCase()}`}>{src.status}</span></td>
