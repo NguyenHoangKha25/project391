@@ -303,8 +303,8 @@ function RegisterPage() {
                   <button
                     type="button"
                     className="eye-toggle"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     onClick={() => setShowPassword((v) => !v)}
-                    tabIndex={-1}
                   >
                     {showPassword ? <FiEyeOff /> : <FiEye />}
                   </button>
@@ -330,8 +330,8 @@ function RegisterPage() {
                   <button
                     type="button"
                     className="eye-toggle"
+                    aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
                     onClick={() => setShowConfirm((v) => !v)}
-                    tabIndex={-1}
                   >
                     {showConfirm ? <FiEyeOff /> : <FiEye />}
                   </button>
