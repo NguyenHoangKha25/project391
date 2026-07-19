@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import "../../styles/layout.css";
@@ -9,6 +9,14 @@ function MainLayout({
   subtitle = "ScienceTrend Hub workspace",
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (title) {
+      document.title = `${title} | ScienceTrend Hub`;
+    } else {
+      document.title = "ScienceTrend Hub";
+    }
+  }, [title]);
 
   function closeSidebar() {
     setSidebarOpen(false);

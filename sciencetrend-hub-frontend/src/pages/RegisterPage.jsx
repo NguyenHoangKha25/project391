@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff, FiCheck, FiUser, FiMail, FiLock, FiUsers } from "react-icons/fi";
 import logoLogin from "../assets/images/logo-login.png";
@@ -24,6 +24,10 @@ function getPasswordStrength(password) {
 
 function RegisterPage() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "Register | ScienceTrend Hub";
+  }, []);
 
   const [form, setForm] = useState({
     username: "",
