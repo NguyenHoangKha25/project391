@@ -29,3 +29,17 @@
 .cm-page-btn:hover:not(:disabled) { color: var(--st-primary); border-color: rgba(21,127,145,.28); background: var(--st-primary-soft); }
 .cm-page-btn.active { color: #fff; background: linear-gradient(135deg, var(--st-primary), var(--st-primary-dark)); }
 .cm-page-btn:disabled { opacity: .48; }
+
+@keyframes skeleton-pulse {
+  0% { opacity: 0.65; }
+  50% { opacity: 1; }
+  100% { opacity: 0.65; }
+}
+.skeleton-line {
+  background: #e2e8f0;
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-card {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
