@@ -208,6 +208,12 @@
   position: relative;
   overflow: hidden; /* Clips the top border gradient neatly at corners! */
   flex-shrink: 0;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s ease;
+}
+.register-premium-card-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 35px 85px rgba(16,24,40,.18) !important;
+}
 }
 .register-premium-card-box::before {
   content: "";
