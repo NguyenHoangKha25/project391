@@ -394,6 +394,8 @@
 .rich-paper-footer-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   font-size: 11px;
   color: var(--st-muted);
   margin-top: auto;
