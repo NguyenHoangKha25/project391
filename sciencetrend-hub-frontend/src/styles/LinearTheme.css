@@ -558,15 +558,61 @@ body {
 
 .auth-left, .register-left {
   background: #ffffff !important;
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid #f0f0f0 !important;
 }
 
-.auth-left-content h1 {
+.auth-brand-text h1, 
+.register-brand-text h1 {
   color: #000000 !important;
+  background: none !important;
+  -webkit-text-fill-color: #000000 !important;
 }
 
-.auth-left-content p {
-  color: #666666 !important;
+.auth-brand-text p, 
+.register-brand-text p {
+  color: #888888 !important;
+  opacity: 1 !important;
+}
+
+.auth-premium-hero h2,
+.register-hero h2 {
+  color: #000000 !important;
+  font-weight: 850 !important;
+  letter-spacing: -1.5px !important;
+}
+
+.auth-premium-hero p, 
+.register-hero p {
+  color: #444444 !important;
+  opacity: 1 !important;
+}
+
+.feature-list .feature-item p {
+  color: #444444 !important;
+}
+
+.feature-list .feature-item .feature-icon-box {
+  background: #f5f5f7 !important;
+  color: #0070f3 !important;
+  border: 1px solid #eef1f6 !important;
+}
+
+.register-testimonial p {
+  color: #444444 !important;
+}
+
+.register-testimonial span {
+  color: #888888 !important;
+}
+
+.auth-badge {
+  color: #0070f3 !important;
+  background: rgba(0, 112, 243, 0.08) !important;
+  border: 1px solid rgba(0, 112, 243, 0.15) !important;
+}
+
+.register-header h2 {
+  color: #000000 !important;
 }
 
 /* ── Paper list cards ── */
