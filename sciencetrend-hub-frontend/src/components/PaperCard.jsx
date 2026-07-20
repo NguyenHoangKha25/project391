@@ -21,7 +21,12 @@ function PaperCard({
   doi,
 }) {
   const [bookmarking, setBookmarking] = useState(false);
-  const metadata = [authors, year].filter(Boolean).join(" · ");
+  
+  const displayAuthors = Array.isArray(authors)
+    ? authors.map(a => (a && typeof a === "object" ? a.name || a.authorName : a)).filter(Boolean).join(", ")
+    : (typeof authors === "string" ? authors : "");
+
+  const metadata = [displayAuthors, year].filter(Boolean).join(" · ");
 
   async function handleBookmark() {
     if (bookmarking || !onBookmark) return;
@@ -33,17 +38,19 @@ function PaperCard({
     }
   }
 
-  const cleanAbstract = abstract
+  const cleanAbstract = typeof abstract === "string"
     ? (abstract.length > 200 ? abstract.substring(0, 190) + "..." : abstract)
     : "";
 
   // Render rich card layout
   if (variant === "rich") {
-    const displayKeywords = keywords.slice(0, 4);
-    const extraKeywordsCount = keywords.length - displayKeywords.length;
+    const safeKeywords = Array.isArray(keywords) ? keywords : [];
+    const displayKeywords = safeKeywords.slice(0, 4);
+    const extraKeywordsCount = safeKeywords.length - displayKeywords.length;
 
     // Citations trend or mock percentage for high-quality dashboard
-    const citationGrowth = rank ? (20 - rank * 2 + 5.3).toFixed(1) : "12.6";
+    const parsedRank = parseFloat(rank);
+    const citationGrowth = !isNaN(parsedRank) ? (20 - parsedRank * 2 + 5.3).toFixed(1) : "12.6";
 
     return (
       <article className="rich-paper-card">
@@ -60,7 +67,7 @@ function PaperCard({
           <h3 className="rich-paper-title">{title}</h3>
           
           <div className="rich-paper-meta-row">
-            <span className="rich-paper-authors">{authors || "Unknown Authors"}</span>
+            <span className="rich-paper-authors">{displayAuthors || "Unknown Authors"}</span>
             {year && <span className="rich-paper-meta-dot" />}
             {year && <span className="rich-paper-year">{year}</span>}
             {source && <span className="rich-paper-meta-dot" />}

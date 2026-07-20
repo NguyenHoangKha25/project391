@@ -7,13 +7,10 @@ import {
   FiKey,
   FiDatabase,
   FiArrowUpRight,
-  FiTrendingUp,
   FiCheckCircle,
   FiAlertTriangle,
   FiCalendar,
-  FiSearch,
-  FiArrowRight,
-  FiActivity
+  FiArrowRight
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
@@ -278,7 +275,7 @@ function DashboardPage() {
       <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
         <div className="cm-loading" style={{ minHeight: "60vh" }}>
           <div className="cm-spinner" />
-          <p style={{ fontWeight: "700", color: "var(--st-primary-dark)" }}>Loading dashboard overview...</p>
+          <p style={{ fontWeight: "700", color: "var(--st-primary-dark)" }}>Loading dashboard overview statistics...</p>
         </div>
       </MainLayout>
     );

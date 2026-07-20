@@ -370,6 +370,11 @@
   backdrop-filter: none;
   position: relative;
   overflow: hidden; /* Clips the top border gradient neatly at corners! */
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s ease;
+}
+.auth-premium-card-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 35px 85px rgba(16,24,40,.18) !important;
 }
 .auth-premium-card-box::before {
   content: "";
@@ -625,15 +630,17 @@
 }
 @media (max-width: 760px) {
   .auth-page {
-    padding: 14px;
+    padding: 12px;
   }
   .auth-premium-card-box {
-    padding: 26px 20px;
-    border-radius: 24px;
+    padding: 22px 16px !important;
+    border-radius: 20px !important;
+    max-width: 100%;
   }
   .auth-options {
     align-items: flex-start;
     flex-direction: column;
+    gap: 12px;
   }
 }
 

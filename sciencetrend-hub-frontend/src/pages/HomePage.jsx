@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FiArrowRight,
@@ -62,6 +63,10 @@ function HomePage() {
   const { isLoggedIn, defaultPath } = useAuth();
   const primaryPath = isLoggedIn ? defaultPath : ROUTE_PATHS.LOGIN;
   const primaryLabel = isLoggedIn ? "Open workspace" : "Login to workspace";
+
+  useEffect(() => {
+    document.title = "ScienceTrend Hub | Scientific Journal Publication Tracking";
+  }, []);
 
   return (
     <main className="home-page">

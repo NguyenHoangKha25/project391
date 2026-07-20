@@ -54,6 +54,7 @@ export async function apiRequest(endpoint, options = {}) {
     body,
     headers: customHeaders = {},
     auth = true,
+    timeout = 12000,
     ...fetchOptions
   } = options;
 
@@ -73,11 +74,26 @@ export async function apiRequest(endpoint, options = {}) {
       : body;
 
   const url = `${API_BASE_URL}${normalizeEndpoint(endpoint)}${buildQueryString(params)}`;
+  const method = (fetchOptions.method || "GET").toUpperCase();
 
-  const res = await fetch(url, { ...fetchOptions, headers, body: requestBody });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  let res;
+  try {
+    res = await fetch(url, { ...fetchOptions, method, headers, body: requestBody, signal: controller.signal });
+    clearTimeout(timeoutId);
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === "AbortError") {
+      console.error(`[API Timeout] ${method} ${url} timed out after ${timeout}ms`);
+      throw new Error("Request timed out. Please check your network connection.");
+    }
+    console.error(`[API Network Error] ${method} ${url} failed:`, error);
+    throw error;
+  }
 
   if (res.status === 204) {
-    const method = (fetchOptions.method || "GET").toUpperCase();
     if (method !== "GET") {
       try {
         const { clearCache } = await import("../utils/apiCache");
@@ -95,11 +111,12 @@ export async function apiRequest(endpoint, options = {}) {
     : await res.text().catch(() => "");
 
   if (!res.ok) {
-    throw new Error(buildErrorMessage(responseBody, res.status));
+    const errorMsg = buildErrorMessage(responseBody, res.status);
+    console.error(`[API HTTP Error] ${res.status} on ${method} ${url} - Error: ${errorMsg}`, responseBody);
+    throw new Error(errorMsg);
   }
 
   // If request is successful and is a mutating method, clear memory cache
-  const method = (fetchOptions.method || "GET").toUpperCase();
   if (method !== "GET") {
     try {
       const { clearCache } = await import("../utils/apiCache");

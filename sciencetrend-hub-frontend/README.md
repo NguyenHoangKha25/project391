@@ -14,3 +14,18 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Local Development Environment Setup
+
+To run this application locally, please configure a `.env.local` file in the root of the project with the following properties:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080/api
+VITE_GOOGLE_AUTH_URL=http://localhost:8080/api/oauth2/authorization/google
+```
+
+### Steps to Run:
+1. Ensure the backend Spring Boot server is running on `http://localhost:8080`.
+2. Run `npm install` to install local node dependencies.
+3. Run `npm run dev` to spin up the local Vite development server.
+4. Open your browser and navigate to `http://localhost:5173` to explore the workspace.

@@ -1,4 +1,5 @@
-import { FiBookOpen, FiCheckCircle, FiMinusCircle } from "react-icons/fi";
+import { useState } from "react";
+import { FiBookOpen, FiCheckCircle, FiMinusCircle, FiLoader } from "react-icons/fi";
 import "../styles/DashboardPage.css";
 
 function JournalCard({
@@ -10,6 +11,18 @@ function JournalCard({
   openAccess = false,
   onUnfollow,
 }) {
+  const [unfollowing, setUnfollowing] = useState(false);
+
+  async function handleUnfollow() {
+    if (unfollowing || !onUnfollow) return;
+    setUnfollowing(true);
+    try {
+      await onUnfollow();
+    } catch (e) {
+      setUnfollowing(false);
+    }
+  }
+
   return (
     <article className="db-journal-card" style={{ position: "relative" }}>
       <span className="db-journal-icon">
@@ -39,7 +52,8 @@ function JournalCard({
       {onUnfollow && (
         <button
           type="button"
-          onClick={onUnfollow}
+          onClick={handleUnfollow}
+          disabled={unfollowing}
           style={{
             position: "absolute",
             right: "12px",
@@ -57,7 +71,7 @@ function JournalCard({
           }}
           title="Untrack journal"
         >
-          <FiMinusCircle />
+          {unfollowing ? <FiLoader className="is-spinning" /> : <FiMinusCircle />}
         </button>
       )}
     </article>

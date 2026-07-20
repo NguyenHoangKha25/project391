@@ -116,10 +116,16 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   transform: translateX(4px);
 }
 
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
 .st-menu-link.active {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
-  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .st-menu-link.active::before {
@@ -140,7 +146,7 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
 
 .st-status-dot {
   background: #10b981;
-  box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.15), 0 0 15px rgba(16, 185, 129, 0.4);
+  animation: pulse-dot 2s infinite;
 }
 
 /* Floating Frosted Navbar */
@@ -196,6 +202,12 @@ body, .auth-page, .login-page, .register-page, .forgot-page, .reset-page {
   border-color: rgba(226, 232, 240, 0.8);
   background: #fff;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  transition: all 0.25s var(--ease-out);
+}
+.st-search-form:focus-within {
+  border-color: rgba(79, 70, 229, 0.45) !important;
+  box-shadow: 0 8px 30px rgba(79, 70, 229, 0.08), 0 0 0 4px rgba(79, 70, 229, 0.05) !important;
+  transform: translateY(-1px);
 }
 .st-search-form input {
   color: #1c2533 !important;

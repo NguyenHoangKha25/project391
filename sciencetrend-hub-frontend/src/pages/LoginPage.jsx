@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FiEye, FiEyeOff, FiUser, FiLock, FiLayers, FiBookOpen, FiPieChart } from "react-icons/fi";
@@ -21,6 +21,10 @@ function LoginPage() {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    document.title = "Sign in | ScienceTrend Hub";
+  }, []);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -69,7 +73,6 @@ function LoginPage() {
       <div className="auth-bg-blur auth-bg-blur-right"></div>
 
       <section className="auth-layout">
-        {/* ── Left branding panel ── */}
         <div className="auth-left">
           <Link to={ROUTE_PATHS.HOME} className="auth-brand" aria-label="ScienceTrend Hub home">
             <span className="auth-logo-box">
@@ -149,7 +152,6 @@ function LoginPage() {
 
         <div className="auth-right">
           <div className="auth-premium-card-box" style={{ position: "relative" }}>
-            {/* Top Border Gradient Line - Perfect mathematical overlay covering the top border */}
             <div style={{
               position: "absolute",
               top: "-1px",

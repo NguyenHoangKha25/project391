@@ -1,46 +1,91 @@
 import { apiRequest } from "./api";
 
-// Connect to GET /api/journals
+/**
+ * Retrieves the full list of journals.
+ * 
+ * @returns {Promise<Array>} List of journal profiles.
+ */
 export function getJournals() {
   return apiRequest("/journals", { auth: false });
 }
 
-// Connect to GET /api/journals/search?keyword=...
+/**
+ * Searches journals by a keyword string.
+ * 
+ * @param {string} keyword - Search pattern matching name, subject, or publisher.
+ * @returns {Promise<Array>} List of matching journal profiles.
+ */
 export function searchJournals(keyword) {
   return apiRequest("/journals/search", { params: { keyword }, auth: false });
 }
 
-// Connect to GET /api/journals/top?limit=...
+/**
+ * Retrieves the top-ranked journals.
+ * 
+ * @param {number} [limit=10] - Number of items to return.
+ * @returns {Promise<Array>} Sorted list of top journals.
+ */
 export function getTopJournals(limit = 10) {
   return apiRequest("/journals/top", { params: { limit }, auth: false });
 }
 
-// Connect to GET /api/journals/{journalId}
+/**
+ * Retrieves a single journal profile by ID.
+ * 
+ * @param {string|number} id - Target journal identifier.
+ * @returns {Promise<Object>} Journal profile details.
+ */
 export function getJournalById(id) {
   return apiRequest(`/journals/${id}`, { auth: false });
 }
 
-// Connect to GET /api/journals/{journalId}/papers?page=...&size=...
+/**
+ * Retrieves paginated research papers published under a journal.
+ * 
+ * @param {string|number} journalId - Target journal identifier.
+ * @param {number} [page=0] - Active page index.
+ * @param {number} [size=10] - Number of results per page.
+ * @returns {Promise<Object>} Paginated papers content list.
+ */
 export function getPapersByJournal(journalId, page = 0, size = 10) {
   return apiRequest(`/journals/${journalId}/papers`, { params: { page, size }, auth: false });
 }
 
-// Connect to GET /api/journals/following
+/**
+ * Retrieves the list of journals followed by the current user.
+ * 
+ * @returns {Promise<Array>} List of followed journals.
+ */
 export function getFollowedJournals() {
   return apiRequest("/journals/following", { method: "GET" });
 }
 
-// Connect to POST /api/journals/{journalId}/follow
+/**
+ * Tracks/follows a specific journal.
+ * 
+ * @param {string|number} journalId - Target journal identifier.
+ * @returns {Promise<Object>} Follow relationship result.
+ */
 export function followJournal(journalId) {
   return apiRequest(`/journals/${journalId}/follow`, { method: "POST" });
 }
 
-// Connect to DELETE /api/journals/{journalId}/follow
+/**
+ * Untracks/unfollows a specific journal.
+ * 
+ * @param {string|number} journalId - Target journal identifier.
+ * @returns {Promise<Object>} Follow relationship result.
+ */
 export function unfollowJournal(journalId) {
   return apiRequest(`/journals/${journalId}/follow`, { method: "DELETE" });
 }
 
-// Connect to GET /api/journals/{journalId}/follow/check
+/**
+ * Checks if a specific journal is followed by the user.
+ * 
+ * @param {string|number} journalId - Target journal identifier.
+ * @returns {Promise<Object>} Map containing validation flag status.
+ */
 export function checkJournalFollowed(journalId) {
   return apiRequest(`/journals/${journalId}/follow/check`, { method: "GET" });
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff, FiCheck, FiUser, FiMail, FiLock, FiUsers } from "react-icons/fi";
 import logoLogin from "../assets/images/logo-login.png";
@@ -24,6 +24,10 @@ function getPasswordStrength(password) {
 
 function RegisterPage() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "Register | ScienceTrend Hub";
+  }, []);
 
   const [form, setForm] = useState({
     username: "",
@@ -146,7 +150,7 @@ function RegisterPage() {
         });
       }, 2000);
     } catch (error) {
-      console.error("Registration error details:", error);
+      console.warn("Registration attempt failed:", error);
       const msg = error.message || "Registration failed. Please check your information.";
       setMessage(msg);
       setMessageType("error");
@@ -303,8 +307,8 @@ function RegisterPage() {
                   <button
                     type="button"
                     className="eye-toggle"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     onClick={() => setShowPassword((v) => !v)}
-                    tabIndex={-1}
                   >
                     {showPassword ? <FiEyeOff /> : <FiEye />}
                   </button>
@@ -330,8 +334,8 @@ function RegisterPage() {
                   <button
                     type="button"
                     className="eye-toggle"
+                    aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
                     onClick={() => setShowConfirm((v) => !v)}
-                    tabIndex={-1}
                   >
                     {showConfirm ? <FiEyeOff /> : <FiEye />}
                   </button>

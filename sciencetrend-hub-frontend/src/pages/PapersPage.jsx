@@ -71,7 +71,8 @@ function PapersPage() {
           setAvailableKeywords(toArray(keywordsRes.value));
         }
       } catch (err) {
-        console.error("Cannot load metadata options", err);
+        // Suppress verbose metadata errors in production logs
+        console.warn("Metadata options unavailable", err);
       }
     }
     fetchMetadata();
@@ -111,7 +112,8 @@ function PapersPage() {
       setTotalElements(response?.totalElements ?? items.length);
       setPage(pageNum);
     } catch (error) {
-      console.error("Cannot load papers", error);
+      // Gracefully capture query errors and warn
+      console.warn("Papers query load failed", error);
       setPapers([]);
       setErrorMessage(error.message || "Couldn't load papers. Try again in a moment.");
     } finally {
@@ -457,9 +459,29 @@ function PapersPage() {
 
             {/* Results block */}
             {loading ? (
-              <div className="workspace-empty" style={{ minHeight: 340 }}>
-                <span className="workspace-loading-spinner" />
-                Loading papers…
+              <div className="search-papers-list">
+                {[1, 2, 3].map((n) => (
+                  <div key={n} className="rich-paper-card skeleton-card" style={{ pointerEvents: "none", opacity: 0.7 }}>
+                    <div className="rich-paper-rank-section">
+                      <div className="skeleton-line" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#f0eae1" }} />
+                      <div className="skeleton-line" style={{ width: "40px", height: "40px", borderRadius: "12px", background: "#e1d8cb", marginTop: "12px" }} />
+                    </div>
+                    <div className="rich-paper-details" style={{ flex: 1 }}>
+                      <div className="skeleton-line" style={{ width: "80%", height: "20px", background: "#e1d8cb", borderRadius: "4px", marginBottom: "12px" }} />
+                      <div className="skeleton-line" style={{ width: "50%", height: "14px", background: "#f0eae1", borderRadius: "4px", marginBottom: "16px" }} />
+                      <div className="skeleton-line" style={{ width: "95%", height: "40px", background: "#f5f1ea", borderRadius: "4px", marginBottom: "16px" }} />
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <div className="skeleton-line" style={{ width: "60px", height: "22px", background: "#f0eae1", borderRadius: "12px" }} />
+                        <div className="skeleton-line" style={{ width: "70px", height: "22px", background: "#f0eae1", borderRadius: "12px" }} />
+                      </div>
+                    </div>
+                    <div className="rich-paper-stats-section" style={{ width: "120px", borderLeft: "1px solid rgba(230, 222, 211, 0.8)", paddingLeft: "16px" }}>
+                      <div className="skeleton-line" style={{ width: "50px", height: "12px", background: "#f0eae1", borderRadius: "3px", marginBottom: "8px" }} />
+                      <div className="skeleton-line" style={{ width: "45px", height: "28px", background: "#e1d8cb", borderRadius: "4px", marginBottom: "12px" }} />
+                      <div className="skeleton-line" style={{ width: "80px", height: "28px", background: "#e1d8cb", borderRadius: "6px" }} />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : papers.length === 0 ? (
               <div className="workspace-empty" style={{ minHeight: 340 }}>

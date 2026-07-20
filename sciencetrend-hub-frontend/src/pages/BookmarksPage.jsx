@@ -73,6 +73,7 @@ function BookmarksPage() {
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [untrackProcessing, setUntrackProcessing] = useState(new Set());
   const { toast, showToast } = useToast();
 
   const loadLibraryData = useCallback(async () => {
@@ -170,38 +171,68 @@ function BookmarksPage() {
   }
 
   async function handleRemoveKeyword(keywordId) {
-    const oldKeywords = savedKeywords;
-    setSavedKeywords((curr) => curr.filter((kw) => kw.id !== keywordId));
+    if (untrackProcessing.has(`keyword-${keywordId}`)) return;
+    setUntrackProcessing((prev) => {
+      const next = new Set(prev);
+      next.add(`keyword-${keywordId}`);
+      return next;
+    });
     try {
       await removeKeywordBookmark(keywordId);
+      setSavedKeywords((curr) => curr.filter((kw) => kw.id !== keywordId));
       showToast("Removed keyword from bookmarks.", "info");
     } catch {
-      setSavedKeywords(oldKeywords);
       showToast("Couldn't remove keyword. Try again.", "warning");
+    } finally {
+      setUntrackProcessing((prev) => {
+        const next = new Set(prev);
+        next.delete(`keyword-${keywordId}`);
+        return next;
+      });
     }
   }
 
   async function handleUnfollowJournal(journalId) {
-    const oldJournals = followedJournals;
-    setFollowedJournals((curr) => curr.filter((j) => j.id !== journalId));
+    if (untrackProcessing.has(`journal-${journalId}`)) return;
+    setUntrackProcessing((prev) => {
+      const next = new Set(prev);
+      next.add(`journal-${journalId}`);
+      return next;
+    });
     try {
       await unfollowJournal(journalId);
+      setFollowedJournals((curr) => curr.filter((j) => j.id !== journalId));
       showToast("Untracked journal.", "info");
     } catch {
-      setFollowedJournals(oldJournals);
       showToast("Couldn't untrack journal. Try again.", "warning");
+    } finally {
+      setUntrackProcessing((prev) => {
+        const next = new Set(prev);
+        next.delete(`journal-${journalId}`);
+        return next;
+      });
     }
   }
 
   async function handleUnfollowTopic(topicId) {
-    const oldTopics = followedTopics;
-    setFollowedTopics((curr) => curr.filter((t) => t.id !== topicId));
+    if (untrackProcessing.has(`topic-${topicId}`)) return;
+    setUntrackProcessing((prev) => {
+      const next = new Set(prev);
+      next.add(`topic-${topicId}`);
+      return next;
+    });
     try {
       await unfollowTopic(topicId);
+      setFollowedTopics((curr) => curr.filter((t) => t.id !== topicId));
       showToast("Untracked topic.", "info");
     } catch {
-      setFollowedTopics(oldTopics);
       showToast("Couldn't untrack topic. Try again.", "warning");
+    } finally {
+      setUntrackProcessing((prev) => {
+        const next = new Set(prev);
+        next.delete(`topic-${topicId}`);
+        return next;
+      });
     }
   }
 
@@ -423,9 +454,10 @@ function BookmarksPage() {
                           <button
                             type="button"
                             className="lib-card-untrack"
+                            disabled={untrackProcessing.has(`journal-${journal.id}`)}
                             onClick={() => handleUnfollowJournal(journal.id)}
                           >
-                            Untrack
+                            {untrackProcessing.has(`journal-${journal.id}`) ? "..." : "Untrack"}
                           </button>
                         </div>
                       ))}
@@ -462,9 +494,10 @@ function BookmarksPage() {
                           <button
                             type="button"
                             className="lib-card-untrack"
+                            disabled={untrackProcessing.has(`topic-${topic.id}`)}
                             onClick={() => handleUnfollowTopic(topic.id)}
                           >
-                            Untrack
+                            {untrackProcessing.has(`topic-${topic.id}`) ? "..." : "Untrack"}
                           </button>
                         </div>
                       ))}
@@ -525,10 +558,11 @@ function BookmarksPage() {
                       <span>{kw.name}</span>
                       <button
                         type="button"
+                        disabled={untrackProcessing.has(`keyword-${kw.id}`)}
                         onClick={() => handleRemoveKeyword(kw.id)}
                         title="Remove keyword"
                       >
-                        <FiX />
+                        {untrackProcessing.has(`keyword-${kw.id}`) ? "…" : <FiX />}
                       </button>
                     </div>
                   ))}

@@ -210,26 +210,29 @@ function TrendsPage() {
 
   // Calculate dynamic SVG Area Chart path (Publication Count by Year)
   const areaChartPathData = useMemo(() => {
-    const points = chartData.length > 0 
-      ? chartData.map((pt) => pt.value)
-      : [];
+    const safeChartData = Array.isArray(chartData) ? chartData : [];
+    const points = safeChartData.map((pt) => pt?.value ?? 0);
     
     const width = 380;
     const height = 120;
     const padding = 10;
+    
+    if (points.length === 0) {
+      return { linePath: "", areaPath: "", coords: [], points: [] };
+    }
+    
     const maxVal = Math.max(...points, 1);
     const minVal = Math.min(...points, 0);
-    const range = maxVal - minVal;
+    const range = maxVal - minVal || 1;
     
     const coords = points.map((val, idx) => {
-      const x = padding + (idx * (width - 2 * padding)) / (points.length - 1);
+      const denominator = points.length > 1 ? points.length - 1 : 1;
+      const x = padding + (idx * (width - 2 * padding)) / denominator;
       const y = height - padding - ((val - minVal) * (height - 2 * padding)) / range;
-      return { x, y };
+      return { x, y, value: val, label: safeChartData[idx]?.label || "" };
     });
 
     const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
-    
-    // Closed shape for gradient area filling
     const areaPath = coords.length > 0
       ? `${linePath} L ${coords[coords.length - 1].x.toFixed(1)},${(height - padding).toFixed(1)} L ${coords[0].x.toFixed(1)},${(height - padding).toFixed(1)} Z`
       : "";
@@ -244,26 +247,31 @@ function TrendsPage() {
     const padding = 10;
 
     const activeChips = trendTab === "keyword" ? keywordChips : topicChips;
-    if (activeChips.length === 0 || chartData.length === 0) return [];
+    const safeActiveChips = Array.isArray(activeChips) ? activeChips : [];
+    const safeChartData = Array.isArray(chartData) ? chartData : [];
+    
+    if (safeActiveChips.length === 0 || safeChartData.length === 0) return [];
 
-    // Map backend chart data curve by year label to align perfectly with years axis
     const yearValuesMap = {};
-    chartData.forEach(pt => {
-      yearValuesMap[String(pt.label)] = pt.value;
+    safeChartData.forEach(pt => {
+      if (pt) {
+        yearValuesMap[String(pt.label)] = pt.value;
+      }
     });
 
     const values = years.map(yr => yearValuesMap[String(yr)] || 0);
     const maxVal = Math.max(...values, 10);
     const minVal = 0;
-    const range = maxVal - minVal;
+    const range = maxVal - minVal || 1;
 
     const dataset = [
-      { label: activeChips[0] || "Topic 1", stroke: "#5e6ad2", values }
+      { label: safeActiveChips[0] || "Topic 1", stroke: "#5e6ad2", values }
     ];
 
     return dataset.map((line, lineIdx) => {
       const coords = line.values.map((val, idx) => {
-        const x = padding + (idx * (width - 2 * padding)) / (years.length - 1);
+        const denominator = years.length > 1 ? years.length - 1 : 1;
+        const x = padding + (idx * (width - 2 * padding)) / denominator;
         const y = height - padding - ((val - minVal) * (height - 2 * padding)) / range;
         return { x, y };
       });
@@ -271,7 +279,7 @@ function TrendsPage() {
       const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
 
       return {
-        label: activeChips[lineIdx] || line.label,
+        label: safeActiveChips[lineIdx] || line.label,
         stroke: line.stroke,
         linePath,
         coords
@@ -486,7 +494,20 @@ function TrendsPage() {
                     <path d={areaChartPathData.areaPath} fill="url(#areaGrad)" />
                     <path d={areaChartPathData.linePath} fill="none" stroke="#5e6ad2" strokeWidth="2.5" strokeLinecap="round" />
                     {areaChartPathData.coords.map((c, i) => (
-                      <circle key={i} cx={c.x} cy={c.y} r="3" fill="#ffffff" stroke="#5e6ad2" strokeWidth="1.5" />
+                      <circle 
+                        key={i} 
+                        cx={c.x} 
+                        cy={c.y} 
+                        r="3.5" 
+                        fill="#ffffff" 
+                        stroke="#5e6ad2" 
+                        strokeWidth="1.5"
+                        tabIndex="0"
+                        role="img"
+                        aria-label={`Năm ${c.label}: ${c.value} bài báo`}
+                        style={{ cursor: "pointer", transition: "all 0.15s ease" }}
+                        className="trend-chart-point"
+                      />
                     ))}
                   </svg>
                   <div className="trends-chart-axis-x">

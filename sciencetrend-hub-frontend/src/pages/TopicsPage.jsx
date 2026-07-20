@@ -337,8 +337,22 @@ function TopicsPage() {
               })}
             </div>
           ) : (
-            <div className="topics-empty">
-              No research topics found matching "{searchQuery}".
+            <div className="workspace-empty" style={{ minHeight: 240, background: "rgba(255, 255, 255, 0.5)", border: "1px dashed rgba(230, 222, 211, 0.8)", borderRadius: "20px", display: "grid", placeItems: "center", padding: "30px", textAlign: "center", marginTop: "16px" }}>
+              <div style={{ maxWidth: "340px", margin: "0 auto" }}>
+                <FiLayers style={{ fontSize: "36px", color: "var(--st-primary, #157f91)", marginBottom: "12px", opacity: 0.8 }} />
+                <h3 style={{ fontSize: "16px", fontWeight: "800", color: "var(--st-heading)", marginBottom: "6px" }}>No Topics Found</h3>
+                <p style={{ fontSize: "13.5px", color: "var(--st-muted-strong)", lineHeight: "1.5", marginBottom: "16px" }}>
+                  We couldn't find any scientific topics matching "{searchQuery}". Try using different terms or clear your search.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="cm-btn cm-btn-sm cm-btn-secondary"
+                  style={{ minHeight: "32px", padding: "0 14px", borderRadius: "10px", border: "1px solid rgba(21,127,145,.18)", color: "var(--st-primary)", background: "var(--st-primary-soft)", cursor: "pointer", fontWeight: "750" }}
+                >
+                  Clear Search
+                </button>
+              </div>
             </div>
           )}
         </section>
