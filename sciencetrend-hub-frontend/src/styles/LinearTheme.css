@@ -562,6 +562,50 @@ body {
   border-right: 1px solid #f0f0f0 !important;
 }
 
+/* ── Register/Login Page Full Vercel Overhaul ── */
+.register-page,
+.auth-page {
+  background: #fafafa !important;
+  padding: clamp(20px, 3vw, 36px) !important;
+}
+
+.register-page::before,
+.auth-page::before {
+  display: none !important;
+}
+
+.register-wrapper,
+.auth-layout {
+  background: #ffffff !important;
+  border: 1px solid #f0f0f0 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04), 0 30px 60px rgba(0, 0, 0, 0.02) !important;
+  min-height: auto !important;
+  height: auto !important;
+  align-self: center !important;
+  overflow: hidden !important;
+}
+
+/* Left panel */
+.register-left,
+.auth-left {
+  background: #ffffff !important;
+  border-right: 1px solid #f0f0f0 !important;
+  color: #000000 !important;
+}
+
+.register-left::before,
+.auth-left::before {
+  display: none !important;
+}
+
+.register-logo-box,
+.auth-logo-box {
+  background: #f5f5f7 !important;
+  border: 1px solid #eef1f6 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+}
+
 .auth-brand-text h1, 
 .register-brand-text h1 {
   color: #000000 !important;
@@ -578,49 +622,81 @@ body {
 .auth-premium-hero h2,
 .register-hero h2 {
   color: #000000 !important;
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: #000000 !important;
   font-weight: 850 !important;
   letter-spacing: -1.5px !important;
+  filter: none !important;
 }
 
 .auth-premium-hero p, 
 .register-hero p {
-  color: #444444 !important;
+  color: #555555 !important;
   opacity: 1 !important;
 }
 
+/* Feature items */
+.feature-item {
+  background: #f5f5f7 !important;
+  border: 1px solid #eef1f6 !important;
+  border-radius: 12px !important;
+}
+
+.feature-item:hover {
+  background: #eef1f6 !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+  transform: translateY(-2px) !important;
+}
+
 .feature-list .feature-item p {
-  color: #444444 !important;
+  color: #333333 !important;
 }
 
 .feature-list .feature-item .feature-icon-box {
-  background: #f5f5f7 !important;
-  color: #0070f3 !important;
-  border: 1px solid #eef1f6 !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+}
+
+/* Testimonial */
+.register-testimonial {
+  border-top: 1px solid #f0f0f0 !important;
+  background: transparent !important;
 }
 
 .register-testimonial p {
   color: #444444 !important;
+  font-style: italic !important;
 }
 
 .register-testimonial span {
   color: #888888 !important;
 }
 
+/* Auth badge */
 .auth-badge {
-  color: #0070f3 !important;
-  background: rgba(0, 112, 243, 0.08) !important;
-  border: 1px solid rgba(0, 112, 243, 0.15) !important;
+  color: #000000 !important;
+  background: #f5f5f7 !important;
+  border: 1px solid #eef1f6 !important;
 }
 
+/* Auth premium feature tags */
+.auth-premium-feature-tag {
+  background: #f5f5f7 !important;
+  border: 1px solid #eef1f6 !important;
+  color: #333333 !important;
+}
+
+/* Right panel - Form card */
 .register-header h2 {
   color: #000000 !important;
-}
-
-/* ── Register / Login Container Scroll Fix (Vercel Style) ── */
-.register-wrapper {
-  min-height: auto !important;
-  height: auto !important;
-  align-self: center !important;
+  font-size: 32px !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.04em !important;
 }
 
 .register-right {
@@ -628,12 +704,82 @@ body {
   min-height: 100% !important;
   overflow-y: visible !important;
   justify-content: center !important;
-  padding-bottom: clamp(20px, 3vw, 30px) !important;
+  padding: clamp(24px, 3vw, 36px) !important;
+  background: #fafafa !important;
 }
 
-.register-premium-card-box {
+.register-premium-card-box,
+.auth-premium-card-box {
+  background: #ffffff !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.03) !important;
+  border-radius: 16px !important;
   max-height: none !important;
   overflow: visible !important;
+}
+
+.register-premium-card-box::before,
+.auth-premium-card-box::before {
+  display: none !important;
+}
+
+/* Form inputs */
+.register-form input,
+.register-form select {
+  background: #ffffff !important;
+  border: 1px solid #eef1f6 !important;
+  color: #000000 !important;
+  border-radius: 10px !important;
+}
+
+.register-form input:focus,
+.register-form select:focus {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.register-form label {
+  color: #444444 !important;
+}
+
+.input-field-icon {
+  color: #888888 !important;
+}
+
+/* Submit button */
+.register-submit-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.register-submit-btn:hover {
+  background: #222222 !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Links */
+.register-signin-redirect {
+  color: #666666 !important;
+}
+
+.register-signin-redirect .login-link,
+.register-terms a {
+  color: #0070f3 !important;
+  font-weight: 700 !important;
+}
+
+.register-terms {
+  color: #888888 !important;
+}
+
+/* Toggle password eye */
+.toggle-password-btn {
+  color: #888888 !important;
+  background: transparent !important;
 }
 
 /* ── Paper list cards ── */
