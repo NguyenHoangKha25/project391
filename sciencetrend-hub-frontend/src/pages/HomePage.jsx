@@ -2,16 +2,15 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FiBarChart2,
-  FiBookOpen,
   FiBookmark,
   FiCheckCircle,
   FiDatabase,
+  FiFileText,
+  FiFilter,
   FiSearch,
   FiShield,
   FiTrendingUp,
   FiZap,
-  FiGrid,
-  FiSettings,
   FiArrowUpRight,
 } from "react-icons/fi";
 import logo from "../assets/images/logo-login.png";
@@ -134,120 +133,72 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="home-hero-visual" aria-label="ScienceTrend Hub preview">
-          <div className="portal-mockup-app">
-            {/* Sidebar Mockup */}
-            <aside className="mockup-sidebar">
-              <div className="mockup-window-controls">
-                <span className="control-close" />
-                <span className="control-min" />
-                <span className="control-max" />
-              </div>
-              <div className="mockup-sidebar-logo">
-                <FiZap />
-              </div>
-              <nav className="mockup-sidebar-nav">
-                <span className="active"><FiGrid /></span>
-                <span><FiBookOpen /></span>
-                <span><FiTrendingUp /></span>
-                <span><FiBookmark /></span>
-                <span><FiBarChart2 /></span>
-                <span><FiSettings /></span>
-              </nav>
-              <div className="mockup-sidebar-avatar" />
-            </aside>
+        <div className="home-hero-visual" aria-label="Paper search workspace preview">
+          <div className="research-preview">
+            <div className="research-preview-bar">
+              <span className="research-preview-brand">
+                <span className="research-preview-logo"><FiSearch /></span>
+                Paper search
+              </span>
+              <span className="research-preview-index"><i /> Index updated today</span>
+            </div>
 
-            {/* Main Content Mockup */}
-            <main className="mockup-content">
-              {/* Header Title Info */}
-              <header className="mockup-header">
-                <div className="mockup-brand-title">
-                  <h3>Trends in Sciences Journal Analytics</h3>
-                  <small>Volume 23 • ISSN: 2774-0226</small>
+            <div className="research-preview-body">
+              <div className="research-preview-heading">
+                <div>
+                  <span>Search across journals</span>
+                  <h3>Find research you can use</h3>
                 </div>
-              </header>
-
-              {/* Rich Multi-Widget Grid */}
-              <div className="mockup-grid">
-                {/* 1. Unified Overview Card */}
-                <section className="mockup-card overview-card">
-                  <div className="overview-top-row">
-                    <div className="overview-stats">
-                      <small>Cumulative Citations & Impact</small>
-                      <div className="chart-stats-row">
-                        <strong>18,450</strong>
-                        <span className="growth-text">+32.6%</span>
-                      </div>
-                    </div>
-                    {/* Small compact radial gauge */}
-                    <div className="mini-radial-box">
-                      <svg viewBox="0 0 100 100" className="radial-svg">
-                        <circle cx="50" cy="50" r="40" stroke="rgba(99,179,237,0.12)" strokeWidth="10" fill="none" />
-                        <circle cx="50" cy="50" r="40" stroke="url(#accent-gradient-new)" strokeWidth="10" fill="none" strokeDasharray="251.2" strokeDashoffset="45" strokeLinecap="round" />
-                        <defs>
-                          <linearGradient id="accent-gradient-new" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#3b82f6" />
-                            <stop offset="100%" stopColor="#fbbf24" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      <div className="radial-text">
-                        <strong>86%</strong>
-                        <small>AI & ML</small>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Full width trend line chart */}
-                  <div className="sparkline-chart-main">
-                    <svg viewBox="0 0 300 50" className="sparkline-svg-large">
-                      <path d="M0 40 Q50 10 100 30 T200 15 T300 5" fill="none" stroke="#3b82f6" strokeWidth="2.5" />
-                      <circle cx="300" cy="5" r="3.5" fill="#3b82f6" />
-                    </svg>
-                  </div>
-                </section>
-
-                {/* 2. Monitored Publications Card (2 items) */}
-                <section className="mockup-card list-card">
-                  <div className="card-header-clean">
-                    <small>Recently Monitored Publications</small>
-                  </div>
-                  <div className="feed-list">
-                    <div className="feed-item">
-                      <div className="feed-info">
-                        <strong>GPT-4 Architecture & Scholarly Impact</strong>
-                        <span>2026 • 4.8k citations</span>
-                      </div>
-                      <span className="feed-badge"><FiArrowUpRight /></span>
-                    </div>
-                    <div className="feed-item">
-                      <div className="feed-info">
-                        <strong>Quantum Information & Cryptography</strong>
-                        <span>2025 • 2.1k citations</span>
-                      </div>
-                      <span className="feed-badge"><FiArrowUpRight /></span>
-                    </div>
-                  </div>
-                </section>
-
-                {/* 3. Journal Impact Factors Card (2 items) */}
-                <section className="mockup-card list-card">
-                  <div className="card-header-clean">
-                    <small>Core Journal Impact Factors</small>
-                  </div>
-                  <div className="impact-list">
-                    <div className="impact-item">
-                      <span>Nature Science Trend</span>
-                      <strong>15.4 IF</strong>
-                    </div>
-                    <div className="impact-item">
-                      <span>IEEE Journal of Computing</span>
-                      <strong>12.8 IF</strong>
-                    </div>
-                  </div>
-                </section>
+                <strong>2,480 papers</strong>
               </div>
-            </main>
+
+              <div className="research-preview-search">
+                <FiSearch aria-hidden="true" />
+                <span>graph neural networks</span>
+                <kbd>⌘ K</kbd>
+              </div>
+
+              <div className="research-preview-filters" aria-label="Applied search filters">
+                <span><FiFilter /> 2022–2026</span>
+                <span>Open access</span>
+                <span>Sort: Relevance</span>
+              </div>
+
+              <div className="research-preview-results">
+                <article className="research-paper-row">
+                  <div className="research-paper-icon"><FiFileText /></div>
+                  <div className="research-paper-copy">
+                    <span className="research-paper-source">Survey paper · Open access</span>
+                    <h4>A Comprehensive Survey on Graph Neural Networks</h4>
+                    <p>Z. Wu, S. Pan, F. Chen · IEEE Transactions · 2023</p>
+                    <div>
+                      <span>Graph learning</span>
+                      <span>1,284 citations</span>
+                    </div>
+                  </div>
+                  <span className="research-paper-save"><FiBookmark /> Save</span>
+                </article>
+
+                <article className="research-paper-row">
+                  <div className="research-paper-icon"><FiFileText /></div>
+                  <div className="research-paper-copy">
+                    <span className="research-paper-source">Research article · PDF available</span>
+                    <h4>Graph Attention Networks for Scientific Discovery</h4>
+                    <p>M. Velickovic, A. Casanova · Machine Learning Journal · 2024</p>
+                    <div>
+                      <span>Attention models</span>
+                      <span>642 citations</span>
+                    </div>
+                  </div>
+                  <span className="research-paper-save"><FiBookmark /> Save</span>
+                </article>
+              </div>
+
+              <div className="research-preview-footer">
+                <span><FiCheckCircle /> Sources verified</span>
+                <span>View all results <FiArrowUpRight /></span>
+              </div>
+            </div>
           </div>
         </div>
 
