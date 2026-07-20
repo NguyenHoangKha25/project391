@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" style="color-scheme: light only; background: #f8f7f3;">
+<html lang="en" style="color-scheme: dark; background: #0a0e27;">
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="color-scheme" content="light only" />
+  <meta name="color-scheme" content="dark" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ScienceTrend Hub</title>
@@ -12,18 +12,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Block dark mode at the earliest possible moment -->
   <style>
-    :root { color-scheme: light only !important; }
+    :root { color-scheme: dark !important; }
     html, body {
-      color-scheme: light only !important;
-      background: #fafafa !important;
-      color: #333333 !important;
+      color-scheme: dark !important;
+      background: #0a0e27 !important;
+      color: #ffffff !important;
       font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
     }
-    /* Override any browser dark-mode UA stylesheet */
-    @media (prefers-color-scheme: dark) {
-      html, body { background: #fafafa !important; color: #333333 !important; }
+    @media (prefers-color-scheme: light) {
+      html, body { background: #0a0e27 !important; color: #ffffff !important; }
     }
   </style>
 </head>
