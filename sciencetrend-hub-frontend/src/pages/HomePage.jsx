@@ -1,22 +1,17 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-  FiArrowRight,
   FiBarChart2,
   FiBookOpen,
   FiBookmark,
   FiCheckCircle,
   FiDatabase,
-  FiGlobe,
-  FiLayers,
   FiSearch,
   FiShield,
   FiTrendingUp,
   FiZap,
   FiGrid,
   FiSettings,
-  FiBell,
-  FiClock,
   FiArrowUpRight,
 } from "react-icons/fi";
 import logo from "../assets/images/logo-login.png";
@@ -73,7 +68,7 @@ function HomePage() {
       <div className="home-topbar">
         <div>
           <span>ScienceTrend Research Hub</span>
-          <span>Publication intelligence for students and researchers</span>
+          <span>A practical research workspace for students and researchers</span>
         </div>
         <div>
           <span>English</span>
@@ -92,9 +87,9 @@ function HomePage() {
         </Link>
 
         <nav className="home-nav-links" aria-label="Home navigation">
-          <a href="#features">Services</a>
-          <a href="#insight">Insights</a>
-          <a href="#workflow">Workflow</a>
+          <a href="#features">Features</a>
+          <a href="#insight">Overview</a>
+          <a href="#workflow">How it works</a>
           <Link to={ROUTE_PATHS.PAPERS}>Papers</Link>
         </nav>
 
@@ -119,32 +114,22 @@ function HomePage() {
 
         <div className="home-hero-copy">
           <span className="home-eyebrow">
-            <FiZap aria-hidden="true" /> FOR STUDENTS & RESEARCHERS
+            <FiZap aria-hidden="true" /> RESEARCH WORKSPACE
           </span>
           <h1>
-            All your academic research, in <span className="hero-highlight">one smart workspace</span>.
+            Research without <span className="hero-highlight">losing your place.</span>
           </h1>
           <p>
-            Organize your bibliography, track journals, and export citation reports instantly.
+            Search papers, save what matters, follow new topics, and turn your reading into clear reports—all in one workspace.
           </p>
 
           <div className="home-hero-actions">
-            <a 
-              href="#features" 
-              className="home-secondary-link"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: "48px",
-                padding: "0 24px",
-                borderRadius: "99px",
-                whiteSpace: "nowrap",
-                gap: "8px",
-                textDecoration: "none"
-              }}
-            >
-              Explore modules
+            <Link to={primaryPath} className="home-primary-link">
+              {primaryLabel}
+              <FiArrowUpRight aria-hidden="true" />
+            </Link>
+            <a href="#features" className="home-secondary-link">
+              Explore features
             </a>
           </div>
         </div>
@@ -279,11 +264,11 @@ function HomePage() {
       <section className="home-section" id="features">
         <div className="home-section-heading">
           <span className="home-eyebrow">
-            <FiShield aria-hidden="true" /> KEY FEATURES
+            <FiShield aria-hidden="true" /> BUILT FOR REAL RESEARCH
           </span>
-          <h2>Everything you need to write and research</h2>
+          <h2>Tools that fit the way you already research</h2>
           <p>
-            Simple tools built for academic research.
+            No complicated setup. Just search, save, follow, and report.
           </p>
         </div>
  
@@ -308,9 +293,9 @@ function HomePage() {
           <span className="home-eyebrow">
             <FiDatabase aria-hidden="true" /> HOW IT WORKS
           </span>
-          <h2>From search to final report in minutes</h2>
+          <h2>A shorter path from question to evidence</h2>
           <p>
-            Go from raw search to final draft in minutes.
+            Three straightforward steps keep your research moving.
           </p>
         </div>
 

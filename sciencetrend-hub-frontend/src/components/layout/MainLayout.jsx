@@ -24,6 +24,9 @@ function MainLayout({
 
   return (
     <div className="st-layout">
+      <a className="st-skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
 
       {sidebarOpen && (
@@ -41,7 +44,7 @@ function MainLayout({
           subtitle={subtitle}
           onMenuClick={() => setSidebarOpen((current) => !current)}
         />
-        <main className="st-content">{children}</main>
+        <main className="st-content" id="main-content">{children}</main>
       </div>
     </div>
   );

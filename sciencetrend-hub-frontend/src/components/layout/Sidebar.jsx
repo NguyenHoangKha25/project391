@@ -58,7 +58,7 @@ function Sidebar({ isOpen = false, onNavigate }) {
 
       <div className="st-menu-label">Workspace</div>
 
-      <div className="st-menu" role="menubar">
+      <div className="st-menu">
         {visibleMenuItems.map((item) => {
           const Icon = item.icon;
 
@@ -70,7 +70,6 @@ function Sidebar({ isOpen = false, onNavigate }) {
               className={({ isActive }) =>
                 `st-menu-link ${isActive ? "active" : ""}`
               }
-              role="menuitem"
             >
               <Icon aria-hidden="true" />
               <span>{item.label}</span>

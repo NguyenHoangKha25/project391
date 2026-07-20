@@ -78,6 +78,7 @@ function Navbar({
   async function fetchSuggestions(query) {
     try {
       setLoadingSuggestions(true);
+      setShowSuggestions(true);
       const response = await searchPapers(query, { size: 12 });
       const papersList = toArray(response ? (response.content || response) : []);
 
@@ -126,9 +127,10 @@ function Navbar({
       });
 
       setSuggestions(unique.slice(0, 8)); // Limit to max 8 suggestions
-      setShowSuggestions(unique.length > 0);
+      setShowSuggestions(true);
     } catch (err) {
       console.error("Error fetching search suggestions", err);
+      setSuggestions([]);
     } finally {
       setLoadingSuggestions(false);
     }
@@ -136,11 +138,7 @@ function Navbar({
 
   // Debounced autocomplete search
   useEffect(() => {
-    if (searchValue.trim().length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
+    if (searchValue.trim().length < 2) return;
 
     const timer = setTimeout(() => {
       fetchSuggestions(searchValue.trim());
@@ -176,14 +174,11 @@ function Navbar({
     setSearchValue(sug.value);
     setShowSuggestions(false);
     
-    let path = ROUTE_PATHS.PAPERS;
-    if (sug.type === "author") {
-      path = `${ROUTE_PATHS.PAPERS}?author=${encodeURIComponent(sug.value)}`;
-    } else if (sug.type === "keyword") {
-      path = `${ROUTE_PATHS.PAPERS}?keyword=${encodeURIComponent(sug.value)}`;
-    } else {
-      path = `${ROUTE_PATHS.PAPERS}?q=${encodeURIComponent(sug.value)}`;
-    }
+    const path = sug.type === "author"
+      ? `${ROUTE_PATHS.PAPERS}?author=${encodeURIComponent(sug.value)}`
+      : sug.type === "keyword"
+        ? `${ROUTE_PATHS.PAPERS}?keyword=${encodeURIComponent(sug.value)}`
+        : `${ROUTE_PATHS.PAPERS}?q=${encodeURIComponent(sug.value)}`;
     navigate(path);
   }
 
@@ -197,7 +192,6 @@ function Navbar({
   // immediately redirecting back to /dashboard.
   useEffect(() => {
     if (pendingLogout && !isLoggedIn) {
-      setPendingLogout(false);
       navigate(ROUTE_PATHS.LOGIN, { replace: true });
     }
   }, [pendingLogout, isLoggedIn, navigate]);
@@ -237,8 +231,10 @@ function Navbar({
             type="search"
             value={searchValue}
             onChange={(event) => {
-              setSearchValue(event.target.value);
-              setShowSuggestions(true);
+              const nextValue = event.target.value;
+              setSearchValue(nextValue);
+              setShowSuggestions(nextValue.trim().length >= 2);
+              if (nextValue.trim().length < 2) setSuggestions([]);
             }}
             onFocus={() => {
               if (suggestions.length > 0) setShowSuggestions(true);
@@ -246,19 +242,26 @@ function Navbar({
             placeholder="Search papers, journals…"
             aria-label="Search research papers, journals, and keywords"
           />
-          {showSuggestions && suggestions.length > 0 && (
+          {showSuggestions && searchValue.trim().length >= 2 && (
             <div className="st-search-suggestions">
-              {suggestions.map((sug, idx) => (
-                <div 
+              {loadingSuggestions && (
+                <div className="st-suggestion-state">Searching research papers…</div>
+              )}
+              {!loadingSuggestions && suggestions.length === 0 && (
+                <div className="st-suggestion-state">No matching results. Press Enter to search all papers.</div>
+              )}
+              {!loadingSuggestions && suggestions.map((sug, idx) => (
+                <button
+                  type="button"
                   key={idx} 
                   className="st-suggestion-item" 
                   onClick={() => handleSuggestionClick(sug)}
                 >
                   {sug.type === "title" && <FiFileText style={{ color: "#2563eb", flexShrink: 0 }} />}
-                  {sug.type === "author" && <FiUser style={{ color: "#10b981", flexShrink: 0 }} />}
-                  {sug.type === "keyword" && <FiTag style={{ color: "#8b5cf6", flexShrink: 0 }} />}
+                  {sug.type === "author" && <FiUser style={{ color: "#7c3aed", flexShrink: 0 }} />}
+                  {sug.type === "keyword" && <FiTag style={{ color: "#ea580c", flexShrink: 0 }} />}
                   <span className="suggestion-text" title={sug.value}>{sug.value}</span>
-                </div>
+                </button>
               ))}
             </div>
           )}
