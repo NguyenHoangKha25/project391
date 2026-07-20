@@ -76,13 +76,14 @@ body {
 }
 
 .st-brand strong {
-  background: #000000 !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
+  background: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  font-weight: 850 !important;
+  letter-spacing: -0.5px !important;
 }
 
 .st-brand small {
@@ -718,9 +719,10 @@ body > div:first-child[style*="background"] {
 }
 
 .home-brand strong {
-  background: #000000 !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
+  background: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
   font-weight: 850 !important;
