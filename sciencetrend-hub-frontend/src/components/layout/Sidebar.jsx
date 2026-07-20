@@ -41,7 +41,7 @@ function Sidebar({ isOpen = false, onNavigate }) {
   const visibleMenuItems = menuItems.filter((item) => !item.adminOnly || isAdminUser);
 
   return (
-    <nav className={`st-sidebar ${isOpen ? "is-open" : ""}`} aria-label="Sidebar navigation">
+    <nav className={`st-sidebar ${isOpen ? "is-open" : ""}`} aria-label="Sidebar navigation" style={{ background: "#091612", borderRight: "1px solid rgba(16, 185, 129, 0.2)", boxShadow: "none" }}>
       <NavLink
         to={ROUTE_PATHS.DASHBOARD}
         className="st-brand"

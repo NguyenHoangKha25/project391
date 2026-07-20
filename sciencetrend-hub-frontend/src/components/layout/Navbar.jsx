@@ -208,7 +208,7 @@ function Navbar({
   }
 
   return (
-    <header className="st-navbar">
+    <header className="st-navbar" style={{ background: "rgba(13, 27, 23, 0.95)", border: "1px solid rgba(16, 185, 129, 0.25)", boxShadow: "0 8px 26px rgba(0, 0, 0, 0.4)" }}>
       <div className="st-navbar-heading">
         <button
           type="button"
@@ -220,8 +220,8 @@ function Navbar({
         </button>
 
         <div>
-          <h1>{title}</h1>
-          <p>{subtitle}</p>
+          <h1 style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", background: "none", fontWeight: "850" }}>{title}</h1>
+          <p style={{ color: "#a7f3d0", fontWeight: "600" }}>{subtitle}</p>
         </div>
       </div>
 
