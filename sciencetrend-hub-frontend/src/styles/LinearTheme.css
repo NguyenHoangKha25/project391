@@ -1,9 +1,8 @@
 /* ==========================================================================
-   ScienceTrend Hub — High-Contrast Clean Slate Theme
-   Nền sáng xám xanh nhẹ (#f8fafc), Thẻ trắng tinh khiết (#ffffff),
-   Chữ Đen Slate (#0f172a) đậm 100% rõ nét, Accent Xanh Sapphire (#2563eb).
-   Áp dụng đồng bộ 100% cho TẤT CẢ các trang (Auth, Dashboard, Papers,
-   Trends, Topics, Bookmarks, Following, Notifications, Reports, Admin, Account, Home).
+   ScienceTrend Hub — Royal Sapphire & Slate Theme (ZERO GREEN)
+   Nền xám xanh sáng dịu (#f8fafc), Thẻ trắng tinh khiết (#ffffff),
+   Chữ Đen Slate (#0f172a) sắc nét 100%, Accent Xanh Sapphire (#2563eb).
+   Hoàn toàn loại bỏ màu xanh lá. Áp dụng đồng bộ cho TẤT CẢ các trang.
    ========================================================================== */
 
 :root {
@@ -23,7 +22,7 @@
   --sp-text-secondary: #334155;
   --sp-text-muted: #64748b;
 
-  /* ── Accents (Sapphire Blue & Amber) ── */
+  /* ── Accents (Royal Sapphire Blue & Amber) ── */
   --sp-purple: #2563eb;
   --sp-purple-light: #3b82f6;
   --sp-purple-bg: rgba(37, 99, 235, 0.08);
@@ -32,13 +31,13 @@
   --sp-pink: #d97706;
   --sp-pink-light: #f59e0b;
 
-  --sp-mint: #059669;
-  --sp-mint-bg: rgba(5, 150, 105, 0.1);
+  --sp-mint: #2563eb;
+  --sp-mint-bg: rgba(37, 99, 235, 0.1);
 
   --sp-sky: #0284c7;
 
   /* ── Semantic ── */
-  --sp-success: #059669;
+  --sp-success: #2563eb;
   --sp-danger: #dc2626;
   --sp-warning: #d97706;
 
@@ -89,7 +88,7 @@ body {
   color: #0f172a !important;
 }
 
-/* Scrollbars — Clean Slate */
+/* Scrollbars — Clean Sapphire */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent !important; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1 !important; border-radius: 99px; }
@@ -176,8 +175,8 @@ body {
 }
 
 .st-status-dot {
-  background: #059669 !important;
-  box-shadow: 0 0 8px rgba(5, 150, 105, 0.4) !important;
+  background: #2563eb !important;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4) !important;
 }
 
 /* ══════════════════════════════════════════
@@ -342,6 +341,7 @@ h1, h2, h3, h4, h5, h6,
 .trends-card-header h3,
 .account-hero-title h1,
 .auth-card-header h2,
+.register-header h2,
 .papers-card-custom h2,
 .papers-card-custom h3,
 .paper-title,
@@ -361,6 +361,7 @@ p, span:not(.badge):not(.status-pill):not(.tag),
 .chart-card-header p,
 .account-hero-title p,
 .auth-card-header p,
+.register-header p,
 .paper-abstract,
 .bookmark-meta,
 .notification-time {
@@ -406,9 +407,9 @@ p, span:not(.badge):not(.status-pill):not(.tag),
 }
 
 .metric-badge {
-  background: rgba(5, 150, 105, 0.1) !important;
-  color: #059669 !important;
-  border: 1px solid rgba(5, 150, 105, 0.25) !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: #2563eb !important;
+  border: 1px solid rgba(37, 99, 235, 0.25) !important;
   border-radius: 99px !important;
   font-weight: 700 !important;
 }
@@ -426,12 +427,12 @@ button:not(.st-icon-btn):not(.st-menu-link):not(.st-account-trigger):not(.auth-p
 .primary-btn,
 .export-btn,
 .follow-btn {
-  border-radius: 10px !important;
-  font-weight: 700 !important;
+  border-radius: 12px !important;
+  font-weight: 750 !important;
   transition: all 0.2s ease !important;
 }
 
-/* Primary Action Buttons */
+/* Primary Action Buttons — Royal Sapphire Blue */
 .st-btn-primary,
 .auth-login-btn,
 .register-submit-btn,
@@ -529,7 +530,7 @@ tr:hover td {
 }
 
 /* ══════════════════════════════════════════
-   STATUS BADGES, TAGS & PILLS (ALL PAGES)
+   STATUS BADGES, TAGS & PILLS (ALL PAGES - NO GREEN)
    ══════════════════════════════════════════ */
 .status-pill,
 .badge,
@@ -550,9 +551,9 @@ tr:hover td {
 .tag-mint,
 .status-label.connected,
 .status-dot.active {
-  background: rgba(5, 150, 105, 0.12) !important;
-  color: #059669 !important;
-  border: 1px solid rgba(5, 150, 105, 0.3) !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+  color: #2563eb !important;
+  border: 1px solid rgba(37, 99, 235, 0.28) !important;
 }
 
 .status-pill.warning,
@@ -583,7 +584,7 @@ tr:hover td {
 }
 
 /* ══════════════════════════════════════════
-   INPUTS & FORMS (ALL PAGES)
+   INPUTS & FORMS (ALL PAGES - NO GREEN LABELS)
    ══════════════════════════════════════════ */
 input[type="text"],
 input[type="email"],
@@ -591,11 +592,11 @@ input[type="password"],
 input[type="search"],
 select,
 textarea {
-  background: #f8fafc !important;
+  background: #ffffff !important;
   border: 1px solid #cbd5e1 !important;
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   font-size: 14px !important;
   transition: all 0.2s ease !important;
 }
@@ -608,9 +609,20 @@ textarea:focus {
   outline: none !important;
 }
 
-label {
+label,
+.form-group label,
+.auth-form-group label {
   color: #0f172a !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  font-size: 12px !important;
+  letter-spacing: 0.05em !important;
+}
+
+.input-field-icon,
+.input-wrap svg,
+.select-wrap svg {
+  color: #2563eb !important;
 }
 
 /* ══════════════════════════════════════════
@@ -639,21 +651,25 @@ label {
   color: #ffffff !important;
 }
 
-.auth-brand-text h1 {
+.auth-brand-text h1,
+.register-left h1 {
   color: #ffffff !important;
 }
 
-.auth-brand-text p {
+.auth-brand-text p,
+.register-left p {
   color: #94a3b8 !important;
 }
 
-.auth-premium-hero h2 {
+.auth-premium-hero h2,
+.register-hero h2 {
   color: #ffffff !important;
   background: none !important;
   -webkit-text-fill-color: #ffffff !important;
 }
 
-.auth-premium-hero p {
+.auth-premium-hero p,
+.register-hero p {
   color: #cbd5e1 !important;
 }
 
@@ -664,6 +680,7 @@ label {
 
 .auth-premium-card-box,
 .register-card-box,
+.register-premium-card-box,
 .auth-card-box {
   background: #ffffff !important;
   border: none !important;
@@ -671,13 +688,15 @@ label {
   color: #0f172a !important;
 }
 
-.auth-card-header h2 {
+.auth-card-header h2,
+.register-header h2 {
   color: #0f172a !important;
   background: none !important;
   -webkit-text-fill-color: #0f172a !important;
 }
 
 .auth-card-header p,
+.register-header p,
 .auth-register-text,
 .register-signin-redirect {
   color: #475569 !important;
@@ -685,7 +704,8 @@ label {
 
 .auth-register-text a,
 .register-signin-redirect a,
-.auth-options a {
+.auth-options a,
+.login-link {
   color: #2563eb !important;
   font-weight: 750 !important;
 }
