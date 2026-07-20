@@ -1,0 +1,558 @@
+/* LinearTheme.css
+   Premium Dark Redesign: Sleek, high-contrast, minimalist Dark Mode style inspired by Linear.app.
+   This file overrides ColorfulTheme.css dynamically. */
+
+:root {
+  --st-primary: #5e6ad2 !important;
+  --st-primary-strong: #4d56b4 !important;
+  --st-primary-dark: #12131e !important;
+  --st-primary-soft: rgba(94, 106, 210, 0.1) !important;
+  --st-accent: #00c2ff !important;
+  --st-accent-soft: rgba(0, 194, 255, 0.1) !important;
+  --st-violet: #8a3ffc !important;
+  --st-violet-soft: rgba(138, 63, 252, 0.1) !important;
+  --st-pink: #ff7eb6 !important;
+  --st-pink-soft: rgba(255, 126, 182, 0.1) !important;
+  --st-blue: #00c2ff !important;
+  --st-blue-soft: rgba(0, 194, 255, 0.1) !important;
+  --st-emerald: #24a148 !important;
+  --st-emerald-soft: rgba(36, 161, 72, 0.1) !important;
+  --st-sky: #00c2ff !important;
+  --st-amber: #f1c21b !important;
+  --st-heading: #f7f8f8 !important;
+  --st-text: #b4b6ba !important;
+  --st-muted: #7e828a !important;
+  --st-muted-strong: #8a8f98 !important;
+  --st-bg: #08080c !important;
+  --st-bg-2: #12131a !important;
+  --st-border: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ── Global Styles & Canvas ── */
+body, 
+.st-layout, 
+.auth-page, 
+.login-page, 
+.register-page, 
+.forgot-page, 
+.reset-page,
+.home-page {
+  background: #08080c !important;
+  color: var(--st-text) !important;
+  animation: none !important;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+::selection {
+  background: rgba(94, 106, 210, 0.3) !important;
+  color: #fff !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #08080c !important;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ── Layout Elements ── */
+.st-sidebar {
+  background: #0d0e12 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: none !important;
+}
+
+.st-brand strong {
+  background: linear-gradient(90deg, #f7f8f8, #b4b6ba) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.st-menu-label {
+  color: #7e828a !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.st-menu-link {
+  color: #b4b6ba !important;
+  font-weight: 600;
+}
+
+.st-menu-link:hover {
+  color: #f7f8f8 !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  transform: none !important;
+}
+
+.st-menu-link.active {
+  background: rgba(94, 106, 210, 0.15) !important;
+  border: 1px solid rgba(94, 106, 210, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(94, 106, 210, 0.1) !important;
+}
+
+.st-menu-link.active::before {
+  background: #5e6ad2 !important;
+  box-shadow: 0 0 10px #5e6ad2 !important;
+}
+
+.st-sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: transparent !important;
+}
+
+/* ── Navbar ── */
+.st-navbar {
+  margin: 16px 24px !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: rgba(13, 14, 18, 0.75) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.st-navbar-heading h1 {
+  color: #f7f8f8 !important;
+  -webkit-text-fill-color: #f7f8f8 !important;
+  font-weight: 800;
+}
+
+.st-navbar-heading p {
+  color: #7e828a !important;
+}
+
+.st-search-form {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.st-search-form input {
+  color: #f7f8f8 !important;
+  -webkit-text-fill-color: #f7f8f8 !important;
+  font-weight: 600 !important;
+}
+
+.st-search-form svg {
+  color: #7e828a !important;
+}
+
+.st-search-suggestions {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.st-suggestion-item {
+  color: #b4b6ba !important;
+}
+
+.st-suggestion-item:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.st-icon-btn {
+  color: #b4b6ba !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.st-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #fff !important;
+  border-color: rgba(94, 106, 210, 0.3) !important;
+}
+
+.st-account-trigger {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #b4b6ba !important;
+}
+
+.st-account-trigger:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(94, 106, 210, 0.3) !important;
+}
+
+.st-account-trigger .st-user-copy strong {
+  color: #f7f8f8 !important;
+}
+
+.st-account-trigger .st-user-copy small {
+  color: #7e828a !important;
+}
+
+.st-account-menu {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.st-account-summary {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.st-account-menu button {
+  color: #b4b6ba !important;
+}
+
+.st-account-menu button:hover {
+  background: rgba(94, 106, 210, 0.1) !important;
+  color: #fff !important;
+}
+
+/* ── Panels & Cards ── */
+.glassmorphic-panel, 
+.db-welcome-row, 
+.workspace-toolbar, 
+.account-hero-card, 
+.metric-card, 
+.chart-card, 
+.admin-panel, 
+.admin-panel-detailed, 
+.trends-card, 
+.topic-card,
+.trends-chart-card,
+.trends-top-card,
+.trends-insights-card,
+.st-account-details-panel,
+.papers-container-card {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 16px !important;
+}
+
+.db-welcome-row::after, 
+.workspace-toolbar::after {
+  background: #5e6ad2 !important;
+  box-shadow: none !important;
+}
+
+.db-eyebrow, 
+.account-eyebrow, 
+.home-eyebrow, 
+.workspace-panel-header span, 
+.db-range-badge, 
+.db-panel-header-link,
+.badge-chip {
+  color: #5e6ad2 !important;
+  background: rgba(94, 106, 210, 0.12) !important;
+  border: 1px solid rgba(94, 106, 210, 0.2) !important;
+}
+
+/* Titles inside panels */
+.chart-card h3, 
+.panel-header-row h3, 
+.admin-panel h3, 
+.admin-panel-detailed h3,
+.trends-chart-card h3,
+.trends-top-card h3,
+.trends-insights-card h3,
+.topic-card-body h3,
+.paper-detail-card h3 {
+  color: #f7f8f8 !important;
+  font-weight: 700;
+}
+
+/* ── Dashboard Specifics ── */
+.metric-title {
+  color: #7e828a !important;
+}
+
+.metric-value {
+  color: #f7f8f8 !important;
+  font-weight: 800;
+}
+
+.metric-trend.positive {
+  color: #24a148 !important;
+}
+
+.metric-trend.negative {
+  color: #da1e28 !important;
+}
+
+.metric-trend-text {
+  color: #7e828a !important;
+}
+
+/* Charts Elements */
+.bar-wrapper {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  border-radius: 4px;
+}
+
+.chart-bar-active {
+  background: #5e6ad2 !important;
+}
+
+.chart-bar-col:hover .bar-wrapper {
+  background: rgba(94, 106, 210, 0.08) !important;
+}
+
+.bar-chart-y-axis span {
+  color: #7e828a !important;
+}
+
+.bar-chart-x-axis span {
+  color: #7e828a !important;
+}
+
+/* Donut Chart and Legend */
+.donut-center-label tspan:first-child {
+  fill: #f7f8f8 !important;
+}
+
+.donut-center-label tspan:last-child {
+  fill: #7e828a !important;
+}
+
+.legend-item span:first-child {
+  color: #f7f8f8 !important;
+}
+
+.legend-item span:last-child {
+  color: #7e828a !important;
+}
+
+/* ── Interactive Tables ── */
+.admin-compact-table th, 
+.admin-detailed-table th,
+.papers-table th {
+  color: #7e828a !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  font-weight: 700;
+}
+
+.admin-compact-table td, 
+.admin-detailed-table td,
+.papers-table td {
+  color: #b4b6ba !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+.admin-compact-table tr:hover, 
+.admin-detailed-table tr:hover,
+.papers-table tr:hover {
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* ── Buttons & Inputs ── */
+.db-refresh-btn-premium, 
+.admin-header-plus-btn, 
+.admin-header-trigger-sync-btn, 
+.cm-btn-primary, 
+.auth-login-btn,
+.db-refresh-btn,
+.register-btn {
+  background: #5e6ad2 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 14px rgba(94, 106, 210, 0.3) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+}
+
+.db-refresh-btn-premium:hover, 
+.admin-header-plus-btn:hover, 
+.admin-header-trigger-sync-btn:hover, 
+.cm-btn-primary:hover, 
+.auth-login-btn:hover,
+.db-refresh-btn:hover,
+.register-btn:hover {
+  background: #4d56b4 !important;
+  box-shadow: 0 6px 20px rgba(94, 106, 210, 0.4) !important;
+}
+
+.trends-btn-toggle {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #b4b6ba !important;
+}
+
+.trends-btn-toggle.active {
+  background: rgba(94, 106, 210, 0.15) !important;
+  color: #fff !important;
+  border: 1px solid rgba(94, 106, 210, 0.3) !important;
+}
+
+.db-datepicker-wrapper {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #b4b6ba !important;
+}
+
+.db-datepicker-select {
+  color: #f7f8f8 !important;
+}
+
+.cm-input {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #f7f8f8 !important;
+  border-radius: 12px !important;
+}
+
+.cm-input:focus {
+  border-color: #5e6ad2 !important;
+  box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.2) !important;
+}
+
+/* Modals */
+.cm-modal {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+.cm-modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.cm-modal-footer {
+  background: rgba(255, 255, 255, 0.01) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.cm-modal-close {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #b4b6ba !important;
+}
+
+.cm-modal-close:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+/* ── Custom Auth / Login Styles ── */
+.auth-status-card {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+.auth-form-card {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+.auth-form-input {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #f7f8f8 !important;
+}
+
+.auth-form-input:focus {
+  border-color: #5e6ad2 !important;
+  box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.2) !important;
+}
+
+.auth-card-header h2,
+.register-header h2,
+.login-header-row h2 {
+  color: #f7f8f8 !important;
+  background: none !important;
+  -webkit-text-fill-color: #f7f8f8 !important;
+}
+
+/* ── Paper Details & Badges ── */
+.papers-card-custom {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.paper-item-title {
+  color: #f7f8f8 !important;
+}
+
+.paper-item-abstract {
+  color: #b4b6ba !important;
+}
+
+.paper-author-label {
+  color: #7e828a !important;
+}
+
+.paper-badge-keyword {
+  color: #8b5cf6 !important;
+  background: rgba(139, 92, 246, 0.12) !important;
+  border: 1px solid rgba(139, 92, 246, 0.2) !important;
+}
+
+.paper-badge-journal {
+  color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+.paper-badge-year {
+  color: #0ea5e9 !important;
+  background: rgba(14, 165, 233, 0.12) !important;
+  border: 1px solid rgba(14, 165, 233, 0.2) !important;
+}
+
+/* ── Toast Overlay ── */
+.papers-toast {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f7f8f8 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+.papers-toast--success {
+  border-left: 4px solid #24a148 !important;
+}
+
+.papers-toast--warning {
+  border-left: 4px solid #da1e28 !important;
+}
+
+.papers-toast--info {
+  border-left: 4px solid #5e6ad2 !important;
+}
+
+/* ── Home Page Customizations ── */
+.home-orb-one {
+  background: radial-gradient(circle, rgba(94, 106, 210, 0.15), transparent 60%) !important;
+}
+
+.home-orb-two {
+  background: radial-gradient(circle, rgba(0, 194, 255, 0.15), transparent 60%) !important;
+}
+
+.home-navbar {
+  background: rgba(13, 14, 18, 0.75) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+.home-feature-card {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.home-workflow-item {
+  background: #12131a !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}

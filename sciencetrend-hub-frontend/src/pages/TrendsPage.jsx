@@ -258,7 +258,7 @@ function TrendsPage() {
     const range = maxVal - minVal;
 
     const dataset = [
-      { label: activeChips[0] || "Topic 1", stroke: "#2563eb", values }
+      { label: activeChips[0] || "Topic 1", stroke: "#5e6ad2", values }
     ];
 
     return dataset.map((line, lineIdx) => {
@@ -479,14 +479,14 @@ function TrendsPage() {
                   <svg viewBox="0 0 380 120" className="trends-svg-chart">
                     <defs>
                       <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#157f91" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#157f91" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="#5e6ad2" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#5e6ad2" stopOpacity="0.0" />
                       </linearGradient>
                     </defs>
                     <path d={areaChartPathData.areaPath} fill="url(#areaGrad)" />
-                    <path d={areaChartPathData.linePath} fill="none" stroke="#157f91" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d={areaChartPathData.linePath} fill="none" stroke="#5e6ad2" strokeWidth="2.5" strokeLinecap="round" />
                     {areaChartPathData.coords.map((c, i) => (
-                      <circle key={i} cx={c.x} cy={c.y} r="3" fill="#ffffff" stroke="#157f91" strokeWidth="1.5" />
+                      <circle key={i} cx={c.x} cy={c.y} r="3" fill="#ffffff" stroke="#5e6ad2" strokeWidth="1.5" />
                     ))}
                   </svg>
                   <div className="trends-chart-axis-x">
