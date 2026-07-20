@@ -292,7 +292,10 @@ function TopicsPage() {
           </h2>
 
           {loading ? (
-            <div className="topics-loading">Loading topics list...</div>
+            <div className="cm-loading" style={{ minHeight: "180px", margin: "20px 0" }}>
+              <div className="cm-spinner" />
+              <p style={{ fontWeight: "700", color: "#666666" }}>Loading scientific topics...</p>
+            </div>
           ) : topics.length > 0 ? (
             <div className="topics-grid explore-grid">
               {topics.map((topic) => {

@@ -85,6 +85,10 @@ body {
   letter-spacing: -0.5px;
 }
 
+.st-brand small {
+  color: #666666 !important;
+}
+
 .st-menu-label {
   color: #888888 !important;
   font-weight: 700;
@@ -121,7 +125,26 @@ body {
 
 .st-sidebar-footer {
   border-top: 1px solid #f0f0f0 !important;
-  background: transparent !important;
+  background: #fafafa !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  margin-top: auto !important;
+}
+
+.st-sidebar-footer strong {
+  color: #000000 !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+  display: block !important;
+}
+
+.st-sidebar-footer small {
+  color: #666666 !important;
+  font-size: 11px !important;
+  margin-top: 1px !important;
+  display: block !important;
 }
 
 .st-status-dot {
@@ -885,4 +908,94 @@ body > div:first-child[style*="background"] {
   background: #f5f5f7 !important;
   transform: none !important;
 }
+
+/* ── Topics Explorer Redesign (Vercel Style) ── */
+.topics-search-input {
+  background: #ffffff !important;
+  border: 1px solid #eef1f6 !important;
+  color: #000000 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01) !important;
+}
+
+.topics-search-input:focus {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.topics-section .section-title {
+  color: #000000 !important;
+}
+
+.topic-card {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 20px 40px rgba(0, 0, 0, 0.015) !important;
+}
+
+.topic-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06) !important;
+  border: none !important;
+}
+
+.topic-card-body h3 {
+  color: #000000 !important;
+}
+
+.topic-card:hover .topic-card-body h3 {
+  color: #0070f3 !important;
+}
+
+.meta-item.count {
+  background: #f5f5f7 !important;
+  color: #666666 !important;
+  border: none !important;
+}
+
+.topic-card-actions {
+  background: #ffffff !important;
+  border-top: none !important;
+  padding: 0 20px 20px 20px !important;
+}
+
+.topic-follow-btn {
+  background: #f5f5f7 !important;
+  color: #000000 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+}
+
+.topic-follow-btn:hover {
+  background: #eaeaea !important;
+  color: #000000 !important;
+}
+
+.topic-follow-btn.following {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.topic-follow-btn.following:hover {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+.topic-card.trending-card {
+  border-left: none !important; /* Remove yellow left strip */
+}
+
+.trending-badge {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+}
+
+.topics-loading {
+  display: none !important;
+}
+
 
