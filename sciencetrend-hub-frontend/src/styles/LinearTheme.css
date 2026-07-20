@@ -1,8 +1,9 @@
 /* ==========================================================================
-   ScienceTrend Hub — Deep Emerald Dark Theme
-   Nền đen huyền bí, chữ trắng sáng 100% rõ nét,
-   Accent xanh ngọc Emerald + Vàng hổ phách Amber Gold.
-   Thẻ & Bảng viền xanh sắc nét, hiệu ứng tương phản cực cao.
+   ScienceTrend Hub — Deep Emerald Dark Theme (GLOBAL ALL PAGES)
+   Nền đen huyền bí (#060d0b), chữ trắng sáng 100% (#ffffff),
+   Accent Xanh Ngọc Emerald (#10b981) + Vàng Hổ Phách Amber Gold (#fbbf24).
+   Áp dụng đồng bộ 100% cho TẤT CẢ các trang (Dashboard, Papers, Trends,
+   Topics, Bookmarks, Following, Notifications, Reports, Admin, Account, Auth, Home).
    ========================================================================== */
 
 :root {
@@ -23,12 +24,12 @@
   --sp-text-muted: #64748b;
 
   /* ── Accents (Emerald & Gold) ── */
-  --sp-purple: #10b981;        /* Re-map to Emerald Green */
+  --sp-purple: #10b981;
   --sp-purple-light: #34d399;
   --sp-purple-bg: rgba(16, 185, 129, 0.14);
   --sp-purple-border: rgba(16, 185, 129, 0.35);
 
-  --sp-pink: #f59e0b;          /* Re-map to Amber Gold */
+  --sp-pink: #f59e0b;
   --sp-pink-light: #fbbf24;
   --sp-pink-bg: rgba(245, 158, 11, 0.14);
 
@@ -50,17 +51,33 @@
   --sp-shadow-xl: 0 20px 50px rgba(0,0,0,0.8);
 }
 
-/* ── Global Canvas ── */
+/* ══════════════════════════════════════════
+   GLOBAL CANVAS (ALL PAGES)
+   ══════════════════════════════════════════ */
+html,
 body,
+#root,
 .st-layout,
+.st-layout-content,
+.home-page,
+.dashboard-page,
+.papers-page,
+.trends-page,
+.topics-page,
+.bookmarks-page,
+.following-page,
+.notifications-page,
+.reports-page,
+.admin-page,
+.my-account-page,
+.workspace-page,
 .auth-page,
 .login-page,
 .register-page,
 .forgot-page,
-.reset-page,
-.home-page {
-  background: var(--sp-bg) !important;
-  color: var(--sp-text) !important;
+.reset-page {
+  background: #060d0b !important;
+  color: #ffffff !important;
   animation: none !important;
 }
 
@@ -81,11 +98,11 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.6) !important; }
 
 /* ══════════════════════════════════════════
-   SIDEBAR
+   SIDEBAR & BRANDING
    ══════════════════════════════════════════ */
 .st-sidebar {
-  background: var(--sp-sidebar-bg) !important;
-  border-right: 1px solid var(--sp-border) !important;
+  background: #081310 !important;
+  border-right: 1px solid rgba(16, 185, 129, 0.25) !important;
   box-shadow: none !important;
 }
 
@@ -99,12 +116,12 @@ body {
 }
 
 .st-brand small {
-  color: var(--sp-text-secondary) !important;
+  color: #94a3b8 !important;
 }
 
 .st-menu-label {
   color: #64748b !important;
-  font-weight: 700;
+  font-weight: 750;
   text-transform: uppercase;
   font-size: 10.5px;
   letter-spacing: 0.8px;
@@ -147,17 +164,17 @@ body {
 }
 
 .st-sidebar-footer {
-  border-top: 1px solid var(--sp-border) !important;
+  border-top: 1px solid rgba(16, 185, 129, 0.2) !important;
   background: transparent !important;
 }
 
 .st-sidebar-footer strong {
-  color: var(--sp-text) !important;
+  color: #ffffff !important;
   font-weight: 700 !important;
 }
 
 .st-sidebar-footer small {
-  color: var(--sp-text-secondary) !important;
+  color: #94a3b8 !important;
 }
 
 .st-status-dot {
@@ -166,13 +183,13 @@ body {
 }
 
 /* ══════════════════════════════════════════
-   NAVBAR
+   NAVBAR & SEARCH
    ══════════════════════════════════════════ */
 .st-navbar {
   margin: 16px 24px !important;
   border-radius: 16px !important;
-  border: 1px solid var(--sp-border) !important;
-  background: rgba(13, 27, 23, 0.92) !important;
+  border: 1px solid rgba(16, 185, 129, 0.28) !important;
+  background: rgba(13, 27, 23, 0.94) !important;
   box-shadow: var(--sp-shadow-md) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
@@ -186,12 +203,12 @@ body {
 }
 
 .st-navbar-heading p {
-  color: var(--sp-text-secondary) !important;
+  color: #94a3b8 !important;
 }
 
 .st-search-form {
-  background: var(--sp-bg-warm) !important;
-  border: 1px solid var(--sp-border) !important;
+  background: #0a1612 !important;
+  border: 1px solid rgba(16, 185, 129, 0.28) !important;
   border-radius: 10px !important;
 }
 
@@ -201,7 +218,7 @@ body {
 }
 
 .st-search-form input::placeholder {
-  color: var(--sp-text-muted) !important;
+  color: #64748b !important;
 }
 
 .st-search-form svg {
@@ -209,8 +226,8 @@ body {
 }
 
 .st-search-suggestions {
-  background: var(--sp-surface) !important;
-  border: 1px solid var(--sp-border) !important;
+  background: #0d1b17 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
   box-shadow: var(--sp-shadow-xl) !important;
   border-radius: 14px !important;
 }
@@ -226,8 +243,8 @@ body {
 
 .st-icon-btn,
 .st-account-trigger {
-  background: var(--sp-surface) !important;
-  border: 1px solid var(--sp-border) !important;
+  background: #0d1b17 !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
   color: #cbd5e1 !important;
   border-radius: 10px !important;
 }
@@ -244,19 +261,19 @@ body {
 }
 
 .st-account-trigger .st-user-copy small {
-  color: var(--sp-text-secondary) !important;
+  color: #94a3b8 !important;
 }
 
 .st-account-menu {
-  background: var(--sp-surface) !important;
-  border: 1px solid var(--sp-border) !important;
+  background: #0d1b17 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
   box-shadow: var(--sp-shadow-xl) !important;
   border-radius: 14px !important;
 }
 
 .st-account-summary {
-  background: var(--sp-bg-warm) !important;
-  border-bottom: 1px solid var(--sp-border) !important;
+  background: #0a1612 !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2) !important;
 }
 
 .st-account-menu button {
@@ -269,7 +286,7 @@ body {
 }
 
 /* ══════════════════════════════════════════
-   CARDS & PANELS (ALL PAGES)
+   CARDS, PANELS & CONTAINERS (ALL 16 PAGES)
    ══════════════════════════════════════════ */
 .glassmorphic-panel,
 .db-welcome-row,
@@ -279,6 +296,9 @@ body {
 .chart-card,
 .admin-panel,
 .admin-panel-detailed,
+.admin-stat-card,
+.system-health-card,
+.sync-log-card,
 .trends-card,
 .topic-card,
 .trends-chart-card,
@@ -287,14 +307,26 @@ body {
 .st-account-details-panel,
 .papers-container-card,
 .papers-card-custom,
+.paper-card,
+.paper-item,
 .bookmarks-card,
+.bookmark-card,
+.bookmark-item,
 .following-card,
+.author-card,
+.journal-card,
 .notifications-card,
-.reports-card {
-  background: var(--sp-surface) !important;
-  border: 1px solid var(--sp-border) !important;
+.notification-card,
+.notification-item,
+.reports-card,
+.report-card,
+.account-card,
+.workspace-panel {
+  background: #0d1b17 !important;
+  border: 1px solid rgba(16, 185, 129, 0.28) !important;
   box-shadow: var(--sp-shadow-md) !important;
   border-radius: 16px !important;
+  color: #ffffff !important;
 }
 
 .db-welcome-row::after,
@@ -302,6 +334,8 @@ body {
   display: none !important;
 }
 
+/* Titles and Text across all cards */
+h1, h2, h3, h4, h5, h6,
 .db-welcome-copy h2,
 .workspace-toolbar-left h1,
 .workspace-title-row h1,
@@ -311,48 +345,62 @@ body {
 .account-hero-title h1,
 .auth-card-header h2,
 .papers-card-custom h2,
-.papers-card-custom h3 {
+.papers-card-custom h3,
+.paper-title,
+.bookmark-title,
+.author-name,
+.journal-title,
+.report-title {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
   font-weight: 850 !important;
 }
 
+p, span:not(.badge):not(.status-pill):not(.tag),
 .db-welcome-copy p,
 .workspace-toolbar-left p,
 .chart-card-header p,
 .account-hero-title p,
-.auth-card-header p {
-  color: var(--sp-text-secondary) !important;
+.auth-card-header p,
+.paper-abstract,
+.bookmark-meta,
+.notification-time {
+  color: #94a3b8 !important;
 }
 
-/* Metric Cards */
-.metric-card {
+/* Metric Cards (Dashboard & Stats) */
+.metric-card,
+.admin-stat-card {
   padding: 22px !important;
   background: linear-gradient(145deg, #0d1b17 0%, #10241e 100%) !important;
-  border: 1px solid var(--sp-border) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
   transition: all 0.2s ease !important;
 }
 
-.metric-card:hover {
+.metric-card:hover,
+.admin-stat-card:hover {
   transform: translateY(-2px) !important;
-  border-color: rgba(16, 185, 129, 0.45) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
   box-shadow: var(--sp-shadow-lg) !important;
 }
 
-.metric-card-top .metric-label {
-  color: var(--sp-text-secondary) !important;
+.metric-card-top .metric-label,
+.admin-stat-label {
+  color: #94a3b8 !important;
   font-weight: 600 !important;
   font-size: 13px !important;
 }
 
-.metric-card-icon-box {
-  background: rgba(16, 185, 129, 0.15) !important;
+.metric-card-icon-box,
+.admin-stat-icon {
+  background: rgba(16, 185, 129, 0.18) !important;
   color: #34d399 !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
   border-radius: 12px !important;
 }
 
-.metric-value-row .metric-value {
+.metric-value-row .metric-value,
+.admin-stat-value {
   color: #ffffff !important;
   font-weight: 900 !important;
   letter-spacing: -0.5px !important;
@@ -367,15 +415,18 @@ body {
 }
 
 /* ══════════════════════════════════════════
-   BUTTONS
+   BUTTONS & TABS (ALL PAGES)
    ══════════════════════════════════════════ */
 button:not(.st-icon-btn):not(.st-menu-link):not(.st-account-trigger):not(.auth-password-toggle):not(.eye-toggle),
 .st-btn,
 .db-quick-action-btn,
 .account-tab-btn,
+.trends-tab-btn,
 .auth-login-btn,
 .register-submit-btn,
-.primary-btn {
+.primary-btn,
+.export-btn,
+.follow-btn {
   border-radius: 10px !important;
   font-weight: 700 !important;
   transition: all 0.2s ease !important;
@@ -385,7 +436,9 @@ button:not(.st-icon-btn):not(.st-menu-link):not(.st-account-trigger):not(.auth-p
 .st-btn-primary,
 .auth-login-btn,
 .register-submit-btn,
-.primary-btn {
+.primary-btn,
+.export-btn,
+.follow-btn.active {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   color: #ffffff !important;
   border: none !important;
@@ -395,7 +448,8 @@ button:not(.st-icon-btn):not(.st-menu-link):not(.st-account-trigger):not(.auth-p
 .st-btn-primary:hover,
 .auth-login-btn:hover,
 .register-submit-btn:hover,
-.primary-btn:hover {
+.primary-btn:hover,
+.export-btn:hover {
   background: linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
   transform: translateY(-1px) !important;
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45) !important;
@@ -404,32 +458,52 @@ button:not(.st-icon-btn):not(.st-menu-link):not(.st-account-trigger):not(.auth-p
 /* Secondary Buttons */
 .st-btn-secondary,
 .db-quick-action-btn,
-.auth-google-btn {
-  background: var(--sp-elevated) !important;
-  color: #f0fdf4 !important;
-  border: 1px solid var(--sp-border) !important;
+.auth-google-btn,
+.follow-btn {
+  background: #12241f !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
 }
 
 .st-btn-secondary:hover,
 .db-quick-action-btn:hover,
-.auth-google-btn:hover {
-  background: rgba(16, 185, 129, 0.15) !important;
+.auth-google-btn:hover,
+.follow-btn:hover {
+  background: rgba(16, 185, 129, 0.18) !important;
   color: #34d399 !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
+  border-color: rgba(16, 185, 129, 0.45) !important;
   transform: none !important;
 }
 
+/* Tab Switchers (Trends, Account, Reports) */
+.account-tab-btn,
+.trends-tab-btn {
+  background: transparent !important;
+  color: #94a3b8 !important;
+  border: 1px solid transparent !important;
+}
+
+.account-tab-btn.active,
+.trends-tab-btn.active {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  font-weight: 800 !important;
+}
+
 /* ══════════════════════════════════════════
-   TABLES (High Contrast Dark Emerald)
+   TABLES (High Contrast Dark Emerald - ALL PAGES)
    ══════════════════════════════════════════ */
 table,
 .st-table,
 .papers-table-custom,
-.admin-table {
+.admin-table,
+.db-table {
   width: 100% !important;
   border-collapse: separate !important;
   border-spacing: 0 !important;
   color: #ffffff !important;
+  background: transparent !important;
 }
 
 th {
@@ -439,31 +513,33 @@ th {
   font-size: 11.5px !important;
   text-transform: uppercase !important;
   letter-spacing: 0.6px !important;
-  border-bottom: 1px solid var(--sp-border) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.28) !important;
   padding: 14px 16px !important;
 }
 
 td {
   background: transparent !important;
-  border-bottom: 1px solid var(--sp-border-light) !important;
-  color: #f0fdf4 !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.16) !important;
+  color: #ffffff !important;
   padding: 14px 16px !important;
   font-size: 13.5px !important;
 }
 
 tr:hover td {
-  background: rgba(16, 185, 129, 0.08) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
 }
 
 /* ══════════════════════════════════════════
-   STATUS BADGES & PILLS
+   STATUS BADGES, TAGS & PILLS (ALL PAGES)
    ══════════════════════════════════════════ */
 .status-pill,
 .badge,
 .tag,
 .topic-tag,
 .journal-tier-badge,
-.paper-badge {
+.paper-badge,
+.role-badge,
+.status-label {
   border-radius: 99px !important;
   font-weight: 700 !important;
   font-size: 11px !important;
@@ -472,38 +548,52 @@ tr:hover td {
 
 .status-pill.success,
 .badge-success,
-.tag-mint {
+.tag-mint,
+.status-label.connected,
+.status-dot.active {
   background: rgba(16, 185, 129, 0.2) !important;
   color: #34d399 !important;
-  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
 }
 
 .status-pill.warning,
 .badge-warning,
-.tag-amber {
+.tag-amber,
+.role-badge.manager {
   background: rgba(245, 158, 11, 0.2) !important;
   color: #fbbf24 !important;
-  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
 }
 
 .status-pill.info,
 .badge-info,
-.tag-sky {
+.tag-sky,
+.role-badge.analyst {
   background: rgba(56, 189, 248, 0.2) !important;
   color: #38bdf8 !important;
-  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  border: 1px solid rgba(56, 189, 248, 0.45) !important;
+}
+
+.role-badge.admin,
+.status-pill.danger,
+.badge-danger,
+.status-label.error {
+  background: rgba(248, 113, 113, 0.2) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.45) !important;
 }
 
 /* ══════════════════════════════════════════
-   INPUTS & FORMS
+   INPUTS & FORMS (ALL PAGES)
    ══════════════════════════════════════════ */
 input[type="text"],
 input[type="email"],
 input[type="password"],
+input[type="search"],
 select,
 textarea {
   background: #091612 !important;
-  border: 1px solid var(--sp-border) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
   border-radius: 10px !important;
@@ -515,7 +605,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: #10b981 !important;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35) !important;
   outline: none !important;
 }
 
@@ -529,7 +619,9 @@ label {
    ══════════════════════════════════════════ */
 .auth-page,
 .login-page,
-.register-page {
+.register-page,
+.forgot-page,
+.reset-page {
   background: #060d0b !important;
 }
 
@@ -540,7 +632,7 @@ label {
 
 .auth-left {
   background: linear-gradient(160deg, #091814 0%, #060e0c 100%) !important;
-  border-right: 1px solid var(--sp-border) !important;
+  border-right: 1px solid rgba(16, 185, 129, 0.28) !important;
   color: #ffffff !important;
 }
 
@@ -551,12 +643,15 @@ label {
   justify-content: center !important;
 }
 
-.auth-premium-card-box {
+.auth-premium-card-box,
+.register-card-box,
+.auth-card-box {
   background: #0d1b17 !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.12) !important;
   border-radius: 24px !important;
   padding: 40px !important;
+  color: #ffffff !important;
 }
 
 .auth-card-header h2 {
@@ -564,10 +659,7 @@ label {
   -webkit-text-fill-color: #ffffff !important;
 }
 
-.auth-card-header p {
-  color: #94a3b8 !important;
-}
-
+.auth-card-header p,
 .auth-register-text,
 .register-signin-redirect {
   color: #94a3b8 !important;

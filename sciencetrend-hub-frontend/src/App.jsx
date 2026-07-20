@@ -1,6 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import AuthProvider from "./context/AuthProvider";
 import AppRoutes from "./routes/AppRoutes";
+import "./styles/LinearTheme.css";
 
 function App() {
   return (
