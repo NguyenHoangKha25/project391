@@ -535,6 +535,120 @@ textarea {
   color: #2563eb;
 }
 
+.research-flow {
+  width: 100%;
+  padding: clamp(24px, 3vw, 34px);
+  color: #334155;
+  border: 1px solid #dbe3ee;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 24px 54px rgba(15, 23, 42, 0.12);
+}
+
+.research-flow-heading {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.research-flow-heading > span {
+  display: block;
+  margin-bottom: 6px;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.research-flow-heading h3 {
+  margin-bottom: 7px;
+  color: #0f172a !important;
+  font-size: clamp(20px, 2.3vw, 27px);
+  line-height: 1.2;
+}
+
+.research-flow-heading p {
+  max-width: 420px;
+  color: #64748b !important;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.research-flow-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.research-flow-list li {
+  display: grid;
+  grid-template-columns: 26px 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.research-flow-number {
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.research-flow-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+  border-radius: 9px;
+  background: #eff6ff;
+}
+
+.research-flow-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.research-flow-list li > div {
+  min-width: 0;
+}
+
+.research-flow-list strong,
+.research-flow-list small {
+  display: block;
+}
+
+.research-flow-list strong {
+  margin-bottom: 3px;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.research-flow-list small {
+  color: #64748b;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.research-flow-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 16px;
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.research-flow-note svg {
+  flex: 0 0 auto;
+  color: #15803d;
+}
+
 .portal-mockup-app {
   min-height: 450px !important;
   border: 1px solid #334155 !important;
@@ -1738,6 +1852,15 @@ textarea {
 
   .research-preview-body {
     padding: 16px !important;
+  }
+
+  .research-flow {
+    padding: 20px !important;
+  }
+
+  .research-flow-list li {
+    grid-template-columns: 22px 36px minmax(0, 1fr) !important;
+    gap: 10px !important;
   }
 
   .research-preview-index,

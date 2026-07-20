@@ -5,8 +5,6 @@ import {
   FiBookmark,
   FiCheckCircle,
   FiDatabase,
-  FiFileText,
-  FiFilter,
   FiSearch,
   FiShield,
   FiTrendingUp,
@@ -22,7 +20,7 @@ const featureItems = [
   {
     icon: FiSearch,
     title: "Smart Search",
-    description: "Search millions of papers instantly.",
+    description: "Search papers and journals from one place.",
   },
   {
     icon: FiTrendingUp,
@@ -39,12 +37,6 @@ const featureItems = [
     title: "Instant Reports",
     description: "Generate citation summaries.",
   },
-];
-
-const stats = [
-  { value: "12k+", label: "Academic Papers" },
-  { value: "38", label: "Research Topics" },
-  { value: "24/7", label: "Instant Access" },
 ];
 
 const workflowItems = [
@@ -133,83 +125,56 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="home-hero-visual" aria-label="Paper search workspace preview">
-          <div className="research-preview">
-            <div className="research-preview-bar">
-              <span className="research-preview-brand">
-                <span className="research-preview-logo"><FiSearch /></span>
-                Paper search
-              </span>
-              <span className="research-preview-index"><i /> Index updated today</span>
+        <div className="home-hero-visual" aria-label="ScienceTrend research workflow">
+          <div className="research-flow">
+            <div className="research-flow-heading">
+              <span>One connected workflow</span>
+              <h3>Keep the research process simple</h3>
+              <p>Each tool has a clear job, from the first search to the final report.</p>
             </div>
 
-            <div className="research-preview-body">
-              <div className="research-preview-heading">
+            <ol className="research-flow-list">
+              <li>
+                <span className="research-flow-number">01</span>
+                <span className="research-flow-icon"><FiSearch /></span>
                 <div>
-                  <span>Search across journals</span>
-                  <h3>Find research you can use</h3>
+                  <strong>Search trusted sources</strong>
+                  <small>Find papers and journals from one search page.</small>
                 </div>
-                <strong>2,480 papers</strong>
-              </div>
+              </li>
+              <li>
+                <span className="research-flow-number">02</span>
+                <span className="research-flow-icon"><FiBookmark /></span>
+                <div>
+                  <strong>Keep useful work together</strong>
+                  <small>Save papers and organize the references you need.</small>
+                </div>
+              </li>
+              <li>
+                <span className="research-flow-number">03</span>
+                <span className="research-flow-icon"><FiTrendingUp /></span>
+                <div>
+                  <strong>Follow the field</strong>
+                  <small>Watch topics and journals without repeating searches.</small>
+                </div>
+              </li>
+              <li>
+                <span className="research-flow-number">04</span>
+                <span className="research-flow-icon"><FiBarChart2 /></span>
+                <div>
+                  <strong>Prepare a clear report</strong>
+                  <small>Turn organized research into a useful summary.</small>
+                </div>
+              </li>
+            </ol>
 
-              <div className="research-preview-search">
-                <FiSearch aria-hidden="true" />
-                <span>graph neural networks</span>
-                <kbd>⌘ K</kbd>
-              </div>
-
-              <div className="research-preview-filters" aria-label="Applied search filters">
-                <span><FiFilter /> 2022–2026</span>
-                <span>Open access</span>
-                <span>Sort: Relevance</span>
-              </div>
-
-              <div className="research-preview-results">
-                <article className="research-paper-row">
-                  <div className="research-paper-icon"><FiFileText /></div>
-                  <div className="research-paper-copy">
-                    <span className="research-paper-source">Survey paper · Open access</span>
-                    <h4>A Comprehensive Survey on Graph Neural Networks</h4>
-                    <p>Z. Wu, S. Pan, F. Chen · IEEE Transactions · 2023</p>
-                    <div>
-                      <span>Graph learning</span>
-                      <span>1,284 citations</span>
-                    </div>
-                  </div>
-                  <span className="research-paper-save"><FiBookmark /> Save</span>
-                </article>
-
-                <article className="research-paper-row">
-                  <div className="research-paper-icon"><FiFileText /></div>
-                  <div className="research-paper-copy">
-                    <span className="research-paper-source">Research article · PDF available</span>
-                    <h4>Graph Attention Networks for Scientific Discovery</h4>
-                    <p>M. Velickovic, A. Casanova · Machine Learning Journal · 2024</p>
-                    <div>
-                      <span>Attention models</span>
-                      <span>642 citations</span>
-                    </div>
-                  </div>
-                  <span className="research-paper-save"><FiBookmark /> Save</span>
-                </article>
-              </div>
-
-              <div className="research-preview-footer">
-                <span><FiCheckCircle /> Sources verified</span>
-                <span>View all results <FiArrowUpRight /></span>
-              </div>
+            <div className="research-flow-note">
+              <FiCheckCircle />
+              <span>Everything stays connected in the same workspace.</span>
             </div>
           </div>
         </div>
 
-        <div className="home-stat-strip" aria-label="ScienceTrend quick statistics">
-          {stats.map((item) => (
-            <div key={item.label}>
-              <strong>{item.value}</strong>
-              <span>{item.label}</span>
-            </div>
-          ))}
-        </div>
       </section>
 
       <section className="home-section" id="features">
