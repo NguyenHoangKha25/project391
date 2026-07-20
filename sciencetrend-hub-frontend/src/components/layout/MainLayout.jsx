@@ -23,7 +23,7 @@ function MainLayout({
   }
 
   return (
-    <div className="st-layout" style={{ background: "#060d0b", color: "#ffffff" }}>
+    <div className="st-layout">
       <Sidebar isOpen={sidebarOpen} onNavigate={closeSidebar} />
 
       {sidebarOpen && (

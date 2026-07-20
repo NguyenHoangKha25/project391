@@ -208,7 +208,7 @@ function Navbar({
   }
 
   return (
-    <header className="st-navbar" style={{ background: "rgba(13, 27, 23, 0.95)", border: "1px solid rgba(16, 185, 129, 0.25)", boxShadow: "0 8px 26px rgba(0, 0, 0, 0.4)" }}>
+    <header className="st-navbar">
       <div className="st-navbar-heading">
         <button
           type="button"
@@ -220,8 +220,8 @@ function Navbar({
         </button>
 
         <div>
-          <h1 style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", background: "none", fontWeight: "850" }}>{title}</h1>
-          <p style={{ color: "#a7f3d0", fontWeight: "600" }}>{subtitle}</p>
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
         </div>
       </div>
 
@@ -231,7 +231,6 @@ function Navbar({
           role="search" 
           onSubmit={handleSearch}
           ref={searchRef}
-          style={{ position: "relative" }}
         >
           <FiSearch aria-hidden="true" />
           <input
@@ -246,12 +245,6 @@ function Navbar({
             }}
             placeholder="Search papers, journals…"
             aria-label="Search research papers, journals, and keywords"
-            style={{ 
-              color: "#1c2533", 
-              WebkitTextFillColor: "#1c2533", 
-              fontWeight: "800",
-              fontSize: "14.5px"
-            }}
           />
           {showSuggestions && suggestions.length > 0 && (
             <div className="st-search-suggestions">
@@ -308,38 +301,22 @@ function Navbar({
                 </div>
               </div>
 
-              <button 
-                type="button" 
-                onClick={() => goTo(ROUTE_PATHS.MY_ACCOUNT)}
-                style={{ color: "#1c2533", fontWeight: "780" }}
-              >
-                <FiUser style={{ color: "#1c2533" }} />
+              <button type="button" onClick={() => goTo(ROUTE_PATHS.MY_ACCOUNT)}>
+                <FiUser />
                 My account
               </button>
-              <button 
-                type="button" 
-                onClick={() => goTo(ROUTE_PATHS.LIBRARY)}
-                style={{ color: "#1c2533", fontWeight: "780" }}
-              >
-                <FiFileText style={{ color: "#1c2533" }} />
+              <button type="button" onClick={() => goTo(ROUTE_PATHS.LIBRARY)}>
+                <FiFileText />
                 My library
               </button>
-              <button 
-                type="button" 
-                onClick={() => goTo(ROUTE_PATHS.REPORTS)}
-                style={{ color: "#1c2533", fontWeight: "780" }}
-              >
-                <FiSettings style={{ color: "#1c2533" }} />
+              <button type="button" onClick={() => goTo(ROUTE_PATHS.REPORTS)}>
+                <FiSettings />
                 Reports
               </button>
 
               {isAdminUser && (
-                <button 
-                  type="button" 
-                  onClick={() => goTo(ROUTE_PATHS.ADMIN)}
-                  style={{ color: "#1c2533", fontWeight: "780" }}
-                >
-                  <FiSettings style={{ color: "#1c2533" }} />
+                <button type="button" onClick={() => goTo(ROUTE_PATHS.ADMIN)}>
+                  <FiSettings />
                   Admin panel
                 </button>
               )}
@@ -350,9 +327,8 @@ function Navbar({
                 type="button"
                 className="st-account-logout"
                 onClick={handleLogout}
-                style={{ color: "#dc2626", fontWeight: "780" }}
               >
-                <FiLogOut style={{ color: "#dc2626" }} />
+                <FiLogOut />
                 Log out
               </button>
             </div>
