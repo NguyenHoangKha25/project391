@@ -299,7 +299,7 @@ function TrendsPage() {
       <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
         <div className="cm-loading" style={{ minHeight: "60vh" }}>
           <div className="cm-spinner" />
-          <p style={{ fontWeight: "700", color: "var(--st-primary-dark)" }}>Loading scientific trends...</p>
+          <p style={{ fontWeight: "750", color: "#34d399", fontSize: "16px" }}>Loading scientific trends...</p>
         </div>
       </MainLayout>
     );

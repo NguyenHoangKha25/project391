@@ -275,7 +275,7 @@ function DashboardPage() {
       <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
         <div className="cm-loading" style={{ minHeight: "60vh" }}>
           <div className="cm-spinner" />
-          <p style={{ fontWeight: "700", color: "var(--st-primary-dark)" }}>Loading dashboard overview statistics...</p>
+          <p style={{ fontWeight: "750", color: "#34d399", fontSize: "16px" }}>Loading dashboard overview statistics...</p>
         </div>
       </MainLayout>
     );
