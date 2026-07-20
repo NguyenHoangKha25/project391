@@ -72,9 +72,8 @@ export function isAdmin() {
   return getStoredRole() === ADMIN_ROLE;
 }
 
-export function getDefaultAuthenticatedPath(roleValue) {
-  const role = normalizeRoleValue(roleValue || getStoredRole());
-  return role === ADMIN_ROLE ? "/admin" : "/dashboard";
+export function getDefaultAuthenticatedPath() {
+  return "/dashboard";
 }
 
 // Backend AuthResponse: { token, refreshToken, user: { userId, username, email, role } }

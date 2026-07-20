@@ -61,7 +61,7 @@ function AuthProvider({ children }) {
     () => ({
       ...authState,
       displayRole: formatRoleForDisplay(authState.role),
-      defaultPath: getDefaultAuthenticatedPath(authState.role),
+      defaultPath: getDefaultAuthenticatedPath(),
       loginUser,
       logoutUser,
       refreshAuthState,

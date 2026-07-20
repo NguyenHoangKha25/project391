@@ -14,16 +14,16 @@ function OAuth2CallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { refreshAuthState } = useAuth();
-  const [errorMsg, setErrorMsg] = useState("");
-
   const token =
     searchParams.get("token") ||
     searchParams.get("accessToken") ||
     searchParams.get("jwt");
+  const [errorMsg, setErrorMsg] = useState(() =>
+    token ? "" : "Google authentication token not found. Please try again.",
+  );
 
   useEffect(() => {
     if (!token) {
-      setErrorMsg("Google authentication token not found. Please try again.");
       return;
     }
 
@@ -52,9 +52,8 @@ function OAuth2CallbackPage() {
         localStorage.setItem("user", JSON.stringify(updatedUser));
 
         // 3. Refresh context và navigate
-        const nextState = refreshAuthState();
-        const nextRole = nextState?.role || userInfo.role;
-        navigate(getDefaultAuthenticatedPath(nextRole), { replace: true });
+        refreshAuthState();
+        navigate(getDefaultAuthenticatedPath(), { replace: true });
       } catch (err) {
         console.error("Google login callback failed", err);
         setErrorMsg(err.message || "An unexpected error occurred during Google sign-in.");

@@ -44,8 +44,8 @@ function LoginPage() {
         password,
       });
 
-      const session = loginUser(response, { username: username.trim() });
-      navigate(getDefaultAuthenticatedPath(session.user.role), { replace: true });
+      loginUser(response, { username: username.trim() });
+      navigate(getDefaultAuthenticatedPath(), { replace: true });
     } catch (error) {
       console.error("Login failed", error);
       setErrorMessage(error.message || "Invalid username or password.");

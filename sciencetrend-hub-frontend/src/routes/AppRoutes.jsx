@@ -19,7 +19,7 @@ import FollowingPage from "../pages/FollowingPage";
 import { ROUTE_PATHS } from "./routePaths";
 
 // Cho phép truy cập khi chưa đăng nhập.
-// Nếu đã đăng nhập → redirect về dashboard/admin tuỳ role.
+// Nếu đã đăng nhập → redirect về dashboard.
 function PublicOnlyRoute({ children }) {
   const { isLoggedIn, defaultPath } = useAuth();
   const location = useLocation();
