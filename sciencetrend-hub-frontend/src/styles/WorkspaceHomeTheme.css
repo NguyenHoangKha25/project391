@@ -10,27 +10,30 @@
  */
 
 .st-layout {
-  --workspace-canvas: #060d0b;
-  --workspace-canvas-soft: #091612;
-  --workspace-surface: rgba(13, 27, 23, 0.94);
-  --workspace-surface-strong: #11221c;
-  --workspace-surface-soft: rgba(16, 185, 129, 0.08);
-  --workspace-border: rgba(16, 185, 129, 0.25);
-  --workspace-border-strong: rgba(52, 211, 153, 0.48);
-  --workspace-heading: #ffffff;
-  --workspace-text: #e2e8f0;
-  --workspace-muted: #a7f3d0;
+  --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --workspace-canvas: #081712;
+  --workspace-canvas-soft: #0c211a;
+  --workspace-surface: #102a21;
+  --workspace-surface-strong: #16382e;
+  --workspace-surface-soft: rgba(52, 211, 153, 0.12);
+  --workspace-border: rgba(94, 234, 179, 0.3);
+  --workspace-border-strong: rgba(110, 231, 183, 0.64);
+  --workspace-heading: #f8fffc;
+  --workspace-text: #e6f5ef;
+  --workspace-muted: #b8d9cc;
   --workspace-primary: #10b981;
-  --workspace-primary-bright: #34d399;
+  --workspace-primary-bright: #46dda3;
   --workspace-accent: #fbbf24;
   --workspace-danger: #fb7185;
-  --workspace-panel-shadow: 0 18px 46px rgba(0, 0, 0, 0.42), 0 0 24px rgba(16, 185, 129, 0.07);
-  --workspace-control-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --workspace-panel-shadow: 0 16px 38px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  --workspace-control-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
 
   color: var(--workspace-text) !important;
   background:
-    radial-gradient(circle at 78% -8%, rgba(16, 185, 129, 0.13), transparent 31rem),
-    radial-gradient(circle at 34% 112%, rgba(251, 191, 36, 0.07), transparent 28rem),
+    radial-gradient(circle at 78% -8%, rgba(52, 211, 153, 0.14), transparent 31rem),
+    radial-gradient(circle at 34% 112%, rgba(251, 191, 36, 0.055), transparent 28rem),
     var(--workspace-canvas) !important;
 }
 
@@ -49,7 +52,7 @@
   z-index: -1;
   content: "";
   pointer-events: none;
-  opacity: 0.13;
+  opacity: 0.09;
   background-image:
     linear-gradient(rgba(16, 185, 129, 0.18) 1px, transparent 1px),
     linear-gradient(90deg, rgba(16, 185, 129, 0.18) 1px, transparent 1px);
@@ -60,10 +63,10 @@
 /* Navigation shell */
 .st-layout .st-sidebar {
   background:
-    radial-gradient(circle at 20% 0%, rgba(16, 185, 129, 0.13), transparent 19rem),
+    radial-gradient(circle at 20% 0%, rgba(52, 211, 153, 0.12), transparent 19rem),
     var(--workspace-canvas-soft) !important;
-  border-right: 1px solid rgba(16, 185, 129, 0.2) !important;
-  box-shadow: 18px 0 50px rgba(0, 0, 0, 0.2) !important;
+  border-right: 1px solid rgba(94, 234, 179, 0.26) !important;
+  box-shadow: 18px 0 44px rgba(0, 0, 0, 0.18) !important;
 }
 
 .st-layout .st-brand {
@@ -90,7 +93,7 @@
 .st-layout .st-menu-link {
   min-height: 46px;
   border-radius: 13px !important;
-  color: #cbd5e1 !important;
+  color: #d5e9e1 !important;
 }
 
 .st-layout .st-menu-link:hover {
@@ -102,8 +105,8 @@
 
 .st-layout .st-menu-link.active {
   color: #ffffff !important;
-  border-color: rgba(52, 211, 153, 0.4) !important;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(5, 150, 105, 0.13)) !important;
+  border-color: rgba(110, 231, 183, 0.52) !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.38), rgba(5, 150, 105, 0.22)) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 26px rgba(0, 0, 0, 0.2) !important;
 }
 
@@ -112,8 +115,8 @@
 }
 
 .st-layout .st-sidebar-footer {
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-  background: rgba(16, 185, 129, 0.06) !important;
+  border: 1px solid rgba(94, 234, 179, 0.3) !important;
+  background: rgba(16, 185, 129, 0.11) !important;
 }
 
 .st-layout .st-navbar {
@@ -121,10 +124,10 @@
   min-height: 76px;
   margin: 12px 24px 0 !important;
   padding: 12px 18px;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border: 1px solid rgba(94, 234, 179, 0.34) !important;
   border-radius: 20px !important;
-  background: rgba(13, 27, 23, 0.9) !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.48), 0 0 20px rgba(16, 185, 129, 0.08) !important;
+  background: rgba(15, 39, 31, 0.96) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32), 0 0 18px rgba(16, 185, 129, 0.08) !important;
   backdrop-filter: blur(18px) saturate(1.1) !important;
   -webkit-backdrop-filter: blur(18px) saturate(1.1) !important;
 }
@@ -171,7 +174,7 @@
 }
 
 .st-layout .st-search-form input::placeholder {
-  color: rgba(167, 243, 208, 0.62) !important;
+  color: rgba(213, 233, 225, 0.72) !important;
 }
 
 .st-layout .st-search-form svg,
@@ -1038,4 +1041,130 @@
   .st-layout .db-refresh-btn-premium {
     width: 100%;
   }
+}
+
+/* Readability pass: retain the emerald identity while improving hierarchy. */
+.st-layout,
+.st-layout :is(button, input, select, textarea) {
+  font-family: var(--font-body) !important;
+}
+
+.st-layout :is(h1, h2, h3, h4, h5, h6, .st-brand strong) {
+  font-family: var(--font-display) !important;
+  letter-spacing: -0.025em;
+}
+
+.st-layout :is(
+  .metric-card,
+  .chart-card,
+  .table-card,
+  .trend-stat-card,
+  .trends-chart-panel,
+  .trends-table-panel,
+  .trends-bottom-panel,
+  .workspace-panel,
+  .account-panel,
+  .admin-panel,
+  .admin-panel-detailed
+) {
+  border-color: rgba(94, 234, 179, 0.32) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(52, 211, 153, 0.09), transparent 14rem),
+    linear-gradient(145deg, #122f26 0%, #0f271f 100%) !important;
+}
+
+.st-layout .db-controls-row {
+  border-color: rgba(94, 234, 179, 0.28) !important;
+  background: rgba(15, 42, 33, 0.94) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.2);
+}
+
+.st-layout .db-refresh-btn-premium {
+  color: #05251a !important;
+  border-color: rgba(167, 243, 208, 0.72) !important;
+  background: linear-gradient(135deg, #6ee7b7 0%, #34d399 100%) !important;
+  box-shadow: 0 9px 22px rgba(16, 185, 129, 0.28) !important;
+}
+
+.st-layout .db-refresh-btn-premium:hover:not(:disabled) {
+  color: #031a12 !important;
+  border-color: #d1fae5 !important;
+  background: linear-gradient(135deg, #a7f3d0 0%, #4adea8 100%) !important;
+  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.38) !important;
+}
+
+.st-layout .db-datepicker-icon,
+.st-layout .st-search-form svg {
+  color: #5ee7ad !important;
+}
+
+.st-layout :is(.metric-title, .admin-stat-card-custom .card-label) {
+  color: #d3ebe1 !important;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.st-layout :is(.metric-value, .stat-card-value, .admin-stat-card-custom .card-value) {
+  color: #ffffff !important;
+  text-shadow: 0 1px 12px rgba(255, 255, 255, 0.05);
+}
+
+.st-layout :is(
+  .metric-trend-text,
+  .chart-subtext,
+  .paper-authors-sub,
+  .legend-val,
+  .bar-chart-y-axis,
+  .bar-label,
+  .keyword-label
+) {
+  color: #c7dfd5 !important;
+}
+
+.st-layout :is(.bar-chart-y-axis, .bar-label, .keyword-label, .legend-val) {
+  font-weight: 650 !important;
+}
+
+.st-layout :is(.panel-header-row h3, .legend-name, .keyword-value) {
+  color: #f7fffb !important;
+}
+
+.st-layout :is(.keyword-bar-track, .bar-wrapper) {
+  background: #244a3e !important;
+}
+
+.st-layout .bar-fill {
+  background: linear-gradient(to top, #10b981, #6ee7b7) !important;
+}
+
+.st-layout .donut-svg > circle:first-child {
+  stroke: rgba(184, 217, 204, 0.18) !important;
+}
+
+.st-layout :is(.panel-header-row, .panel-footer-row) {
+  border-color: rgba(94, 234, 179, 0.23) !important;
+}
+
+.st-layout :is(.badge-chip, .db-eyebrow) {
+  color: #9af0c9 !important;
+  border-color: rgba(110, 231, 183, 0.38) !important;
+  background: rgba(52, 211, 153, 0.14) !important;
+}
+
+.st-layout :is(.footer-link, .metric-trend.positive, .trend-pct) {
+  color: #62e6ad !important;
+}
+
+.st-layout .premium-table th {
+  color: #d1e8df !important;
+  background: rgba(52, 211, 153, 0.09) !important;
+}
+
+.st-layout .premium-table td {
+  color: #e6f5ef !important;
+}
+
+.st-layout :is(input, textarea)::placeholder {
+  color: rgba(213, 233, 225, 0.7) !important;
+  -webkit-text-fill-color: rgba(213, 233, 225, 0.7) !important;
 }
