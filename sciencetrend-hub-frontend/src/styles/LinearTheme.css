@@ -750,3 +750,123 @@ body > div:first-child[style*="background"] {
 .mockup-trend-row strong {
   color: #0070f3 !important;
 }
+
+/* ── Portal Mockup App (Vercel Style) ── */
+.portal-mockup-app {
+  background: #ffffff !important;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08) !important;
+}
+
+.portal-mockup-app:hover {
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-2px);
+}
+
+.mockup-sidebar {
+  background: #fafafa !important;
+  border-right: 1px solid #f0f0f0 !important;
+}
+
+.mockup-sidebar-logo {
+  color: #000000 !important;
+}
+
+.mockup-sidebar-nav span {
+  color: #888888 !important;
+}
+
+.mockup-sidebar-nav span.active {
+  color: #000000 !important;
+  background: #f5f5f7 !important;
+}
+
+.mockup-content {
+  background: #fafafa !important;
+}
+
+.mockup-brand-title h3 {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+.mockup-brand-title small {
+  color: #666666 !important;
+}
+
+.mockup-card {
+  background: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 20px 40px rgba(0, 0, 0, 0.015) !important;
+  border-radius: 12px !important;
+}
+
+.overview-stats small {
+  color: #666666 !important;
+}
+
+.overview-stats strong {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+.growth-text {
+  color: #10b981 !important;
+}
+
+.radial-text strong {
+  color: #000000 !important;
+}
+
+.radial-text small {
+  color: #666666 !important;
+}
+
+.card-header-clean small {
+  color: #888888 !important;
+}
+
+.feed-item {
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.feed-info strong {
+  color: #000000 !important;
+}
+
+.feed-info span {
+  color: #666666 !important;
+}
+
+.feed-badge {
+  color: #000000 !important;
+  background: #f5f5f7 !important;
+}
+
+.impact-item {
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.impact-item span {
+  color: #333333 !important;
+}
+
+.impact-item strong {
+  color: #000000 !important;
+}
+
+/* Home Section Layout background modifications */
+.home-hero {
+  background: #fafafa !important;
+}
+
+.home-hero-bg {
+  background: radial-gradient(circle at 50% 50%, rgba(0, 112, 243, 0.04), transparent 60%) !important;
+}
+
+.home-grid-lines {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px) !important;
+}
+

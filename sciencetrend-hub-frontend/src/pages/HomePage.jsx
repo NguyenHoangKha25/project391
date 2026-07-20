@@ -197,12 +197,12 @@ function HomePage() {
                     {/* Small compact radial gauge */}
                     <div className="mini-radial-box">
                       <svg viewBox="0 0 100 100" className="radial-svg">
-                        <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.06)" strokeWidth="10" fill="none" />
+                        <circle cx="50" cy="50" r="40" stroke="rgba(0,0,0,0.04)" strokeWidth="10" fill="none" />
                         <circle cx="50" cy="50" r="40" stroke="url(#accent-gradient-new)" strokeWidth="10" fill="none" strokeDasharray="251.2" strokeDashoffset="45" strokeLinecap="round" />
                         <defs>
                           <linearGradient id="accent-gradient-new" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#ffb900" />
-                            <stop offset="100%" stopColor="#f43f5e" />
+                            <stop offset="0%" stopColor="#0070f3" />
+                            <stop offset="100%" stopColor="#7928ca" />
                           </linearGradient>
                         </defs>
                       </svg>
@@ -216,8 +216,8 @@ function HomePage() {
                   {/* Full width trend line chart */}
                   <div className="sparkline-chart-main">
                     <svg viewBox="0 0 300 50" className="sparkline-svg-large">
-                      <path d="M0 40 Q50 10 100 30 T200 15 T300 5" fill="none" stroke="#10b981" strokeWidth="2.5" />
-                      <circle cx="300" cy="5" r="3.5" fill="#10b981" />
+                      <path d="M0 40 Q50 10 100 30 T200 15 T300 5" fill="none" stroke="#000000" strokeWidth="2.5" />
+                      <circle cx="300" cy="5" r="3.5" fill="#000000" />
                     </svg>
                   </div>
                 </section>
