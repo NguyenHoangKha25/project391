@@ -233,7 +233,7 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="username"
-                    style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#11221c", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                 </div>
                 {fieldErrors.username && <p className="field-error">{fieldErrors.username}</p>}
@@ -252,7 +252,7 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="email"
-                    style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#11221c", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                 </div>
                 {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
@@ -278,7 +278,7 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="new-password"
-                    style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#11221c", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                   <button
                     type="button"
@@ -305,7 +305,7 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="new-password"
-                    style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#11221c", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                   <button
                     type="button"
@@ -332,7 +332,7 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     required
-                    style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#11221c", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   >
                     <option value="">Select account type...</option>
                     {REGISTER_ROLES.map((r) => (

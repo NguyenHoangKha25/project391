@@ -203,7 +203,7 @@ function LoginPage() {
                       setErrorMessage("");
                       setSuccessMessage("");
                     }}
-                    style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#11221c", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                 </div>
               </div>
@@ -224,7 +224,7 @@ function LoginPage() {
                       setErrorMessage("");
                       setSuccessMessage("");
                     }}
-                    style={{ color: "#ffffff", WebkitTextFillColor: "#ffffff", backgroundColor: "#11221c", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                   <button
                     type="button"

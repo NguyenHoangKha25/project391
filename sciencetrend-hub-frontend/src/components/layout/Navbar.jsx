@@ -47,7 +47,7 @@ function Navbar({
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const displayName = useMemo(
-    () => user.username || user.name || user.fullName || user.email || "Researcher",
+    () => user.fullName || user.name || user.username || user.email || "Researcher",
     [user],
   );
   const role = displayRole;
@@ -283,7 +283,7 @@ function Navbar({
           >
             <span className="st-avatar">{initials}</span>
             <span className="st-user-copy">
-              <strong>{displayName}</strong>
+              <strong title={displayName}>{displayName}</strong>
               <small>{role}</small>
             </span>
             <FiChevronDown
