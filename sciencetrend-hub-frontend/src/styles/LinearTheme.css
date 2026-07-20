@@ -615,6 +615,26 @@ body {
   color: #000000 !important;
 }
 
+/* ── Register / Login Container Scroll Fix (Vercel Style) ── */
+.register-wrapper {
+  min-height: auto !important;
+  height: auto !important;
+  align-self: center !important;
+}
+
+.register-right {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-y: visible !important;
+  justify-content: center !important;
+  padding-bottom: clamp(20px, 3vw, 30px) !important;
+}
+
+.register-premium-card-box {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
 /* ── Paper list cards ── */
 .papers-card-custom {
   background: #ffffff !important;
