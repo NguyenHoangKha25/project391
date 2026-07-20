@@ -23,7 +23,7 @@ import { normalizeDashboard, formatNumber, normalizeTopic, toArray } from "../ut
 import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/DashboardPage.css";
 
-const DONUT_COLORS = ["#10b981", "#34d399", "#6ee7b7", "#059669", "#fbbf24", "#a7f3d0"];
+const DONUT_COLORS = ["#3b82f6", "#60a5fa", "#8b5cf6", "#a78bfa", "#f59e0b", "#94a3b8"];
 
 function DashboardPage() {
   const { user } = useAuth();
@@ -272,7 +272,7 @@ function DashboardPage() {
       <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
         <div className="cm-loading" style={{ minHeight: "60vh" }}>
           <div className="cm-spinner" />
-          <p style={{ fontWeight: "750", color: "#34d399", fontSize: "16px" }}>Loading dashboard overview statistics...</p>
+          <p style={{ fontWeight: "750", color: "#60a5fa", fontSize: "16px" }}>Loading dashboard overview statistics...</p>
         </div>
       </MainLayout>
     );
@@ -595,7 +595,7 @@ function DashboardPage() {
                         <svg width="84" height="40" className="sparkline-svg">
                           <polyline
                             fill="none"
-                            stroke="#34d399"
+                            stroke="#60a5fa"
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"

@@ -6,6 +6,7 @@ import "./styles/TypographyRefresh.css";
 import "./styles/ColorfulTheme.css";
 import "./styles/LinearTheme.css";
 import "./styles/WorkspaceHomeTheme.css";
+import "./styles/ProfessionalNeutralTheme.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

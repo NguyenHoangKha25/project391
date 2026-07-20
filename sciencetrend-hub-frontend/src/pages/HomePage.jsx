@@ -201,7 +201,7 @@ function HomePage() {
                         <circle cx="50" cy="50" r="40" stroke="url(#accent-gradient-new)" strokeWidth="10" fill="none" strokeDasharray="251.2" strokeDashoffset="45" strokeLinecap="round" />
                         <defs>
                           <linearGradient id="accent-gradient-new" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#10b981" />
+                            <stop offset="0%" stopColor="#3b82f6" />
                             <stop offset="100%" stopColor="#fbbf24" />
                           </linearGradient>
                         </defs>
@@ -216,8 +216,8 @@ function HomePage() {
                   {/* Full width trend line chart */}
                   <div className="sparkline-chart-main">
                     <svg viewBox="0 0 300 50" className="sparkline-svg-large">
-                      <path d="M0 40 Q50 10 100 30 T200 15 T300 5" fill="none" stroke="#10b981" strokeWidth="2.5" />
-                      <circle cx="300" cy="5" r="3.5" fill="#10b981" />
+                      <path d="M0 40 Q50 10 100 30 T200 15 T300 5" fill="none" stroke="#3b82f6" strokeWidth="2.5" />
+                      <circle cx="300" cy="5" r="3.5" fill="#3b82f6" />
                     </svg>
                   </div>
                 </section>
