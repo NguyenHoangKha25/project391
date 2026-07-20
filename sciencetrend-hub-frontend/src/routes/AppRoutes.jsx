@@ -17,6 +17,7 @@ import TrendsPage from "../pages/TrendsPage";
 import TopicsPage from "../pages/TopicsPage";
 import FollowingPage from "../pages/FollowingPage";
 import { ROUTE_PATHS } from "./routePaths";
+import "../styles/LinearTheme.css";
 
 // Cho phép truy cập khi chưa đăng nhập.
 // Nếu đã đăng nhập → redirect về dashboard/admin tuỳ role.

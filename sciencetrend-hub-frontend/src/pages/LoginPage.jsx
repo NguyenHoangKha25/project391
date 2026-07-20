@@ -79,8 +79,8 @@ function LoginPage() {
               <img src={logo} alt="ScienceTrend Hub logo" className="auth-logo-img" />
             </span>
             <div className="auth-brand-text">
-              <h1 style={{ color: "#ffffff", fontWeight: "900" }}>ScienceTrend Hub</h1>
-              <p style={{ color: "#bdf2f8", fontWeight: "600", opacity: 0.95 }}>Scientific Journal Publication Tracking</p>
+              <h1 style={{ fontWeight: "900" }}>ScienceTrend Hub</h1>
+              <p style={{ fontWeight: "600", opacity: 0.95 }}>Scientific Journal Publication Tracking</p>
             </div>
           </Link>
 
@@ -89,17 +89,12 @@ function LoginPage() {
               <span className="auth-badge">Research Dashboard</span>
               <h2 style={{
                 fontFamily: "var(--font-display)",
-                background: "linear-gradient(135deg, #ffc067 0%, #f97316 100%)",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                color: "transparent",
-                WebkitTextFillColor: "transparent",
                 fontSize: "44px",
                 fontWeight: "950",
                 letterSpacing: "-0.05em",
                 margin: "18px 0 12px"
               }}>Welcome!</h2>
-              <p style={{ color: "#ffffff", fontWeight: "600", fontSize: "16px", lineHeight: "1.7", opacity: 0.95 }}>
+              <p style={{ fontWeight: "600", fontSize: "16px", lineHeight: "1.7", opacity: 0.95 }}>
                 Explore scientific trends, manage papers, and track journals instantly.
               </p>
 
@@ -170,14 +165,13 @@ function LoginPage() {
             <div className="auth-card-header">
               <h2 style={{
                 fontFamily: "var(--font-display)",
-                color: "#082733",
                 fontSize: "38px",
                 fontWeight: "950",
                 letterSpacing: "-0.04em",
                 margin: 0,
                 display: "block"
               }}>Sign in</h2>
-              <p style={{ color: "#475569", fontSize: "15px", fontWeight: "600", marginTop: "6px", lineHeight: "1.5" }}>
+              <p style={{ fontSize: "15px", fontWeight: "600", marginTop: "6px", lineHeight: "1.5" }}>
                 Enter your username and password to continue.
               </p>
               {successMessage && (
@@ -194,7 +188,7 @@ function LoginPage() {
 
             <form className="auth-form" onSubmit={handleLogin} noValidate>
               <div className="auth-form-group">
-                <label htmlFor="username" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
+                <label htmlFor="username" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
                 <div className="auth-input-wrapper">
                   <FiUser className="auth-input-icon" />
                   <input
@@ -209,13 +203,13 @@ function LoginPage() {
                       setErrorMessage("");
                       setSuccessMessage("");
                     }}
-                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                 </div>
               </div>
 
               <div className="auth-form-group">
-                <label htmlFor="password" style={{ color: "#0f172a", fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
+                <label htmlFor="password" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
                 <div className="auth-input-wrapper">
                   <FiLock className="auth-input-icon" />
                   <input
@@ -230,7 +224,7 @@ function LoginPage() {
                       setErrorMessage("");
                       setSuccessMessage("");
                     }}
-                    style={{ color: "#082733", fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                   <button
                     type="button"
@@ -244,7 +238,7 @@ function LoginPage() {
               </div>
 
               <div className="auth-options">
-                <label className="auth-remember" style={{ color: "#334155", fontWeight: "600" }}>
+                <label className="auth-remember" style={{ fontWeight: "600" }}>
                   <input type="checkbox" />
                   <span>Remember me</span>
                 </label>
@@ -275,7 +269,7 @@ function LoginPage() {
               <span>Continue with Google</span>
             </button>
 
-            <p className="auth-register-text" style={{ color: "#475569", fontWeight: "600" }}>
+            <p className="auth-register-text" style={{ fontWeight: "600" }}>
               Do not have an account?{" "}
               <Link to={ROUTE_PATHS.REGISTER} style={{ fontWeight: "800" }}>Create account</Link>
             </p>

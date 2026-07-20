@@ -20,7 +20,7 @@ import { normalizeDashboard, formatNumber, normalizeTopic, toArray } from "../ut
 import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/DashboardPage.css";
 
-const DONUT_COLORS = ["#2563eb", "#0ea5e9", "#10b981", "#ffb020", "#ec4899", "#8b5cf6"];
+const DONUT_COLORS = ["#8b5cf6", "#ec4899", "#06b6d4", "#10b981", "#f59e0b", "#a855f7"];
 
 function DashboardPage() {
   const { user } = useAuth();
@@ -590,7 +590,7 @@ function DashboardPage() {
                         <svg width="84" height="40" className="sparkline-svg">
                           <polyline
                             fill="none"
-                            stroke="#10b981"
+                            stroke="#a78bfa"
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
