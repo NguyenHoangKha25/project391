@@ -10,7 +10,10 @@ import {
   FiCheckCircle,
   FiAlertTriangle,
   FiCalendar,
-  FiArrowRight
+  FiArrowRight,
+  FiTrendingUp,
+  FiTrendingDown,
+  FiMinus
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
@@ -124,8 +127,7 @@ function DashboardPage() {
         title: "Total Papers",
         value: formatNumber(totalPapers),
         icon: FiFileText,
-        colorClass: "card-blue",
-        trend: totalPapers > 0 ? "↑ 12.6%" : "—",
+        change: totalPapers > 0 ? "12.6%" : "—",
         trendText: totalPapers > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       },
@@ -133,8 +135,7 @@ function DashboardPage() {
         title: "Journals",
         value: formatNumber(totalJournals),
         icon: FiBookOpen,
-        colorClass: "card-green",
-        trend: totalJournals > 0 ? "↑ 5.3%" : "—",
+        change: totalJournals > 0 ? "5.3%" : "—",
         trendText: totalJournals > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       },
@@ -142,8 +143,7 @@ function DashboardPage() {
         title: "Keywords",
         value: formatNumber(totalKeywords),
         icon: FiKey,
-        colorClass: "card-purple",
-        trend: totalKeywords > 0 ? "↑ 8.7%" : "—",
+        change: totalKeywords > 0 ? "8.7%" : "—",
         trendText: totalKeywords > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       },
@@ -151,8 +151,7 @@ function DashboardPage() {
         title: "OpenAlex Papers",
         value: formatNumber(openAlexPapers),
         icon: FiDatabase,
-        colorClass: "card-sky",
-        trend: openAlexPapers > 0 ? "↑ 9.4%" : "—",
+        change: openAlexPapers > 0 ? "9.4%" : "—",
         trendText: openAlexPapers > 0 ? "vs last year" : "No sync data",
         trendType: "positive"
       }
@@ -164,8 +163,7 @@ function DashboardPage() {
           title: "Successful Syncs",
           value: formatNumber(successfulSyncs),
           icon: FiCheckCircle,
-          colorClass: "card-emerald",
-          trend: successfulSyncs > 0 ? "↑ 7.1%" : "—",
+          change: successfulSyncs > 0 ? "7.1%" : "—",
           trendText: successfulSyncs > 0 ? "vs last year" : "No sync data",
           trendType: "positive"
         },
@@ -173,8 +171,7 @@ function DashboardPage() {
           title: "Failed Syncs",
           value: formatNumber(failedSyncs),
           icon: FiAlertTriangle,
-          colorClass: "card-red",
-          trend: failedSyncs > 0 ? "↓ 22.2%" : "—",
+          change: failedSyncs > 0 ? "22.2%" : "—",
           trendText: failedSyncs > 0 ? "vs last year" : "No sync data",
           trendType: "negative"
         }
@@ -319,21 +316,29 @@ function DashboardPage() {
         )}
 
         {/* Dynamic Metrics Grid */}
-        <section className="db-metrics-grid" style={{ gridTemplateColumns: `repeat(${dashboardStats.length}, 1fr)` }}>
+        <section className="db-metrics-grid" aria-label="Dashboard overview">
           {dashboardStats.map((stat, i) => {
             const Icon = stat.icon;
+            const TrendIcon = stat.change === "—"
+              ? FiMinus
+              : stat.trendType === "negative"
+                ? FiTrendingDown
+                : FiTrendingUp;
             return (
-              <article key={i} className={`metric-card ${stat.colorClass}`}>
-                <div className="metric-header">
-                  <span className="metric-title">{stat.title}</span>
-                  <div className="metric-icon-box">
+              <article key={i} className="db-kpi-card" aria-label={`${stat.title}: ${stat.value}`}>
+                <div className="db-kpi-card-header">
+                  <span className="db-kpi-label">{stat.title}</span>
+                  <div className="db-kpi-icon" aria-hidden="true">
                     <Icon />
                   </div>
                 </div>
-                <h3 className="metric-value">{stat.value}</h3>
-                <div className="metric-footer">
-                  <span className={`metric-trend ${stat.trendType}`}>{stat.trend}</span>
-                  <span className="metric-trend-text">{stat.trendText}</span>
+                <strong className="db-kpi-value">{stat.value}</strong>
+                <div className="db-kpi-meta">
+                  <span className={`db-kpi-change ${stat.trendType}`}>
+                    <TrendIcon aria-hidden="true" />
+                    {stat.change}
+                  </span>
+                  <span className="db-kpi-comparison">{stat.trendText}</span>
                 </div>
               </article>
             );
