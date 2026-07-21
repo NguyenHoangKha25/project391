@@ -114,33 +114,33 @@ function LoginPage() {
               </div>
             </div>
 
-            <div className="auth-premium-preview-card" aria-label="Platform Highlights" style={{ background: "rgba(15, 23, 42, 0.85)", border: "1px solid rgba(148, 163, 184, 0.25)", borderRadius: "14px", padding: "14px 16px", marginTop: "12px" }}>
-              <div style={{ padding: "0 0 8px", borderBottom: "1px solid rgba(148, 163, 184, 0.2)", marginBottom: "10px" }}>
+            <div className="auth-premium-preview-card" aria-label="Platform Highlights" style={{ background: "rgba(15, 23, 42, 0.85)", border: "1px solid rgba(148, 163, 184, 0.25)", borderRadius: "14px", padding: "12px 14px", marginTop: "8px" }}>
+              <div style={{ padding: "0 0 6px", borderBottom: "1px solid rgba(148, 163, 184, 0.2)", marginBottom: "8px" }}>
                 <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "850", color: "#60a5fa", textTransform: "uppercase" }}>PLATFORM HIGHLIGHTS</span>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                  <span style={{ color: "#60a5fa", fontSize: "16px", marginTop: "2px", display: "flex", alignItems: "center" }}><FiSearch /></span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span className="feature-icon-box" style={{ background: "rgba(96, 165, 250, 0.18)", color: "#60a5fa", width: "28px", height: "28px", flex: "0 0 28px", fontSize: "14px" }}><FiSearch /></span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Multi-Source Discovery</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Cross-reference papers, authors, citations, and journal quartiles (Q1–Q4).</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Multi-Source Discovery</h5>
+                    <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Cross-reference papers, authors, citations, and journal quartiles (Q1–Q4).</p>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                  <span style={{ color: "#34d399", fontSize: "16px", marginTop: "2px", display: "flex", alignItems: "center" }}><FiBookmark /></span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span className="feature-icon-box" style={{ background: "rgba(52, 211, 153, 0.18)", color: "#34d399", width: "28px", height: "28px", flex: "0 0 28px", fontSize: "14px" }}><FiBookmark /></span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Research Library</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Bookmark key publications, follow journals, and track emerging topics.</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Research Library</h5>
+                    <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Bookmark key publications, follow journals, and track emerging topics.</p>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                  <span style={{ color: "#fbbf24", fontSize: "16px", marginTop: "2px", display: "flex", alignItems: "center" }}><FiTrendingUp /></span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span className="feature-icon-box" style={{ background: "rgba(251, 191, 36, 0.18)", color: "#fbbf24", width: "28px", height: "28px", flex: "0 0 28px", fontSize: "14px" }}><FiTrendingUp /></span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Trend & Summary Reports</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Visualize annual growth curves and export structured summary reports.</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Trend & Summary Reports</h5>
+                    <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Visualize annual growth curves and export structured summary reports.</p>
                   </div>
                 </div>
               </div>

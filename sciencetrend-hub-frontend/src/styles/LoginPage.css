@@ -53,8 +53,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 14px;
+  justify-content: center;
+  gap: 16px;
   padding: clamp(20px, 2.2vw, 28px);
   color: #fff;
   overflow: hidden;
