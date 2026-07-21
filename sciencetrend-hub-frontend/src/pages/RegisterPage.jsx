@@ -169,40 +169,40 @@ function RegisterPage() {
             </div>
             <div className="register-brand-text">
               <h1>ScienceTrend Hub</h1>
-              <p>Hệ thống Theo dõi & Phân tích Tạp chí Khoa học</p>
+              <p>Scientific Journal & Publication Analytics</p>
             </div>
           </Link>
 
           <div className="register-hero">
-            <h2>Tạo tài khoản Nghiên cứu</h2>
+            <h2>Join ScienceTrend Hub</h2>
             <p>
-              Đăng ký tài khoản để tra cứu bài báo, theo dõi biến động tạp chí khoa học,
-              lưu trữ tài liệu và xuất báo cáo phân tích theo không gian làm việc cá nhân.
+              Create your workspace to explore publication analytics, track journals,
+              and export structured research reports.
             </p>
           </div>
 
           <ul className="feature-list">
             <li className="feature-item">
               <span className="feature-icon-box"><FiCheck /></span>
-              <p>Theo dõi xu hướng và biến động công bố khoa học</p>
+              <p>Real-time publication & citation trend tracking</p>
             </li>
             <li className="feature-item">
               <span className="feature-icon-box"><FiCheck /></span>
-              <p>Lưu trữ và quản lý danh mục bài báo cá nhân</p>
+              <p>Personalized paper bookmarks & journal library</p>
             </li>
             <li className="feature-item">
               <span className="feature-icon-box"><FiCheck /></span>
-              <p>Tra cứu chỉ số tạp chí (Q1-Q4) và chủ đề nghiên cứu</p>
+              <p>Quartile rankings (Q1–Q4) & topic discovery</p>
             </li>
             <li className="feature-item">
               <span className="feature-icon-box"><FiCheck /></span>
-              <p>Trích xuất báo cáo thống kê phục vụ nghiên cứu</p>
+              <p>Exportable PDF & CSV summary analytics</p>
             </li>
           </ul>
 
           <div className="register-testimonial">
-            <p>"Hệ thống hỗ trợ tự động hóa việc tra cứu bài báo và nắm bắt nhanh các hướng nghiên cứu mới."</p>
-            <span>— Đồ án Tốt nghiệp SWP391</span>
+            <p>"Streamlines literature review and publication tracking into a single daily workflow."</p>
+            <span>— Scientific Journal & Trend Analytics</span>
           </div>
         </div>
 

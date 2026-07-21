@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff, FiUser, FiLock, FiLayers, FiBookOpen, FiPieChart } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiUser, FiLock, FiLayers, FiBookOpen, FiPieChart, FiSearch, FiBookmark, FiTrendingUp } from "react-icons/fi";
 import logo from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { useAuth } from "../context/useAuth";
@@ -80,67 +80,67 @@ function LoginPage() {
             </span>
             <div className="auth-brand-text">
               <h1 style={{ fontWeight: "900" }}>ScienceTrend Hub</h1>
-              <p style={{ fontWeight: "600", opacity: 0.95 }}>Hệ thống Theo dõi & Phân tích Tạp chí Khoa học</p>
+              <p style={{ fontWeight: "600", opacity: 0.95 }}>Scientific Journal & Publication Analytics</p>
             </div>
           </Link>
 
           <div className="auth-left-premium-content">
             <div className="auth-premium-hero">
-              <span className="auth-badge">HỆ THỐNG QUẢN LÝ NCKH</span>
+              <span className="auth-badge">RESEARCH INTELLIGENCE PLATFORM</span>
               <h2 style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "32px",
+                fontSize: "30px",
                 fontWeight: "900",
                 letterSpacing: "-0.04em",
                 margin: "8px 0 6px"
-              }}>Chào mừng bạn!</h2>
+              }}>Journal & Trend Analytics</h2>
               <p style={{ fontWeight: "600", fontSize: "13.5px", lineHeight: "1.45", opacity: 0.95 }}>
-                Nền tảng hỗ trợ tra cứu bài báo, theo dõi xu hướng công bố và quản lý thư viện nghiên cứu.
+                Access real-time analytics across top journals, research topics, and publication metrics in one unified workspace.
               </p>
 
               <div className="auth-premium-features-row" style={{ marginTop: "10px" }}>
                 <div className="auth-premium-feature-tag tag-blue">
                   <FiLayers />
-                  <span>Dashboard</span>
+                  <span>Analytics</span>
                 </div>
                 <div className="auth-premium-feature-tag tag-green">
                   <FiBookOpen />
-                  <span>Thư viện</span>
+                  <span>Journals</span>
                 </div>
                 <div className="auth-premium-feature-tag tag-yellow">
                   <FiPieChart />
-                  <span>Báo cáo</span>
+                  <span>Reports</span>
                 </div>
               </div>
             </div>
 
-            <div className="auth-premium-preview-card" aria-label="Tính năng chính" style={{ background: "rgba(15, 23, 42, 0.85)", border: "1px solid rgba(148, 163, 184, 0.25)", borderRadius: "14px", padding: "14px 16px", marginTop: "12px" }}>
+            <div className="auth-premium-preview-card" aria-label="Platform Highlights" style={{ background: "rgba(15, 23, 42, 0.85)", border: "1px solid rgba(148, 163, 184, 0.25)", borderRadius: "14px", padding: "14px 16px", marginTop: "12px" }}>
               <div style={{ padding: "0 0 8px", borderBottom: "1px solid rgba(148, 163, 184, 0.2)", marginBottom: "10px" }}>
-                <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "850", color: "#60a5fa", textTransform: "uppercase" }}>TÍNH NĂNG CHÍNH CỦA HỆ THỐNG</span>
+                <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "850", color: "#60a5fa", textTransform: "uppercase" }}>PLATFORM HIGHLIGHTS</span>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                  <span style={{ color: "#60a5fa", fontSize: "16px", marginTop: "1px" }}>🔍</span>
+                  <span style={{ color: "#60a5fa", fontSize: "16px", marginTop: "2px", display: "flex", alignItems: "center" }}><FiSearch /></span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Tra cứu Đa nguồn (Multi-Source)</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Tìm kiếm bài báo, tác giả, xếp hạng tạp chí (Q1-Q4) và chỉ số trích dẫn.</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Multi-Source Discovery</h5>
+                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Cross-reference papers, authors, citations, and journal quartiles (Q1–Q4).</p>
                   </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                  <span style={{ color: "#34d399", fontSize: "16px", marginTop: "1px" }}>📌</span>
+                  <span style={{ color: "#34d399", fontSize: "16px", marginTop: "2px", display: "flex", alignItems: "center" }}><FiBookmark /></span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Bộ sưu tập & Lưu trữ cá nhân</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Lưu trữ bài báo quan trọng, theo dõi danh mục tạp chí và từ khóa quan tâm.</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Research Library</h5>
+                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Bookmark key publications, follow journals, and track emerging topics.</p>
                   </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                  <span style={{ color: "#fbbf24", fontSize: "16px", marginTop: "1px" }}>📊</span>
+                  <span style={{ color: "#fbbf24", fontSize: "16px", marginTop: "2px", display: "flex", alignItems: "center" }}><FiTrendingUp /></span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Phân tích Xu hướng & Báo cáo</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Trực quan hóa biểu đồ phát triển ngành học và xuất báo cáo thống kê tổng hợp.</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Trend & Summary Reports</h5>
+                    <p style={{ color: "#cbd5e1", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Visualize annual growth curves and export structured summary reports.</p>
                   </div>
                 </div>
               </div>
