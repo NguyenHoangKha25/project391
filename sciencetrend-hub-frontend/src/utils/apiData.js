@@ -214,7 +214,24 @@ export function parseChartsFromContent(content = "") {
     charts.push({ title: currentSection, data: currentPoints });
   }
 
-  return charts;
+  // Clean and format points for each section
+  return charts.map((chart) => {
+    const titleLower = chart.title.toLowerCase();
+    
+    // For Papers by year: sort ascending by 4-digit year, filter valid years >= 2000
+    if (titleLower.includes("year") || titleLower.includes("năm")) {
+      const validYearPoints = chart.data
+        .filter((pt) => /^\d{4}$/.test(pt.label) && Number(pt.label) >= 2010)
+        .sort((a, b) => Number(a.label) - Number(b.label));
+      
+      return { 
+        ...chart, 
+        data: validYearPoints.length >= 2 ? validYearPoints : chart.data 
+      };
+    }
+
+    return chart;
+  });
 }
 
 // Report:

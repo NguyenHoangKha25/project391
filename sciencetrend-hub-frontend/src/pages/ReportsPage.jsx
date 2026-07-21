@@ -20,6 +20,34 @@ function chartPoints(chart = {}) {
   return [];
 }
 
+function OverallStatsCard({ points }) {
+  const cardThemes = [
+    { bg: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)", icon: "📄" },
+    { bg: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)", icon: "📚" },
+    { bg: "linear-gradient(135deg, #10b981 0%, #059669 100%)", icon: "🏷️" },
+    { bg: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", icon: "🌐" },
+    { bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", icon: "✅" },
+    { bg: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)", icon: "⚠️" },
+  ];
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginTop: "14px" }}>
+      {points.map((pt, idx) => {
+        const theme = cardThemes[idx % cardThemes.length];
+        return (
+          <div key={idx} style={{ background: theme.bg, color: "#ffffff", borderRadius: "10px", padding: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <span style={{ fontSize: "11px", fontWeight: 600, opacity: 0.92, textTransform: "capitalize" }}>{pt.label}</span>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginTop: "8px" }}>
+              <span style={{ fontSize: "20px", fontWeight: 800 }}>{pt.value.toLocaleString()}</span>
+              <span style={{ fontSize: "16px" }}>{theme.icon}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function LineChart({ points }) {
   const max = Math.max(...points.map((p) => p.value), 10);
   const width = 340;
@@ -33,29 +61,42 @@ function LineChart({ points }) {
     return { x, y, ...p };
   });
 
-  const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+  let linePath = "";
+  if (coords.length > 0) {
+    linePath = `M ${coords[0].x.toFixed(1)},${coords[0].y.toFixed(1)}`;
+    for (let i = 0; i < coords.length - 1; i++) {
+      const curr = coords[i];
+      const next = coords[i + 1];
+      const cp1x = (curr.x + next.x) / 2;
+      const cp1y = curr.y;
+      const cp2x = (curr.x + next.x) / 2;
+      const cp2y = next.y;
+      linePath += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`;
+    }
+  }
+
   const areaPath = coords.length > 0
     ? `${linePath} L ${coords[coords.length - 1].x.toFixed(1)},${height - padding} L ${coords[0].x.toFixed(1)},${height - padding} Z`
     : "";
 
   return (
-    <div className="report-line-container" style={{ marginTop: "12px" }}>
+    <div style={{ marginTop: "12px" }}>
       <svg width="100%" height="110" viewBox={`0 0 ${width} ${height}`}>
         <defs>
-          <linearGradient id="reportLineGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#2563eb" stopOpacity="0.01" />
+          <linearGradient id="vibrantLineGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.01" />
           </linearGradient>
         </defs>
-        <path d={areaPath} fill="url(#reportLineGrad)" />
-        <path d={linePath} fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" />
+        <path d={areaPath} fill="url(#vibrantLineGrad)" />
+        <path d={linePath} fill="none" stroke="#6366f1" strokeWidth="3" strokeLinecap="round" />
         {coords.map((c, i) => (
-          <circle key={i} cx={c.x} cy={c.y} r="3.5" fill="#ffffff" stroke="#2563eb" strokeWidth="2">
+          <circle key={i} cx={c.x} cy={c.y} r="4" fill="#ffffff" stroke="#6366f1" strokeWidth="2">
             <title>{`${c.label}: ${c.value} papers`}</title>
           </circle>
         ))}
       </svg>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--st-muted-strong, #64748b)", marginTop: "4px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontWeight: 600, color: "var(--st-muted-strong, #64748b)", marginTop: "4px" }}>
         <span>{points[0]?.label}</span>
         <span>{points[Math.floor(points.length / 2)]?.label}</span>
         <span>{points[points.length - 1]?.label}</span>
@@ -65,42 +106,49 @@ function LineChart({ points }) {
 }
 
 function DonutChart({ points }) {
+  const sliceColors = ["#6366f1", "#06b6d4", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6"];
   const total = points.reduce((sum, p) => sum + p.value, 0) || 1;
-  const colors = ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#c7d2fe", "#818cf8"];
-  
+
+  let cumulativePercent = 0;
   const slices = points.slice(0, 5).map((p, idx) => {
     const pct = Math.round((p.value / total) * 100);
-    return { ...p, pct, color: colors[idx % colors.length] };
+    const startPct = cumulativePercent;
+    cumulativePercent += pct;
+    return {
+      ...p,
+      pct,
+      color: sliceColors[idx % sliceColors.length],
+      dashArray: `${pct * 0.999} ${100 - pct * 0.999}`,
+      dashOffset: 100 - startPct + 25,
+    };
   });
 
   return (
-    <div className="report-donut-container" style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "12px", flexWrap: "wrap" }}>
-      <svg width="110" height="110" viewBox="0 0 42 42" className="donut-svg">
-        <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e2e8f0" strokeWidth="6" />
-        {slices.map((slice, idx) => {
-          const strokeDasharray = `${slice.pct} ${100 - slice.pct}`;
-          const offset = 100 - slices.slice(0, idx).reduce((sum, s) => sum + s.pct, 0) + 25;
-          return (
-            <circle
-              key={idx}
-              cx="21"
-              cy="21"
-              r="15.915"
-              fill="transparent"
-              stroke={slice.color}
-              strokeWidth="6"
-              strokeDasharray={strokeDasharray}
-              strokeDashoffset={offset}
-            />
-          );
-        })}
-      </svg>
-      <div className="donut-legend" style={{ display: "grid", gap: "6px", fontSize: "12px", flex: 1 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "14px", flexWrap: "wrap" }}>
+      <svg width="100" height="100" viewBox="0 0 42 42" style={{ flexShrink: 0, transform: "rotate(-90deg)", borderRadius: "50%" }}>
+        <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="7" />
         {slices.map((slice, idx) => (
-          <div key={idx} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: slice.color, display: "inline-block" }} />
-            <span style={{ fontWeight: 600, color: "var(--st-text-main, #1e293b)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "140px" }} title={slice.label}>{slice.label}:</span>
-            <span style={{ color: "var(--st-muted-strong, #64748b)" }}>{slice.value} ({slice.pct}%)</span>
+          <circle
+            key={idx}
+            cx="21"
+            cy="21"
+            r="15.915"
+            fill="transparent"
+            stroke={slice.color}
+            strokeWidth="7"
+            strokeDasharray={slice.dashArray}
+            strokeDashoffset={slice.dashOffset}
+            style={{ transition: "all 0.4s ease" }}
+          >
+            <title>{`${slice.label}: ${slice.value} (${slice.pct}%)`}</title>
+          </circle>
+        ))}
+      </svg>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "6px", fontSize: "12px", flex: 1 }}>
+        {slices.map((slice, idx) => (
+          <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", background: "var(--st-card-bg, #f8fafc)", padding: "4px 8px", borderRadius: "6px", borderLeft: `3px solid ${slice.color}` }}>
+            <span style={{ fontWeight: 600, color: "var(--st-text-main, #1e293b)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px" }} title={slice.label}>{slice.label}</span>
+            <span style={{ fontWeight: 700, color: slice.color }}>{slice.value.toLocaleString()} <small style={{ opacity: 0.8 }}>({slice.pct}%)</small></span>
           </div>
         ))}
       </div>
@@ -109,16 +157,25 @@ function DonutChart({ points }) {
 }
 
 function ColumnChart({ points }) {
+  const columnGradients = [
+    "linear-gradient(to bottom, #6366f1, #4338ca)",
+    "linear-gradient(to bottom, #06b6d4, #0891b2)",
+    "linear-gradient(to bottom, #10b981, #059669)",
+    "linear-gradient(to bottom, #f59e0b, #d97706)",
+    "linear-gradient(to bottom, #ec4899, #be185d)",
+    "linear-gradient(to bottom, #8b5cf6, #6d28d9)",
+  ];
   const max = Math.max(...points.map((p) => p.value), 1);
   return (
-    <div className="report-column-container" style={{ display: "flex", alignItems: "flex-end", gap: "10px", height: "110px", marginTop: "16px", paddingBottom: "24px", position: "relative" }}>
-      {points.slice(0, 7).map((p, idx) => {
-        const heightPct = Math.max((p.value / max) * 100, 10);
+    <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", height: "120px", marginTop: "16px", paddingBottom: "24px", position: "relative" }}>
+      {points.slice(0, 6).map((p, idx) => {
+        const heightPct = Math.max((p.value / max) * 100, 12);
+        const bg = columnGradients[idx % columnGradients.length];
         return (
           <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
-            <span style={{ fontSize: "10px", fontWeight: 600, color: "#2563eb", marginBottom: "4px" }}>{p.value}</span>
-            <div style={{ width: "100%", height: `${heightPct}%`, backgroundImage: "linear-gradient(to bottom, #3b82f6, #1d4ed8)", borderRadius: "4px" }} />
-            <span style={{ position: "absolute", bottom: "0", fontSize: "10px", color: "var(--st-muted-strong, #64748b)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "45px" }} title={p.label}>{p.label}</span>
+            <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--st-text-main, #0f172a)", marginBottom: "4px" }}>{p.value}</span>
+            <div style={{ width: "100%", height: `${heightPct}%`, backgroundImage: bg, borderRadius: "6px 6px 0 0", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }} />
+            <span style={{ position: "absolute", bottom: "0", fontSize: "10px", fontWeight: 500, color: "var(--st-muted-strong, #64748b)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "45px" }} title={p.label}>{p.label}</span>
           </div>
         );
       })}
@@ -128,17 +185,28 @@ function ColumnChart({ points }) {
 
 function BarChart({ points }) {
   const max = Math.max(...points.map((p) => p.value), 1);
+  const barGradients = [
+    "linear-gradient(to right, #6366f1, #4f46e5)",
+    "linear-gradient(to right, #0ea5e9, #0284c7)",
+    "linear-gradient(to right, #10b981, #059669)",
+    "linear-gradient(to right, #f59e0b, #d97706)",
+    "linear-gradient(to right, #ec4899, #be185d)",
+  ];
+
   return (
-    <div className="report-chart-bars" style={{ marginTop: "12px", display: "grid", gap: "8px" }}>
-      {points.slice(0, 6).map((point, idx) => (
-        <div key={idx} className="report-chart-row" style={{ display: "grid", gridTemplateColumns: "130px 1fr 50px", alignItems: "center", gap: "10px", fontSize: "12px" }}>
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }} title={point.label}>{point.label}</span>
-          <div style={{ background: "var(--st-border, #e2e8f0)", height: "8px", borderRadius: "4px", overflow: "hidden" }}>
-            <i style={{ display: "block", height: "100%", width: `${Math.max((point.value / max) * 100, 3)}%`, backgroundImage: "linear-gradient(to right, #3b82f6, #6366f1)", borderRadius: "4px" }} />
+    <div style={{ marginTop: "12px", display: "grid", gap: "10px" }}>
+      {points.slice(0, 5).map((point, idx) => {
+        const bg = barGradients[idx % barGradients.length];
+        return (
+          <div key={idx} style={{ display: "grid", gridTemplateColumns: "130px 1fr 50px", alignItems: "center", gap: "10px", fontSize: "12px" }}>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600, color: "var(--st-text-main, #0f172a)" }} title={point.label}>{point.label}</span>
+            <div style={{ background: "var(--st-border, #e2e8f0)", height: "10px", borderRadius: "6px", overflow: "hidden" }}>
+              <i style={{ display: "block", height: "100%", width: `${Math.max((point.value / max) * 100, 4)}%`, backgroundImage: bg, borderRadius: "6px" }} />
+            </div>
+            <strong style={{ fontSize: "12px", textAlign: "right", color: "var(--st-text-main, #0f172a)" }}>{point.value.toLocaleString()}</strong>
           </div>
-          <strong style={{ fontSize: "12px", textAlign: "right" }}>{point.value.toLocaleString()}</strong>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -148,30 +216,41 @@ function ReportChart({ chart, index = 0 }) {
   const title = (chart.title || chart.name || "").toLowerCase();
 
   let chartType = "bar";
-  if (title.includes("year") || title.includes("năm") || index === 0) {
+  if (title.includes("overall") || title.includes("statistics") || title.includes("tổng quan")) {
+    chartType = "stats";
+  } else if (title.includes("year") || title.includes("năm")) {
     chartType = "line";
-  } else if (title.includes("journal") || title.includes("tạp chí") || index === 2) {
+  } else if (title.includes("journal") || title.includes("tạp chí")) {
     chartType = "donut";
-  } else if (title.includes("keyword") || title.includes("từ khóa") || index === 1) {
+  } else if (title.includes("keyword") || title.includes("từ khóa")) {
     chartType = "column";
   } else {
     chartType = "bar";
   }
 
+  const badgeLabels = {
+    stats: "KPI Metric Cards",
+    line: "Time Series Curve",
+    donut: "Distribution Donut",
+    column: "Frequency Columns",
+    bar: "Rankings & Progress",
+  };
+
   return (
-    <div className="report-chart-card" style={{ background: "var(--st-card-bg, #ffffff)", border: "1px solid var(--st-border, #e2e8f0)", borderRadius: "10px", padding: "16px", marginTop: "16px" }}>
+    <div className="report-chart-card" style={{ background: "var(--st-card-bg, #ffffff)", border: "1px solid var(--st-border, #cbd5e1)", borderRadius: "12px", padding: "18px", marginTop: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--st-text-main, #1e293b)" }}>{chart.title || chart.name || "Report chart"}</h4>
-        <span style={{ fontSize: "11px", fontWeight: 600, background: "var(--st-highlight-bg, #eff6ff)", color: "#2563eb", padding: "2px 8px", borderRadius: "12px", textTransform: "uppercase" }}>
-          {chartType === "line" ? "Line Chart" : chartType === "donut" ? "Donut Chart" : chartType === "column" ? "Column Chart" : "Bar Chart"}
+        <h4 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--st-text-main, #0f172a)" }}>{chart.title || chart.name || "Report chart"}</h4>
+        <span style={{ fontSize: "11px", fontWeight: 700, background: "linear-gradient(135deg, #6366f1 0%, #4338ca 100%)", color: "#ffffff", padding: "3px 10px", borderRadius: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          {badgeLabels[chartType] || "Chart"}
         </span>
       </div>
       {points.length > 0 ? (
+        chartType === "stats" ? <OverallStatsCard points={points} /> :
         chartType === "line" ? <LineChart points={points} /> :
         chartType === "donut" ? <DonutChart points={points} /> :
         chartType === "column" ? <ColumnChart points={points} /> :
         <BarChart points={points} />
-      ) : <p style={{ fontSize: "12px", color: "var(--st-text-muted)" }}>No chart points returned.</p>}
+      ) : <p style={{ fontSize: "12px", color: "var(--st-text-muted)" }}>No chart data points available.</p>}
     </div>
   );
 }
