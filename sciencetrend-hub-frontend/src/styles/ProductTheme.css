@@ -1597,6 +1597,16 @@ textarea {
   box-shadow: none !important;
 }
 
+.auth-left :is(h1, h2, h3, h4, h5, h6, strong),
+.register-left :is(h1, h2, h3, h4, h5, h6, strong),
+.auth-premium-preview-card :is(h1, h2, h3, h4, h5, h6, strong) {
+  color: #ffffff !important;
+}
+
+.auth-premium-preview-card p {
+  color: #cbd5e1 !important;
+}
+
 .auth-premium-feature-tag:hover,
 .feature-item:hover,
 .auth-premium-preview-card:hover {
