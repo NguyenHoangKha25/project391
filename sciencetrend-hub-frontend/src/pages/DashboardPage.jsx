@@ -334,7 +334,7 @@ function DashboardPage() {
                 </div>
                 <strong className="db-kpi-value">{stat.value}</strong>
                 <div className="db-kpi-meta">
-                  <span className={`db-kpi-change ${stat.trendType}`} style={{ color: stat.trendType === "positive" ? "#047857" : "#be123c", fontWeight: "850", backgroundColor: stat.trendType === "positive" ? "rgba(16, 185, 129, 0.2)" : "rgba(244, 63, 94, 0.18)" }}>
+                  <span className={`db-kpi-change ${stat.trendType}`}>
                     <TrendIcon aria-hidden="true" />
                     {stat.change}
                   </span>
@@ -356,7 +356,7 @@ function DashboardPage() {
             </div>
             
             <div className="bar-chart-container">
-              <div className="bar-chart-y-axis" style={{ color: "#64748b", fontWeight: "850" }}>
+              <div className="bar-chart-y-axis">
                 <span>120K</span>
                 <span>80K</span>
                 <span>40K</span>
@@ -378,7 +378,7 @@ function DashboardPage() {
                             </span>
                           </div>
                         </div>
-                        <span className="bar-label" style={{ color: "#64748b", fontWeight: "850" }}>{p.label}</span>
+                        <span className="bar-label">{p.label}</span>
                       </div>
                     );
                   })
@@ -390,7 +390,7 @@ function DashboardPage() {
               </div>
             </div>
             
-            <p className="chart-subtext" style={{ color: "#64748b", fontWeight: "600" }}>
+            <p className="chart-subtext">
               {papersByYear.length > 0 
                 ? `The number of papers ranges across the catalog in dynamic annual trends.`
                 : "No publication statistics recorded in the database yet."}
@@ -410,14 +410,14 @@ function DashboardPage() {
                   const widthPercent = (k.value / maxKeywordVal) * 100;
                   return (
                     <div key={idx} className="keyword-row">
-                      <span className="keyword-label" style={{ color: "#475569", fontWeight: "850", fontSize: "12px", opacity: 1 }}>{k.label}</span>
+                      <span className="keyword-label">{k.label}</span>
                       <div className="keyword-bar-track">
                         <div 
                           className={`keyword-bar-fill fill-color-${idx % 5}`} 
                           style={{ width: `${widthPercent}%` }}
                         />
                       </div>
-                      <span className="keyword-value" style={{ color: "#475569", fontWeight: "850" }}>{formatNumber(k.value)}</span>
+                      <span className="keyword-value">{formatNumber(k.value)}</span>
                     </div>
                   );
                 })
@@ -486,8 +486,8 @@ function DashboardPage() {
                       <div key={idx} className="legend-item">
                         <span className="legend-dot" style={{ backgroundColor: seg.color }} />
                         <div className="legend-texts">
-                          <strong className="legend-name" style={{ color: "#334155", fontWeight: "850" }}>{seg.label}</strong>
-                          <span className="legend-val" style={{ color: "#4f46e5", fontWeight: "850" }}>{formatNumber(seg.value)} ({seg.percent}%)</span>
+                          <strong className="legend-name">{seg.label}</strong>
+                          <span className="legend-val">{formatNumber(seg.value)} ({seg.percent}%)</span>
                         </div>
                       </div>
                     ))}

@@ -1409,6 +1409,50 @@ textarea {
   background: #3b82f6 !important;
 }
 
+.st-layout :is(.keyword-label, .keyword-value) {
+  color: #334155 !important;
+  font-weight: 800 !important;
+}
+
+.st-layout .bar-label {
+  color: #64748b !important;
+  font-weight: 700 !important;
+}
+
+.st-layout .bar-chart-y-axis,
+.st-layout .bar-chart-y-axis span {
+  color: #64748b !important;
+  font-weight: 700 !important;
+}
+
+.st-layout .legend-name {
+  color: #1e293b !important;
+  font-weight: 750 !important;
+}
+
+.st-layout .legend-val {
+  color: #2563eb !important;
+  font-weight: 700 !important;
+}
+
+.st-layout .donut-center-text span {
+  color: #2563eb !important;
+}
+
+.st-layout .donut-center-text strong {
+  color: #0f172a !important;
+}
+
+.st-layout .chart-subtext {
+  color: #64748b !important;
+}
+
+.st-layout .trend-pct {
+  color: #15803d !important;
+  border-color: #bbf7d0 !important;
+  background: #f0fdf4 !important;
+}
+
 .st-layout :is(.footer-link, .paper-title-link, .view-details, .lib-tab-link, .lib-action-text-btn) {
   color: #2563eb !important;
 }
