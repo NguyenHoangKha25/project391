@@ -86,7 +86,7 @@ function LoginPage() {
 
           <div className="auth-left-premium-content">
             <div className="auth-premium-hero">
-              <span className="auth-badge">Research Dashboard</span>
+              <span className="auth-badge">RESEARCH DASHBOARD</span>
               <h2 style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "44px",
@@ -114,31 +114,34 @@ function LoginPage() {
               </div>
             </div>
 
-            <div className="auth-premium-preview-card" aria-label="Interactive trends snippet">
-              <div className="mockup-search-box">
-                <FiUser style={{ marginRight: "10px", color: "rgba(255, 255, 255, 0.6)", fontSize: "16px" }} />
-                <span style={{ color: "rgba(255, 255, 255, 0.8)", fontWeight: "600" }}>Search 12,000+ scientific papers...</span>
+            <div className="auth-premium-preview-card" aria-label="Platform Highlights" style={{ background: "rgba(13, 27, 23, 0.85)", border: "1px solid rgba(16, 185, 129, 0.25)", borderRadius: "18px", padding: "20px" }}>
+              <div style={{ padding: "0 0 12px", borderBottom: "1px solid rgba(16, 185, 129, 0.2)", marginBottom: "14px" }}>
+                <span style={{ fontSize: "11px", letterSpacing: "0.08em", fontWeight: "850", color: "#34d399", textTransform: "uppercase" }}>System Capabilities</span>
               </div>
 
-              <div className="mockup-paper-card">
-                <div className="mockup-paper-header">
-                  <span className="mockup-badge badge-q1">Q1 Journal</span>
-                  <span className="mockup-badge badge-citation">9.4k Citations</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                  <span style={{ color: "#34d399", fontSize: "18px", marginTop: "2px" }}>🔍</span>
+                  <div>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 2px", fontSize: "14px" }}>Cross-Source Search</h5>
+                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "12.5px", margin: 0, lineHeight: "1.4" }}>Search and filter papers, authors, and journal quartiles in one place.</p>
+                  </div>
                 </div>
-                <h4 style={{ color: "#ffffff", fontWeight: "850" }}>Deep Learning in Neural Networks</h4>
-                <p style={{ color: "rgba(255, 255, 255, 0.75)", fontWeight: "600" }}>J. Schmidhuber • AI Review</p>
-              </div>
 
-              <div className="mockup-trend-stats">
-                <div className="mockup-trend-row">
-                  <span className="topic-dot topic-blue" />
-                  <p style={{ color: "#ffffff", fontWeight: "600" }}>Computer Vision</p>
-                  <strong style={{ color: "#7debf6", fontWeight: "800" }}>+32%</strong>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                  <span style={{ color: "#7debf6", fontSize: "18px", marginTop: "2px" }}>📌</span>
+                  <div>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 2px", fontSize: "14px" }}>Personal Library</h5>
+                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "12.5px", margin: 0, lineHeight: "1.4" }}>Bookmark key papers, track journals, and follow research terms.</p>
+                  </div>
                 </div>
-                <div className="mockup-trend-row">
-                  <span className="topic-dot topic-green" />
-                  <p style={{ color: "#ffffff", fontWeight: "600" }}>Bioinformatics</p>
-                  <strong style={{ color: "#59d795", fontWeight: "800" }}>+18%</strong>
+
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                  <span style={{ color: "#fbbf24", fontSize: "18px", marginTop: "2px" }}>📊</span>
+                  <div>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 2px", fontSize: "14px" }}>Trend Analytics & Reports</h5>
+                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "12.5px", margin: 0, lineHeight: "1.4" }}>Visualize growth curves and export structured summary reports.</p>
+                  </div>
                 </div>
               </div>
             </div>
