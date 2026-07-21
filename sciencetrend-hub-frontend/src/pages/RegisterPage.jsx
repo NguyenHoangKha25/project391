@@ -169,40 +169,40 @@ function RegisterPage() {
             </div>
             <div className="register-brand-text">
               <h1>ScienceTrend Hub</h1>
-              <p>Scientific Journal Publication Tracking</p>
+              <p>Hệ thống Theo dõi & Phân tích Tạp chí Khoa học</p>
             </div>
           </Link>
 
           <div className="register-hero">
-            <h2>Start your research journey</h2>
+            <h2>Tạo tài khoản Nghiên cứu</h2>
             <p>
-              One account to search papers, track journals, follow emerging topics,
-              and keep everything organised in your own workspace.
+              Đăng ký tài khoản để tra cứu bài báo, theo dõi biến động tạp chí khoa học,
+              lưu trữ tài liệu và xuất báo cáo phân tích theo không gian làm việc cá nhân.
             </p>
           </div>
 
           <ul className="feature-list">
             <li className="feature-item">
               <span className="feature-icon-box"><FiCheck /></span>
-              <p>Track publication trends</p>
+              <p>Theo dõi xu hướng và biến động công bố khoa học</p>
             </li>
             <li className="feature-item">
               <span className="feature-icon-box"><FiCheck /></span>
-              <p>Save and annotate papers</p>
+              <p>Lưu trữ và quản lý danh mục bài báo cá nhân</p>
             </li>
             <li className="feature-item">
               <span className="feature-icon-box"><FiCheck /></span>
-              <p>Explore journals and topics</p>
+              <p>Tra cứu chỉ số tạp chí (Q1-Q4) và chủ đề nghiên cứu</p>
             </li>
             <li className="feature-item">
               <span className="feature-icon-box"><FiCheck /></span>
-              <p>Download research reports</p>
+              <p>Trích xuất báo cáo thống kê phục vụ nghiên cứu</p>
             </li>
           </ul>
 
           <div className="register-testimonial">
-            <p>"ScienceTrend Hub changed how I keep up with new research — it's now part of my weekly workflow."</p>
-            <span>— Research student, FPT University</span>
+            <p>"Hệ thống hỗ trợ tự động hóa việc tra cứu bài báo và nắm bắt nhanh các hướng nghiên cứu mới."</p>
+            <span>— Đồ án Tốt nghiệp SWP391</span>
           </div>
         </div>
 
