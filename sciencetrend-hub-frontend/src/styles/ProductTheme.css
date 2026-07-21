@@ -1633,12 +1633,10 @@ textarea {
 }
 
 .auth-premium-feature-tag svg,
-.feature-icon-box,
 .mockup-trend-row strong {
   color: #93c5fd !important;
 }
 
-.feature-icon-box,
 .badge-q1,
 .badge-citation {
   background: rgba(59, 130, 246, 0.16) !important;

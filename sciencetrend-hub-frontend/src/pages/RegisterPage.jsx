@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiEye, FiEyeOff, FiCheck, FiUser, FiMail, FiLock, FiUsers } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiCheck, FiUser, FiMail, FiLock, FiUsers, FiTrendingUp, FiBookmark, FiAward, FiFileText } from "react-icons/fi";
 import logoLogin from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { register } from "../services/authService";
@@ -174,7 +174,8 @@ function RegisterPage() {
           </Link>
 
           <div className="register-hero">
-            <h2>Join ScienceTrend Hub</h2>
+            <span className="auth-badge" style={{ display: "inline-flex", alignSelf: "flex-start", marginBottom: "8px" }}>START YOUR RESEARCH</span>
+            <h2 style={{ fontSize: "28px", margin: "6px 0 6px" }}>Join ScienceTrend Hub</h2>
             <p>
               Create your workspace to explore publication analytics, track journals,
               and export structured research reports.
@@ -182,27 +183,27 @@ function RegisterPage() {
           </div>
 
           <ul className="feature-list">
-            <li className="feature-item">
-              <span className="feature-icon-box"><FiCheck /></span>
-              <p>Real-time publication & citation trend tracking</p>
+            <li className="feature-item" style={{ borderColor: "rgba(96, 165, 250, 0.25)" }}>
+              <span className="feature-icon-box" style={{ background: "rgba(96, 165, 250, 0.18)", color: "#60a5fa" }}><FiTrendingUp /></span>
+              <p style={{ color: "#f1f5f9", fontWeight: "650" }}>Real-time publication & citation trend tracking</p>
             </li>
-            <li className="feature-item">
-              <span className="feature-icon-box"><FiCheck /></span>
-              <p>Personalized paper bookmarks & journal library</p>
+            <li className="feature-item" style={{ borderColor: "rgba(52, 211, 153, 0.25)" }}>
+              <span className="feature-icon-box" style={{ background: "rgba(52, 211, 153, 0.18)", color: "#34d399" }}><FiBookmark /></span>
+              <p style={{ color: "#f1f5f9", fontWeight: "650" }}>Personalized paper bookmarks & journal library</p>
             </li>
-            <li className="feature-item">
-              <span className="feature-icon-box"><FiCheck /></span>
-              <p>Quartile rankings (Q1–Q4) & topic discovery</p>
+            <li className="feature-item" style={{ borderColor: "rgba(251, 191, 36, 0.25)" }}>
+              <span className="feature-icon-box" style={{ background: "rgba(251, 191, 36, 0.18)", color: "#fbbf24" }}><FiAward /></span>
+              <p style={{ color: "#f1f5f9", fontWeight: "650" }}>Quartile rankings (Q1–Q4) & topic discovery</p>
             </li>
-            <li className="feature-item">
-              <span className="feature-icon-box"><FiCheck /></span>
-              <p>Exportable PDF & CSV summary analytics</p>
+            <li className="feature-item" style={{ borderColor: "rgba(192, 132, 252, 0.25)" }}>
+              <span className="feature-icon-box" style={{ background: "rgba(192, 132, 252, 0.18)", color: "#c084fc" }}><FiFileText /></span>
+              <p style={{ color: "#f1f5f9", fontWeight: "650" }}>Exportable PDF & CSV summary analytics</p>
             </li>
           </ul>
 
-          <div className="register-testimonial">
-            <p>"Streamlines literature review and publication tracking into a single daily workflow."</p>
-            <span>— Scientific Journal & Trend Analytics</span>
+          <div className="register-testimonial" style={{ background: "rgba(15, 23, 42, 0.6)", borderColor: "rgba(148, 163, 184, 0.2)", borderRadius: "12px", padding: "10px 14px", marginTop: "12px" }}>
+            <p style={{ color: "#cbd5e1", fontStyle: "italic", fontSize: "12px", margin: "0 0 4px" }}>"Streamlines literature review and publication tracking into a single daily workflow."</p>
+            <span style={{ color: "#94a3b8", fontSize: "11px", fontWeight: "700" }}>— Scientific Journal & Publication Analytics Platform</span>
           </div>
         </div>
 
