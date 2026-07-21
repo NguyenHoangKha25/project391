@@ -371,33 +371,33 @@ p, span:not(.badge):not(.status-pill):not(.tag),
 
 /* Dashboard Keyword Ranking Labels & Donut Legend Labels Override */
 .keyword-label {
-  color: #ffffff !important;
+  color: #475569 !important;
   font-weight: 850 !important;
   font-size: 12px !important;
   opacity: 1 !important;
 }
 
 .legend-name {
-  color: #ffffff !important;
+  color: #334155 !important;
   font-weight: 850 !important;
   opacity: 1 !important;
 }
 
 .legend-val {
-  color: #34d399 !important;
+  color: #4f46e5 !important;
   font-weight: 850 !important;
   opacity: 1 !important;
 }
 
 .bar-chart-y-axis,
 .bar-chart-y-axis span {
-  color: #e2e8f0 !important;
+  color: #64748b !important;
   font-weight: 850 !important;
   opacity: 1 !important;
 }
 
 .bar-label {
-  color: #34d399 !important;
+  color: #64748b !important;
   font-weight: 850 !important;
   opacity: 1 !important;
 }
