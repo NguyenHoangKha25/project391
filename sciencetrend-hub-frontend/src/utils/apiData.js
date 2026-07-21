@@ -128,18 +128,26 @@ export function normalizeKeyword(keyword = {}, index = 0) {
   };
 }
 
-// TopicResponse từ backend:
+// TopicResponse & TopTopicResponse từ backend:
 export function normalizeTopic(topic = {}, index = 0) {
-  const rawGrowth = topic.growth ?? topic.change ?? 0;
+  const rawGrowth = topic.growth ?? topic.growthRate ?? topic.change ?? 0;
   const growthNumber = Number(rawGrowth);
-  const growth = Number.isFinite(growthNumber)
-    ? `${growthNumber >= 0 ? "+" : ""}${growthNumber}%`
-    : String(rawGrowth || "");
+  let growth = "0%";
+  if (Number.isFinite(growthNumber)) {
+    const pct = (growthNumber > -1 && growthNumber < 1 && growthNumber !== 0)
+      ? Math.round(growthNumber * 100)
+      : Math.round(growthNumber);
+    growth = `${pct >= 0 ? "+" : ""}${pct}%`;
+  } else {
+    growth = String(rawGrowth || "0%");
+  }
+
+  const topicName = topic.name ?? topic.topic ?? topic.topicName ?? topic.title ?? "Untitled topic";
 
   return {
-    id: topic.researchTopicId ?? topic.id ?? topic.topicId ?? index,
-    name: topic.name ?? topic.topicName ?? "Untitled topic",
-    paperCount: `${formatNumber(topic.paperCount ?? topic.count ?? 0)} papers`,
+    id: topic.researchTopicId ?? topic.id ?? topic.topicId ?? topicName ?? index,
+    name: topicName,
+    paperCount: `${formatNumber(topic.paperCount ?? topic.totalPapers ?? topic.count ?? 0)} papers`,
     growth,
     score: toNumber(topic.score ?? topic.percentage ?? 0),
   };
@@ -153,10 +161,6 @@ export function normalizeChartPoint(item = {}, index = 0) {
   };
 }
 
-// DashboardSummaryResponse:
-// { totalPapers, totalJournals, totalKeywords, openAlexPapers,
-//   successfulSyncs, failedSyncs, papersByYear[], topKeywords[],
-//   topJournals[], topCitedPapers[], latestSyncLog }
 export function normalizeDashboard(data = {}) {
   return {
     totalPapers: toNumber(data.totalPapers),
