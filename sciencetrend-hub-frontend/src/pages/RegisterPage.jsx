@@ -222,7 +222,10 @@ function RegisterPage() {
             <form className="register-form" onSubmit={handleRegister} noValidate>
 
               <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username && !fieldErrors.username ? "is-valid" : ""}`}>
-                <label htmlFor="username" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <label htmlFor="username" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Username</label>
+                  {fieldErrors.username && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.username}</span>}
+                </div>
                 <div className="input-wrap">
                   <FiUser className="input-field-icon" />
                   <input
@@ -234,14 +237,16 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="username"
-                    style={{ fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "14px" }}
                   />
                 </div>
-                {fieldErrors.username && <p className="field-error">{fieldErrors.username}</p>}
               </div>
 
               <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email && !fieldErrors.email ? "is-valid" : ""}`}>
-                <label htmlFor="email" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Email address</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <label htmlFor="email" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Email address</label>
+                  {fieldErrors.email && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.email}</span>}
+                </div>
                 <div className="input-wrap">
                   <FiMail className="input-field-icon" />
                   <input
@@ -253,20 +258,23 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="email"
-                    style={{ fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "14px" }}
                   />
                 </div>
-                {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
               </div>
 
               <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                  <label htmlFor="password" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Password</label>
-                  {form.password && (
-                    <span style={{ fontSize: "11px", fontWeight: "700", color: "var(--sp-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      Strength: <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
-                    </span>
-                  )}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <label htmlFor="password" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Password</label>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    {fieldErrors.password ? (
+                      <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.password}</span>
+                    ) : form.password ? (
+                      <span style={{ fontSize: "10.5px", fontWeight: "700", color: "var(--sp-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        Strength: <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="input-wrap">
                   <FiLock className="input-field-icon" />
@@ -279,7 +287,7 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="new-password"
-                    style={{ fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "14px" }}
                   />
                   <button
                     type="button"
@@ -290,11 +298,13 @@ function RegisterPage() {
                     {showPassword ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
-                {fieldErrors.password && <p className="field-error">{fieldErrors.password}</p>}
               </div>
 
               <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
-                <label htmlFor="confirmPassword" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Confirm password</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <label htmlFor="confirmPassword" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Confirm password</label>
+                  {fieldErrors.confirmPassword && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.confirmPassword}</span>}
+                </div>
                 <div className="input-wrap">
                   <FiLock className="input-field-icon" />
                   <input
@@ -306,7 +316,7 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="new-password"
-                    style={{ fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "14px" }}
                   />
                   <button
                     type="button"
@@ -317,13 +327,13 @@ function RegisterPage() {
                     {showConfirm ? <FiEyeOff /> : <FiEye />}
                   </button>
                 </div>
-                {fieldErrors.confirmPassword && (
-                  <p className="field-error">{fieldErrors.confirmPassword}</p>
-                )}
               </div>
 
               <div className={`form-group ${fieldErrors.role ? "has-error" : touched.role && form.role && !fieldErrors.role ? "is-valid" : ""}`}>
-                <label htmlFor="role" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Account type</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                  <label htmlFor="role" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Account type</label>
+                  {fieldErrors.role && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.role}</span>}
+                </div>
                 <div className="select-wrap">
                   <FiUsers className="input-field-icon" />
                   <select
@@ -333,7 +343,7 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     required
-                    style={{ fontWeight: "700", fontSize: "15px" }}
+                    style={{ fontWeight: "700", fontSize: "14px" }}
                   >
                     <option value="">Select account type...</option>
                     {REGISTER_ROLES.map((r) => (
@@ -343,7 +353,6 @@ function RegisterPage() {
                     ))}
                   </select>
                 </div>
-                {fieldErrors.role && <p className="field-error">{fieldErrors.role}</p>}
               </div>
 
               <button type="submit" className="register-submit-btn" disabled={loading}>
