@@ -20,23 +20,158 @@ function chartPoints(chart = {}) {
   return [];
 }
 
-function ReportChart({ chart }) {
-  const points = chartPoints(chart);
-  const max = Math.max(...points.map((point) => point.value), 1);
+function LineChart({ points }) {
+  const max = Math.max(...points.map((p) => p.value), 10);
+  const width = 340;
+  const height = 110;
+  const padding = 16;
+  
+  const coords = points.map((p, idx) => {
+    const denom = points.length > 1 ? points.length - 1 : 1;
+    const x = padding + (idx * (width - 2 * padding)) / denom;
+    const y = height - padding - ((p.value) * (height - 2 * padding)) / max;
+    return { x, y, ...p };
+  });
+
+  const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+  const areaPath = coords.length > 0
+    ? `${linePath} L ${coords[coords.length - 1].x.toFixed(1)},${height - padding} L ${coords[0].x.toFixed(1)},${height - padding} Z`
+    : "";
+
   return (
-    <div className="report-chart">
-      <h4>{chart.title || chart.name || "Report chart"}</h4>
-      {points.length > 0 ? (
-        <div className="report-chart-bars">
-          {points.slice(0, 12).map((point) => (
-            <div key={point.label} className="report-chart-row">
-              <span title={point.label}>{point.label}</span>
-              <div><i style={{ width: `${Math.max((point.value / max) * 100, 2)}%` }} /></div>
-              <strong>{point.value.toLocaleString()}</strong>
-            </div>
-          ))}
+    <div className="report-line-container" style={{ marginTop: "12px" }}>
+      <svg width="100%" height="110" viewBox={`0 0 ${width} ${height}`}>
+        <defs>
+          <linearGradient id="reportLineGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#2563eb" stopOpacity="0.01" />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill="url(#reportLineGrad)" />
+        <path d={linePath} fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" />
+        {coords.map((c, i) => (
+          <circle key={i} cx={c.x} cy={c.y} r="3.5" fill="#ffffff" stroke="#2563eb" strokeWidth="2">
+            <title>{`${c.label}: ${c.value} papers`}</title>
+          </circle>
+        ))}
+      </svg>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "var(--st-muted-strong, #64748b)", marginTop: "4px" }}>
+        <span>{points[0]?.label}</span>
+        <span>{points[Math.floor(points.length / 2)]?.label}</span>
+        <span>{points[points.length - 1]?.label}</span>
+      </div>
+    </div>
+  );
+}
+
+function DonutChart({ points }) {
+  const total = points.reduce((sum, p) => sum + p.value, 0) || 1;
+  const colors = ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#c7d2fe", "#818cf8"];
+  
+  const slices = points.slice(0, 5).map((p, idx) => {
+    const pct = Math.round((p.value / total) * 100);
+    return { ...p, pct, color: colors[idx % colors.length] };
+  });
+
+  return (
+    <div className="report-donut-container" style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "12px", flexWrap: "wrap" }}>
+      <svg width="110" height="110" viewBox="0 0 42 42" className="donut-svg">
+        <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e2e8f0" strokeWidth="6" />
+        {slices.map((slice, idx) => {
+          const strokeDasharray = `${slice.pct} ${100 - slice.pct}`;
+          const offset = 100 - slices.slice(0, idx).reduce((sum, s) => sum + s.pct, 0) + 25;
+          return (
+            <circle
+              key={idx}
+              cx="21"
+              cy="21"
+              r="15.915"
+              fill="transparent"
+              stroke={slice.color}
+              strokeWidth="6"
+              strokeDasharray={strokeDasharray}
+              strokeDashoffset={offset}
+            />
+          );
+        })}
+      </svg>
+      <div className="donut-legend" style={{ display: "grid", gap: "6px", fontSize: "12px", flex: 1 }}>
+        {slices.map((slice, idx) => (
+          <div key={idx} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: slice.color, display: "inline-block" }} />
+            <span style={{ fontWeight: 600, color: "var(--st-text-main, #1e293b)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "140px" }} title={slice.label}>{slice.label}:</span>
+            <span style={{ color: "var(--st-muted-strong, #64748b)" }}>{slice.value} ({slice.pct}%)</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ColumnChart({ points }) {
+  const max = Math.max(...points.map((p) => p.value), 1);
+  return (
+    <div className="report-column-container" style={{ display: "flex", alignItems: "flex-end", gap: "10px", height: "110px", marginTop: "16px", paddingBottom: "24px", position: "relative" }}>
+      {points.slice(0, 7).map((p, idx) => {
+        const heightPct = Math.max((p.value / max) * 100, 10);
+        return (
+          <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
+            <span style={{ fontSize: "10px", fontWeight: 600, color: "#2563eb", marginBottom: "4px" }}>{p.value}</span>
+            <div style={{ width: "100%", height: `${heightPct}%`, backgroundImage: "linear-gradient(to bottom, #3b82f6, #1d4ed8)", borderRadius: "4px" }} />
+            <span style={{ position: "absolute", bottom: "0", fontSize: "10px", color: "var(--st-muted-strong, #64748b)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "45px" }} title={p.label}>{p.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BarChart({ points }) {
+  const max = Math.max(...points.map((p) => p.value), 1);
+  return (
+    <div className="report-chart-bars" style={{ marginTop: "12px", display: "grid", gap: "8px" }}>
+      {points.slice(0, 6).map((point, idx) => (
+        <div key={idx} className="report-chart-row" style={{ display: "grid", gridTemplateColumns: "130px 1fr 50px", alignItems: "center", gap: "10px", fontSize: "12px" }}>
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }} title={point.label}>{point.label}</span>
+          <div style={{ background: "var(--st-border, #e2e8f0)", height: "8px", borderRadius: "4px", overflow: "hidden" }}>
+            <i style={{ display: "block", height: "100%", width: `${Math.max((point.value / max) * 100, 3)}%`, backgroundImage: "linear-gradient(to right, #3b82f6, #6366f1)", borderRadius: "4px" }} />
+          </div>
+          <strong style={{ fontSize: "12px", textAlign: "right" }}>{point.value.toLocaleString()}</strong>
         </div>
-      ) : <p>No chart points were returned.</p>}
+      ))}
+    </div>
+  );
+}
+
+function ReportChart({ chart, index = 0 }) {
+  const points = chartPoints(chart);
+  const title = (chart.title || chart.name || "").toLowerCase();
+
+  let chartType = "bar";
+  if (title.includes("year") || title.includes("năm") || index === 0) {
+    chartType = "line";
+  } else if (title.includes("journal") || title.includes("tạp chí") || index === 2) {
+    chartType = "donut";
+  } else if (title.includes("keyword") || title.includes("từ khóa") || index === 1) {
+    chartType = "column";
+  } else {
+    chartType = "bar";
+  }
+
+  return (
+    <div className="report-chart-card" style={{ background: "var(--st-card-bg, #ffffff)", border: "1px solid var(--st-border, #e2e8f0)", borderRadius: "10px", padding: "16px", marginTop: "16px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "var(--st-text-main, #1e293b)" }}>{chart.title || chart.name || "Report chart"}</h4>
+        <span style={{ fontSize: "11px", fontWeight: 600, background: "var(--st-highlight-bg, #eff6ff)", color: "#2563eb", padding: "2px 8px", borderRadius: "12px", textTransform: "uppercase" }}>
+          {chartType === "line" ? "Line Chart" : chartType === "donut" ? "Donut Chart" : chartType === "column" ? "Column Chart" : "Bar Chart"}
+        </span>
+      </div>
+      {points.length > 0 ? (
+        chartType === "line" ? <LineChart points={points} /> :
+        chartType === "donut" ? <DonutChart points={points} /> :
+        chartType === "column" ? <ColumnChart points={points} /> :
+        <BarChart points={points} />
+      ) : <p style={{ fontSize: "12px", color: "var(--st-text-muted)" }}>No chart points returned.</p>}
     </div>
   );
 }
@@ -218,7 +353,7 @@ function ReportsPage() {
               </div>
               {selected.charts && selected.charts.length > 0 && (
                 <div className="report-charts">
-                  {selected.charts.map((chart, index) => <ReportChart key={chart.id ?? chart.title ?? index} chart={chart} />)}
+                  {selected.charts.map((chart, index) => <ReportChart key={chart.id ?? chart.title ?? index} chart={chart} index={index} />)}
                 </div>
               )}
               <div style={{ marginTop: "16px", display: "flex", gap: "12px" }}>
