@@ -258,7 +258,6 @@
   .metric-trend-text,
   .chart-subtext,
   .paper-authors-sub,
-  .legend-val,
   .filter-form-group label,
   .results-found-count,
   .rich-paper-authors,
@@ -1113,20 +1112,28 @@
   .metric-trend-text,
   .chart-subtext,
   .paper-authors-sub,
-  .legend-val,
   .bar-chart-y-axis,
-  .bar-label,
-  .keyword-label
+  .bar-label
 ) {
-  color: #c7dfd5 !important;
+  color: #64748b !important;
 }
 
-.st-layout :is(.bar-chart-y-axis, .bar-label, .keyword-label, .legend-val) {
-  font-weight: 650 !important;
+.st-layout .keyword-label {
+  color: #334155 !important;
+  font-weight: 850 !important;
+}
+
+.st-layout .legend-val {
+  color: #2563eb !important;
+  font-weight: 800 !important;
+}
+
+.st-layout :is(.bar-chart-y-axis, .bar-label) {
+  font-weight: 750 !important;
 }
 
 .st-layout :is(.panel-header-row h3, .legend-name, .keyword-value) {
-  color: #f7fffb !important;
+  color: #0f172a !important;
 }
 
 .st-layout :is(.keyword-bar-track, .bar-wrapper) {
