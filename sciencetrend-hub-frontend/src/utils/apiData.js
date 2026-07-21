@@ -177,6 +177,46 @@ export function normalizeDashboard(data = {}) {
   };
 }
 
+export function parseChartsFromContent(content = "") {
+  if (!content || typeof content !== "string") return [];
+  const lines = content.split("\n");
+  const charts = [];
+  let currentSection = null;
+  let currentPoints = [];
+
+  for (let line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const sectionMatch = trimmed.match(/^(\d+\.\s+[A-Za-z0-9\s_\-:]+)/);
+    if (sectionMatch && !trimmed.startsWith("-")) {
+      if (currentSection && currentPoints.length > 0) {
+        charts.push({ title: currentSection, data: currentPoints });
+      }
+      currentSection = sectionMatch[1];
+      currentPoints = [];
+      continue;
+    }
+
+    if (trimmed.startsWith("-") && currentSection) {
+      const itemMatch = trimmed.match(/^-\s*([^:]+):\s*([\d,.]+)/);
+      if (itemMatch) {
+        const label = itemMatch[1].trim();
+        const value = Number(itemMatch[2].replace(/,/g, "")) || 0;
+        if (label) {
+          currentPoints.push({ label, value });
+        }
+      }
+    }
+  }
+
+  if (currentSection && currentPoints.length > 0) {
+    charts.push({ title: currentSection, data: currentPoints });
+  }
+
+  return charts;
+}
+
 // Report:
 export function normalizeReport(report = {}, index = 0) {
   const API_BASE_URL = (
@@ -189,16 +229,21 @@ export function normalizeReport(report = {}, index = 0) {
     downloadUrl = `${API_BASE_URL}${cleanUrl.startsWith("/") ? "" : "/"}${cleanUrl}`;
   }
 
+  const rawContent = report.content ?? report.description ?? report.summary ?? "";
+  const parsedCharts = Array.isArray(report.charts) && report.charts.length > 0 
+    ? report.charts 
+    : parseChartsFromContent(rawContent);
+
   return {
     id: report.id ?? report.reportId ?? report.dashboardReportId ?? index,
     title: report.title ?? report.name ?? "Untitled report",
     description: report.description ?? report.content ?? report.summary ?? "",
-    content: report.content ?? report.description ?? "",
+    content: rawContent,
     period: report.period ?? report.generatedAt ?? report.createdAt ?? "",
     format: String(report.format ?? report.fileType ?? "PDF").toUpperCase(),
     status: report.status ?? "Ready",
     downloadUrl,
-    charts: Array.isArray(report.charts) ? report.charts : [],
+    charts: parsedCharts,
     ownerName: report.ownerName ?? report.user?.username ?? "",
     username: report.username ?? "",
     email: report.email ?? report.user?.email ?? "",
