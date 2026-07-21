@@ -382,8 +382,8 @@
 .keyword-label {
   width: 95px;
   text-align: right;
-  color: #1e293b;
-  font-weight: 800;
+  color: #ffffff !important;
+  font-weight: 850 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -369,6 +369,39 @@ p, span:not(.badge):not(.status-pill):not(.tag),
   color: #e2e8f0 !important;
 }
 
+/* Dashboard Keyword Ranking Labels & Donut Legend Labels Override */
+.keyword-label {
+  color: #ffffff !important;
+  font-weight: 850 !important;
+  font-size: 12px !important;
+  opacity: 1 !important;
+}
+
+.legend-name {
+  color: #ffffff !important;
+  font-weight: 850 !important;
+  opacity: 1 !important;
+}
+
+.legend-val {
+  color: #34d399 !important;
+  font-weight: 850 !important;
+  opacity: 1 !important;
+}
+
+.bar-chart-y-axis,
+.bar-chart-y-axis span {
+  color: #e2e8f0 !important;
+  font-weight: 850 !important;
+  opacity: 1 !important;
+}
+
+.bar-label {
+  color: #34d399 !important;
+  font-weight: 850 !important;
+  opacity: 1 !important;
+}
+
 /* Metric Cards (Dashboard & Stats) */
 .metric-card,
 .admin-stat-card {
