@@ -115,12 +115,12 @@
 
 /* Hero Section */
 .register-hero h2 {
-  margin: 18px 0 12px;
+  margin: 8px 0 6px;
   font-family: var(--font-display) !important;
-  font-size: clamp(38px, 4.5vw, 54px);
+  font-size: 30px;
   line-height: .98;
   font-weight: 900 !important;
-  letter-spacing: -.05em;
+  letter-spacing: -.04em;
   background: linear-gradient(135deg, #ffc067 0%, #f97316 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -132,8 +132,8 @@
 .register-hero p {
   max-width: 480px;
   color: rgba(255,255,255,.76) !important;
-  font-size: 15.5px;
-  line-height: 1.7;
+  font-size: 13.5px;
+  line-height: 1.45;
   margin: 0;
   text-align: left !important;
 }
@@ -142,34 +142,34 @@
 .feature-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-top: 24px;
+  gap: 10px;
+  margin-top: 14px;
 }
 .feature-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-radius: 18px;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
   border: 1px solid rgba(255,255,255,.08) !important;
   background: rgba(255,255,255,.06) !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left !important;
 }
 .feature-item:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   border-color: rgba(125, 235, 246, 0.4) !important;
   background: rgba(255, 255, 255, 0.12) !important;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25), 0 0 15px rgba(125, 235, 246, 0.15) !important;
 }
 .feature-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  font-size: 17px;
-  flex: 0 0 36px;
+  font-size: 15px;
+  flex: 0 0 30px;
   background: rgba(125, 235, 246, 0.12);
   color: #7debf6;
 }
@@ -185,13 +185,12 @@
 .register-right {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
-  padding: clamp(20px, 3vw, 30px);
-  padding-bottom: 50px;
+  padding: clamp(14px, 2vw, 24px);
   background: transparent;
-  height: 680px;
-  overflow-y: auto;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* Flat Form Container */
@@ -199,9 +198,9 @@
   width: 100%;
   max-width: 440px;
   margin: 0 auto;
-  padding: clamp(20px, 3vw, 30px) !important;
+  padding: clamp(16px, 2.2vw, 24px) !important;
   border: 1px solid rgba(230,222,211,.92) !important;
-  border-radius: 30px !important;
+  border-radius: 24px !important;
   background: #ffffff !important;
   box-shadow: 0 28px 80px rgba(16,24,40,.13) !important;
   backdrop-filter: none;
@@ -229,8 +228,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 10px;
 }
 .register-page .register-header h2,
 .register-page .register-premium-card-box .register-header h2 {
@@ -240,7 +239,7 @@
   background-clip: text !important;
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
-  font-size: 34px;
+  font-size: 26px;
   font-weight: 850;
   letter-spacing: -.045em;
   margin: 0;
