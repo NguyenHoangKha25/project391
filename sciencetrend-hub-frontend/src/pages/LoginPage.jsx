@@ -89,16 +89,16 @@ function LoginPage() {
               <span className="auth-badge">RESEARCH DASHBOARD</span>
               <h2 style={{
                 fontFamily: "var(--font-display)",
-                fontSize: "44px",
-                fontWeight: "950",
-                letterSpacing: "-0.05em",
-                margin: "18px 0 12px"
+                fontSize: "32px",
+                fontWeight: "900",
+                letterSpacing: "-0.04em",
+                margin: "8px 0 6px"
               }}>Welcome!</h2>
-              <p style={{ fontWeight: "600", fontSize: "16px", lineHeight: "1.7", opacity: 0.95 }}>
+              <p style={{ fontWeight: "600", fontSize: "13.5px", lineHeight: "1.45", opacity: 0.95 }}>
                 Explore scientific trends, manage papers, and track journals instantly.
               </p>
 
-              <div className="auth-premium-features-row">
+              <div className="auth-premium-features-row" style={{ marginTop: "10px" }}>
                 <div className="auth-premium-feature-tag tag-blue">
                   <FiLayers />
                   <span>Dashboard</span>
@@ -114,33 +114,33 @@ function LoginPage() {
               </div>
             </div>
 
-            <div className="auth-premium-preview-card" aria-label="Platform Highlights" style={{ background: "rgba(13, 27, 23, 0.85)", border: "1px solid rgba(16, 185, 129, 0.25)", borderRadius: "18px", padding: "20px" }}>
-              <div style={{ padding: "0 0 12px", borderBottom: "1px solid rgba(16, 185, 129, 0.2)", marginBottom: "14px" }}>
-                <span style={{ fontSize: "11px", letterSpacing: "0.08em", fontWeight: "850", color: "#34d399", textTransform: "uppercase" }}>System Capabilities</span>
+            <div className="auth-premium-preview-card" aria-label="Platform Highlights" style={{ background: "rgba(13, 27, 23, 0.85)", border: "1px solid rgba(16, 185, 129, 0.25)", borderRadius: "14px", padding: "14px 16px", marginTop: "12px" }}>
+              <div style={{ padding: "0 0 8px", borderBottom: "1px solid rgba(16, 185, 129, 0.2)", marginBottom: "10px" }}>
+                <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "850", color: "#34d399", textTransform: "uppercase" }}>System Capabilities</span>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                  <span style={{ color: "#34d399", fontSize: "18px", marginTop: "2px" }}>🔍</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <span style={{ color: "#34d399", fontSize: "16px", marginTop: "1px" }}>🔍</span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 2px", fontSize: "14px" }}>Cross-Source Search</h5>
-                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "12.5px", margin: 0, lineHeight: "1.4" }}>Search and filter papers, authors, and journal quartiles in one place.</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Cross-Source Search</h5>
+                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Search and filter papers, authors, and journal quartiles in one place.</p>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                  <span style={{ color: "#7debf6", fontSize: "18px", marginTop: "2px" }}>📌</span>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <span style={{ color: "#7debf6", fontSize: "16px", marginTop: "1px" }}>📌</span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 2px", fontSize: "14px" }}>Personal Library</h5>
-                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "12.5px", margin: 0, lineHeight: "1.4" }}>Bookmark key papers, track journals, and follow research terms.</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Personal Library</h5>
+                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Bookmark key papers, track journals, and follow research terms.</p>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                  <span style={{ color: "#fbbf24", fontSize: "18px", marginTop: "2px" }}>📊</span>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                  <span style={{ color: "#fbbf24", fontSize: "16px", marginTop: "1px" }}>📊</span>
                   <div>
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 2px", fontSize: "14px" }}>Trend Analytics & Reports</h5>
-                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "12.5px", margin: 0, lineHeight: "1.4" }}>Visualize growth curves and export structured summary reports.</p>
+                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "13px" }}>Trend Analytics & Reports</h5>
+                    <p style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "11.5px", margin: 0, lineHeight: "1.35" }}>Visualize growth curves and export structured summary reports.</p>
                   </div>
                 </div>
               </div>

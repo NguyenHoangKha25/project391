@@ -1507,13 +1507,22 @@ textarea {
   background: #fffbeb !important;
 }
 
-/* Authentication */
+/* Authentication - Fixed 100vh Viewport Layout (No Vertical Scrollbar) */
 .auth-page,
 .register-page,
 .forgot-page,
 .reset-page,
 .auth-status-page {
   color: #0f172a !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  padding: clamp(10px, 1.8vh, 20px) 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
   background:
     radial-gradient(circle at 12% 8%, rgba(37, 99, 235, 0.11), transparent 26rem),
     radial-gradient(circle at 90% 92%, rgba(124, 58, 237, 0.07), transparent 28rem),
@@ -1529,16 +1538,23 @@ textarea {
 
 .auth-layout,
 .register-wrapper {
+  width: min(1040px, 100%) !important;
+  max-height: calc(100vh - 24px) !important;
+  min-height: auto !important;
+  height: auto !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 20px !important;
   background: #f8fafc !important;
   box-shadow: 0 28px 72px rgba(15, 23, 42, 0.16) !important;
+  overflow: hidden !important;
 }
 
 .auth-left,
 .register-left {
   color: #ffffff !important;
   border-right: 0 !important;
+  padding: clamp(20px, 2.5vw, 28px) !important;
+  gap: 14px !important;
   background:
     radial-gradient(circle at 12% 88%, rgba(37, 99, 235, 0.24), transparent 22rem),
     #0f172a !important;
