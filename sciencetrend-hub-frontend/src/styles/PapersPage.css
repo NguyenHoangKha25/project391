@@ -93,12 +93,20 @@
   border-radius: 11px;
   padding: 0 12px;
   font-size: 13px;
-  font-weight: 550;
-  color: var(--st-heading);
-  background: #ffffff;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
+  background: #ffffff !important;
   outline: none;
   transition: all 0.2s ease;
   box-shadow: var(--sh-xs);
+}
+.filter-select-wrapper select option {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
+  font-size: 13px;
+  font-weight: 600;
 }
 .filter-input-wrapper input {
   padding-right: 34px;

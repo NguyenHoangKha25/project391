@@ -1,5 +1,15 @@
 :root { --sidebar-w: 264px; --navbar-h: 72px; --workspace-max: 1480px; --workspace-min: 1080px; }
 
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+  color: #1e293b;
+  -webkit-text-fill-color: #1e293b;
+}
+select option {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  -webkit-text-fill-color: #1e293b !important;
+}
+
 .st-layout {
   display: flex;
   min-height: 100vh;
