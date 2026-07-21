@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FiSearch,
   FiX,
@@ -50,99 +50,117 @@ function TrendsPage() {
   const [dbKeywords, setDbKeywords] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [metadataLoading, setMetadataLoading] = useState(true);
+  const [chartLoading, setChartLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { toast, showToast } = useToast();
 
-  const loadTrendData = useCallback(async () => {
-    const activeSearchKeyword = trendTab === "keyword" ? activeKeyword : activeTopicState;
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "trends_metadata_v2";
+    const cached = getCachedData(cacheKey, 300000);
 
-    const cacheKey = `trends_${activeSearchKeyword}`;
-    const cachedData = getCachedData(cacheKey);
+    function applyMetadata(metadata) {
+      if (cancelled) return;
+      const topics = metadata.trendingTopics ?? [];
+      const keywords = metadata.dbKeywords ?? [];
+      setTrendingTopics(topics);
+      setDbKeywords(keywords);
+      setDashboard(metadata.dashboard ?? null);
+      setKeywordChips((current) => current.length > 0 ? current : keywords.slice(0, 5));
+      setActiveKeyword((current) => current || keywords[0] || "");
+      const topicNames = topics.map((topic) => topic.name).filter(Boolean);
+      setTopicChips((current) => current.length > 0 ? current : topicNames.slice(0, 5));
+      setActiveTopicState((current) => current || topicNames[0] || "");
+    }
 
-    if (cachedData) {
-      setTrendingTopics(cachedData.trendingTopics);
-      setChartData(cachedData.chartData);
-      setDbKeywords(cachedData.dbKeywords);
-      setDashboard(cachedData.dashboard);
-      setLoading(false);
+    function updateMetadata(patch) {
+      const current = getCachedData(cacheKey, Number.MAX_SAFE_INTEGER) ?? cached ?? {
+        trendingTopics: [],
+        dbKeywords: [],
+        dashboard: null,
+      };
+      const next = { ...current, ...patch };
+      setCachedData(cacheKey, next);
+      applyMetadata(next);
+    }
 
-      // Perform a silent background validation to refresh cache seamlessly
-      Promise.allSettled([
-        getTrendingTopics({ limit: 10 }),
-        activeSearchKeyword
-          ? getTrendStats(trendTab === "keyword" ? { keyword: activeSearchKeyword } : { topic: activeSearchKeyword })
-          : Promise.resolve([]),
-        getAllKeywords({ page: 0, size: 100 }),
-        getDashboardOverview(),
-      ]).then(([topicsRes, statsRes, allTopicsRes, overviewRes]) => {
-        const freshData = {
-          trendingTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
-          chartData: statsRes.status === "fulfilled" ? toArray(statsRes.value).map(normalizeChartPoint) : [],
-          dbKeywords: allTopicsRes.status === "fulfilled" ? toArray(allTopicsRes.value, ["keywords"]).map(normalizeKeyword).map((keyword) => keyword.name) : [],
-          dashboard: overviewRes.status === "fulfilled" ? normalizeDashboard(overviewRes.value) : null
-        };
-        setTrendingTopics(freshData.trendingTopics);
-        setChartData(freshData.chartData);
-        setDbKeywords(freshData.dbKeywords);
-        setKeywordChips((current) => current.length > 0 ? current : freshData.dbKeywords.slice(0, 5));
-        setActiveKeyword((current) => current || freshData.dbKeywords[0] || "");
-        const topicNames = freshData.trendingTopics.map((topic) => topic.name).filter(Boolean);
-        setTopicChips((current) => current.length > 0 ? current : topicNames.slice(0, 5));
-        setActiveTopicState((current) => current || topicNames[0] || "");
-        setDashboard(freshData.dashboard);
-        if (freshData.trendingTopics.length > 0 || freshData.chartData.length > 0) {
-          setCachedData(cacheKey, freshData);
-        }
-      });
+    if (cached) {
+      applyMetadata(cached);
+      setMetadataLoading(false);
+    }
+
+    const metadataRequests = [
+      getTrendingTopics({ limit: 10 }).then((response) => {
+        updateMetadata({ trendingTopics: toArray(response).map(normalizeTopic) });
+      }),
+      getAllKeywords({ page: 0, size: 100 }).then((response) => {
+        updateMetadata({ dbKeywords: toArray(response, ["keywords"]).map(normalizeKeyword).map((keyword) => keyword.name) });
+      }),
+      getDashboardOverview().then((response) => {
+        updateMetadata({ dashboard: normalizeDashboard(response) });
+      }),
+    ];
+
+    Promise.allSettled(metadataRequests).then((results) => {
+      if (!cancelled && !cached && results.every((result) => result.status === "rejected")) {
+        setErrorMessage("Could not load trend catalog data. Please try again.");
+      }
+    }).finally(() => {
+      if (!cancelled) setMetadataLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const activeTrendTerm = trendTab === "keyword" ? activeKeyword : activeTopicState;
+
+  useEffect(() => {
+    if (!activeTrendTerm) {
+      setChartData([]);
+      setChartLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      setErrorMessage("");
+    let cancelled = false;
+    const normalizedTerm = activeTrendTerm.trim().toLowerCase();
+    const cacheKey = `trend_series_${trendTab}_${normalizedTerm}`;
+    const cached = getCachedData(cacheKey, 300000);
 
-      const [topicsRes, statsRes, allTopicsRes, overviewRes] = await Promise.allSettled([
-        getTrendingTopics({ limit: 10 }),
-        activeSearchKeyword
-          ? getTrendStats(trendTab === "keyword" ? { keyword: activeSearchKeyword } : { topic: activeSearchKeyword })
-          : Promise.resolve([]),
-        getAllKeywords({ page: 0, size: 100 }),
-        getDashboardOverview(),
-      ]);
-
-      const freshData = {
-        trendingTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
-        chartData: statsRes.status === "fulfilled" ? toArray(statsRes.value).map(normalizeChartPoint) : [],
-        dbKeywords: allTopicsRes.status === "fulfilled" ? toArray(allTopicsRes.value, ["keywords"]).map(normalizeKeyword).map((keyword) => keyword.name) : [],
-        dashboard: overviewRes.status === "fulfilled" ? normalizeDashboard(overviewRes.value) : null
+    if (cached) {
+      setChartData(cached);
+      setChartLoading(false);
+      return () => {
+        cancelled = true;
       };
-
-      setTrendingTopics(freshData.trendingTopics);
-      setChartData(freshData.chartData);
-      setDbKeywords(freshData.dbKeywords);
-      setKeywordChips((current) => current.length > 0 ? current : freshData.dbKeywords.slice(0, 5));
-      setActiveKeyword((current) => current || freshData.dbKeywords[0] || "");
-      const topicNames = freshData.trendingTopics.map((topic) => topic.name).filter(Boolean);
-      setTopicChips((current) => current.length > 0 ? current : topicNames.slice(0, 5));
-      setActiveTopicState((current) => current || topicNames[0] || "");
-      if (freshData.dashboard) {
-        setDashboard(freshData.dashboard);
-      }
-      if (freshData.trendingTopics.length > 0 || freshData.chartData.length > 0) {
-        setCachedData(cacheKey, freshData);
-      }
-    } catch (err) {
-      console.error("Cannot load trends data", err);
-      setErrorMessage("Could not load scientific trend signals. Using cached dataset.");
-    } finally {
-      setLoading(false);
+    } else {
+      setChartData([]);
+      setChartLoading(true);
     }
-  }, [trendTab, activeKeyword, activeTopicState]);
 
-  useEffect(() => {
-    loadTrendData();
-  }, [loadTrendData]);
+    getTrendStats(trendTab === "keyword" ? { keyword: activeTrendTerm } : { topic: activeTrendTerm })
+      .then((response) => {
+        if (cancelled) return;
+        const points = toArray(response).map(normalizeChartPoint);
+        setChartData(points);
+        setCachedData(cacheKey, points);
+        setErrorMessage("");
+      })
+      .catch((error) => {
+        if (!cancelled && !cached) {
+          setErrorMessage(error.message || "Could not load the selected trend series.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setChartLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTrendTerm, trendTab]);
 
   // Chip management
   function handleAddChip(e) {
@@ -288,21 +306,16 @@ function TrendsPage() {
     return ((last - first) / first) * 100;
   }, [chartData]);
 
-  if (loading) {
-    return (
-      <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
-        <div className="cm-loading" style={{ minHeight: "60vh" }}>
-          <div className="cm-spinner" />
-          <p style={{ fontWeight: "750", color: "#34d399", fontSize: "16px" }}>Loading scientific trends...</p>
-        </div>
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
       <div className="trends-page-container">
         {errorMessage && <div className="workspace-notice warning">{errorMessage}</div>}
+        {(metadataLoading || chartLoading) && (
+          <div className="trends-loading-notice" role="status" aria-live="polite">
+            <span className="workspace-loading-spinner" />
+            <span>{metadataLoading ? "Loading trend catalog…" : `Updating ${trendTab} chart…`}</span>
+          </div>
+        )}
         {toast && <div className={`papers-toast papers-toast--${toast.type}`}>{toast.message}</div>}
         
         {/* Sub-toolbar for filters, search, and switch tab buttons */}

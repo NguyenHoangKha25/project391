@@ -524,3 +524,18 @@
   r: 5.5;
   outline: none;
 }
+.trends-loading-notice {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  padding: 0 13px;
+  border: 1px solid rgba(21,127,145,.16);
+  border-radius: 13px;
+  color: var(--st-primary);
+  background: var(--st-primary-soft);
+  font-size: 12px;
+  font-weight: 750;
+}
+.trends-loading-notice .workspace-loading-spinner { width: 17px; height: 17px; border-width: 2px; }
