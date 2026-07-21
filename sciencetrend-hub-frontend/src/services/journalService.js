@@ -5,8 +5,8 @@ import { apiRequest } from "./api";
  * 
  * @returns {Promise<Array>} List of journal profiles.
  */
-export function getJournals() {
-  return apiRequest("/journals", { auth: false });
+export function getJournals(params = {}) {
+  return apiRequest("/journals", { params, auth: false });
 }
 
 /**
@@ -15,8 +15,8 @@ export function getJournals() {
  * @param {string} keyword - Search pattern matching name, subject, or publisher.
  * @returns {Promise<Array>} List of matching journal profiles.
  */
-export function searchJournals(keyword) {
-  return apiRequest("/journals/search", { params: { keyword }, auth: false });
+export function searchJournals(keyword, params = {}) {
+  return apiRequest("/journals/search", { params: { ...params, keyword }, auth: false });
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AuthContext from "./AuthContext";
 import { logoutFromServer } from "../services/authService";
 import {
@@ -12,7 +12,9 @@ import {
   isAdmin,
   readStoredUser,
   saveAuthSession,
+  saveCurrentUser,
 } from "../utils/authStorage";
+import { getCurrentUser } from "../services/userService";
 
 function buildAuthState() {
   const user = readStoredUser();
@@ -48,6 +50,32 @@ function AuthProvider({ children }) {
     [refreshAuthState],
   );
 
+  const updateCurrentUser = useCallback(
+    (userResponse) => {
+      const user = saveCurrentUser(userResponse);
+      refreshAuthState();
+      return user;
+    },
+    [refreshAuthState],
+  );
+
+  useEffect(() => {
+    if (!authState.token) return;
+
+    let cancelled = false;
+    getCurrentUser()
+      .then((response) => {
+        if (!cancelled) updateCurrentUser(response);
+      })
+      .catch(() => {
+        // Keep the locally stored session when the profile endpoint is temporarily unavailable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authState.token, updateCurrentUser]);
+
   // Gọi BE logout (POST /api/auth/logout) đồng thời clear local storage
   const logoutUser = useCallback(() => {
     const refreshToken = getRefreshToken();
@@ -63,10 +91,11 @@ function AuthProvider({ children }) {
       displayRole: formatRoleForDisplay(authState.role),
       defaultPath: getDefaultAuthenticatedPath(),
       loginUser,
+      updateCurrentUser,
       logoutUser,
       refreshAuthState,
     }),
-    [authState, loginUser, logoutUser, refreshAuthState],
+    [authState, loginUser, logoutUser, refreshAuthState, updateCurrentUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

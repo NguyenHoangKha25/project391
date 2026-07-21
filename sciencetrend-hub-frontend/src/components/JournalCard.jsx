@@ -18,7 +18,7 @@ function JournalCard({
     setUnfollowing(true);
     try {
       await onUnfollow();
-    } catch (e) {
+    } catch {
       setUnfollowing(false);
     }
   }

@@ -1,11 +1,22 @@
 import { apiRequest } from "./api";
 
-export function getReports() {
-  return apiRequest("/reports/my", { method: "GET" });
+export function getReports(params = {}) {
+  return apiRequest("/reports/my", { method: "GET", params });
 }
 
 export function generateReport(params = {}) {
   return apiRequest("/reports/generate", { method: "POST", body: params });
+}
+
+export function searchReports(query, params = {}) {
+  return apiRequest("/reports/search", {
+    method: "GET",
+    params: { ...params, query },
+  });
+}
+
+export function deleteReport(reportId) {
+  return apiRequest(`/reports/${reportId}`, { method: "DELETE" });
 }
 
 export function downloadReport(url) {

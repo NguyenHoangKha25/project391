@@ -35,7 +35,7 @@ function Navbar({
   const navigate = useNavigate();
   const [pendingLogout, setPendingLogout] = useState(false);
 
-  const { user, displayRole, isAdminUser, logoutUser, isLoggedIn } = useAuth();
+  const { user, role: rawRole, displayRole, isAdminUser, logoutUser, isLoggedIn } = useAuth();
   const accountRef = useRef(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -51,6 +51,7 @@ function Navbar({
     [user],
   );
   const role = displayRole;
+  const canUseReports = ["LECTURER", "RESEARCHER", "ADMIN"].includes(rawRole);
   const initials = getInitials(displayName) || "R";
 
   useEffect(() => {
@@ -267,17 +268,19 @@ function Navbar({
           )}
         </form>
 
-        <button
-          type="button"
-          className="st-icon-btn"
-          aria-label="Open notifications dashboard and system alerts"
-          onClick={() => navigate(ROUTE_PATHS.NOTIFICATIONS)}
-        >
-          <FiBell />
-          <span className="st-notification-dot" />
-        </button>
+        {isLoggedIn ? (
+          <>
+            <button
+              type="button"
+              className="st-icon-btn"
+              aria-label="Open notifications dashboard and system alerts"
+              onClick={() => navigate(ROUTE_PATHS.NOTIFICATIONS)}
+            >
+              <FiBell />
+              <span className="st-notification-dot" />
+            </button>
 
-        <div className="st-account" ref={accountRef}>
+            <div className="st-account" ref={accountRef}>
           <button
             type="button"
             className="st-account-trigger"
@@ -308,14 +311,16 @@ function Navbar({
                 <FiUser />
                 My account
               </button>
-              <button type="button" onClick={() => goTo(ROUTE_PATHS.LIBRARY)}>
+              <button type="button" onClick={() => goTo(ROUTE_PATHS.BOOKMARKS)}>
                 <FiFileText />
                 My library
               </button>
-              <button type="button" onClick={() => goTo(ROUTE_PATHS.REPORTS)}>
-                <FiSettings />
-                Reports
-              </button>
+              {canUseReports && (
+                <button type="button" onClick={() => goTo(ROUTE_PATHS.REPORTS)}>
+                  <FiSettings />
+                  Reports
+                </button>
+              )}
 
               {isAdminUser && (
                 <button type="button" onClick={() => goTo(ROUTE_PATHS.ADMIN)}>
@@ -336,7 +341,18 @@ function Navbar({
               </button>
             </div>
           )}
-        </div>
+            </div>
+          </>
+        ) : (
+          <div className="st-guest-actions">
+            <button type="button" className="st-guest-login" onClick={() => navigate(ROUTE_PATHS.LOGIN)}>
+              Log in
+            </button>
+            <button type="button" className="st-guest-register" onClick={() => navigate(ROUTE_PATHS.REGISTER)}>
+              Create account
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

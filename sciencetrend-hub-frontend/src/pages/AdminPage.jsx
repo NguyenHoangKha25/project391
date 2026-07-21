@@ -1,738 +1,268 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  FiBookOpen,
-  FiFileText,
-  FiKey,
-  FiRefreshCw,
-  FiDatabase,
-  FiShield,
-  FiUsers,
-  FiCheckCircle,
   FiAlertTriangle,
+  FiCheckCircle,
+  FiDatabase,
   FiDownload,
-  FiPlus,
-  FiSliders,
-  FiChevronDown,
-  FiArrowRight,
+  FiEye,
+  FiFileText,
+  FiRefreshCw,
+  FiSearch,
+  FiSettings,
+  FiTrash2,
+  FiUsers,
+  FiX,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
-import StatCard from "../components/StatCard";
-import { useAuth } from "../context/useAuth";
+import {
+  deleteAdminUser,
+  getAdminReports,
+  getAdminSyncLogs,
+  getAdminSystemConfig,
+  getAdminUser,
+  getAdminUsers,
+  triggerAdminBackfill,
+  triggerAdminSync,
+  updateAdminUserRole,
+} from "../services/adminService";
 import { getDashboardOverview } from "../services/dashboardService";
-import { getReports, generateReport } from "../services/reportService";
-import { apiRequest } from "../services/api";
-import { normalizeDashboard, normalizeReport, formatNumber, formatDateTime, toArray } from "../utils/apiData";
-import { formatRoleForDisplay } from "../utils/authStorage";
+import { formatDateTime, formatNumber, normalizeDashboard, normalizeReport, toArray, toObject } from "../utils/apiData";
 import "../styles/WorkspacePages.css";
 import "../styles/AdminPage.css";
 
-/* ── Toast Overlay ── */
-function useToast() {
-  const [toast, setToast] = useState(null);
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
+const tabs = [
+  ["overview", "Overview"],
+  ["users", "Users"],
+  ["sync", "Sync & backfill"],
+  ["reports", "All reports"],
+  ["settings", "System config"],
+];
 
-  function showToast(message, type = "info") {
-    setToast({ message, type });
-  }
-
-  return { toast, showToast };
+function statusClass(value) {
+  return ["SUCCESS", "COMPLETED", "ACTIVE", "CONNECTED"].includes(String(value).toUpperCase()) ? "connected" : "error";
 }
 
-const safeSplitDate = (value) => {
-  if (!value) return "Recent";
-  if (typeof value === "string") return value.split("T")[0];
-  if (Array.isArray(value)) {
-    return `${value[0]}-${String(value[1]).padStart(2, "0")}-${String(value[2]).padStart(2, "0")}`;
-  }
-  return "Recent";
-};
-
-// Mock User Data matching mockup design
-const MOCK_USERS = [
-  { id: 1, username: "dr.researcher", email: "researcher@university.edu", role: "Admin", status: "Active" },
-  { id: 2, username: "alice.admin", email: "alice.admin@institute.org", role: "Admin", status: "Active" },
-  { id: 3, username: "john.manager", email: "john.manager@university.edu", role: "Manager", status: "Active" },
-  { id: 4, username: "rachel.smith", email: "rachel.smith@lab.org", role: "Analyst", status: "Active" },
-  { id: 5, username: "tom.baker", email: "tom.baker@student.edu", role: "Viewer", status: "Inactive" }
-];
-
-// Mock Data Sources matching mockup design
-const MOCK_SOURCES = [
-  { id: 1, name: "OpenAlex", status: "Connected", lastSync: "May 20, 2026 08:45 AM", records: "2,847,126" },
-  { id: 2, name: "Dimensions", status: "Connected", lastSync: "May 20, 2026 06:30 AM", records: "1,923,456" },
-  { id: 3, name: "Scopus", status: "Error", lastSync: "May 20, 2026 04:15 AM", records: "—" }
-];
-
 function AdminPage() {
-  const { user: storedUser, refreshAuthState } = useAuth();
-  const [user, setUser] = useState(storedUser || {});
+  const [tab, setTab] = useState("overview");
   const [dashboard, setDashboard] = useState(null);
+  const [users, setUsers] = useState([]);
   const [syncLogs, setSyncLogs] = useState([]);
   const [reports, setReports] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [config, setConfig] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userSearch, setUserSearch] = useState("");
+  const [fromYear, setFromYear] = useState(String(new Date().getFullYear() - 10));
+  const [toYear, setToYear] = useState(String(new Date().getFullYear()));
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [generatingReport, setGeneratingReport] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const { toast, showToast } = useToast();
-
-  // Tab navigation states: 'overview' | 'users' | 'sync' | 'sources' | 'reports' | 'settings'
-  const [adminTab, setAdminTab] = useState("overview");
+  const [working, setWorking] = useState("");
+  const [message, setMessage] = useState("");
 
   const loadAdminData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setErrorMessage("");
-
-      const [dashboardResult, logsResult, reportsResult, usersResult] = await Promise.allSettled([
-        getDashboardOverview(),
-        apiRequest("/admin/sync/logs"),
-        getReports(),
-        apiRequest("/admin/users"),
-      ]);
-
-      if (dashboardResult.status === "fulfilled") {
-        setDashboard(normalizeDashboard(dashboardResult.value));
-      }
-
-      if (logsResult.status === "fulfilled") {
-        const logsArray = Array.isArray(logsResult.value) ? logsResult.value : [];
-        setSyncLogs(logsArray);
-      }
-
-      if (reportsResult.status === "fulfilled") {
-        setReports(toArray(reportsResult.value).map(normalizeReport));
-      }
-
-      if (usersResult.status === "fulfilled") {
-        setUsers(toArray(usersResult.value));
-      }
-    } catch (error) {
-      console.error("Cannot load admin data", error);
-      setErrorMessage(error.message || "Cannot load admin data from backend.");
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    setMessage("");
+    const results = await Promise.allSettled([
+      getDashboardOverview(),
+      getAdminUsers({ page: 0, size: 200 }),
+      getAdminSyncLogs({ page: 0, size: 100 }),
+      getAdminReports({ page: 0, size: 100 }),
+      getAdminSystemConfig(),
+    ]);
+    const [dashboardResult, usersResult, logsResult, reportsResult, configResult] = results;
+    if (dashboardResult.status === "fulfilled") setDashboard(normalizeDashboard(dashboardResult.value));
+    if (usersResult.status === "fulfilled") setUsers(toArray(usersResult.value, ["users"]));
+    if (logsResult.status === "fulfilled") setSyncLogs(toArray(logsResult.value, ["logs", "syncLogs"]));
+    if (reportsResult.status === "fulfilled") setReports(toArray(reportsResult.value, ["reports"]).map(normalizeReport));
+    if (configResult.status === "fulfilled") setConfig(toObject(configResult.value));
+    const failed = results.filter((result) => result.status === "rejected").length;
+    if (failed > 0) setMessage(`${failed} admin data source${failed > 1 ? "s" : ""} could not be loaded.`);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
     loadAdminData();
   }, [loadAdminData]);
 
-  // POST /api/admin/sync — trigger manual sync
-  async function handleTriggerSync() {
+  async function searchUsers(event) {
+    event.preventDefault();
+    setWorking("search");
     try {
-      setSyncing(true);
-      setErrorMessage("");
-      await apiRequest("/admin/sync", { method: "POST" });
-      showToast("Manual synchronization triggered successfully!", "success");
-      await loadAdminData(); // Reload to see new log entry
+      const response = await getAdminUsers({ search: userSearch.trim(), page: 0, size: 200 });
+      setUsers(toArray(response, ["users"]));
     } catch (error) {
-      console.error("Sync failed", error);
-      setErrorMessage(error.message || "Sync trigger failed.");
-      showToast("Manual synchronization failed to start.", "warning");
+      setMessage(error.message || "Could not search users.");
     } finally {
-      setSyncing(false);
+      setWorking("");
     }
   }
 
-  // Handle report generation
-  async function handleCreateReport() {
+  async function viewUser(userId) {
+    setWorking(`user-${userId}`);
     try {
-      setGeneratingReport(true);
-      await generateReport({ type: "summary" });
-      showToast("Report generation started successfully!", "success");
-      await loadAdminData(); // Reload reports list
-    } catch (err) {
-      showToast(err.message || "Report generation failed.", "warning");
+      setSelectedUser(toObject(await getAdminUser(userId)));
+    } catch (error) {
+      setMessage(error.message || "Could not load this user.");
     } finally {
-      setGeneratingReport(false);
+      setWorking("");
     }
   }
 
-  // Handle updating user role
-  async function handleUpdateRole(userId, newRole) {
+  async function updateRole(userId, role) {
+    const previous = users;
+    setUsers((current) => current.map((user) => (user.userId ?? user.id) === userId ? { ...user, role } : user));
     try {
-      showToast("Updating user role...", "info");
-      await apiRequest(`/admin/users/${userId}/role`, {
-        method: "PUT",
-        body: { role: newRole }
-      });
-      showToast("User role updated successfully!", "success");
-      await loadAdminData(); // Reload to refresh list
-    } catch (err) {
-      console.error("Failed to update user role", err);
-      showToast(err.message || "Failed to update role.", "warning");
+      await updateAdminUserRole(userId, role);
+    } catch (error) {
+      setUsers(previous);
+      setMessage(error.message || "Could not update the role.");
     }
   }
 
-  // Handle deleting user
-  async function handleDeleteUser(userId) {
-    if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
+  async function removeUser(user) {
+    const userId = user.userId ?? user.id;
+    if (!window.confirm(`Delete ${user.username || user.email}?`)) return;
+    const previous = users;
+    setUsers((current) => current.filter((item) => (item.userId ?? item.id) !== userId));
     try {
-      showToast("Deleting user...", "info");
-      await apiRequest(`/admin/users/${userId}`, {
-        method: "DELETE"
-      });
-      showToast("User deleted successfully!", "success");
-      await loadAdminData(); // Reload to refresh list
-    } catch (err) {
-      console.error("Failed to delete user", err);
-      showToast(err.message || "Failed to delete user.", "warning");
+      await deleteAdminUser(userId);
+    } catch (error) {
+      setUsers(previous);
+      setMessage(error.message || "Could not delete the user.");
     }
   }
 
-  const sources = useMemo(() => {
-    const openAlexLogs = syncLogs.filter(log => log.sourceApi === "OpenAlex" || !log.sourceApi);
-    const latestLog = openAlexLogs.length > 0 ? openAlexLogs[0] : null;
-
-    let openAlexStatus = "Connected";
-    let openAlexLastSync = "—";
-    let openAlexRecords = dashboard ? formatNumber(dashboard.openAlexPapers) : "—";
-
-    if (latestLog) {
-      if (latestLog.status === "RUNNING") openAlexStatus = "Syncing";
-      else if (latestLog.status === "FAILED") openAlexStatus = "Error";
-      else openAlexStatus = "Connected";
-
-      const syncTime = latestLog.finishedAt || latestLog.startedAt;
-      if (syncTime) {
-        openAlexLastSync = formatDateTime(syncTime);
-      }
-      if (latestLog.paperSynced !== undefined && latestLog.paperSynced !== null) {
-        openAlexRecords = formatNumber(latestLog.paperSynced);
-      }
+  async function runSync() {
+    setWorking("sync");
+    setMessage("");
+    try {
+      await triggerAdminSync();
+      setMessage("Manual OpenAlex sync was started.");
+      await loadAdminData();
+    } catch (error) {
+      setMessage(error.message || "Could not start sync.");
+    } finally {
+      setWorking("");
     }
+  }
 
-    return [
-      { id: 1, name: "OpenAlex", status: openAlexStatus, lastSync: openAlexLastSync, records: openAlexRecords },
-      { id: 2, name: "Dimensions", status: "Disconnected", lastSync: "—", records: "—" },
-      { id: 3, name: "Scopus", status: "Disconnected", lastSync: "—", records: "—" }
-    ];
-  }, [syncLogs, dashboard]);
+  async function runBackfill(event) {
+    event.preventDefault();
+    setWorking("backfill");
+    setMessage("");
+    try {
+      await triggerAdminBackfill({ fromYear: Number(fromYear), toYear: Number(toYear) });
+      setMessage(`Historical backfill ${fromYear}–${toYear} was started.`);
+      await loadAdminData();
+    } catch (error) {
+      setMessage(error.message || "Could not start backfill.");
+    } finally {
+      setWorking("");
+    }
+  }
 
-  const statCards = useMemo(() => {
-    const totalUsers = users.length;
-    const activeUsers = users.filter(u => u.status === "Active" || u.status === "ACTIVE" || true).length;
-    const successfulSyncs = dashboard ? dashboard.successfulSyncs : 0;
-    const failedSyncs = dashboard ? dashboard.failedSyncs : 0;
-
-    return [
-      { 
-        title: "Total Users", 
-        value: String(totalUsers), 
-        icon: FiUsers, 
-        trend: totalUsers > 0 ? "↑ 100%" : "—", 
-        trendText: "Registered accounts", 
-        trendType: "positive" 
-      },
-      { 
-        title: "Active Users", 
-        value: String(activeUsers), 
-        icon: FiShield, 
-        trend: activeUsers > 0 ? "↑ 100%" : "—", 
-        trendText: "Active accounts", 
-        trendType: "positive" 
-      },
-      {
-        title: "Sync Success",
-        value: formatNumber(successfulSyncs),
-        icon: FiCheckCircle,
-        trend: successfulSyncs > 0 ? "↑ 12.4%" : "—",
-        trendText: "Completed runs",
-        trendType: "positive"
-      },
-      {
-        title: "Sync Failures",
-        value: formatNumber(failedSyncs),
-        icon: FiAlertTriangle,
-        trend: failedSyncs > 0 ? "↓ 2.2%" : "—",
-        trendText: "Failed runs",
-        trendType: "negative"
-      },
-      { title: "Data Sources", value: "3", icon: FiDatabase, trend: "All systems ok", trendType: "positive" },
-      { title: "Reports Generated", value: String(reports.length || 0), icon: FiFileText, trend: reports.length > 0 ? "↑ 15.3%" : "—", trendType: "positive" }
-    ];
-  }, [users, dashboard, reports]);
+  const activeUsers = useMemo(
+    () => users.filter((user) => !user.status || String(user.status).toUpperCase() === "ACTIVE").length,
+    [users],
+  );
+  const stats = [
+    { label: "Total users", value: users.length, icon: FiUsers },
+    { label: "Active users", value: activeUsers, icon: FiCheckCircle },
+    { label: "Successful syncs", value: dashboard?.successfulSyncs ?? 0, icon: FiDatabase },
+    { label: "Failed syncs", value: dashboard?.failedSyncs ?? 0, icon: FiAlertTriangle },
+    { label: "All reports", value: reports.length, icon: FiFileText },
+    { label: "Config entries", value: Object.keys(config).length, icon: FiSettings },
+  ];
 
   return (
-    <MainLayout title="Admin" subtitle="Manage users, system syncs, data sources, and reports">
-      <div className="admin-page-container">
-        
-        {/* Navigation Tabs Bar */}
+    <MainLayout title="Admin" subtitle="Manage users, OpenAlex synchronization and system data">
+      <section className="workspace-page admin-page-container">
         <nav className="admin-tabs-bar" aria-label="Admin navigation">
-          <button type="button" className={`admin-tab-item ${adminTab === "overview" ? "active" : ""}`} onClick={() => setAdminTab("overview")}>Overview</button>
-          <button type="button" className={`admin-tab-item ${adminTab === "users" ? "active" : ""}`} onClick={() => setAdminTab("users")}>Users</button>
-          <button type="button" className={`admin-tab-item ${adminTab === "sync" ? "active" : ""}`} onClick={() => setAdminTab("sync")}>Sync Management</button>
-          <button type="button" className={`admin-tab-item ${adminTab === "sources" ? "active" : ""}`} onClick={() => setAdminTab("sources")}>Data Sources</button>
-          <button type="button" className={`admin-tab-item ${adminTab === "reports" ? "active" : ""}`} onClick={() => setAdminTab("reports")}>Reports</button>
-          <button type="button" className={`admin-tab-item ${adminTab === "settings" ? "active" : ""}`} onClick={() => setAdminTab("settings")}>System Settings</button>
+          {tabs.map(([value, label]) => <button key={value} type="button" className={`admin-tab-item ${tab === value ? "active" : ""}`} onClick={() => setTab(value)}>{label}</button>)}
         </nav>
+        {message && <div className="workspace-notice info admin-message">{message}<button type="button" onClick={() => setMessage("")} aria-label="Dismiss"><FiX /></button></div>}
 
-        {errorMessage && (
-          <div className="workspace-notice warning" style={{ marginBottom: 16 }}>
-            {errorMessage}
-          </div>
-        )}
-
-        {/* Toast Notification overlay */}
-        {toast && (
-          <div className={`papers-toast papers-toast--${toast.type}`}>
-            {toast.message}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="workspace-empty" style={{ minHeight: 380 }}>
-            <span className="workspace-loading-spinner" />
-            Loading Admin Workspace…
-          </div>
-        ) : (
-          <div className="admin-content-area">
-            
-            {/* OVERVIEW TAB: Dashboard mockup grid containing 4 sections */}
-            {adminTab === "overview" && (
+        {loading ? <div className="workspace-empty"><span className="workspace-loading-spinner" />Loading admin data…</div> : (
+          <>
+            {tab === "overview" && (
               <div className="admin-overview-layout">
-                
-                {/* 6 Stats strip */}
                 <div className="admin-stats-strip">
-                  {statCards.map((card, i) => (
-                    <article key={i} className="admin-stat-card-custom">
-                      <div className="card-header">
-                        <span className="card-label">{card.title}</span>
-                        <div className="card-icon-circle">
-                          <card.icon />
-                        </div>
-                      </div>
-                      <h3 className="card-value">{card.value}</h3>
-                      <div className="card-footer">
-                        <span className={`card-trend ${card.trendType ?? "positive"}`}>{card.trend}</span>
-                        {card.trendText && <span className="card-trend-sub"> {card.trendText}</span>}
-                      </div>
+                  {stats.map(({ label, value, icon: Icon }) => (
+                    <article className="admin-stat-card-custom" key={label}>
+                      <div className="card-header"><span className="card-label">{label}</span><span className="card-icon-circle"><Icon /></span></div>
+                      <h3 className="card-value">{formatNumber(value)}</h3>
+                      <div className="card-footer"><span className="card-trend-sub">Live backend data</span></div>
                     </article>
                   ))}
                 </div>
-
-                {/* Mid section grid: User Management summary & Sync Management summary */}
                 <div className="admin-overview-mid-row">
-                  
-                  {/* Left: User Management */}
-                  <article className="admin-panel glassmorphic-panel">
-                    <div className="panel-header-row">
-                      <h3>User Management</h3>
-                      <button type="button" className="admin-header-plus-btn" onClick={() => showToast("Mockup: Opened Create User Form", "info")}>
-                        <FiPlus />
-                        <span>Add User</span>
-                      </button>
-                    </div>
-                    <div className="admin-table-responsive">
-                      <table className="admin-compact-table">
-                        <thead>
-                          <tr>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {users.slice(0, 4).map((u) => (
-                            <tr key={u.userId || u.id}>
-                              <td><strong>{u.username}</strong></td>
-                              <td>{u.email}</td>
-                              <td><span className={`role-badge ${(u.role || "").toLowerCase()}`}>{u.role}</span></td>
-                              <td><span className="status-dot active" /> Active</td>
-                            </tr>
-                          ))}
-                          {users.length === 0 && (
-                            <tr>
-                              <td colSpan="4" style={{ textAlign: "center" }}>No users registered.</td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                    <button type="button" className="admin-view-all-link-btn" onClick={() => setAdminTab("users")}>
-                      Manage all users <FiArrowRight />
-                    </button>
+                  <article className="admin-panel">
+                    <div className="panel-header-row"><h3>Recent users</h3><button className="admin-view-all-link-btn" type="button" onClick={() => setTab("users")}>Manage users</button></div>
+                    <AdminUsersTable users={users.slice(0, 5)} onView={viewUser} onRole={updateRole} onDelete={removeUser} working={working} compact />
                   </article>
-
-                  {/* Right: Sync Management */}
-                  <article className="admin-panel glassmorphic-panel">
-                    <div className="panel-header-row">
-                      <h3>Sync Management</h3>
-                      <button
-                        type="button"
-                        className="admin-header-trigger-sync-btn"
-                        onClick={handleTriggerSync}
-                        disabled={syncing}
-                      >
-                        <FiRefreshCw className={syncing ? "is-spinning" : ""} />
-                        <span>Trigger Manual Sync</span>
-                      </button>
-                    </div>
-                    
-                    <div className="admin-sync-summary-strip">
-                      <div className="sync-indicator-card ok">
-                        <span>Success Rate</span>
-                        <strong>99.44%</strong>
-                      </div>
-                      <div className="sync-indicator-card fail">
-                        <span>Failed Syncs</span>
-                        <strong>7 runs</strong>
-                      </div>
-                    </div>
-
-                    <div className="admin-sync-logs-list">
-                      {syncLogs.slice(0, 3).map((log, i) => (
-                        <div key={log.id ?? i} className="admin-sync-log-row">
-                          <span className={`log-bullet ${log.status === "SUCCESS" || log.status === "COMPLETED" ? "success" : "failed"}`} />
-                          <div className="log-copy">
-                            <h4>{log.status === "SUCCESS" || log.status === "COMPLETED" ? "Data sync completed successfully" : "Scopus data sync failed"}</h4>
-                            <p>{log.message ?? `${log.newRecords ?? 0} records indexed`}</p>
-                          </div>
-                          <span className="log-time">{safeSplitDate(log.startedAt)}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <button type="button" className="admin-view-all-link-btn" onClick={() => setAdminTab("sync")}>
-                      View all sync logs <FiArrowRight />
-                    </button>
+                  <article className="admin-panel">
+                    <div className="panel-header-row"><h3>Latest sync runs</h3><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Sync now</button></div>
+                    <SyncTable logs={syncLogs.slice(0, 5)} compact />
                   </article>
-
                 </div>
-
-                {/* Bottom section grid: Data Sources summary & Reports summary */}
-                <div className="admin-overview-bottom-row">
-                  
-                  {/* Left: Data Sources */}
-                  <article className="admin-panel glassmorphic-panel">
-                    <div className="panel-header-row">
-                      <h3>Data Sources</h3>
-                      <button type="button" className="admin-header-plus-btn" onClick={() => showToast("Mockup: Add Data Source Panel", "info")}>
-                        <FiPlus />
-                        <span>Add Data Source</span>
-                      </button>
-                    </div>
-                    <div className="admin-table-responsive">
-                      <table className="admin-compact-table">
-                        <thead>
-                          <tr>
-                            <th>Source Name</th>
-                            <th>Status</th>
-                            <th>Last Sync</th>
-                            <th>Records</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sources.map((src) => (
-                            <tr key={src.id}>
-                              <td><strong>{src.name}</strong></td>
-                              <td><span className={`status-label ${src.status.toLowerCase()}`}>{src.status}</span></td>
-                              <td>{src.lastSync}</td>
-                              <td>{src.records}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </article>
-
-                  {/* Right: Reports */}
-                  <article className="admin-panel glassmorphic-panel">
-                    <div className="panel-header-row">
-                      <h3>Reports</h3>
-                      <button
-                        type="button"
-                        className="admin-header-plus-btn"
-                        onClick={handleCreateReport}
-                        disabled={generatingReport}
-                      >
-                        <FiPlus />
-                        <span>{generatingReport ? "Generating..." : "Generate New Report"}</span>
-                      </button>
-                    </div>
-                    <div className="admin-table-responsive">
-                      <table className="admin-compact-table">
-                        <thead>
-                          <tr>
-                            <th>Report Name</th>
-                            <th>Type</th>
-                            <th>Generated On</th>
-                            <th style={{ textAlign: "right" }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {reports.slice(0, 3).map((rep) => (
-                            <tr key={rep.id}>
-                              <td><strong>{rep.title}</strong></td>
-                              <td><span className="report-type-badge">{rep.format}</span></td>
-                              <td>{safeSplitDate(rep.period)}</td>
-                              <td style={{ textAlign: "right" }}>
-                                {rep.downloadUrl && (
-                                  <a href={rep.downloadUrl} className="admin-download-btn" target="_blank" rel="noreferrer" title="Download file">
-                                    <FiDownload />
-                                  </a>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                          {reports.length === 0 && (
-                            <tr>
-                              <td colSpan="4" style={{ textAlign: "center" }}>No reports found. Click generate to start.</td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                    <button type="button" className="admin-view-all-link-btn" onClick={() => setAdminTab("reports")}>
-                      View all reports <FiArrowRight />
-                    </button>
-                  </article>
-
-                </div>
-
               </div>
             )}
 
-            {/* USERS TAB */}
-            {adminTab === "users" && (
-              <article className="admin-panel-detailed glassmorphic-panel">
-                <div className="panel-header-row">
-                  <h3>System User Base ({users.length} accounts)</h3>
-                </div>
-                <div className="admin-detailed-table-wrap">
-                  <table className="admin-detailed-table">
-                    <thead>
-                      <tr>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th style={{ textAlign: "right" }}>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users.map((u) => (
-                        <tr key={u.userId || u.id}>
-                          <td><strong>{u.username}</strong></td>
-                          <td>{u.email}</td>
-                          <td>
-                            <div className="trends-select-wrapper-custom" style={{ display: "inline-flex" }}>
-                              <select 
-                                value={u.role} 
-                                onChange={(e) => handleUpdateRole(u.userId || u.id, e.target.value)}
-                              >
-                                <option value="ADMIN">ADMIN</option>
-                                <option value="LECTURER">LECTURER</option>
-                                <option value="STUDENT">STUDENT</option>
-                                <option value="RESEARCHER">RESEARCHER</option>
-                              </select>
-                              <FiChevronDown />
-                            </div>
-                          </td>
-                          <td><span className="status-label connected">Active</span></td>
-                          <td style={{ textAlign: "right" }}>
-                            <button 
-                              type="button" 
-                              className="admin-delete-btn" 
-                              onClick={() => handleDeleteUser(u.userId || u.id)}
-                              style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", fontWeight: "bold" }}
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                      {users.length === 0 && (
-                        <tr>
-                          <td colSpan="5" style={{ textAlign: "center" }}>No users registered.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+            {tab === "users" && (
+              <article className="admin-panel-detailed">
+                <div className="panel-header-row"><h3>User management</h3><form className="admin-search-form" onSubmit={searchUsers}><FiSearch /><input value={userSearch} onChange={(event) => setUserSearch(event.target.value)} placeholder="Search username or email" /><button type="submit" disabled={working === "search"}>Search</button></form></div>
+                <AdminUsersTable users={users} onView={viewUser} onRole={updateRole} onDelete={removeUser} working={working} />
               </article>
             )}
 
-            {/* SYNC TAB */}
-            {adminTab === "sync" && (
-              <article className="admin-panel-detailed glassmorphic-panel">
-                <div className="panel-header-row">
-                  <h3>OpenAlex Database Synchronizations</h3>
-                  <button
-                    type="button"
-                    className="admin-header-trigger-sync-btn"
-                    onClick={handleTriggerSync}
-                    disabled={syncing}
-                  >
-                    <FiRefreshCw className={syncing ? "is-spinning" : ""} />
-                    <span>Sync From OpenAlex Now</span>
-                  </button>
-                </div>
-                <div className="admin-detailed-table-wrap">
-                  <table className="admin-detailed-table">
-                    <thead>
-                      <tr>
-                        <th>Status</th>
-                        <th>Synced Records</th>
-                        <th>Triggered At</th>
-                        <th>Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {syncLogs.map((log, i) => (
-                        <tr key={log.id ?? i}>
-                          <td>
-                            <span className={`status-label ${log.status === "SUCCESS" || log.status === "COMPLETED" ? "connected" : "error"}`}>
-                              {log.status}
-                            </span>
-                          </td>
-                          <td><strong>{formatNumber(log.newRecords ?? 0)} records</strong></td>
-                          <td>{log.startedAt ? formatDateTime(log.startedAt) : "—"}</td>
-                          <td>{log.message || "Manual system check completed."}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </article>
+            {tab === "sync" && (
+              <div className="admin-sync-layout">
+                <article className="admin-panel-detailed">
+                  <div className="panel-header-row"><div><h3>OpenAlex synchronization</h3><p>Start a current sync or backfill a historical year range.</p></div><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Manual sync</button></div>
+                  <form className="admin-backfill-form" onSubmit={runBackfill}>
+                    <label>From year<input type="number" min="1900" max={toYear} value={fromYear} onChange={(event) => setFromYear(event.target.value)} /></label>
+                    <label>To year<input type="number" min={fromYear} max={new Date().getFullYear()} value={toYear} onChange={(event) => setToYear(event.target.value)} /></label>
+                    <button className="workspace-button primary" type="submit" disabled={working === "backfill"}>{working === "backfill" ? "Starting…" : "Start backfill"}</button>
+                  </form>
+                </article>
+                <article className="admin-panel-detailed"><div className="panel-header-row"><h3>Sync history</h3></div><SyncTable logs={syncLogs} /></article>
+              </div>
             )}
 
-            {/* SOURCES TAB */}
-            {adminTab === "sources" && (
-              <article className="admin-panel-detailed glassmorphic-panel">
-                <div className="panel-header-row">
-                  <h3>Metadata Sources Configuration</h3>
-                  <button type="button" className="admin-header-plus-btn" onClick={() => showToast("Mockup: Add Source", "info")}>
-                    <FiPlus />
-                    <span>Register New Source</span>
-                  </button>
-                </div>
-                <div className="admin-detailed-table-wrap">
-                  <table className="admin-detailed-table">
-                    <thead>
-                      <tr>
-                        <th>Source Name</th>
-                        <th>Connection Status</th>
-                        <th>Last Synchronization Cycle</th>
-                        <th>Indexed Records</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sources.map((src) => (
-                        <tr key={src.id}>
-                          <td><strong>{src.name}</strong></td>
-                          <td><span className={`status-label ${src.status.toLowerCase()}`}>{src.status}</span></td>
-                          <td>{src.lastSync}</td>
-                          <td>{src.records}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </article>
+            {tab === "reports" && (
+              <article className="admin-panel-detailed"><div className="panel-header-row"><h3>Reports from all users</h3><span>{reports.length} reports</span></div><ReportsTable reports={reports} /></article>
             )}
 
-            {/* REPORTS TAB */}
-            {adminTab === "reports" && (
-              <article className="admin-panel-detailed glassmorphic-panel">
-                <div className="panel-header-row">
-                  <h3>Generated Citation & Trend Reports</h3>
-                  <button
-                    type="button"
-                    className="admin-header-plus-btn"
-                    onClick={handleCreateReport}
-                    disabled={generatingReport}
-                  >
-                    <FiPlus />
-                    <span>{generatingReport ? "Creating..." : "Request New Report"}</span>
-                  </button>
-                </div>
-                <div className="admin-detailed-table-wrap">
-                  <table className="admin-detailed-table">
-                    <thead>
-                      <tr>
-                        <th>Report Title</th>
-                        <th>Format</th>
-                        <th>Description</th>
-                        <th>Generated On</th>
-                        <th style={{ textAlign: "right" }}>Download</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reports.map((rep) => (
-                        <tr key={rep.id}>
-                          <td><strong>{rep.title}</strong></td>
-                          <td><span className="report-type-badge">{rep.format}</span></td>
-                          <td>{rep.description || "Citation analytics summary for active topics."}</td>
-                          <td>{rep.period ? formatDateTime(rep.period) : "Recent"}</td>
-                          <td style={{ textAlign: "right" }}>
-                            {rep.downloadUrl && (
-                              <a href={rep.downloadUrl} className="admin-download-btn" target="_blank" rel="noreferrer">
-                                <FiDownload />
-                                <span>Get File</span>
-                              </a>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </article>
+            {tab === "settings" && (
+              <article className="admin-panel-detailed"><div className="panel-header-row"><div><h3>Current system configuration</h3><p>Read-only values returned by the backend.</p></div><button type="button" className="workspace-button" onClick={loadAdminData}><FiRefreshCw /> Refresh</button></div><ConfigGrid config={config} /></article>
             )}
-
-            {/* SYSTEM SETTINGS TAB */}
-            {adminTab === "settings" && (
-              <article className="admin-panel-detailed glassmorphic-panel">
-                <div className="panel-header-row">
-                  <h3>System Settings & Options</h3>
-                </div>
-                <div className="admin-settings-mockup-options">
-                  <div className="settings-option-item">
-                    <div className="settings-option-details">
-                      <h4>Automatic Sync Interval</h4>
-                      <p>Run OpenAlex catalog synchronization automatically on a cron schedule.</p>
-                    </div>
-                    <div className="trends-select-wrapper-custom">
-                      <select defaultValue="daily">
-                        <option value="hourly">Every Hour</option>
-                        <option value="daily">Every Day at 12:00 AM</option>
-                        <option value="weekly">Every Week (Sunday)</option>
-                      </select>
-                      <FiChevronDown />
-                    </div>
-                  </div>
-                  <div className="settings-option-item">
-                    <div className="settings-option-details">
-                      <h4>API Fetch Batch Size</h4>
-                      <p>Number of papers to retrieve per request from metadata APIs.</p>
-                    </div>
-                    <div className="trends-select-wrapper-custom">
-                      <select defaultValue="100">
-                        <option value="50">50 records</option>
-                        <option value="100">100 records</option>
-                        <option value="500">500 records</option>
-                      </select>
-                      <FiChevronDown />
-                    </div>
-                  </div>
-                </div>
-              </article>
-            )}
-
-          </div>
+          </>
         )}
 
-      </div>
+        {selectedUser && <UserDetail user={selectedUser} onClose={() => setSelectedUser(null)} />}
+      </section>
     </MainLayout>
   );
+}
+
+function AdminUsersTable({ users, onView, onRole, onDelete, working, compact = false }) {
+  return <div className="admin-detailed-table-wrap"><table className={compact ? "admin-compact-table" : "admin-detailed-table"}><thead><tr><th>User</th><th>Email</th><th>Role</th>{!compact && <th>Status</th>}<th>Actions</th></tr></thead><tbody>{users.map((user) => { const id = user.userId ?? user.id; return <tr key={id}><td><strong>{user.username || user.fullName || "Unnamed user"}</strong></td><td>{user.email || "—"}</td><td><select value={user.role || "STUDENT"} onChange={(event) => onRole(id, event.target.value)}><option>STUDENT</option><option>LECTURER</option><option>RESEARCHER</option><option>ADMIN</option></select></td>{!compact && <td><span className={`status-label ${statusClass(user.status || "ACTIVE")}`}>{user.status || "ACTIVE"}</span></td>}<td><div className="admin-row-actions"><button type="button" onClick={() => onView(id)} disabled={working === `user-${id}`} aria-label="View user"><FiEye /></button><button type="button" className="danger" onClick={() => onDelete(user)} aria-label="Delete user"><FiTrash2 /></button></div></td></tr>; })}{users.length === 0 && <tr><td colSpan="5">No users found.</td></tr>}</tbody></table></div>;
+}
+
+function SyncTable({ logs, compact = false }) {
+  return <div className="admin-detailed-table-wrap"><table className={compact ? "admin-compact-table" : "admin-detailed-table"}><thead><tr><th>Status</th><th>Records</th><th>Started</th>{!compact && <th>Details</th>}</tr></thead><tbody>{logs.map((log, index) => <tr key={log.id ?? index}><td><span className={`status-label ${statusClass(log.status)}`}>{log.status || "UNKNOWN"}</span></td><td>{formatNumber(log.paperSynced ?? log.newRecords ?? log.recordsIndexed ?? 0)}</td><td>{log.startedAt ? formatDateTime(log.startedAt) : "—"}</td>{!compact && <td>{log.message || "—"}</td>}</tr>)}{logs.length === 0 && <tr><td colSpan="4">No sync logs available.</td></tr>}</tbody></table></div>;
+}
+
+function ReportsTable({ reports }) {
+  return <div className="admin-detailed-table-wrap"><table className="admin-detailed-table"><thead><tr><th>Report</th><th>Owner</th><th>Status</th><th>Generated</th><th>File</th></tr></thead><tbody>{reports.map((report) => <tr key={report.id}><td><strong>{report.title}</strong></td><td>{report.ownerName || report.username || report.email || "—"}</td><td><span className="workspace-status">{report.status}</span></td><td>{report.period ? formatDateTime(report.period) : "—"}</td><td>{report.downloadUrl ? <a className="admin-download-btn" href={report.downloadUrl} target="_blank" rel="noreferrer"><FiDownload /> Download</a> : "—"}</td></tr>)}{reports.length === 0 && <tr><td colSpan="5">No reports available.</td></tr>}</tbody></table></div>;
+}
+
+function ConfigGrid({ config }) {
+  const entries = Object.entries(config);
+  if (entries.length === 0) return <div className="workspace-empty">No configuration values were returned.</div>;
+  return <dl className="admin-config-grid">{entries.map(([key, value]) => <div key={key}><dt>{key.replace(/([A-Z])/g, " $1").replace(/[_.-]+/g, " ")}</dt><dd>{typeof value === "object" ? JSON.stringify(value) : String(value)}</dd></div>)}</dl>;
+}
+
+function UserDetail({ user, onClose }) {
+  return <div className="admin-user-backdrop" onClick={onClose}><aside className="admin-user-detail" onClick={(event) => event.stopPropagation()}><button type="button" onClick={onClose} aria-label="Close"><FiX /></button><span className="catalog-kicker">User details</span><h2>{user.username || user.fullName || user.email}</h2><dl>{Object.entries(user).filter(([, value]) => value !== null && typeof value !== "object").map(([key, value]) => <div key={key}><dt>{key}</dt><dd>{String(value)}</dd></div>)}</dl></aside></div>;
 }
 
 export default AdminPage;

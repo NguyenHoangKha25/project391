@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import logo from "../assets/images/logo-login.png";
 import { useAuth } from "../context/useAuth";
 import { ROUTE_PATHS } from "../routes/routePaths";
-import { getDefaultAuthenticatedPath, saveOAuthSessionFromQuery } from "../utils/authStorage";
+import { getDefaultAuthenticatedPath, saveCurrentUser, saveOAuthSessionFromQuery } from "../utils/authStorage";
 import { getCurrentUser } from "../services/userService";
 import "../styles/AuthStatusPage.css";
 
@@ -40,16 +40,7 @@ function OAuth2CallbackPage() {
         }
 
         // Cập nhật user trong localStorage với thông tin đầy đủ từ BE
-        const { normalizeRoleValue } = await import("../utils/authStorage");
-        const role = normalizeRoleValue(userInfo.role || "STUDENT");
-        const updatedUser = {
-          userId: userInfo.userId || null,
-          username: userInfo.username || "",
-          email: userInfo.email || "",
-          role,
-          roles: [role],
-        };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        saveCurrentUser(userInfo);
 
         // 3. Refresh context và navigate
         refreshAuthState();

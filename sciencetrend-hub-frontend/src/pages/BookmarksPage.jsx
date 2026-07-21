@@ -3,14 +3,10 @@ import { Link } from "react-router-dom";
 import {
   FiBookmark,
   FiBookOpen,
-  FiBell,
-  FiFileText,
   FiTrash2,
-  FiExternalLink,
   FiTag,
-  FiFolder,
   FiArrowRight,
-  FiSettings,
+  FiX,
   FiCheckCircle,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  FiUsers,
   FiBookOpen,
   FiTag,
   FiTrash2,
@@ -86,7 +85,7 @@ function FollowingPage() {
       setFollowedTopics(freshData.followedTopics);
       setFollowedJournals(freshData.followedJournals);
       setCachedData(cacheKey, freshData);
-    } catch (err) {
+    } catch {
       showToast("Failed to load followed content.", "warning");
     } finally {
       setLoading(false);

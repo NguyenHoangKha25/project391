@@ -9,7 +9,6 @@ import {
   FiArrowUpRight,
   FiCheckCircle,
   FiAlertTriangle,
-  FiCalendar,
   FiArrowRight,
   FiTrendingUp,
   FiTrendingDown,
@@ -32,7 +31,6 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [spinning, setSpinning] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [selectedRange, setSelectedRange] = useState("all");
 
   const loadDashboard = useCallback(async (isRefresh = false) => {
     // Check client-side memory cache first if not explicitly refreshing
@@ -106,17 +104,12 @@ function DashboardPage() {
 
   const displayName = user.username || user.fullName || user.email || "Dr. Researcher";
 
-  // Merge loaded database metrics with mockup defaults for a premium visual presentation
+  // Display backend totals without fabricating historical comparison percentages.
   const dashboardStats = useMemo(() => {
-    let multiplier = 1.0;
-    if (selectedRange === "30") multiplier = 0.12;
-    else if (selectedRange === "90") multiplier = 0.35;
-    else if (selectedRange === "year") multiplier = 0.65;
-
-    const totalPapers = Math.round((data?.totalPapers ?? 0) * multiplier);
-    const totalJournals = Math.round((data?.totalJournals ?? 0) * multiplier);
-    const totalKeywords = Math.round((data?.totalKeywords ?? 0) * multiplier);
-    const openAlexPapers = Math.round((data?.openAlexPapers ?? 0) * multiplier);
+    const totalPapers = data?.totalPapers ?? 0;
+    const totalJournals = data?.totalJournals ?? 0;
+    const totalKeywords = data?.totalKeywords ?? 0;
+    const openAlexPapers = data?.openAlexPapers ?? 0;
     const successfulSyncs = data?.successfulSyncs ?? 0;
     const failedSyncs = data?.failedSyncs ?? 0;
 
@@ -127,33 +120,33 @@ function DashboardPage() {
         title: "Total Papers",
         value: formatNumber(totalPapers),
         icon: FiFileText,
-        change: totalPapers > 0 ? "12.6%" : "—",
-        trendText: totalPapers > 0 ? "vs last year" : "No sync data",
-        trendType: "positive"
+        change: totalPapers > 0 ? "Live" : "—",
+        trendText: totalPapers > 0 ? "catalog total" : "No sync data",
+        trendType: "neutral"
       },
       {
         title: "Journals",
         value: formatNumber(totalJournals),
         icon: FiBookOpen,
-        change: totalJournals > 0 ? "5.3%" : "—",
-        trendText: totalJournals > 0 ? "vs last year" : "No sync data",
-        trendType: "positive"
+        change: totalJournals > 0 ? "Live" : "—",
+        trendText: totalJournals > 0 ? "catalog total" : "No sync data",
+        trendType: "neutral"
       },
       {
         title: "Keywords",
         value: formatNumber(totalKeywords),
         icon: FiKey,
-        change: totalKeywords > 0 ? "8.7%" : "—",
-        trendText: totalKeywords > 0 ? "vs last year" : "No sync data",
-        trendType: "positive"
+        change: totalKeywords > 0 ? "Live" : "—",
+        trendText: totalKeywords > 0 ? "catalog total" : "No sync data",
+        trendType: "neutral"
       },
       {
         title: "OpenAlex Papers",
         value: formatNumber(openAlexPapers),
         icon: FiDatabase,
-        change: openAlexPapers > 0 ? "9.4%" : "—",
-        trendText: openAlexPapers > 0 ? "vs last year" : "No sync data",
-        trendType: "positive"
+        change: openAlexPapers > 0 ? "Live" : "—",
+        trendText: openAlexPapers > 0 ? "OpenAlex records" : "No sync data",
+        trendType: "neutral"
       }
     ];
 
@@ -163,23 +156,23 @@ function DashboardPage() {
           title: "Successful Syncs",
           value: formatNumber(successfulSyncs),
           icon: FiCheckCircle,
-          change: successfulSyncs > 0 ? "7.1%" : "—",
-          trendText: successfulSyncs > 0 ? "vs last year" : "No sync data",
-          trendType: "positive"
+          change: successfulSyncs > 0 ? "Live" : "—",
+          trendText: successfulSyncs > 0 ? "completed runs" : "No sync data",
+          trendType: "neutral"
         },
         {
           title: "Failed Syncs",
           value: formatNumber(failedSyncs),
           icon: FiAlertTriangle,
-          change: failedSyncs > 0 ? "22.2%" : "—",
-          trendText: failedSyncs > 0 ? "vs last year" : "No sync data",
-          trendType: "negative"
+          change: failedSyncs > 0 ? "Live" : "—",
+          trendText: failedSyncs > 0 ? "failed runs" : "No sync data",
+          trendType: failedSyncs > 0 ? "negative" : "neutral"
         }
       );
     }
 
     return stats;
-  }, [data, user, selectedRange]);
+  }, [data, user]);
 
   // Real database metrics with no hardcoded fallback datasets
   const papersByYear = useMemo(() => {
@@ -188,44 +181,20 @@ function DashboardPage() {
     const sorted = [...raw].sort((a, b) => parseInt(a.label || 0) - parseInt(b.label || 0));
     const sliced = sorted.slice(-7);
 
-    let multiplier = 1.0;
-    if (selectedRange === "30") multiplier = 0.12;
-    else if (selectedRange === "90") multiplier = 0.35;
-    else if (selectedRange === "year") multiplier = 0.65;
-
-    return sliced.map(item => ({
-      ...item,
-      value: Math.round(item.value * multiplier)
-    }));
-  }, [data, selectedRange]);
+    return sliced;
+  }, [data]);
 
   const topKeywords = useMemo(() => {
     let raw = data?.topKeywords || [];
 
-    let multiplier = 1.0;
-    if (selectedRange === "30") multiplier = 0.12;
-    else if (selectedRange === "90") multiplier = 0.35;
-    else if (selectedRange === "year") multiplier = 0.65;
-
-    return raw.map(item => ({
-      ...item,
-      value: Math.round(item.value * multiplier)
-    })).filter(item => item.value > 0);
-  }, [data, selectedRange]);
+    return raw.filter(item => item.value > 0);
+  }, [data]);
 
   const topJournals = useMemo(() => {
     let raw = data?.topJournals || [];
 
-    let multiplier = 1.0;
-    if (selectedRange === "30") multiplier = 0.12;
-    else if (selectedRange === "90") multiplier = 0.35;
-    else if (selectedRange === "year") multiplier = 0.65;
-
-    return raw.map(item => ({
-      ...item,
-      value: Math.round(item.value * multiplier)
-    })).filter(item => item.value > 0);
-  }, [data, selectedRange]);
+    return raw.filter(item => item.value > 0);
+  }, [data]);
 
   const topCitedPapers = useMemo(() => {
     let raw = data?.topCitedPapers || [];
@@ -238,13 +207,13 @@ function DashboardPage() {
     const sum = sliceJournals.reduce((acc, curr) => acc + curr.value, 0);
     const radius = 38;
     const circumference = 2 * Math.PI * radius; // ~238.76
-    let cumulativePercent = 0;
-
     return sliceJournals.map((j, i) => {
       const percent = sum > 0 ? j.value / sum : 0;
+      const cumulativePercent = sliceJournals
+        .slice(0, i)
+        .reduce((total, item) => total + (sum > 0 ? item.value / sum : 0), 0);
       const strokeLength = percent * circumference;
       const strokeOffset = circumference - (cumulativePercent * circumference);
-      cumulativePercent += percent;
 
       return {
         label: j.label,
@@ -284,19 +253,7 @@ function DashboardPage() {
         
         {/* Date Filter & Control bar */}
         <div className="db-controls-row">
-          <div className="db-datepicker-wrapper">
-            <FiCalendar className="db-datepicker-icon" />
-            <select 
-              className="db-datepicker-select" 
-              value={selectedRange}
-              onChange={(e) => setSelectedRange(e.target.value)}
-            >
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="year">This Year</option>
-              <option value="all">All Time</option>
-            </select>
-          </div>
+          <div className="db-datepicker-wrapper"><FiDatabase className="db-datepicker-icon" /><span className="db-datepicker-select">All-time catalog</span></div>
           <button
             type="button"
             className="db-refresh-btn-premium"
@@ -319,7 +276,7 @@ function DashboardPage() {
         <section className="db-metrics-grid" aria-label="Dashboard overview">
           {dashboardStats.map((stat, i) => {
             const Icon = stat.icon;
-            const TrendIcon = stat.change === "—"
+            const TrendIcon = stat.change === "—" || stat.trendType === "neutral"
               ? FiMinus
               : stat.trendType === "negative"
                 ? FiTrendingDown
@@ -589,7 +546,7 @@ function DashboardPage() {
                       </div>
                       
                       <div className="trend-stats-col">
-                        <span className="trend-pct">+{t.growth || "24%"}</span>
+                  <span className="trend-pct">{t.growth || "—"}</span>
                         
                         {/* SVG Sparkline Graph */}
                         <svg width="84" height="40" className="sparkline-svg">

@@ -445,3 +445,9 @@
   text-align: left;
 }
 
+.st-guest-actions { display: flex; align-items: center; gap: 9px; }
+.st-guest-login,
+.st-guest-register { min-height: 42px; padding: 0 16px; border-radius: 13px; font-size: 13px; font-weight: 800; }
+.st-guest-login { color: var(--st-primary); border: 1px solid rgba(21,127,145,.22); background: #fff; }
+.st-guest-register { color: #fff; background: linear-gradient(135deg,var(--st-primary),var(--st-primary-dark)); box-shadow: 0 10px 22px rgba(21,127,145,.18); }
+@media (max-width: 680px) { .st-guest-register { display: none; } }

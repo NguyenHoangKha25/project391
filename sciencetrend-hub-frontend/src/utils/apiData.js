@@ -102,13 +102,29 @@ export function normalizePaper(paper = {}, index = 0) {
 // JournalResponse từ backend: chưa implement, trả về rỗng
 export function normalizeJournal(journal = {}, index = 0) {
   return {
-    id: journal.id ?? journal.journalId ?? index,
+    id: journal.id ?? journal.journalId ?? journal.sourceId ?? index,
     name: journal.name ?? journal.title ?? "Untitled journal",
     publisher: journal.publisher ?? "Unknown publisher",
     subject: journal.subject ?? journal.field ?? "General",
     quartile: journal.quartile ?? "",
     impactFactor: journal.impactFactor ?? "",
     openAccess: Boolean(journal.openAccess ?? false),
+    paperCount: toNumber(journal.paperCount ?? journal.worksCount ?? journal.count),
+    description: journal.description ?? journal.summary ?? "",
+    issn: journal.issn ?? journal.issnL ?? "",
+    homepage: journal.homepage ?? journal.website ?? journal.url ?? "",
+  };
+}
+
+export function normalizeKeyword(keyword = {}, index = 0) {
+  if (typeof keyword === "string") {
+    return { id: keyword, name: keyword, paperCount: 0, bookmarked: false };
+  }
+  return {
+    id: keyword.keywordId ?? keyword.id ?? index,
+    name: keyword.name ?? keyword.keyword ?? keyword.term ?? "Untitled keyword",
+    paperCount: toNumber(keyword.paperCount ?? keyword.count ?? keyword.worksCount),
+    bookmarked: Boolean(keyword.bookmarked ?? keyword.saved ?? false),
   };
 }
 
@@ -178,6 +194,10 @@ export function normalizeReport(report = {}, index = 0) {
     format: String(report.format ?? report.fileType ?? "PDF").toUpperCase(),
     status: report.status ?? "Ready",
     downloadUrl,
+    charts: Array.isArray(report.charts) ? report.charts : [],
+    ownerName: report.ownerName ?? report.user?.username ?? "",
+    username: report.username ?? "",
+    email: report.email ?? report.user?.email ?? "",
   };
 }
 

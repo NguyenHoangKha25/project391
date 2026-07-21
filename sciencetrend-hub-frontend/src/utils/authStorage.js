@@ -113,6 +113,23 @@ export function saveAuthSession(response, fallbackUser = {}) {
   return { token, refreshToken, user, role, roles: user.roles };
 }
 
+export function saveCurrentUser(userResponse = {}) {
+  const data = unwrapResponse(userResponse) || {};
+  const current = readStoredUser();
+  const role = normalizeRoleValue(data.role || current.role || DEFAULT_MEMBER_ROLE);
+  const user = {
+    ...current,
+    ...data,
+    userId: data.userId ?? data.id ?? current.userId ?? null,
+    username: data.username ?? current.username ?? "",
+    email: data.email ?? current.email ?? "",
+    role,
+    roles: [role],
+  };
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  return user;
+}
+
 // OAuth2 callback: BE redirect về /oauth2/callback?token=xxx
 // Chỉ có token, username/email/role phải lấy từ /api/auth/me sau
 export function saveOAuthSessionFromQuery(searchParams) {

@@ -16,6 +16,9 @@ import ResetPassWord from "../pages/ResetPassWord";
 import TrendsPage from "../pages/TrendsPage";
 import TopicsPage from "../pages/TopicsPage";
 import FollowingPage from "../pages/FollowingPage";
+import JournalsPage from "../pages/JournalsPage";
+import KeywordsPage from "../pages/KeywordsPage";
+import PaperDetailPage from "../pages/PaperDetailPage";
 import { ROUTE_PATHS } from "./routePaths";
 
 // Cho phép truy cập khi chưa đăng nhập.
@@ -61,6 +64,20 @@ function AdminRoute({ children }) {
   return children;
 }
 
+function RoleRoute({ children, allowedRoles }) {
+  const { isLoggedIn, role } = useAuth();
+
+  if (!isLoggedIn) {
+    return <Navigate to={ROUTE_PATHS.LOGIN} replace />;
+  }
+
+  if (!allowedRoles.includes(role)) {
+    return <Navigate to={ROUTE_PATHS.DASHBOARD} replace />;
+  }
+
+  return children;
+}
+
 function AppRoutes() {
   const { isLoggedIn, defaultPath } = useAuth();
 
@@ -93,21 +110,15 @@ function AppRoutes() {
 
       <Route
         path={ROUTE_PATHS.DASHBOARD}
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
+        element={<DashboardPage />}
       />
 
       <Route
         path={ROUTE_PATHS.PAPERS}
-        element={
-          <ProtectedRoute>
-            <PapersPage />
-          </ProtectedRoute>
-        }
+        element={<PapersPage />}
       />
+
+      <Route path={ROUTE_PATHS.PAPER_DETAIL} element={<PaperDetailPage />} />
 
       <Route
         path={ROUTE_PATHS.MY_ACCOUNT}
@@ -120,21 +131,16 @@ function AppRoutes() {
 
       <Route
         path={ROUTE_PATHS.TRENDS}
-        element={
-          <ProtectedRoute>
-            <TrendsPage />
-          </ProtectedRoute>
-        }
+        element={<TrendsPage />}
       />
 
       <Route
         path={ROUTE_PATHS.TOPICS}
-        element={
-          <ProtectedRoute>
-            <TopicsPage />
-          </ProtectedRoute>
-        }
+        element={<TopicsPage />}
       />
+
+      <Route path={ROUTE_PATHS.JOURNALS} element={<JournalsPage />} />
+      <Route path={ROUTE_PATHS.KEYWORDS} element={<KeywordsPage />} />
 
       <Route
         path={ROUTE_PATHS.BOOKMARKS}
@@ -166,9 +172,9 @@ function AppRoutes() {
       <Route
         path={ROUTE_PATHS.REPORTS}
         element={
-          <ProtectedRoute>
+          <RoleRoute allowedRoles={["LECTURER", "RESEARCHER", "ADMIN"]}>
             <ReportsPage />
-          </ProtectedRoute>
+          </RoleRoute>
         }
       />
 

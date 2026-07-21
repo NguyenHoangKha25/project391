@@ -6,13 +6,14 @@ import logo from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { useAuth } from "../context/useAuth";
 import { login } from "../services/authService";
+import { getCurrentUser } from "../services/userService";
 import { getDefaultAuthenticatedPath } from "../utils/authStorage";
 import "../styles/LoginPage.css";
 
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginUser } = useAuth();
+  const { loginUser, updateCurrentUser } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -45,6 +46,12 @@ function LoginPage() {
       });
 
       loginUser(response, { username: username.trim() });
+      try {
+        const currentUser = await getCurrentUser();
+        updateCurrentUser(currentUser);
+      } catch {
+        // The login response remains a valid fallback if /auth/me is unavailable.
+      }
       navigate(getDefaultAuthenticatedPath(), { replace: true });
     } catch (error) {
       console.error("Login failed", error);

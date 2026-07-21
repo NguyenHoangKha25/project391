@@ -11,7 +11,7 @@ function TopicCard({ rank, name, paperCount, growth, score = 0, onUnfollow }) {
     setUnfollowing(true);
     try {
       await onUnfollow();
-    } catch (e) {
+    } catch {
       setUnfollowing(false);
     }
   }

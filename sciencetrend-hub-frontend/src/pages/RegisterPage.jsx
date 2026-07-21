@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiEye, FiEyeOff, FiCheck, FiUser, FiMail, FiLock, FiUsers, FiTrendingUp, FiBookmark, FiAward, FiFileText } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiUsers, FiTrendingUp, FiBookmark, FiAward, FiFileText } from "react-icons/fi";
 import logoLogin from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { register } from "../services/authService";

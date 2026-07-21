@@ -1,16 +1,17 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FiBookmark, FiExternalLink, FiLoader, FiFileText } from "react-icons/fi";
 import { formatNumber } from "../utils/apiData";
 import "../styles/DashboardPage.css";
 
 function PaperCard({
-  id,
   title,
   source,
   authors,
   year,
   tag,
   href,
+  detailPath,
   saved = false,
   onBookmark,
   variant = "compact", // default is compact
@@ -47,10 +48,6 @@ function PaperCard({
     const safeKeywords = Array.isArray(keywords) ? keywords : [];
     const displayKeywords = safeKeywords.slice(0, 4);
     const extraKeywordsCount = safeKeywords.length - displayKeywords.length;
-
-    // Citations trend or mock percentage for high-quality dashboard
-    const parsedRank = parseFloat(rank);
-    const citationGrowth = !isNaN(parsedRank) ? (20 - parsedRank * 2 + 5.3).toFixed(1) : "12.6";
 
     return (
       <article className="rich-paper-card">
@@ -105,22 +102,14 @@ function PaperCard({
           <div className="rich-paper-citations-box">
             <span className="citations-label">Citations</span>
             <span className="citations-val">{formatNumber(citationCount)}</span>
-            <span className="citations-growth">
-              ↑ {citationGrowth}% <span className="citations-growth-sub">vs last year</span>
-            </span>
           </div>
 
           <div className="rich-paper-actions-stack">
-            {href && (
-              <a
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                className="rich-paper-action-btn view-details"
-              >
+            {detailPath && (
+              <Link className="rich-paper-action-btn view-details" to={detailPath}>
                 <span>View Details</span>
                 <FiExternalLink />
-              </a>
+              </Link>
             )}
             
             <button
@@ -172,16 +161,26 @@ function PaperCard({
           )}
         </button>
 
-        {href && (
-          <a
-            href={href}
-            target="_blank"
-            rel="noreferrer"
+        {(detailPath || href) && (
+          detailPath ? (
+            <Link
+              to={detailPath}
+              aria-label="View paper details"
+              title="View paper details"
+            >
+              <FiExternalLink />
+            </Link>
+          ) : (
+            <a
+              href={href}
+              target="_blank"
+              rel="noreferrer"
             aria-label="Open paper in new tab"
             title="Open paper"
           >
             <FiExternalLink />
           </a>
+          )
         )}
       </div>
     </article>

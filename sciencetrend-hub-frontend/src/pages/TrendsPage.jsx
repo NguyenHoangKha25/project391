@@ -1,22 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import {
-  FiTrendingUp,
   FiSearch,
   FiX,
   FiPlus,
-  FiCalendar,
-  FiGrid,
-  FiArrowUpRight,
-  FiInfo,
   FiLayers,
-  FiChevronDown,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { getTrendingTopics, getTrendStats } from "../services/trendService";
-import { getAllTopics } from "../services/topicService";
+import { getAllKeywords } from "../services/keywordService";
 import { getDashboardOverview } from "../services/dashboardService";
-import { normalizeChartPoint, normalizeTopic, toArray, formatNumber, normalizeDashboard } from "../utils/apiData";
+import { normalizeChartPoint, normalizeKeyword, normalizeTopic, toArray, formatNumber, normalizeDashboard } from "../utils/apiData";
+import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/TrendsPage.css";
 
@@ -41,26 +35,13 @@ function TrendsPage() {
   // Navigation tab: 'keyword' | 'topic'
   const [trendTab, setTrendTab] = useState("keyword");
   const [searchVal, setSearchVal] = useState("");
-  const [yearFilter, setYearFilter] = useState("2015-2025");
   
   // Keyword chips state
-  const [keywordChips, setKeywordChips] = useState([
-    "Large Language Models",
-    "Diffusion Models",
-    "Graph Neural Networks",
-    "AI for Healthcare",
-    "Vision-Language Models",
-  ]);
+  const [keywordChips, setKeywordChips] = useState([]);
   // Topic chips state
-  const [topicChips, setTopicChips] = useState([
-    "Computer Science",
-    "Mathematics",
-    "Engineering",
-    "Medicine",
-    "Physics",
-  ]);
-  const [activeKeyword, setActiveKeyword] = useState("Large Language Models");
-  const [activeTopicState, setActiveTopicState] = useState("Computer Science");
+  const [topicChips, setTopicChips] = useState([]);
+  const [activeKeyword, setActiveKeyword] = useState("");
+  const [activeTopicState, setActiveTopicState] = useState("");
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [showAddKeywordInput, setShowAddKeywordInput] = useState(false);
 
@@ -74,9 +55,7 @@ function TrendsPage() {
   const { toast, showToast } = useToast();
 
   const loadTrendData = useCallback(async () => {
-    const activeSearchKeyword = trendTab === "keyword" 
-      ? (activeKeyword || "computer science") 
-      : (activeTopicState || "computer science");
+    const activeSearchKeyword = trendTab === "keyword" ? activeKeyword : activeTopicState;
 
     const cacheKey = `trends_${activeSearchKeyword}`;
     const cachedData = getCachedData(cacheKey);
@@ -91,19 +70,26 @@ function TrendsPage() {
       // Perform a silent background validation to refresh cache seamlessly
       Promise.allSettled([
         getTrendingTopics({ limit: 10 }),
-        getTrendStats({ keyword: activeSearchKeyword }),
-        getAllTopics(),
+        activeSearchKeyword
+          ? getTrendStats(trendTab === "keyword" ? { keyword: activeSearchKeyword } : { topic: activeSearchKeyword })
+          : Promise.resolve([]),
+        getAllKeywords({ page: 0, size: 100 }),
         getDashboardOverview(),
       ]).then(([topicsRes, statsRes, allTopicsRes, overviewRes]) => {
         const freshData = {
           trendingTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
           chartData: statsRes.status === "fulfilled" ? toArray(statsRes.value).map(normalizeChartPoint) : [],
-          dbKeywords: allTopicsRes.status === "fulfilled" ? toArray(allTopicsRes.value).map((t, idx) => t.name ?? `Topic ${idx}`) : [],
+          dbKeywords: allTopicsRes.status === "fulfilled" ? toArray(allTopicsRes.value, ["keywords"]).map(normalizeKeyword).map((keyword) => keyword.name) : [],
           dashboard: overviewRes.status === "fulfilled" ? normalizeDashboard(overviewRes.value) : null
         };
         setTrendingTopics(freshData.trendingTopics);
         setChartData(freshData.chartData);
         setDbKeywords(freshData.dbKeywords);
+        setKeywordChips((current) => current.length > 0 ? current : freshData.dbKeywords.slice(0, 5));
+        setActiveKeyword((current) => current || freshData.dbKeywords[0] || "");
+        const topicNames = freshData.trendingTopics.map((topic) => topic.name).filter(Boolean);
+        setTopicChips((current) => current.length > 0 ? current : topicNames.slice(0, 5));
+        setActiveTopicState((current) => current || topicNames[0] || "");
         setDashboard(freshData.dashboard);
         if (freshData.trendingTopics.length > 0 || freshData.chartData.length > 0) {
           setCachedData(cacheKey, freshData);
@@ -118,21 +104,28 @@ function TrendsPage() {
 
       const [topicsRes, statsRes, allTopicsRes, overviewRes] = await Promise.allSettled([
         getTrendingTopics({ limit: 10 }),
-        getTrendStats({ keyword: activeSearchKeyword }),
-        getAllTopics(),
+        activeSearchKeyword
+          ? getTrendStats(trendTab === "keyword" ? { keyword: activeSearchKeyword } : { topic: activeSearchKeyword })
+          : Promise.resolve([]),
+        getAllKeywords({ page: 0, size: 100 }),
         getDashboardOverview(),
       ]);
 
       const freshData = {
         trendingTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
         chartData: statsRes.status === "fulfilled" ? toArray(statsRes.value).map(normalizeChartPoint) : [],
-        dbKeywords: allTopicsRes.status === "fulfilled" ? toArray(allTopicsRes.value).map((t, idx) => t.name ?? `Topic ${idx}`) : [],
+        dbKeywords: allTopicsRes.status === "fulfilled" ? toArray(allTopicsRes.value, ["keywords"]).map(normalizeKeyword).map((keyword) => keyword.name) : [],
         dashboard: overviewRes.status === "fulfilled" ? normalizeDashboard(overviewRes.value) : null
       };
 
       setTrendingTopics(freshData.trendingTopics);
       setChartData(freshData.chartData);
       setDbKeywords(freshData.dbKeywords);
+      setKeywordChips((current) => current.length > 0 ? current : freshData.dbKeywords.slice(0, 5));
+      setActiveKeyword((current) => current || freshData.dbKeywords[0] || "");
+      const topicNames = freshData.trendingTopics.map((topic) => topic.name).filter(Boolean);
+      setTopicChips((current) => current.length > 0 ? current : topicNames.slice(0, 5));
+      setActiveTopicState((current) => current || topicNames[0] || "");
       if (freshData.dashboard) {
         setDashboard(freshData.dashboard);
       }
@@ -241,7 +234,7 @@ function TrendsPage() {
   }, [chartData]);
 
   const comparisonLines = useMemo(() => {
-    const years = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
+    const years = [...new Set(chartData.map((point) => Number(point.label)).filter(Number.isFinite))].sort((a, b) => a - b);
     const width = 380;
     const height = 120;
     const padding = 10;
@@ -287,12 +280,13 @@ function TrendsPage() {
     });
   }, [trendTab, keywordChips, topicChips, chartData]);
 
-  // Generate dynamic sparkline coordinates
-  function getSparklinePoints(growth, idx) {
-    const seed = parseFloat(growth) || 15;
-    const base = [10, 15, 12, 20, 18, 28, 24, 35];
-    return base.map((b, i) => `${i * 12},${40 - (b + idx * 2 + seed * 0.1)}`).join(" ");
-  }
+  const annualGrowth = useMemo(() => {
+    if (chartData.length < 2) return null;
+    const first = Number(chartData[0]?.value) || 0;
+    const last = Number(chartData[chartData.length - 1]?.value) || 0;
+    if (first <= 0) return null;
+    return ((last - first) / first) * 100;
+  }, [chartData]);
 
   if (loading) {
     return (
@@ -308,6 +302,8 @@ function TrendsPage() {
   return (
     <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
       <div className="trends-page-container">
+        {errorMessage && <div className="workspace-notice warning">{errorMessage}</div>}
+        {toast && <div className={`papers-toast papers-toast--${toast.type}`}>{toast.message}</div>}
         
         {/* Sub-toolbar for filters, search, and switch tab buttons */}
         <div className="trends-controls-bar">
@@ -336,25 +332,20 @@ function TrendsPage() {
                 placeholder={trendTab === "keyword" ? "Search keywords..." : "Search topics..."}
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
+                list={trendTab === "keyword" ? "trend-keyword-options" : undefined}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" || !searchVal.trim()) return;
+                  event.preventDefault();
+                  if (trendTab === "keyword") {
+                    setActiveKeyword(searchVal.trim());
+                    setKeywordChips((current) => current.includes(searchVal.trim()) ? current : [...current, searchVal.trim()]);
+                  } else {
+                    setActiveTopicState(searchVal.trim());
+                    setTopicChips((current) => current.includes(searchVal.trim()) ? current : [...current, searchVal.trim()]);
+                  }
+                }}
               />
-            </div>
-
-            <div className="trends-select-wrapper-custom">
-              <select>
-                <option value="all">All Fields</option>
-                <option value="cs">Computer Science</option>
-                <option value="med">Medicine</option>
-              </select>
-              <FiChevronDown />
-            </div>
-
-            <div className="trends-select-wrapper-custom">
-              <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
-                <option value="2015-2025">2015 - 2025</option>
-                <option value="2020-2025">2020 - 2025</option>
-                <option value="2010-2020">2010 - 2020</option>
-              </select>
-              <FiCalendar />
+              <datalist id="trend-keyword-options">{dbKeywords.map((keyword) => <option key={keyword} value={keyword} />)}</datalist>
             </div>
 
             {searchVal && (
@@ -440,16 +431,16 @@ function TrendsPage() {
               {dashboard ? formatNumber(dashboard.totalPapers) : "0"}
             </h3>
             <span className="stat-card-trend-text positive">
-              {dashboard && dashboard.totalPapers > 0 ? "↑ 18.6%" : "—"} <span className="sub">{dashboard && dashboard.totalPapers > 0 ? "vs last year" : "No sync data"}</span>
+              <span className="sub">Live catalog total</span>
             </span>
           </div>
           <div className="trend-stat-card">
             <span className="stat-card-label">Avg. Annual Growth</span>
             <h3 className="stat-card-value">
-              {dashboard && dashboard.totalPapers > 0 ? "21.3%" : "0%"}
+              {annualGrowth === null ? "—" : `${annualGrowth >= 0 ? "+" : ""}${annualGrowth.toFixed(1)}%`}
             </h3>
             <span className="stat-card-trend-text positive">
-              {dashboard && dashboard.totalPapers > 0 ? "↑ 2.4%" : "—"} <span className="sub">{dashboard && dashboard.totalPapers > 0 ? "vs last year" : "No sync data"}</span>
+              <span className="sub">Across the selected series</span>
             </span>
           </div>
           <div className="trend-stat-card">
@@ -458,16 +449,16 @@ function TrendsPage() {
               {dashboard ? formatNumber(dashboard.totalKeywords) : "0"}
             </h3>
             <span className="stat-card-trend-text positive">
-              {dashboard && dashboard.totalKeywords > 0 ? "↑ 26.7%" : "—"} <span className="sub">{dashboard && dashboard.totalKeywords > 0 ? "vs last year" : "No sync data"}</span>
+              <span className="sub">Indexed keywords</span>
             </span>
           </div>
           <div className="trend-stat-card">
             <span className="stat-card-label">Breakout Topics</span>
             <h3 className="stat-card-value">
-              {dashboard && dashboard.totalKeywords > 0 ? Math.round(dashboard.totalKeywords / 10) : "0"}
+              {trendingTopics.length}
             </h3>
             <span className="stat-card-trend-text positive">
-              {dashboard && dashboard.totalKeywords > 0 ? "↑ 33.3%" : "—"} <span className="sub">{dashboard && dashboard.totalKeywords > 0 ? "vs last year" : "No sync data"}</span>
+              <span className="sub">Returned by the trends API</span>
             </span>
           </div>
         </div>
@@ -601,7 +592,7 @@ function TrendsPage() {
                         </div>
                       </td>
                       <td>{typeof topic.paperCount === "string" ? topic.paperCount.split(" ")[0] : (topic.paperCount ?? "0")}</td>
-                      <td className="positive">{topic.growth || "+24%"}</td>
+                    <td className="positive">{topic.growth || "—"}</td>
                     </tr>
                   ))}
                   {trendingTopics.length === 0 && (
@@ -628,22 +619,14 @@ function TrendsPage() {
               <span className="badge-chip">Growth</span>
             </div>
             <div className="trends-sparkline-list">
-              {trendingTopics.slice(0, 3).map((topic, idx) => (
+              {trendingTopics.slice(0, 3).map((topic) => (
                 <div key={topic.id} className="trends-sparkline-row">
                   <div className="topic-rank-name">
                     <span className="bullet-dot" />
                     <span className="name">{topic.name}</span>
                   </div>
                   <div className="sparkline-stats">
-                    <span className="growth-text">+{topic.growth || "27.8%"}</span>
-                    <svg width="60" height="30" className="sparkline-mini">
-                      <polyline
-                        fill="none"
-                        stroke="#10b981"
-                        strokeWidth="1.5"
-                        points={getSparklinePoints(topic.growth, idx)}
-                      />
-                    </svg>
+                  <span className="growth-text">{topic.growth || "—"}</span>
                   </div>
                 </div>
               ))}
@@ -658,26 +641,18 @@ function TrendsPage() {
           {/* Card 2: Topic Momentum (Acceleration) */}
           <article className="trends-bottom-panel glassmorphic-panel">
             <div className="panel-header-row">
-              <h3>{trendTab === "keyword" ? "Keyword Momentum (Acceleration)" : "Topic Momentum (Acceleration)"}</h3>
-              <span className="badge-chip">Momentum</span>
+              <h3>{trendTab === "keyword" ? "More Active Keywords" : "More Active Topics"}</h3>
+              <span className="badge-chip">Activity</span>
             </div>
             <div className="trends-sparkline-list">
-              {trendingTopics.slice(2, 5).map((topic, idx) => (
+              {trendingTopics.slice(3, 6).map((topic) => (
                 <div key={topic.id} className="trends-sparkline-row">
                   <div className="topic-rank-name">
                     <span className="bullet-dot bg-blue" />
                     <span className="name">{topic.name}</span>
                   </div>
                   <div className="sparkline-stats">
-                    <span className="momentum-score">{(1.8 - idx * 0.15).toFixed(2)} Score</span>
-                    <svg width="60" height="30" className="sparkline-mini">
-                      <polyline
-                        fill="none"
-                        stroke="#2563eb"
-                        strokeWidth="1.5"
-                        points={getSparklinePoints(topic.growth, idx + 4)}
-                      />
-                    </svg>
+                    <span className="momentum-score">{topic.paperCount || "—"}</span>
                   </div>
                 </div>
               ))}
@@ -689,7 +664,7 @@ function TrendsPage() {
             </div>
           </article>
 
-          {/* Card 3: AI-Generated Insights */}
+          {/* Card 3: concise summaries from returned trend values */}
           <article className="trends-bottom-panel glassmorphic-panel">
             <div className="panel-header-row">
               <h3>{trendTab === "keyword" ? "Analytical Keyword Insights" : "Analytical Topic Insights"}</h3>
@@ -703,13 +678,13 @@ function TrendsPage() {
                       <FiLayers />
                     </div>
                     <p>
-                      <strong>{t.name}</strong> remains an active research segment with {t.paperCount || "0 papers"}, exhibiting steady year-on-year interest acceleration.
+                      <strong>{t.name}</strong> has {t.paperCount || "no paper count"}; reported growth is {t.growth || "not available"}.
                     </p>
                   </div>
                 ))
               ) : (
                 <div className="chart-empty-placeholder" style={{ padding: "40px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
-                  No scientific trends available to generate AI insights.
+                  No scientific trend data is available.
                 </div>
               )}
             </div>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FiSearch,
   FiPlus,
@@ -21,6 +22,8 @@ import {
 } from "../services/topicService";
 import { normalizeTopic, toArray } from "../utils/apiData";
 import { getCachedData, setCachedData } from "../utils/apiCache";
+import { useAuth } from "../context/useAuth";
+import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/TopicsPage.css";
 
@@ -42,6 +45,8 @@ function useToast() {
 }
 
 function TopicsPage() {
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [topics, setTopics] = useState([]);
   const [trending, setTrending] = useState([]);
   const [followedIds, setFollowedIds] = useState(new Set());
@@ -71,7 +76,7 @@ function TopicsPage() {
 
       // Perform a silent background validation to refresh cache seamlessly
       Promise.allSettled([
-        getFollowedTopics(),
+        isLoggedIn ? getFollowedTopics() : Promise.resolve([]),
         getTrendingTopics(5),
         getAllTopics(),
       ]).then(([followedResult, trendingResult, listResult]) => {
@@ -101,7 +106,7 @@ function TopicsPage() {
       
       // Fetch followed topics and all topics (or search result)
       const [followedResult, trendingResult, listResult] = await Promise.allSettled([
-        getFollowedTopics(),
+        isLoggedIn ? getFollowedTopics() : Promise.resolve([]),
         getTrendingTopics(5),
         search ? searchTopics(search) : getAllTopics(),
       ]);
@@ -131,7 +136,7 @@ function TopicsPage() {
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [isLoggedIn, showToast]);
 
   useEffect(() => {
     loadData();
@@ -148,6 +153,10 @@ function TopicsPage() {
 
   // Toggle follow status
   async function handleToggleFollow(topicId, topicName) {
+    if (!isLoggedIn) {
+      navigate(ROUTE_PATHS.LOGIN, { state: { from: ROUTE_PATHS.TOPICS } });
+      return;
+    }
     if (followProcessing.has(topicId)) return;
 
     // Set processing state
@@ -199,7 +208,7 @@ function TopicsPage() {
       const response = await getPapersByTopic(topic.id, 0, 10);
       const papersList = toArray(response, ["content", "papers"]);
       setTopicPapers(papersList);
-    } catch (err) {
+    } catch {
       showToast("Could not retrieve papers for this topic.", "warning");
     } finally {
       setLoadingPapers(false);

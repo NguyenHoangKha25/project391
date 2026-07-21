@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams, Link } from "react-router-dom";
-import { FiSearch, FiX, FiFilter, FiBookmark, FiChevronDown, FiPlus } from "react-icons/fi";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { FiSearch, FiX, FiFilter, FiChevronDown } from "react-icons/fi";
 import PaperCard from "../components/PaperCard";
 import MainLayout from "../components/layout/MainLayout";
 import { getPapers } from "../services/paperService";
@@ -8,6 +8,8 @@ import { toggleBookmark } from "../services/bookmarkService";
 import { getAllTopics } from "../services/topicService";
 import { getAllKeywords } from "../services/keywordService";
 import { normalizePaper, toArray, formatNumber } from "../utils/apiData";
+import { useAuth } from "../context/useAuth";
+import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/PapersPage.css";
 
@@ -29,18 +31,20 @@ function useToast() {
 }
 
 function PapersPage() {
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
 
   // Dynamic filter states
   const [searchVal, setSearchVal] = useState(searchQuery);
-  const [keywordInput, setKeywordInput] = useState("");
-  const [authorInput, setAuthorInput] = useState("");
-  const [journalInput, setJournalInput] = useState("");
-  const [topicInput, setTopicInput] = useState("all");
+  const [keywordInput, setKeywordInput] = useState(searchParams.get("keyword") || "");
+  const [authorInput, setAuthorInput] = useState(searchParams.get("author") || "");
+  const [journalInput, setJournalInput] = useState(searchParams.get("journal") || "");
+  const [topicInput, setTopicInput] = useState(searchParams.get("topic") || "all");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
-  const [sortBy, setSortBy] = useState("citationCount"); // default sorted by citations for premium mockup look
+  const [sortBy, setSortBy] = useState("citationCount");
   const [resultsPerPage, setResultsPerPage] = useState(10);
 
   // Lists for dropdown options
@@ -125,6 +129,8 @@ function PapersPage() {
   useEffect(() => {
     setSearchVal(searchQuery);
     loadPapers(0, searchQuery);
+  // The URL query is the trigger; adding loadPapers would also refetch on every filter keystroke.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   // Handle advanced filter submit
@@ -181,6 +187,10 @@ function PapersPage() {
   }
 
   async function handleToggleSaved(id) {
+    if (!isLoggedIn) {
+      navigate(ROUTE_PATHS.LOGIN, { state: { from: ROUTE_PATHS.PAPERS } });
+      return;
+    }
     const paper = papers.find((p) => p.id === id);
     if (!paper) return;
 
@@ -271,10 +281,16 @@ function PapersPage() {
                   <input
                     id="keyword-filter"
                     type="text"
+                    list="paper-keyword-options"
                     placeholder="Search keywords..."
                     value={keywordInput}
                     onChange={(e) => setKeywordInput(e.target.value)}
                   />
+                  <datalist id="paper-keyword-options">
+                    {availableKeywords.map((keyword, index) => (
+                      <option key={keyword.keywordId ?? keyword.id ?? index} value={keyword.name ?? keyword.keyword ?? String(keyword)} />
+                    ))}
+                  </datalist>
                   <FiSearch />
                 </div>
               </div>
@@ -432,14 +448,6 @@ function PapersPage() {
                 <span className="results-found-count">
                   {loading ? "Searching..." : `${formatNumber(totalElements)} results found`}
                 </span>
-                <button
-                  type="button"
-                  className="save-search-btn-mock"
-                  onClick={() => showToast("Search filters saved to quick access!", "success")}
-                >
-                  <FiBookmark />
-                  <span>Save Search</span>
-                </button>
               </div>
             </div>
 
@@ -495,6 +503,7 @@ function PapersPage() {
                     {...paper}
                     variant="rich"
                     onBookmark={() => handleToggleSaved(paper.id)}
+                    detailPath={ROUTE_PATHS.paperDetail(paper.id)}
                   />
                 ))}
               </div>
