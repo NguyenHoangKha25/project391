@@ -378,12 +378,24 @@ function TrendsPage() {
   }, [trendTab, keywordChips, topicChips, effectiveChartData]);
 
   const annualGrowth = useMemo(() => {
-    if (effectiveChartData.length < 2) return 18.5;
+    if (!effectiveChartData || effectiveChartData.length < 2) return 18.5;
     const first = Number(effectiveChartData[0]?.value) || 1;
     const last = Number(effectiveChartData[effectiveChartData.length - 1]?.value) || first;
-    if (first <= 0) return 24.5;
-    const growth = ((last - first) / first) * 100;
-    return Number.isFinite(growth) ? growth : 18.5;
+    const numYears = Math.max(1, effectiveChartData.length - 1);
+
+    if (first <= 0 || last <= 0) return 18.5;
+
+    // Compound Annual Growth Rate (CAGR) Formula: ((last / first) ^ (1 / n) - 1) * 100
+    const ratio = last / first;
+    const cagr = (Math.pow(ratio, 1 / numYears) - 1) * 100;
+
+    if (Number.isFinite(cagr) && cagr >= -90 && cagr <= 250) {
+      return cagr;
+    }
+    
+    // Average YoY fallback capped at 199.9%
+    const avgYoY = ((last - first) / (first * numYears)) * 100;
+    return Number.isFinite(avgYoY) ? Math.min(Math.max(avgYoY, -99.9), 199.9) : 18.5;
   }, [effectiveChartData]);
 
   return (
