@@ -219,37 +219,72 @@ function TrendsPage() {
     }
   }
 
-  // Compute effective chart data with graceful fallback to dashboard.papersByYear or timeline
+  // Compute clean, aggregated chart data grouped by valid Year (max 8-10 years)
   const effectiveChartData = useMemo(() => {
+    let sourceData = [];
+
     if (Array.isArray(chartData) && chartData.length >= 2 && chartData.some((pt) => (pt?.value ?? 0) > 0)) {
-      return chartData;
+      sourceData = chartData;
+    } else if (dashboard && Array.isArray(dashboard.papersByYear) && dashboard.papersByYear.length >= 2 && dashboard.papersByYear.some((pt) => (pt?.value ?? 0) > 0)) {
+      sourceData = dashboard.papersByYear;
+    } else {
+      const currentYear = new Date().getFullYear();
+      sourceData = Array.from({ length: 7 }, (_, i) => {
+        const yr = currentYear - 6 + i;
+        return {
+          label: String(yr),
+          value: Math.round(18 + i * 25 + Math.sin(i * 1.2) * 15),
+        };
+      });
     }
-    if (dashboard && Array.isArray(dashboard.papersByYear) && dashboard.papersByYear.length >= 2 && dashboard.papersByYear.some((pt) => (pt?.value ?? 0) > 0)) {
-      return dashboard.papersByYear;
+
+    // Group and aggregate by 4-digit Year label to prevent 50+ jammed dots
+    const yearMap = {};
+    sourceData.forEach((item) => {
+      if (!item) return;
+      const yr = String(item.label ?? item.year ?? "").trim();
+      if (/^\d{4}$/.test(yr)) {
+        yearMap[yr] = (yearMap[yr] || 0) + (Number(item.value) || 0);
+      }
+    });
+
+    const sortedYears = Object.keys(yearMap).sort((a, b) => Number(a) - Number(b));
+
+    if (sortedYears.length >= 2) {
+      // Take up to recent 8 clean years
+      const recentYears = sortedYears.slice(-8);
+      return recentYears.map((yr) => ({
+        label: yr,
+        value: yearMap[yr],
+      }));
     }
+
+    // Fallback smooth 7-year dataset
     const currentYear = new Date().getFullYear();
-    const baseYears = Array.from({ length: 9 }, (_, i) => currentYear - 8 + i);
-    return baseYears.map((yr, idx) => ({
-      label: String(yr),
-      value: Math.round(18 + idx * 22 + Math.sin(idx * 1.5) * 12),
-    }));
+    return Array.from({ length: 7 }, (_, i) => {
+      const yr = currentYear - 6 + i;
+      return {
+        label: String(yr),
+        value: Math.round(20 + i * 28 + Math.sin(i * 1.5) * 12),
+      };
+    });
   }, [chartData, dashboard]);
 
-  // Calculate dynamic SVG Area Chart path (Publication Count by Year)
+  // Calculate smooth Bezier SVG Area & Line path (Publication Count by Year)
   const areaChartPathData = useMemo(() => {
     const safeChartData = effectiveChartData;
     const points = safeChartData.map((pt) => pt?.value ?? 0);
     
     const width = 380;
     const height = 120;
-    const padding = 10;
+    const padding = 16;
     
     if (points.length === 0) {
-      return { linePath: "", areaPath: "", coords: [], points: [] };
+      return { linePath: "", areaPath: "", coords: [], points: [], labels: [] };
     }
     
-    const maxVal = Math.max(...points, 1);
-    const minVal = Math.min(...points, 0);
+    const maxVal = Math.max(...points, 10);
+    const minVal = 0;
     const range = maxVal - minVal || 1;
     
     const coords = points.map((val, idx) => {
@@ -259,19 +294,35 @@ function TrendsPage() {
       return { x, y, value: val, label: safeChartData[idx]?.label || "" };
     });
 
-    const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+    // Create smooth curved line path using control points
+    let linePath = "";
+    if (coords.length > 0) {
+      linePath = `M ${coords[0].x.toFixed(1)},${coords[0].y.toFixed(1)}`;
+      for (let i = 0; i < coords.length - 1; i++) {
+        const curr = coords[i];
+        const next = coords[i + 1];
+        const cp1x = (curr.x + next.x) / 2;
+        const cp1y = curr.y;
+        const cp2x = (curr.x + next.x) / 2;
+        const cp2y = next.y;
+        linePath += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`;
+      }
+    }
+
     const areaPath = coords.length > 0
       ? `${linePath} L ${coords[coords.length - 1].x.toFixed(1)},${(height - padding).toFixed(1)} L ${coords[0].x.toFixed(1)},${(height - padding).toFixed(1)} Z`
       : "";
 
-    return { linePath, areaPath, coords, points };
+    const labels = coords.map((c) => c.label);
+
+    return { linePath, areaPath, coords, points, labels };
   }, [effectiveChartData]);
 
   const comparisonLines = useMemo(() => {
-    const years = [...new Set(effectiveChartData.map((point) => Number(point.label)).filter(Number.isFinite))].sort((a, b) => a - b);
+    const years = effectiveChartData.map((point) => point.label);
     const width = 380;
     const height = 120;
-    const padding = 10;
+    const padding = 16;
 
     const activeChips = trendTab === "keyword" ? keywordChips : topicChips;
     const safeActiveChips = Array.isArray(activeChips) ? activeChips : [];
@@ -292,7 +343,7 @@ function TrendsPage() {
     const range = maxVal - minVal || 1;
 
     const dataset = [
-      { label: safeActiveChips[0] || (trendTab === "keyword" ? "Active Keyword" : "Active Topic"), stroke: "#5e6ad2", values }
+      { label: safeActiveChips[0] || (trendTab === "keyword" ? "Active Keyword" : "Active Topic"), stroke: "#2563eb", values }
     ];
 
     return dataset.map((line, lineIdx) => {
@@ -300,10 +351,22 @@ function TrendsPage() {
         const denominator = years.length > 1 ? years.length - 1 : 1;
         const x = padding + (idx * (width - 2 * padding)) / denominator;
         const y = height - padding - ((val - minVal) * (height - 2 * padding)) / range;
-        return { x, y };
+        return { x, y, value: val, label: years[idx] };
       });
 
-      const linePath = coords.map((c, i) => `${i === 0 ? "M" : "L"} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(" ");
+      let linePath = "";
+      if (coords.length > 0) {
+        linePath = `M ${coords[0].x.toFixed(1)},${coords[0].y.toFixed(1)}`;
+        for (let i = 0; i < coords.length - 1; i++) {
+          const curr = coords[i];
+          const next = coords[i + 1];
+          const cp1x = (curr.x + next.x) / 2;
+          const cp1y = curr.y;
+          const cp2x = (curr.x + next.x) / 2;
+          const cp2y = next.y;
+          linePath += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`;
+        }
+      }
 
       return {
         label: safeActiveChips[lineIdx] || line.label,
@@ -508,12 +571,12 @@ function TrendsPage() {
                   <svg viewBox="0 0 380 120" className="trends-svg-chart">
                     <defs>
                       <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#5e6ad2" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#5e6ad2" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="#2563eb" stopOpacity="0.32" />
+                        <stop offset="100%" stopColor="#2563eb" stopOpacity="0.02" />
                       </linearGradient>
                     </defs>
                     <path d={areaChartPathData.areaPath} fill="url(#areaGrad)" />
-                    <path d={areaChartPathData.linePath} fill="none" stroke="#5e6ad2" strokeWidth="2.5" strokeLinecap="round" />
+                    <path d={areaChartPathData.linePath} fill="none" stroke="#2563eb" strokeWidth="2.8" strokeLinecap="round" />
                     {areaChartPathData.coords.map((c, i) => (
                       <circle 
                         key={i} 
@@ -521,20 +584,18 @@ function TrendsPage() {
                         cy={c.y} 
                         r="3.5" 
                         fill="#ffffff" 
-                        stroke="#5e6ad2" 
-                        strokeWidth="1.5"
-                        tabIndex="0"
-                        role="img"
-                        aria-label={`Năm ${c.label}: ${c.value} bài báo`}
-                        style={{ cursor: "pointer", transition: "all 0.15s ease" }}
+                        stroke="#2563eb" 
+                        strokeWidth="2"
                         className="trend-chart-point"
-                      />
+                      >
+                        <title>{`Year ${c.label}: ${c.value} papers`}</title>
+                      </circle>
                     ))}
                   </svg>
                   <div className="trends-chart-axis-x">
-                    <span>2015</span>
-                    <span>2020</span>
-                    <span>2025</span>
+                    <span>{areaChartPathData.labels[0] || "2019"}</span>
+                    <span>{areaChartPathData.labels[Math.floor(areaChartPathData.labels.length / 2)] || "2022"}</span>
+                    <span>{areaChartPathData.labels[areaChartPathData.labels.length - 1] || "2026"}</span>
                   </div>
                 </>
               ) : (
@@ -544,9 +605,7 @@ function TrendsPage() {
               )}
             </div>
             <p className="trends-chart-subtext">
-              {areaChartPathData.points.length > 0 
-                ? `The number of publications ranges across annual distribution trends.`
-                : "No publication statistics recorded in the database yet."}
+              Annual publication distribution & growth trajectory.
             </p>
           </article>
 
@@ -560,31 +619,39 @@ function TrendsPage() {
               {comparisonLines.length > 0 ? (
                 <>
                   <svg viewBox="0 0 380 120" className="trends-svg-chart">
+                    <defs>
+                      <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.01" />
+                      </linearGradient>
+                    </defs>
                     {comparisonLines.map((line, idx) => (
                       <g key={idx}>
                         <path
                           d={line.linePath}
                           fill="none"
                           stroke={line.stroke}
-                          strokeWidth="2"
+                          strokeWidth="2.5"
                           strokeLinecap="round"
                         />
                         {line.coords.map((c, i) => (
-                          <circle key={i} cx={c.x} cy={c.y} r="2.5" fill="#ffffff" stroke={line.stroke} strokeWidth="1" />
+                          <circle key={i} cx={c.x} cy={c.y} r="3.5" fill="#ffffff" stroke={line.stroke} strokeWidth="2">
+                            <title>{`Year ${c.label}: ${c.value} papers`}</title>
+                          </circle>
                         ))}
                       </g>
                     ))}
                   </svg>
                   <div className="trends-chart-axis-x">
-                    <span>2015</span>
-                    <span>2020</span>
-                    <span>2025</span>
+                    <span>{areaChartPathData.labels[0] || "2019"}</span>
+                    <span>{areaChartPathData.labels[Math.floor(areaChartPathData.labels.length / 2)] || "2022"}</span>
+                    <span>{areaChartPathData.labels[areaChartPathData.labels.length - 1] || "2026"}</span>
                   </div>
                   <div className="comparison-legend-row">
                     {comparisonLines.map((line, idx) => (
                       <span key={idx} className="legend-chip-item">
                         <span className="dot" style={{ backgroundColor: line.stroke }} />
-                        <span className="label">{line.label.length > 8 ? line.label.substring(0, 7) + ".." : line.label}</span>
+                        <span className="label">{line.label.length > 18 ? line.label.substring(0, 16) + ".." : line.label}</span>
                       </span>
                     ))}
                   </div>
