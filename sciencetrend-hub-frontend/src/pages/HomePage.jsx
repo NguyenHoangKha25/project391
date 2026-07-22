@@ -297,19 +297,6 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="home-final-cta">
-        <div>
-          <span>Ready when your next question is.</span>
-          <h2>Give your research a workspace that keeps up.</h2>
-        </div>
-        <div className="home-final-cta-actions">
-          <Link to={primaryPath} className="home-primary-link">
-            {primaryLabel} <FiArrowRight aria-hidden="true" />
-          </Link>
-          {!isLoggedIn && <Link to={ROUTE_PATHS.LOGIN} className="home-secondary-link">Sign in</Link>}
-        </div>
-      </section>
-
       <footer className="home-footer home-footer-refresh">
         <div className="home-footer-brand">
           <span className="home-brand-logo"><img src={logo} alt="ScienceTrend Hub logo" /></span>
