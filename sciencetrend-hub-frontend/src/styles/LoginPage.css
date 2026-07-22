@@ -199,8 +199,9 @@
 .auth-premium-feature-tag {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 9px;
+  min-height: 44px;
+  padding: 6px 13px 6px 7px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   background: rgba(255, 255, 255, 0.06);
@@ -211,8 +212,19 @@
   transition: all 0.3s ease;
   text-align: left !important;
 }
-.auth-premium-feature-tag svg {
-  font-size: 15px;
+.auth-tag-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 9px;
+}
+.auth-tag-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 .auth-premium-feature-tag:hover {
   transform: translateY(-2px);
@@ -240,6 +252,10 @@
 }
 .tag-yellow svg { color: #ffc067; }
 
+.auth-tag-icon-blue { color: #93c5fd; background: rgba(59, 130, 246, .16); }
+.auth-tag-icon-green { color: #5eead4; background: rgba(20, 184, 166, .15); }
+.auth-tag-icon-amber { color: #fcd34d; background: rgba(245, 158, 11, .15); }
+
 
 /* Left Column - Mockup Preview Card */
 .auth-premium-preview-card {
@@ -258,6 +274,37 @@
   border-color: rgba(255, 255, 255, 0.25) !important;
   box-shadow: 0 30px 65px rgba(0,0,0,0.3);
 }
+
+.auth-highlight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.auth-highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  padding: 3px 0;
+}
+.auth-highlight-icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 9px;
+}
+.auth-highlight-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+.auth-highlight-icon-blue { color: #93c5fd; background: rgba(59, 130, 246, .16); }
+.auth-highlight-icon-green { color: #5eead4; background: rgba(20, 184, 166, .15); }
+.auth-highlight-icon-amber { color: #fcd34d; background: rgba(245, 158, 11, .15); }
+.auth-highlight-copy { min-width: 0; }
 
 /* High Fidelity SaaS Mockup Styles */
 .mockup-search-box {

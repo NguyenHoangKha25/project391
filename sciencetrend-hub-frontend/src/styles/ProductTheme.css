@@ -1637,6 +1637,29 @@ textarea {
   color: #93c5fd !important;
 }
 
+.auth-left .auth-tag-icon svg,
+.auth-left .auth-highlight-icon svg {
+  color: currentColor !important;
+}
+
+.auth-left .auth-tag-icon-blue,
+.auth-left .auth-highlight-icon-blue {
+  color: #93c5fd !important;
+  background: rgba(59, 130, 246, 0.16) !important;
+}
+
+.auth-left .auth-tag-icon-green,
+.auth-left .auth-highlight-icon-green {
+  color: #5eead4 !important;
+  background: rgba(20, 184, 166, 0.15) !important;
+}
+
+.auth-left .auth-tag-icon-amber,
+.auth-left .auth-highlight-icon-amber {
+  color: #fcd34d !important;
+  background: rgba(245, 158, 11, 0.15) !important;
+}
+
 .badge-q1,
 .badge-citation {
   background: rgba(59, 130, 246, 0.16) !important;

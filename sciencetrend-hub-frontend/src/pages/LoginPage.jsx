@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff, FiUser, FiLock, FiLayers, FiBookOpen, FiPieChart, FiSearch, FiBookmark, FiTrendingUp } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiUser, FiLock, FiBarChart2, FiBookOpen, FiFileText, FiSearch, FiBookmark, FiTrendingUp } from "react-icons/fi";
 import logo from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { useAuth } from "../context/useAuth";
@@ -107,15 +107,15 @@ function LoginPage() {
 
               <div className="auth-premium-features-row" style={{ marginTop: "10px" }}>
                 <div className="auth-premium-feature-tag tag-blue">
-                  <FiLayers />
+                  <span className="auth-tag-icon auth-tag-icon-blue"><FiBarChart2 /></span>
                   <span>Analytics</span>
                 </div>
                 <div className="auth-premium-feature-tag tag-green">
-                  <FiBookOpen />
+                  <span className="auth-tag-icon auth-tag-icon-green"><FiBookOpen /></span>
                   <span>Journals</span>
                 </div>
                 <div className="auth-premium-feature-tag tag-yellow">
-                  <FiPieChart />
+                  <span className="auth-tag-icon auth-tag-icon-amber"><FiFileText /></span>
                   <span>Reports</span>
                 </div>
               </div>
@@ -126,26 +126,26 @@ function LoginPage() {
                 <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "850", color: "#60a5fa", textTransform: "uppercase" }}>PLATFORM HIGHLIGHTS</span>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span className="feature-icon-box" style={{ background: "rgba(96, 165, 250, 0.18)", color: "#60a5fa", width: "28px", height: "28px", flex: "0 0 28px", fontSize: "14px" }}><FiSearch /></span>
-                  <div>
+              <div className="auth-highlight-list">
+                <div className="auth-highlight-item">
+                  <span className="auth-highlight-icon auth-highlight-icon-blue"><FiSearch /></span>
+                  <div className="auth-highlight-copy">
                     <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Multi-Source Discovery</h5>
                     <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Cross-reference papers, authors, citations, and journal quartiles (Q1–Q4).</p>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span className="feature-icon-box" style={{ background: "rgba(52, 211, 153, 0.18)", color: "#34d399", width: "28px", height: "28px", flex: "0 0 28px", fontSize: "14px" }}><FiBookmark /></span>
-                  <div>
+                <div className="auth-highlight-item">
+                  <span className="auth-highlight-icon auth-highlight-icon-green"><FiBookmark /></span>
+                  <div className="auth-highlight-copy">
                     <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Research Library</h5>
                     <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Bookmark key publications, follow journals, and track emerging topics.</p>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span className="feature-icon-box" style={{ background: "rgba(251, 191, 36, 0.18)", color: "#fbbf24", width: "28px", height: "28px", flex: "0 0 28px", fontSize: "14px" }}><FiTrendingUp /></span>
-                  <div>
+                <div className="auth-highlight-item">
+                  <span className="auth-highlight-icon auth-highlight-icon-amber"><FiTrendingUp /></span>
+                  <div className="auth-highlight-copy">
                     <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Trend & Summary Reports</h5>
                     <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Visualize annual growth curves and export structured summary reports.</p>
                   </div>
