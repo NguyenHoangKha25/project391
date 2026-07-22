@@ -2093,9 +2093,9 @@ textarea {
   margin-top: 17px !important;
   padding: 10px 12px 10px 16px !important;
   border-color: rgba(203, 213, 225, 0.88) !important;
-  border-radius: 18px !important;
+  border-radius: 18px 18px 0 0 !important;
   background: rgba(255, 255, 255, 0.9) !important;
-  box-shadow: 0 10px 34px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: none !important;
 }
 
 .home-page-refresh .home-nav-actions {
@@ -2107,10 +2107,10 @@ textarea {
   grid-template-columns: minmax(0, 1.03fr) minmax(420px, 0.97fr) !important;
   align-items: center !important;
   gap: clamp(42px, 5vw, 78px) !important;
-  margin-top: 24px !important;
+  margin-top: -1px !important;
   padding: clamp(58px, 6.5vw, 86px) !important;
   border-color: #dbe3ee !important;
-  border-radius: 28px !important;
+  border-radius: 0 0 28px 28px !important;
   background:
     radial-gradient(circle at 92% 2%, rgba(37, 99, 235, 0.13), transparent 28rem),
     radial-gradient(circle at 4% 96%, rgba(99, 102, 241, 0.07), transparent 24rem),
@@ -2829,6 +2829,7 @@ textarea {
     gap: 10px !important;
     margin-top: 8px !important;
     padding: 10px !important;
+    border-radius: 16px 16px 0 0 !important;
   }
 
   .home-page-refresh .home-brand small,
@@ -2843,9 +2844,9 @@ textarea {
 
   .home-page-refresh .home-hero-refresh {
     width: calc(100% - 20px) !important;
-    margin-top: 18px !important;
+    margin-top: -1px !important;
     padding: 38px 20px 22px !important;
-    border-radius: 21px !important;
+    border-radius: 0 0 21px 21px !important;
   }
 
   .home-page-refresh .home-hero-copy h1 {
