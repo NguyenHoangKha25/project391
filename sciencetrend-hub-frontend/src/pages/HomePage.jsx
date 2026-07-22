@@ -298,17 +298,38 @@ function HomePage() {
       </section>
 
       <footer className="home-footer home-footer-refresh">
-        <Link to={ROUTE_PATHS.HOME} className="home-footer-wordmark" aria-label="ScienceTrend Hub home">
-          <i aria-hidden="true" />
-          <strong>ScienceTrend</strong><span>Hub</span>
-        </Link>
-        <nav aria-label="Footer navigation">
-          <Link to={ROUTE_PATHS.PAPERS}>Papers</Link>
-          <Link to={ROUTE_PATHS.TOPICS}>Topics</Link>
-          <Link to={ROUTE_PATHS.JOURNALS}>Journals</Link>
-          <Link to={ROUTE_PATHS.LOGIN}>Sign in</Link>
-        </nav>
-        <small>© {new Date().getFullYear()} ScienceTrend Hub</small>
+        <div className="home-footer-main">
+          <div className="home-footer-about">
+            <Link to={ROUTE_PATHS.HOME} className="home-footer-wordmark" aria-label="ScienceTrend Hub home">
+              <i aria-hidden="true" />
+              <strong>ScienceTrend</strong><span>Hub</span>
+            </Link>
+            <p>A focused workspace for discovering publications, organizing evidence, following research activity, and preparing reports.</p>
+            <span className="home-footer-promise"><FiCheckCircle aria-hidden="true" /> Built around real academic research tasks</span>
+          </div>
+
+          <div className="home-footer-links">
+            <nav aria-label="Explore ScienceTrend">
+              <strong>Explore</strong>
+              <Link to={ROUTE_PATHS.PAPERS}>Papers</Link>
+              <Link to={ROUTE_PATHS.TOPICS}>Topics</Link>
+              <Link to={ROUTE_PATHS.JOURNALS}>Journals</Link>
+              <Link to={ROUTE_PATHS.TRENDS}>Trends</Link>
+            </nav>
+            <nav aria-label="ScienceTrend workspace">
+              <strong>Workspace</strong>
+              <Link to={primaryPath}>{isLoggedIn ? "Open dashboard" : "Create account"}</Link>
+              {!isLoggedIn && <Link to={ROUTE_PATHS.LOGIN}>Sign in</Link>}
+              <Link to={ROUTE_PATHS.BOOKMARKS}>Bookmarks</Link>
+              <Link to={ROUTE_PATHS.REPORTS}>Reports</Link>
+            </nav>
+          </div>
+        </div>
+
+        <div className="home-footer-bottom">
+          <small>© {new Date().getFullYear()} ScienceTrend Hub</small>
+          <span>Research, organized.</span>
+        </div>
       </footer>
     </main>
   );
