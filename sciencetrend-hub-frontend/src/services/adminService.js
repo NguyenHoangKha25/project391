@@ -24,8 +24,13 @@ export function triggerAdminSync() {
   return apiRequest("/admin/sync", { method: "POST" });
 }
 
-export function triggerAdminBackfill(params) {
-  return apiRequest("/admin/sync/backfill", { method: "POST", body: params });
+export function triggerAdminBackfill({ fromYear, toYear }) {
+  return apiRequest("/admin/sync/backfill", {
+    method: "POST",
+    body: { fromYear, toYear },
+    // Historical OpenAlex imports can take longer than regular API requests.
+    timeout: 120000,
+  });
 }
 
 export function getAdminSystemConfig() {

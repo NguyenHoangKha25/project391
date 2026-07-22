@@ -38,6 +38,9 @@ const tabs = [
   ["settings", "System config"],
 ];
 
+const CURRENT_YEAR = new Date().getFullYear();
+const DEFAULT_BACKFILL_FROM_YEAR = 2015;
+
 function statusClass(value) {
   return ["SUCCESS", "COMPLETED", "ACTIVE", "CONNECTED"].includes(String(value).toUpperCase()) ? "connected" : "error";
 }
@@ -51,8 +54,9 @@ function AdminPage() {
   const [config, setConfig] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
   const [userSearch, setUserSearch] = useState("");
-  const [fromYear, setFromYear] = useState(String(new Date().getFullYear() - 10));
-  const [toYear, setToYear] = useState(String(new Date().getFullYear()));
+  const [fromYear, setFromYear] = useState(String(DEFAULT_BACKFILL_FROM_YEAR));
+  const [toYear, setToYear] = useState(String(CURRENT_YEAR));
+  const [backfillError, setBackfillError] = useState("");
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState("");
   const [message, setMessage] = useState("");
@@ -146,12 +150,29 @@ function AdminPage() {
 
   async function runBackfill(event) {
     event.preventDefault();
+    const parsedFromYear = Number(fromYear);
+    const parsedToYear = Number(toYear);
+
+    if (!Number.isInteger(parsedFromYear) || !Number.isInteger(parsedToYear)) {
+      setBackfillError("Enter a valid start and end year.");
+      return;
+    }
+    if (parsedFromYear < 1900 || parsedToYear > CURRENT_YEAR) {
+      setBackfillError(`Choose years between 1900 and ${CURRENT_YEAR}.`);
+      return;
+    }
+    if (parsedFromYear > parsedToYear) {
+      setBackfillError("The start year cannot be later than the end year.");
+      return;
+    }
+
     setWorking("backfill");
     setMessage("");
+    setBackfillError("");
     try {
-      await triggerAdminBackfill({ fromYear: Number(fromYear), toYear: Number(toYear) });
-      setMessage(`Historical backfill ${fromYear}–${toYear} was started.`);
+      await triggerAdminBackfill({ fromYear: parsedFromYear, toYear: parsedToYear });
       await loadAdminData();
+      setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} completed successfully.`);
     } catch (error) {
       setMessage(error.message || "Could not start backfill.");
     } finally {
@@ -199,7 +220,7 @@ function AdminPage() {
                     <AdminUsersTable users={users.slice(0, 5)} onView={viewUser} onRole={updateRole} onDelete={removeUser} working={working} compact />
                   </article>
                   <article className="admin-panel">
-                    <div className="panel-header-row"><h3>Latest sync runs</h3><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Sync now</button></div>
+                    <div className="panel-header-row"><h3>Latest sync runs</h3><div className="admin-sync-actions"><button className="admin-secondary-action-btn" type="button" onClick={() => setTab("sync")}><FiDatabase /> Backfill years</button><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Sync now</button></div></div>
                     <SyncTable logs={syncLogs.slice(0, 5)} compact />
                   </article>
                 </div>
@@ -218,9 +239,14 @@ function AdminPage() {
                 <article className="admin-panel-detailed">
                   <div className="panel-header-row"><div><h3>OpenAlex synchronization</h3><p>Start a current sync or backfill a historical year range.</p></div><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Manual sync</button></div>
                   <form className="admin-backfill-form" onSubmit={runBackfill}>
-                    <label>From year<input type="number" min="1900" max={toYear} value={fromYear} onChange={(event) => setFromYear(event.target.value)} /></label>
-                    <label>To year<input type="number" min={fromYear} max={new Date().getFullYear()} value={toYear} onChange={(event) => setToYear(event.target.value)} /></label>
-                    <button className="workspace-button primary" type="submit" disabled={working === "backfill"}>{working === "backfill" ? "Starting…" : "Start backfill"}</button>
+                    <div className="admin-backfill-copy"><span>Historical data</span><strong>Backfill publications by year</strong><p>Import missing OpenAlex records for the selected period.</p></div>
+                    <div className="admin-backfill-fields">
+                      <label htmlFor="backfill-from-year">From year<input id="backfill-from-year" type="number" min="1900" max={CURRENT_YEAR} value={fromYear} onChange={(event) => { setFromYear(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
+                      <span className="admin-year-separator" aria-hidden="true">to</span>
+                      <label htmlFor="backfill-to-year">To year<input id="backfill-to-year" type="number" min="1900" max={CURRENT_YEAR} value={toYear} onChange={(event) => { setToYear(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
+                    </div>
+                    <button className="workspace-button primary admin-backfill-submit" type="submit" disabled={working === "backfill"}>{working === "backfill" ? <><FiRefreshCw className="is-spinning" /> Starting backfill…</> : <><FiDownload /> Start backfill</>}</button>
+                    {backfillError && <p className="admin-backfill-error" role="alert"><FiAlertTriangle /> {backfillError}</p>}
                   </form>
                 </article>
                 <article className="admin-panel-detailed"><div className="panel-header-row"><h3>Sync history</h3></div><SyncTable logs={syncLogs} /></article>
