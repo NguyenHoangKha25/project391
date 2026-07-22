@@ -25,8 +25,7 @@ select option {
   z-index: 50;
   width: var(--sidebar-w);
   height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   flex: 0 0 var(--sidebar-w);
   display: flex;
   flex-direction: column;
@@ -88,7 +87,18 @@ select option {
   text-transform: uppercase;
 }
 
-.st-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.st-menu {
+  min-height: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.st-menu::-webkit-scrollbar { display: none; }
 
 .st-menu-link {
   position: relative;

@@ -1898,6 +1898,35 @@ textarea {
   }
 }
 
+/* Keep the navigation shell fixed. Only the menu can scroll on short screens. */
+@media (max-height: 820px) and (min-width: 1081px) {
+  .st-sidebar {
+    padding-block: 12px !important;
+  }
+
+  .st-brand {
+    min-height: 54px !important;
+    padding-block: 5px 12px !important;
+  }
+
+  .st-menu-label {
+    margin: 12px 10px 5px !important;
+  }
+
+  .st-menu {
+    gap: 2px !important;
+  }
+
+  .st-menu-link {
+    min-height: 39px !important;
+  }
+
+  .st-sidebar-footer {
+    margin-top: 8px !important;
+    padding: 10px 12px !important;
+  }
+}
+
 @media (max-width: 760px) {
   .home-topbar,
   .home-nav-links,
