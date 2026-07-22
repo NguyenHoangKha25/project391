@@ -298,10 +298,10 @@ function HomePage() {
       </section>
 
       <footer className="home-footer home-footer-refresh">
-        <div className="home-footer-brand">
-          <span className="home-brand-logo"><img src={logo} alt="ScienceTrend Hub logo" /></span>
-          <div><strong>ScienceTrend Hub</strong><span>Research, organized.</span></div>
-        </div>
+        <Link to={ROUTE_PATHS.HOME} className="home-footer-wordmark" aria-label="ScienceTrend Hub home">
+          <i aria-hidden="true" />
+          <strong>ScienceTrend</strong><span>Hub</span>
+        </Link>
         <nav aria-label="Footer navigation">
           <Link to={ROUTE_PATHS.PAPERS}>Papers</Link>
           <Link to={ROUTE_PATHS.TOPICS}>Topics</Link>
