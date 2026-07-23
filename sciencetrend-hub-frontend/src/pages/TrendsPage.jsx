@@ -442,7 +442,7 @@ function TrendsPage() {
     const range = maxVal - minVal || 1;
 
     const dataset = [
-      { label: safeActiveChips[0] || (trendTab === "keyword" ? "Active Keyword" : "Active Topic"), stroke: trendTab === "keyword" ? "#2563eb" : "#059669", values }
+      { label: trendTab === "keyword" ? "Keyword Growth" : "Topic Growth", stroke: trendTab === "keyword" ? "#2563eb" : "#059669", values }
     ];
 
     return dataset.map((line, lineIdx) => {
@@ -554,69 +554,6 @@ function TrendsPage() {
               <span>Live Analytics Engine</span>
             </div>
           </div>
-        </div>
-
-        {/* Dynamic active chips */}
-        <div className="trends-keyword-chips-row">
-          {(trendTab === "keyword" ? keywordChips : topicChips).map((chip, idx) => {
-            const isSelected = trendTab === "keyword" 
-              ? activeKeyword === chip 
-              : activeTopicState === chip;
-            return (
-              <span 
-                key={idx} 
-                className={`trends-keyword-chip chip-color-${idx % 5} ${isSelected ? "active" : ""}`}
-                onClick={() => {
-                  if (trendTab === "keyword") {
-                    setActiveKeyword(chip);
-                  } else {
-                    setActiveTopicState(chip);
-                  }
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <span className="dot" />
-                <span className="label-text" style={{ fontWeight: isSelected ? "bold" : "normal" }}>{chip}</span>
-                <button 
-                  type="button" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveChip(chip);
-                  }}
-                >
-                  <FiX />
-                </button>
-              </span>
-            );
-          })}
-
-          {showAddKeywordInput ? (
-            <form onSubmit={handleAddChip} className="trends-add-chip-form">
-              <input
-                type="text"
-                autoFocus
-                placeholder={trendTab === "keyword" ? "Type keyword..." : "Type topic..."}
-                value={newKeywordInput}
-                onChange={(e) => setNewKeywordInput(e.target.value)}
-                onBlur={() => setTimeout(() => setShowAddKeywordInput(false), 250)}
-              />
-            </form>
-          ) : (
-            <button
-              type="button"
-              className="trends-add-keyword-trigger-btn"
-              onClick={() => setShowAddKeywordInput(true)}
-            >
-              <FiPlus />
-              <span>{trendTab === "keyword" ? "Add keyword" : "Add topic"}</span>
-            </button>
-          )}
-
-          {(trendTab === "keyword" ? keywordChips : topicChips).length > 0 && (
-            <button type="button" className="trends-clear-chips-btn" onClick={handleClearAllChips}>
-              Clear all
-            </button>
-          )}
         </div>
 
         {/* 4 Stats Cards row */}
