@@ -542,18 +542,41 @@ function TrendsPage() {
       };
     });
 
-    let prevY = -999;
-    return rawLines.map((line) => {
-      let labelY = line.rawY + 4;
-      if (labelY - prevY < 18) {
-        labelY = prevY + 18;
+    const labelGap = 16;
+    const minLabelY = paddingTop + 4;
+    const maxLabelY = height - paddingBottom + 4;
+    const sortedLines = rawLines
+      .map((line, index) => ({ ...line, originalIndex: index }))
+      .sort((a, b) => a.rawY - b.rawY);
+    const labelPositions = sortedLines.map((line) =>
+      Math.min(maxLabelY, Math.max(minLabelY, line.rawY + 4))
+    );
+
+    for (let index = 1; index < labelPositions.length; index += 1) {
+      labelPositions[index] = Math.max(
+        labelPositions[index],
+        labelPositions[index - 1] + labelGap
+      );
+    }
+
+    if (labelPositions.at(-1) > maxLabelY) {
+      labelPositions[labelPositions.length - 1] = maxLabelY;
+      for (let index = labelPositions.length - 2; index >= 0; index -= 1) {
+        labelPositions[index] = Math.min(
+          labelPositions[index],
+          labelPositions[index + 1] - labelGap
+        );
       }
-      prevY = labelY;
-      return {
-        ...line,
-        labelY,
-      };
-    });
+    }
+
+    const resolvedLabelY = new Map(
+      sortedLines.map((line, index) => [line.originalIndex, labelPositions[index]])
+    );
+
+    return rawLines.map((line, index) => ({
+      ...line,
+      labelY: resolvedLabelY.get(index) ?? line.rawY + 4,
+    }));
   }, [trendTab, dbKeywords, trendingTopics, effectiveChartData]);
 
   const annualGrowth = useMemo(() => {
@@ -725,16 +748,29 @@ function TrendsPage() {
                     ))}
                     {/* End of line value label (e.g. 92.1K) */}
                     {line.finalCoord && (
-                      <text
-                        x={line.finalCoord.x + 8}
-                        y={line.labelY || (line.finalCoord.y + 4)}
-                        fill={line.color}
-                        fontSize="12.5"
-                        fontWeight="850"
-                        className="multi-line-end-label"
-                      >
-                        {line.finalValStr}
-                      </text>
+                      <>
+                        <line
+                          x1={line.finalCoord.x + 5}
+                          y1={line.finalCoord.y}
+                          x2={line.finalCoord.x + 11}
+                          y2={(line.labelY || line.finalCoord.y + 4) - 4}
+                          stroke={line.color}
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          opacity="0.65"
+                          className="multi-line-label-connector"
+                        />
+                        <text
+                          x={line.finalCoord.x + 14}
+                          y={line.labelY || (line.finalCoord.y + 4)}
+                          fill={line.color}
+                          fontSize="12.5"
+                          fontWeight="850"
+                          className="multi-line-end-label"
+                        >
+                          {line.finalValStr}
+                        </text>
+                      </>
                     )}
                   </g>
                 ))}
