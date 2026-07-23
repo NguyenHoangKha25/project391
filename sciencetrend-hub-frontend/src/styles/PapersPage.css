@@ -20,7 +20,8 @@
   padding: 14px 16px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.015);
   position: sticky;
-  top: 90px;
+  top: 0px;
+  align-self: start;
 }
 .filters-panel-header {
   display: flex;
