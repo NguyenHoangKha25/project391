@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiBookmark, FiCheck, FiHash, FiSearch } from "react-icons/fi";
+import { FiBookmark, FiCheck, FiBookOpen, FiSearch } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
@@ -122,7 +122,7 @@ function KeywordsPage() {
               const saved = savedIds.has(String(keyword.id));
               return (
                 <article className="keyword-card" key={keyword.id}>
-                  <span className="keyword-icon"><FiHash /></span>
+                  <span className="keyword-icon"><FiBookOpen /></span>
                   <div>
                     <h3>{keyword.name}</h3>
                     <p>{keyword.paperCount > 0 ? `${keyword.paperCount.toLocaleString()} indexed papers` : "Explore matching papers"}</p>
