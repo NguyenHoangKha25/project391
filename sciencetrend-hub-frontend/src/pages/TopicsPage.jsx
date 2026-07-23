@@ -210,7 +210,8 @@ function TopicsPage() {
 
   // Open Recent Papers Drawer
   async function handleOpenTopicDetails(topic) {
-    const cacheKey = `topic_papers_${topic.id}`;
+    const targetTopicId = topic.researchTopicId || topic.id;
+    const cacheKey = `topic_papers_${targetTopicId}`;
     const storedPapers = getPersistentCachedData(cacheKey);
     const cachedPapers = Array.isArray(storedPapers) && storedPapers.length > 0
       ? storedPapers
@@ -222,7 +223,7 @@ function TopicsPage() {
     setTopicPapers(cachedPapers ?? []);
 
     try {
-      const response = await getPapersByTopic(topic.id, 0, 10);
+      const response = await getPapersByTopic(targetTopicId, 0, 10);
       const papersList = toArray(response, ["content", "papers"]);
       if (papersList.length > 0) {
         setTopicPapers(papersList);

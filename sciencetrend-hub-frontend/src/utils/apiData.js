@@ -99,10 +99,17 @@ export function normalizePaper(paper = {}, index = 0) {
   };
 }
 
-// JournalResponse từ backend: chưa implement, trả về rỗng
+// JournalResponse từ backend: dùng journal.journalId
 export function normalizeJournal(journal = {}, index = 0) {
+  const numericId = typeof journal === "object" && journal !== null
+    ? (journal.journalId ?? (typeof journal.id === "number" || /^\d+$/.test(String(journal.id)) ? Number(journal.id) : null) ?? journal.sourceId)
+    : null;
+
+  const validId = numericId ?? (typeof index === "number" ? index : 0);
+
   return {
-    id: journal.id ?? journal.journalId ?? journal.sourceId ?? index,
+    id: validId,
+    journalId: validId,
     name: journal.name ?? journal.title ?? "Untitled journal",
     publisher: journal.publisher ?? "Unknown publisher",
     subject: journal.subject ?? journal.field ?? "General",
@@ -154,7 +161,7 @@ export function normalizeKeyword(keyword = {}, index = 0) {
   };
 }
 
-// TopicResponse & TopTopicResponse từ backend:
+// TopicResponse & TopTopicResponse từ backend: dùng topic.researchTopicId
 export function normalizeTopic(topic = {}, index = 0) {
   const rawGrowth = topic.growth ?? topic.growthRate ?? topic.change ?? 0;
   const growthNumber = Number(rawGrowth);
@@ -168,10 +175,20 @@ export function normalizeTopic(topic = {}, index = 0) {
     growth = String(rawGrowth || "0%");
   }
 
-  const topicName = topic.name ?? topic.topic ?? topic.topicName ?? topic.title ?? "Untitled topic";
+  const topicName = typeof topic === "string" 
+    ? topic 
+    : (topic.name ?? topic.topic ?? topic.topicName ?? topic.title ?? "Untitled topic");
+
+  const numericId = typeof topic === "object" && topic !== null
+    ? (topic.researchTopicId ?? topic.topicId ?? (typeof topic.id === "number" || /^\d+$/.test(String(topic.id)) ? Number(topic.id) : null))
+    : null;
+
+  const validId = numericId ?? (typeof index === "number" ? index : 0);
 
   return {
-    id: topic.researchTopicId ?? topic.id ?? topic.topicId ?? topicName ?? index,
+    id: validId,
+    researchTopicId: validId,
+    topicId: validId,
     name: topicName,
     paperCount: `${formatNumber(topic.paperCount ?? topic.totalPapers ?? topic.count ?? 0)} papers`,
     growth,
