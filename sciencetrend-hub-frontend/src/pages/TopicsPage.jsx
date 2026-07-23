@@ -28,17 +28,17 @@ import "../styles/WorkspacePages.css";
 import "../styles/TopicsPage.css";
 
 /* ── Toast Notifications Hook ── */
-const TOPICS_CACHE_KEY = "topics_default_v5";
+const TOPICS_CACHE_KEY = "topics_default_v6";
 
 function getCachedTopicsData() {
   const cached = getPersistentCachedData(TOPICS_CACHE_KEY);
   if (!cached || typeof cached !== "object") return null;
 
   const topics = Array.isArray(cached.topics)
-    ? cached.topics.filter((topic) => topic?.name && topic.name !== "Untitled topic")
+    ? cached.topics.filter((topic) => topic?.name && topic.name !== "Untitled topic" && (topic.researchTopicId || (typeof topic.id === "number" && topic.id > 0)))
     : [];
   const trending = Array.isArray(cached.trending)
-    ? cached.trending.filter((topic) => topic?.name && topic.name !== "Untitled topic")
+    ? cached.trending.filter((topic) => topic?.name && topic.name !== "Untitled topic" && (topic.researchTopicId || (typeof topic.id === "number" && topic.id > 0)))
     : [];
   return topics.length > 0 || trending.length > 0 ? { topics, trending } : null;
 }
@@ -116,12 +116,12 @@ function TopicsPage() {
       const freshTrending = trendingResult.status === "fulfilled"
         ? toArray(trendingResult.value)
             .map((topic) => normalizeTopic(topic))
-            .filter((topic) => topic.name !== "Untitled topic")
+            .filter((topic) => topic.name !== "Untitled topic" && (topic.researchTopicId || typeof topic.id === "number"))
         : [];
       const freshTopics = listResult.status === "fulfilled"
         ? toArray(listResult.value)
             .map((topic) => normalizeTopic(topic))
-            .filter((topic) => topic.name !== "Untitled topic")
+            .filter((topic) => topic.name !== "Untitled topic" && (topic.researchTopicId || typeof topic.id === "number"))
         : [];
 
       if (isDefaultLoad) {
@@ -171,7 +171,7 @@ function TopicsPage() {
     }
 
     const topicObj = typeof targetTopic === "object" && targetTopic !== null ? targetTopic : null;
-    const rawId = topicObj?.researchTopicId ?? topicObj?.topicId ?? targetTopic;
+    const rawId = topicObj?.researchTopicId ?? topicObj?.topicId ?? (typeof targetTopic === "number" || /^\d+$/.test(String(targetTopic)) ? targetTopic : null);
     const numericId = Number(rawId);
 
     if (Number.isNaN(numericId) || !Number.isInteger(numericId) || numericId <= 0) {
@@ -311,7 +311,7 @@ function TopicsPage() {
                         type="button"
                         className={`topic-follow-btn ${isFollowing ? "following" : ""}`}
                         disabled={processing}
-                        onClick={() => handleToggleFollow(topic.id, topic.name)}
+                        onClick={() => handleToggleFollow(topic, topic.name)}
                       >
                         {processing ? (
                           "…"
@@ -368,7 +368,7 @@ function TopicsPage() {
                         type="button"
                         className={`topic-follow-btn ${isFollowing ? "following" : ""}`}
                         disabled={processing}
-                        onClick={() => handleToggleFollow(topic.id, topic.name)}
+                        onClick={() => handleToggleFollow(topic, topic.name)}
                       >
                         {processing ? (
                           "…"
