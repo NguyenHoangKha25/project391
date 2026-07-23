@@ -6,7 +6,7 @@
 
 :root {
   --font-body: "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Manrope", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-ui: "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --product-canvas: #f6f8fb;
   --product-surface: #ffffff;
@@ -56,7 +56,7 @@ h6 {
   color: var(--product-heading) !important;
   font-family: var(--font-display) !important;
   font-weight: 700 !important;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
 
