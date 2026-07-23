@@ -257,87 +257,107 @@
 .auth-tag-icon-amber { color: #fcd34d; background: rgba(245, 158, 11, .15); }
 
 
-/* Left Column - Mockup Preview Card */
-.auth-premium-preview-card {
-  padding: 20px;
-  border: 1px solid rgba(255,255,255,0.14) !important;
-  border-radius: 24px;
-  background: rgba(255,255,255,0.08) !important;
-  box-shadow: 0 20px 55px rgba(0,0,0,0.18);
-  backdrop-filter: blur(20px);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  text-align: left !important;
+/* Modern SaaS Live Analytics Preview Widget */
+.auth-widget-preview-card {
+  padding: 20px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.45) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transition: all 0.35s ease;
   width: 100%;
 }
-.auth-premium-preview-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 30px 65px rgba(0,0,0,0.3);
+.auth-widget-preview-card:hover {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
-.auth-highlight-list {
+.auth-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 14px;
+}
+.auth-widget-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.auth-widget-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+}
+.auth-widget-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+.auth-widget-badge {
+  font-size: 10.5px;
+  font-weight: 750;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+/* Stat Grid */
+.auth-widget-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.auth-widget-stat-card {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.auth-highlight-item {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  min-width: 0;
-  padding: 3px 0;
+.auth-widget-stat-card .stat-num {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.03em;
 }
-.auth-highlight-icon {
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 32px;
-  border: 1px solid rgba(255, 255, 255, .08);
-  border-radius: 9px;
+.auth-widget-stat-card .stat-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-top: 2px;
 }
-.auth-highlight-icon svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2;
-}
-.auth-highlight-icon-blue { color: #93c5fd; background: rgba(59, 130, 246, .16); }
-.auth-highlight-icon-green { color: #5eead4; background: rgba(20, 184, 166, .15); }
-.auth-highlight-icon-amber { color: #fcd34d; background: rgba(245, 158, 11, .15); }
-.auth-highlight-copy { min-width: 0; }
 
-/* High Fidelity SaaS Mockup Styles */
-.mockup-search-box {
+/* Trend Box */
+.auth-widget-trend-box {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.auth-widget-trend-info {
   display: flex;
   align-items: center;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.56);
-  font-size: 12.5px;
-  margin-bottom: 14px;
-  text-align: left !important;
-}
-.mockup-paper-card {
-  padding: 14px;
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.05);
-  margin-bottom: 14px;
-  text-align: left !important;
-}
-.mockup-paper-header {
-  display: flex;
-  gap: 8px;
+  justify-content: space-between;
   margin-bottom: 8px;
-  text-align: left !important;
 }
-.mockup-badge {
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 7px;
+.auth-widget-trend-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   border-radius: 99px;
   text-transform: uppercase;
 }
