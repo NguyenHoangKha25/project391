@@ -542,7 +542,7 @@ function TrendsPage() {
       };
     });
 
-    const labelGap = 16;
+    const labelGap = 19;
     const minLabelY = paddingTop + 4;
     const maxLabelY = height - paddingBottom + 4;
     const sortedLines = rawLines
@@ -748,29 +748,16 @@ function TrendsPage() {
                     ))}
                     {/* End of line value label (e.g. 92.1K) */}
                     {line.finalCoord && (
-                      <>
-                        <line
-                          x1={line.finalCoord.x + 5}
-                          y1={line.finalCoord.y}
-                          x2={line.finalCoord.x + 11}
-                          y2={(line.labelY || line.finalCoord.y + 4) - 4}
-                          stroke={line.color}
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          opacity="0.65"
-                          className="multi-line-label-connector"
-                        />
-                        <text
-                          x={line.finalCoord.x + 14}
-                          y={line.labelY || (line.finalCoord.y + 4)}
-                          fill={line.color}
-                          fontSize="12.5"
-                          fontWeight="850"
-                          className="multi-line-end-label"
-                        >
-                          {line.finalValStr}
-                        </text>
-                      </>
+                      <text
+                        x={line.finalCoord.x + 16}
+                        y={line.labelY || (line.finalCoord.y + 4)}
+                        fill={line.color}
+                        fontSize="12.5"
+                        fontWeight="850"
+                        className="multi-line-end-label"
+                      >
+                        {line.finalValStr}
+                      </text>
                     )}
                   </g>
                 ))}
