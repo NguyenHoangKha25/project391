@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiUsers, FiTrendingUp, FiBookmark, FiAward, FiFileText } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiUsers, FiTrendingUp, FiBookmark, FiAward, FiFileText, FiBarChart2, FiBookOpen, FiSearch } from "react-icons/fi";
 import logoLogin from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { register } from "../services/authService";
@@ -163,47 +163,71 @@ function RegisterPage() {
     <div className="register-page">
       <div className="register-wrapper">
         <div className="register-left">
-          <Link to={ROUTE_PATHS.HOME} className="register-brand">
-            <div className="register-logo-box">
-              <img src={logoLogin} alt="ScienceTrend Hub" className="register-logo-img" />
-            </div>
+          <Link to={ROUTE_PATHS.HOME} className="register-brand" aria-label="ScienceTrend Hub home">
+            <span className="register-logo-box">
+              <img src={logoLogin} alt="ScienceTrend Hub logo" className="register-logo-img" />
+            </span>
             <div className="register-brand-text">
               <h1>ScienceTrend Hub</h1>
               <p>Scientific Journal & Publication Analytics</p>
             </div>
           </Link>
 
-          <div className="register-hero">
-            <span className="auth-badge" style={{ display: "inline-flex", alignSelf: "flex-start", marginBottom: "8px" }}>START YOUR RESEARCH</span>
-            <h2 style={{ fontSize: "28px", margin: "6px 0 6px" }}>Join ScienceTrend Hub</h2>
-            <p>
-              Create your workspace to explore publication analytics, track journals,
-              and export structured research reports.
-            </p>
-          </div>
+          <div className="auth-left-premium-content">
+            <div className="auth-premium-hero">
+              <span className="auth-badge">START YOUR RESEARCH</span>
+              <h2>Join ScienceTrend Hub</h2>
+              <p>
+                Create your workspace to explore publication analytics, track journals, and export structured research reports.
+              </p>
 
-          <ul className="feature-list">
-            <li className="feature-item" style={{ borderColor: "rgba(96, 165, 250, 0.25)" }}>
-              <span className="feature-icon-box" style={{ background: "rgba(96, 165, 250, 0.18)", color: "#60a5fa" }}><FiTrendingUp /></span>
-              <p style={{ color: "#f1f5f9", fontWeight: "650" }}>Real-time publication & citation trend tracking</p>
-            </li>
-            <li className="feature-item" style={{ borderColor: "rgba(52, 211, 153, 0.25)" }}>
-              <span className="feature-icon-box" style={{ background: "rgba(52, 211, 153, 0.18)", color: "#34d399" }}><FiBookmark /></span>
-              <p style={{ color: "#f1f5f9", fontWeight: "650" }}>Personalized paper bookmarks & journal library</p>
-            </li>
-            <li className="feature-item" style={{ borderColor: "rgba(251, 191, 36, 0.25)" }}>
-              <span className="feature-icon-box" style={{ background: "rgba(251, 191, 36, 0.18)", color: "#fbbf24" }}><FiAward /></span>
-              <p style={{ color: "#f1f5f9", fontWeight: "650" }}>Quartile rankings (Q1–Q4) & topic discovery</p>
-            </li>
-            <li className="feature-item" style={{ borderColor: "rgba(192, 132, 252, 0.25)" }}>
-              <span className="feature-icon-box" style={{ background: "rgba(192, 132, 252, 0.18)", color: "#c084fc" }}><FiFileText /></span>
-              <p style={{ color: "#f1f5f9", fontWeight: "650" }}>Exportable PDF & CSV summary analytics</p>
-            </li>
-          </ul>
+              <div className="auth-premium-features-row">
+                <div className="auth-premium-feature-tag tag-blue">
+                  <span className="auth-tag-icon auth-tag-icon-blue"><FiBarChart2 /></span>
+                  <span>Analytics</span>
+                </div>
+                <div className="auth-premium-feature-tag tag-green">
+                  <span className="auth-tag-icon auth-tag-icon-green"><FiBookOpen /></span>
+                  <span>Journals</span>
+                </div>
+                <div className="auth-premium-feature-tag tag-yellow">
+                  <span className="auth-tag-icon auth-tag-icon-amber"><FiFileText /></span>
+                  <span>Reports</span>
+                </div>
+              </div>
+            </div>
 
-          <div className="register-testimonial" style={{ background: "rgba(15, 23, 42, 0.6)", borderColor: "rgba(148, 163, 184, 0.2)", borderRadius: "12px", padding: "10px 14px", marginTop: "12px" }}>
-            <p style={{ color: "#cbd5e1", fontStyle: "italic", fontSize: "12px", margin: "0 0 4px" }}>"Streamlines literature review and publication tracking into a single daily workflow."</p>
-            <span style={{ color: "#94a3b8", fontSize: "11px", fontWeight: "700" }}>— Scientific Journal & Publication Analytics Platform</span>
+            <div className="auth-premium-preview-card" aria-label="Platform Highlights">
+              <div style={{ padding: "0 0 6px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", marginBottom: "8px" }}>
+                <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "700", color: "#60a5fa", textTransform: "uppercase" }}>PLATFORM HIGHLIGHTS</span>
+              </div>
+
+              <div className="auth-highlight-list">
+                <div className="auth-highlight-item">
+                  <span className="auth-highlight-icon auth-highlight-icon-blue"><FiSearch /></span>
+                  <div className="auth-highlight-copy">
+                    <h5>Multi-Source Discovery</h5>
+                    <p>Cross-reference papers, authors, citations, and journal quartiles (Q1–Q4).</p>
+                  </div>
+                </div>
+
+                <div className="auth-highlight-item">
+                  <span className="auth-highlight-icon auth-highlight-icon-green"><FiBookmark /></span>
+                  <div className="auth-highlight-copy">
+                    <h5>Research Library</h5>
+                    <p>Bookmark key publications, follow journals, and track emerging topics.</p>
+                  </div>
+                </div>
+
+                <div className="auth-highlight-item">
+                  <span className="auth-highlight-icon auth-highlight-icon-amber"><FiTrendingUp /></span>
+                  <div className="auth-highlight-copy">
+                    <h5>Trend & Summary Reports</h5>
+                    <p>Visualize annual growth curves and export structured summary reports.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

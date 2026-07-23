@@ -86,26 +86,20 @@ function LoginPage() {
               <img src={logo} alt="ScienceTrend Hub logo" className="auth-logo-img" />
             </span>
             <div className="auth-brand-text">
-              <h1 style={{ fontWeight: "900" }}>ScienceTrend Hub</h1>
-              <p style={{ fontWeight: "600", opacity: 0.95 }}>Scientific Journal & Publication Analytics</p>
+              <h1>ScienceTrend Hub</h1>
+              <p>Scientific Journal & Publication Analytics</p>
             </div>
           </Link>
 
           <div className="auth-left-premium-content">
             <div className="auth-premium-hero">
               <span className="auth-badge">RESEARCH INTELLIGENCE PLATFORM</span>
-              <h2 style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "30px",
-                fontWeight: "900",
-                letterSpacing: "-0.04em",
-                margin: "8px 0 6px"
-              }}>Journal & Trend Analytics</h2>
-              <p style={{ fontWeight: "600", fontSize: "13.5px", lineHeight: "1.45", opacity: 0.95 }}>
+              <h2>Journal & Trend Analytics</h2>
+              <p>
                 Access real-time analytics across top journals, research topics, and publication metrics in one unified workspace.
               </p>
 
-              <div className="auth-premium-features-row" style={{ marginTop: "10px" }}>
+              <div className="auth-premium-features-row">
                 <div className="auth-premium-feature-tag tag-blue">
                   <span className="auth-tag-icon auth-tag-icon-blue"><FiBarChart2 /></span>
                   <span>Analytics</span>
@@ -121,33 +115,33 @@ function LoginPage() {
               </div>
             </div>
 
-            <div className="auth-premium-preview-card" aria-label="Platform Highlights" style={{ background: "rgba(15, 23, 42, 0.85)", border: "1px solid rgba(148, 163, 184, 0.25)", borderRadius: "14px", padding: "12px 14px", marginTop: "8px" }}>
-              <div style={{ padding: "0 0 6px", borderBottom: "1px solid rgba(148, 163, 184, 0.2)", marginBottom: "8px" }}>
-                <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "850", color: "#60a5fa", textTransform: "uppercase" }}>PLATFORM HIGHLIGHTS</span>
+            <div className="auth-premium-preview-card" aria-label="Platform Highlights">
+              <div style={{ padding: "0 0 6px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", marginBottom: "8px" }}>
+                <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "700", color: "#60a5fa", textTransform: "uppercase" }}>PLATFORM HIGHLIGHTS</span>
               </div>
 
               <div className="auth-highlight-list">
                 <div className="auth-highlight-item">
                   <span className="auth-highlight-icon auth-highlight-icon-blue"><FiSearch /></span>
                   <div className="auth-highlight-copy">
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Multi-Source Discovery</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Cross-reference papers, authors, citations, and journal quartiles (Q1–Q4).</p>
+                    <h5>Multi-Source Discovery</h5>
+                    <p>Cross-reference papers, authors, citations, and journal quartiles (Q1–Q4).</p>
                   </div>
                 </div>
 
                 <div className="auth-highlight-item">
                   <span className="auth-highlight-icon auth-highlight-icon-green"><FiBookmark /></span>
                   <div className="auth-highlight-copy">
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Research Library</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Bookmark key publications, follow journals, and track emerging topics.</p>
+                    <h5>Research Library</h5>
+                    <p>Bookmark key publications, follow journals, and track emerging topics.</p>
                   </div>
                 </div>
 
                 <div className="auth-highlight-item">
                   <span className="auth-highlight-icon auth-highlight-icon-amber"><FiTrendingUp /></span>
                   <div className="auth-highlight-copy">
-                    <h5 style={{ color: "#ffffff", fontWeight: "750", margin: "0 0 1px", fontSize: "12.5px" }}>Trend & Summary Reports</h5>
-                    <p style={{ color: "#cbd5e1", fontSize: "11px", margin: 0, lineHeight: "1.3" }}>Visualize annual growth curves and export structured summary reports.</p>
+                    <h5>Trend & Summary Reports</h5>
+                    <p>Visualize annual growth curves and export structured summary reports.</p>
                   </div>
                 </div>
               </div>

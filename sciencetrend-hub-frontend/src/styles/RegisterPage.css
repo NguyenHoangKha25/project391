@@ -226,10 +226,23 @@
 }
 .register-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 14px;
+  min-height: 40px;
   margin-bottom: 10px;
+}
+.register-feedback-slot {
+  min-width: 0;
+  min-height: 40px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.register-feedback {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .register-page .register-header h2,
 .register-page .register-premium-card-box .register-header h2 {
@@ -430,21 +443,22 @@
   opacity: .65;
 }
 
-/* Error/Success Feedbacks */
-.error-msg, 
-.success-msg {
-  margin-bottom: 16px;
-  padding: 11px 13px;
-  border-radius: 13px;
-  font-size: 13px;
-  line-height: 1.45;
+/* Error/Success feedback stays inside the fixed header row, preventing layout shift. */
+.register-feedback.error-msg,
+.register-feedback.success-msg {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.25;
 }
-.error-msg {
+.register-feedback.error-msg {
   color: var(--st-danger);
   background: var(--st-danger-soft);
   border: 1px solid rgba(192, 57, 43, 0.15);
 }
-.success-msg {
+.register-feedback.success-msg {
   color: var(--st-success);
   background: var(--st-success-soft);
   border: 1px solid rgba(35, 132, 91, 0.15);
@@ -512,6 +526,15 @@
   }
   .form-group {
     grid-column: span 2;
+  }
+  .register-header {
+    gap: 10px;
+  }
+  .register-feedback-slot {
+    max-width: 56%;
+  }
+  .register-feedback {
+    font-size: 11px;
   }
 }
 
