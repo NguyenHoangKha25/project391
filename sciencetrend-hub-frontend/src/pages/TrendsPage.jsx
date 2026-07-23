@@ -558,7 +558,7 @@ function TrendsPage() {
 
         {/* 4 Stats Cards row */}
         <div className="trends-stats-cards-row">
-          <div className="trend-stat-card">
+          <div className="trend-stat-card card-accent-blue">
             <span className="stat-card-label">Total Publications</span>
             <h3 className="stat-card-value">
               {dashboard ? formatNumber(dashboard.totalPapers) : "12,220"}
@@ -567,7 +567,7 @@ function TrendsPage() {
               <span className="sub">Live catalog total</span>
             </span>
           </div>
-          <div className="trend-stat-card">
+          <div className="trend-stat-card card-accent-emerald">
             <span className="stat-card-label">Avg. Annual Growth</span>
             <h3 className="stat-card-value">
               {annualGrowth === null ? "—" : `${annualGrowth >= 0 ? "+" : ""}${annualGrowth.toFixed(1)}%`}
@@ -576,7 +576,7 @@ function TrendsPage() {
               <span className="sub">Across the selected series</span>
             </span>
           </div>
-          <div className="trend-stat-card">
+          <div className="trend-stat-card card-accent-purple">
             <span className="stat-card-label">{trendTab === "keyword" ? "Emerging Keywords" : "Emerging Topics"}</span>
             <h3 className="stat-card-value">
               {trendTab === "keyword"
@@ -587,7 +587,7 @@ function TrendsPage() {
               <span className="sub">{trendTab === "keyword" ? "Indexed keywords" : "Indexed topics"}</span>
             </span>
           </div>
-          <div className="trend-stat-card">
+          <div className="trend-stat-card card-accent-rose">
             <span className="stat-card-label">{trendTab === "keyword" ? "Breakout Keywords" : "Breakout Topics"}</span>
             <h3 className="stat-card-value">
               {trendTab === "keyword" ? Math.min(dbKeywords.length, 10) : trendingTopics.length}
@@ -605,29 +605,35 @@ function TrendsPage() {
           <article className="trends-chart-panel glassmorphic-panel">
             <div className="panel-header-row">
               <h3>Publication Count by Year</h3>
-              <span className="badge-chip">Yearly</span>
+              <span className="badge-chip badge-purple">Yearly</span>
             </div>
             <div className="trends-svg-chart-container">
               {areaChartPathData.points.length > 0 ? (
                 <>
                   <svg viewBox="0 0 380 120" className="trends-svg-chart">
                     <defs>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={trendTab === "keyword" ? "#2563eb" : "#059669"} stopOpacity="0.32" />
-                        <stop offset="100%" stopColor={trendTab === "keyword" ? "#2563eb" : "#059669"} stopOpacity="0.02" />
+                      <linearGradient id="areaGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.45" />
+                        <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.05" />
+                      </linearGradient>
+                      <linearGradient id="areaLineGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#8b5cf6" />
+                        <stop offset="50%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#06b6d4" />
                       </linearGradient>
                     </defs>
                     <path d={areaChartPathData.areaPath} fill="url(#areaGrad)" />
-                    <path d={areaChartPathData.linePath} fill="none" stroke={trendTab === "keyword" ? "#2563eb" : "#059669"} strokeWidth="2.8" strokeLinecap="round" />
+                    <path d={areaChartPathData.linePath} fill="none" stroke="url(#areaLineGrad)" strokeWidth="3.2" strokeLinecap="round" />
                     {areaChartPathData.coords.map((c, i) => (
                       <circle 
                         key={i} 
                         cx={c.x} 
                         cy={c.y} 
-                        r="3.5" 
+                        r="4" 
                         fill="#ffffff" 
-                        stroke={trendTab === "keyword" ? "#2563eb" : "#059669"} 
-                        strokeWidth="2"
+                        stroke="#8b5cf6" 
+                        strokeWidth="2.5"
                         className="trend-chart-point"
                       >
                         <title>{`Year ${c.label}: ${c.value} papers`}</title>
@@ -655,16 +661,21 @@ function TrendsPage() {
           <article className="trends-chart-panel glassmorphic-panel">
             <div className="panel-header-row">
               <h3>{trendTab === "keyword" ? "Keyword Comparison" : "Topic Comparison"}</h3>
-              <span className="badge-chip">Cumulative</span>
+              <span className="badge-chip badge-cyan">Cumulative</span>
             </div>
             <div className="trends-svg-chart-container">
               {comparisonLines.length > 0 ? (
                 <>
                   <svg viewBox="0 0 380 120" className="trends-svg-chart">
                     <defs>
-                      <linearGradient id="compGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={trendTab === "keyword" ? "#4f46e5" : "#06b6d4"} stopOpacity="0.25" />
-                        <stop offset="100%" stopColor={trendTab === "keyword" ? "#4f46e5" : "#06b6d4"} stopOpacity="0.01" />
+                      <linearGradient id="compGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.35" />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.03" />
+                      </linearGradient>
+                      <linearGradient id="compLineGrad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#f43f5e" />
+                        <stop offset="50%" stopColor="#ec4899" />
+                        <stop offset="100%" stopColor="#10b981" />
                       </linearGradient>
                     </defs>
                     {comparisonLines.map((line, idx) => (
@@ -672,12 +683,12 @@ function TrendsPage() {
                         <path
                           d={line.linePath}
                           fill="none"
-                          stroke={line.stroke}
-                          strokeWidth="2.5"
+                          stroke="url(#compLineGrad)"
+                          strokeWidth="3"
                           strokeLinecap="round"
                         />
                         {line.coords.map((c, i) => (
-                          <circle key={i} cx={c.x} cy={c.y} r="3.5" fill="#ffffff" stroke={line.stroke} strokeWidth="2">
+                          <circle key={i} cx={c.x} cy={c.y} r="4" fill="#ffffff" stroke="#f43f5e" strokeWidth="2.5">
                             <title>{`Year ${c.label}: ${c.value} papers`}</title>
                           </circle>
                         ))}
@@ -692,7 +703,7 @@ function TrendsPage() {
                   <div className="comparison-legend-row">
                     {comparisonLines.map((line, idx) => (
                       <span key={idx} className="legend-chip-item">
-                        <span className="dot" style={{ backgroundColor: line.stroke }} />
+                        <span className="dot" style={{ backgroundColor: "#f43f5e" }} />
                         <span className="label">{line.label.length > 18 ? line.label.substring(0, 16) + ".." : line.label}</span>
                       </span>
                     ))}
@@ -710,7 +721,7 @@ function TrendsPage() {
           <article className="trends-table-panel glassmorphic-panel">
             <div className="panel-header-row">
               <h3>{trendTab === "keyword" ? "Top Trending Keywords" : "Top Trending Topics"}</h3>
-              <span className="badge-chip">Top 5</span>
+              <span className="badge-chip badge-amber">Top 5</span>
             </div>
             <div className="trends-compact-table-wrap">
               <table className="trends-compact-table">
@@ -726,12 +737,16 @@ function TrendsPage() {
                     <tr key={item.id ?? idx}>
                       <td>
                         <div className="trends-topic-cell">
-                          <span className="rank-num">{idx + 1}</span>
+                          <span className={`rank-num rank-num-${idx % 5}`}>{idx + 1}</span>
                           <span className="topic-name">{item.name}</span>
                         </div>
                       </td>
-                      <td>{typeof item.paperCount === "string" ? item.paperCount.split(" ")[0] : (item.paperCount ?? "0")}</td>
-                      <td className="positive">{item.growth || "—"}</td>
+                      <td>
+                        <span className="pub-count-pill">{typeof item.paperCount === "string" ? item.paperCount : (item.paperCount ?? "0")}</span>
+                      </td>
+                      <td>
+                        <span className="growth-pill">{item.growth || "—"}</span>
+                      </td>
                     </tr>
                   ))}
                   {activeTrendItems.length === 0 && (
@@ -755,17 +770,17 @@ function TrendsPage() {
           <article className="trends-bottom-panel glassmorphic-panel">
             <div className="panel-header-row">
               <h3>{trendTab === "keyword" ? "Top Growing Keywords (by Growth)" : "Top Growing Topics (by Growth)"}</h3>
-              <span className="badge-chip">Growth</span>
+              <span className="badge-chip badge-emerald">Growth</span>
             </div>
             <div className="trends-sparkline-list">
               {activeTrendItems.slice(0, 3).map((item, idx) => (
-                <div key={item.id ?? idx} className="trends-sparkline-row">
+                <div key={item.id ?? idx} className={`trends-sparkline-row row-color-${idx % 3}`}>
                   <div className="topic-rank-name">
-                    <span className="bullet-dot" />
+                    <span className={`bullet-dot ${idx === 0 ? "bullet-emerald" : idx === 1 ? "bullet-purple" : "bullet-rose"}`} />
                     <span className="name">{item.name}</span>
                   </div>
                   <div className="sparkline-stats">
-                    <span className="growth-text">{item.growth || "—"}</span>
+                    <span className={`growth-pill-${idx === 0 ? "vivid" : idx === 1 ? "purple" : "rose"}`}>{item.growth || "—"}</span>
                   </div>
                 </div>
               ))}
@@ -781,17 +796,17 @@ function TrendsPage() {
           <article className="trends-bottom-panel glassmorphic-panel">
             <div className="panel-header-row">
               <h3>{trendTab === "keyword" ? "More Active Keywords" : "More Active Topics"}</h3>
-              <span className="badge-chip">Activity</span>
+              <span className="badge-chip badge-blue">Activity</span>
             </div>
             <div className="trends-sparkline-list">
               {activeTrendItems.slice(3, 6).map((item, idx) => (
-                <div key={item.id ?? idx} className="trends-sparkline-row">
+                <div key={item.id ?? idx} className={`trends-sparkline-row row-active-${idx % 3}`}>
                   <div className="topic-rank-name">
-                    <span className="bullet-dot bg-blue" />
+                    <span className={`bullet-dot ${idx === 0 ? "bullet-blue" : idx === 1 ? "bullet-cyan" : "bullet-amber"}`} />
                     <span className="name">{item.name}</span>
                   </div>
                   <div className="sparkline-stats">
-                    <span className="momentum-score">{item.paperCount || "—"}</span>
+                    <span className={`activity-pill-${idx === 0 ? "blue" : idx === 1 ? "cyan" : "amber"}`}>{item.paperCount || "—"}</span>
                   </div>
                 </div>
               ))}
@@ -807,13 +822,13 @@ function TrendsPage() {
           <article className="trends-bottom-panel glassmorphic-panel">
             <div className="panel-header-row">
               <h3>{trendTab === "keyword" ? "Analytical Keyword Insights" : "Analytical Topic Insights"}</h3>
-              <span className="badge-chip bg-orange">Insights</span>
+              <span className="badge-chip badge-rose">Insights</span>
             </div>
             <div className="trends-insights-scroll-list">
               {activeTrendItems.length > 0 ? (
                 activeTrendItems.slice(0, 3).map((item, idx) => (
-                  <div key={idx} className="insight-card-item">
-                    <div className="insight-icon-circle green">
+                  <div key={idx} className={`insight-card-item ${idx === 0 ? "insight-amber" : idx === 1 ? "insight-purple" : "insight-emerald"}`}>
+                    <div className={`insight-icon-circle ${idx === 0 ? "amber" : idx === 1 ? "purple" : "emerald"}`}>
                       <FiLayers />
                     </div>
                     <p>
