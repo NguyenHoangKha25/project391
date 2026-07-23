@@ -38,6 +38,35 @@ function hasUsableMetadata(metadata) {
     );
 }
 
+const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v3";
+
+function getTrendSeriesCacheKey(tab, term) {
+  return `trend_series_${tab}_${term.trim().toLowerCase()}`;
+}
+
+function getInitialTrendData() {
+  const storedMetadata = getPersistentCachedData(TRENDS_METADATA_CACHE_KEY);
+  const metadata = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
+  const keywords = Array.isArray(metadata?.dbKeywords) ? metadata.dbKeywords : [];
+  const topics = Array.isArray(metadata?.trendingTopics) ? metadata.trendingTopics : [];
+  const topicNames = topics.map((topic) => topic.name).filter(Boolean);
+  const activeKeyword = keywords[0] || "";
+  const activeTopic = topicNames[0] || "";
+  const storedSeries = activeKeyword
+    ? getPersistentCachedData(getTrendSeriesCacheKey("keyword", activeKeyword))
+    : null;
+
+  return {
+    metadata,
+    keywords,
+    topics,
+    topicNames,
+    activeKeyword,
+    activeTopic,
+    series: hasUsableTrendSeries(storedSeries) ? storedSeries : [],
+  };
+}
+
 function useToast() {
   const [toast, setToast] = useState(null);
   useEffect(() => {
@@ -55,32 +84,34 @@ function useToast() {
 }
 
 function TrendsPage() {
+  const [initialTrendData] = useState(getInitialTrendData);
+
   // Navigation tab: 'keyword' | 'topic'
   const [trendTab, setTrendTab] = useState("keyword");
   const [searchVal, setSearchVal] = useState("");
   
   // Keyword chips state
-  const [keywordChips, setKeywordChips] = useState([]);
+  const [keywordChips, setKeywordChips] = useState(() => initialTrendData.keywords.slice(0, 5));
   // Topic chips state
-  const [topicChips, setTopicChips] = useState([]);
-  const [activeKeyword, setActiveKeyword] = useState("");
-  const [activeTopicState, setActiveTopicState] = useState("");
+  const [topicChips, setTopicChips] = useState(() => initialTrendData.topicNames.slice(0, 5));
+  const [activeKeyword, setActiveKeyword] = useState(initialTrendData.activeKeyword);
+  const [activeTopicState, setActiveTopicState] = useState(initialTrendData.activeTopic);
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [showAddKeywordInput, setShowAddKeywordInput] = useState(false);
 
   // Data states from backend
-  const [trendingTopics, setTrendingTopics] = useState([]);
-  const [dbKeywords, setDbKeywords] = useState([]);
-  const [chartData, setChartData] = useState([]);
-  const [dashboard, setDashboard] = useState(null);
-  const [metadataLoading, setMetadataLoading] = useState(true);
+  const [trendingTopics, setTrendingTopics] = useState(initialTrendData.topics);
+  const [dbKeywords, setDbKeywords] = useState(initialTrendData.keywords);
+  const [chartData, setChartData] = useState(initialTrendData.series);
+  const [dashboard, setDashboard] = useState(initialTrendData.metadata?.dashboard ?? null);
+  const [metadataLoading, setMetadataLoading] = useState(!initialTrendData.metadata);
   const [chartLoading, setChartLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { toast, showToast } = useToast();
 
   useEffect(() => {
     let cancelled = false;
-    const cacheKey = "trends_metadata_v3";
+    const cacheKey = TRENDS_METADATA_CACHE_KEY;
     const storedMetadata = getPersistentCachedData(cacheKey);
     const cached = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
 
@@ -166,8 +197,7 @@ function TrendsPage() {
     }
 
     let cancelled = false;
-    const normalizedTerm = activeTrendTerm.trim().toLowerCase();
-    const cacheKey = `trend_series_${trendTab}_${normalizedTerm}`;
+    const cacheKey = getTrendSeriesCacheKey(trendTab, activeTrendTerm);
     const storedSeries = getPersistentCachedData(cacheKey);
     const cached = hasUsableTrendSeries(storedSeries) ? storedSeries : null;
 

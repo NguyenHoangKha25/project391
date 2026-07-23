@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FiSearch,
@@ -21,13 +21,24 @@ import {
   getPapersByTopic,
 } from "../services/topicService";
 import { normalizeTopic, toArray } from "../utils/apiData";
-import { getCachedData, setCachedData } from "../utils/apiCache";
+import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { useAuth } from "../context/useAuth";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/TopicsPage.css";
 
 /* ── Toast Notifications Hook ── */
+const TOPICS_CACHE_KEY = "topics_default_v2";
+
+function getCachedTopicsData() {
+  const cached = getPersistentCachedData(TOPICS_CACHE_KEY);
+  if (!cached || typeof cached !== "object") return null;
+
+  const topics = Array.isArray(cached.topics) ? cached.topics : [];
+  const trending = Array.isArray(cached.trending) ? cached.trending : [];
+  return topics.length > 0 || trending.length > 0 ? { topics, trending } : null;
+}
+
 function useToast() {
   const [toast, setToast] = useState(null);
   useEffect(() => {
@@ -47,12 +58,14 @@ function useToast() {
 function TopicsPage() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-  const [topics, setTopics] = useState([]);
-  const [trending, setTrending] = useState([]);
+  const [initialData] = useState(getCachedTopicsData);
+  const [topics, setTopics] = useState(() => initialData?.topics ?? []);
+  const [trending, setTrending] = useState(() => initialData?.trending ?? []);
   const [followedIds, setFollowedIds] = useState(new Set());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData);
   const [searchQuery, setSearchQuery] = useState("");
   const [followProcessing, setFollowProcessing] = useState(new Set());
+  const loadRequestIdRef = useRef(0);
 
   // Drawer/Modal State
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -64,89 +77,79 @@ function TopicsPage() {
 
   // Load topics & follow status
   const loadData = useCallback(async (search = "") => {
+    const requestId = loadRequestIdRef.current + 1;
+    loadRequestIdRef.current = requestId;
     const isDefaultLoad = !search;
-    const cacheKey = "topics_default";
-    const cachedData = isDefaultLoad ? getCachedData(cacheKey) : null;
+    const cachedData = isDefaultLoad ? getCachedTopicsData() : null;
 
     if (cachedData) {
-      setFollowedIds(cachedData.followedIds);
       setTrending(cachedData.trending);
       setTopics(cachedData.topics);
       setLoading(false);
-
-      // Perform a silent background validation to refresh cache seamlessly
-      Promise.allSettled([
-        isLoggedIn ? getFollowedTopics() : Promise.resolve([]),
-        getTrendingTopics(5),
-        getAllTopics(),
-      ]).then(([followedResult, trendingResult, listResult]) => {
-        const freshData = {
-          followedIds: followedResult.status === "fulfilled" 
-            ? new Set(toArray(followedResult.value).map(t => normalizeTopic(t)).map(t => String(t.id)))
-            : new Set(),
-          trending: trendingResult.status === "fulfilled"
-            ? toArray(trendingResult.value).map(t => normalizeTopic(t))
-            : [],
-          topics: listResult.status === "fulfilled"
-            ? toArray(listResult.value).map(t => normalizeTopic(t))
-            : []
-        };
-        setFollowedIds(freshData.followedIds);
-        setTrending(freshData.trending);
-        setTopics(freshData.topics);
-        if (freshData.topics.length > 0) {
-          setCachedData(cacheKey, freshData);
-        }
-      });
-      return;
+    } else {
+      setLoading(true);
     }
 
     try {
-      setLoading(true);
-      
-      // Fetch followed topics and all topics (or search result)
       const [followedResult, trendingResult, listResult] = await Promise.allSettled([
         isLoggedIn ? getFollowedTopics() : Promise.resolve([]),
         getTrendingTopics(5),
         search ? searchTopics(search) : getAllTopics(),
       ]);
 
-      const freshData = {
-        followedIds: followedResult.status === "fulfilled" 
-          ? new Set(toArray(followedResult.value).map(t => normalizeTopic(t)).map(t => String(t.id)))
-          : new Set(),
-        trending: trendingResult.status === "fulfilled"
-          ? toArray(trendingResult.value).map(t => normalizeTopic(t))
-          : [],
-        topics: listResult.status === "fulfilled"
-          ? toArray(listResult.value).map(t => normalizeTopic(t))
-          : []
-      };
+      if (requestId !== loadRequestIdRef.current) return;
 
-      setFollowedIds(freshData.followedIds);
-      setTrending(freshData.trending);
-      setTopics(freshData.topics);
+      if (followedResult.status === "fulfilled") {
+        const nextFollowedIds = new Set(
+          toArray(followedResult.value)
+            .map((topic) => normalizeTopic(topic))
+            .map((topic) => String(topic.id)),
+        );
+        setFollowedIds(nextFollowedIds);
+      }
 
-      if (isDefaultLoad && freshData.topics.length > 0) {
-        setCachedData(cacheKey, freshData);
+      const freshTrending = trendingResult.status === "fulfilled"
+        ? toArray(trendingResult.value).map((topic) => normalizeTopic(topic))
+        : [];
+      const freshTopics = listResult.status === "fulfilled"
+        ? toArray(listResult.value).map((topic) => normalizeTopic(topic))
+        : [];
+
+      if (isDefaultLoad) {
+        const nextData = {
+          trending: freshTrending.length > 0 ? freshTrending : (cachedData?.trending ?? []),
+          topics: freshTopics.length > 0 ? freshTopics : (cachedData?.topics ?? []),
+        };
+
+        setTrending(nextData.trending);
+        setTopics(nextData.topics);
+
+        if (freshTrending.length > 0 || freshTopics.length > 0) {
+          setPersistentCachedData(TOPICS_CACHE_KEY, nextData);
+        }
+      } else {
+        setTopics(freshTopics);
+      }
+
+      if (listResult.status === "rejected" && !cachedData) {
+        showToast("Failed to retrieve topics registry.", "warning");
       }
     } catch (err) {
       console.error("Cannot load topics data", err);
-      showToast("Failed to retrieve topics registry.", "warning");
+      if (!cachedData) {
+        showToast("Failed to retrieve topics registry.", "warning");
+      }
     } finally {
-      setLoading(false);
+      if (requestId === loadRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [isLoggedIn, showToast]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  // Live search keyup debounce
-  useEffect(() => {
     const handler = setTimeout(() => {
       loadData(searchQuery);
-    }, 400);
+    }, searchQuery ? 400 : 0);
 
     return () => clearTimeout(handler);
   }, [searchQuery, loadData]);
