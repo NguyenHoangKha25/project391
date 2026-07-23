@@ -64,6 +64,20 @@ export function normalizePaper(paper = {}, index = 0) {
   const kwList = Array.isArray(paper.keywords) 
     ? paper.keywords 
     : (paper.keyword ? [paper.keyword] : []);
+  const citationCount = toNumber(paper.citationCount);
+  const publicationYear = Number(paper.year);
+  const currentYear = new Date().getFullYear();
+  const publicationAge = Number.isInteger(publicationYear) && publicationYear > 0
+    ? Math.max(1, currentYear - publicationYear + 1)
+    : 0;
+  const suppliedCitationsPerYear = Number(
+    paper.citationsPerYear ?? paper.citationsPerYr ?? paper.citationRate,
+  );
+  const citationsPerYear = Number.isFinite(suppliedCitationsPerYear)
+    ? Math.max(0, Math.round(suppliedCitationsPerYear))
+    : publicationAge > 0
+      ? Math.round(citationCount / publicationAge)
+      : 0;
 
   // Robust parsing for authors supporting comma-separated string, array of strings, or array of author objects
   let parsedAuthors = "";
@@ -93,7 +107,8 @@ export function normalizePaper(paper = {}, index = 0) {
     href: paper.doi ? `https://doi.org/${paper.doi}` : (paper.externalId ?? ""),
     saved: Boolean(paper.saved ?? paper.bookmarked ?? false),
     abstract: paper.abstractText ?? paper.abstract ?? "",
-    citationCount: paper.citationCount ?? 0,
+    citationCount,
+    citationsPerYear,
     keywords: kwList,
     doi: paper.doi ?? "",
   };

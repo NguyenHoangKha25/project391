@@ -23,7 +23,7 @@ import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCa
 import "../styles/DashboardPage.css";
 
 const DONUT_COLORS = ["#3b82f6", "#10b981", "#8b5cf6", "#f43f5e", "#f59e0b", "#06b6d4"];
-const DASHBOARD_OVERVIEW_CACHE_KEY = "dashboard_overview_v2";
+const DASHBOARD_OVERVIEW_CACHE_KEY = "dashboard_overview_v3";
 const DASHBOARD_TOPICS_CACHE_KEY = "dashboard_trending_topics_v2";
 
 function hasDashboardData(data) {
@@ -552,7 +552,7 @@ function DashboardPage() {
                             </span>
                           </td>
                           <td style={{ textAlign: "right", color: "#047857", fontWeight: "800", fontSize: "12px" }}>
-                            {paper.citationsPerYear > 0 ? `+${paper.citationsPerYear}/yr` : "—"}
+                            {paper.citationsPerYear > 0 ? `+${formatNumber(paper.citationsPerYear)}/yr` : "—"}
                           </td>
                         </tr>
                       );
