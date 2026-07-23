@@ -21,7 +21,7 @@ import {
   getPapersByTopic,
 } from "../services/topicService";
 import { getPapers, searchPapers } from "../services/paperService";
-import { normalizeTopic, normalizePaper, toArray } from "../utils/apiData";
+import { normalizeTopic, normalizePaper, toArray, formatNumber } from "../utils/apiData";
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { useAuth } from "../context/useAuth";
 import { ROUTE_PATHS } from "../routes/routePaths";
@@ -330,7 +330,11 @@ function TopicsPage() {
                     <div className="topic-card-body" onClick={() => handleOpenTopicDetails(topic)}>
                       <h3>{topic.name}</h3>
                       <div className="topic-meta">
-                        <span className="meta-item count">{topic.paperCount}</span>
+                        <span className="meta-item count">
+                          {typeof topic.paperCount === "number"
+                            ? `${formatNumber(topic.paperCount)} papers`
+                            : (topic.paperCount ? (String(topic.paperCount).includes("paper") ? topic.paperCount : `${topic.paperCount} papers`) : "0 papers")}
+                        </span>
                         {topic.growth && (
                           <span className={`meta-item growth positive`}>
                             {topic.growth} growth
@@ -387,7 +391,11 @@ function TopicsPage() {
                     <div className="topic-card-body" onClick={() => handleOpenTopicDetails(topic)}>
                       <h3>{topic.name}</h3>
                       <div className="topic-meta">
-                        <span className="meta-item count">{topic.paperCount}</span>
+                        <span className="meta-item count">
+                          {typeof topic.paperCount === "number"
+                            ? `${formatNumber(topic.paperCount)} papers`
+                            : (topic.paperCount ? (String(topic.paperCount).includes("paper") ? topic.paperCount : `${topic.paperCount} papers`) : "0 papers")}
+                        </span>
                         {topic.score > 0 && (
                           <span className="meta-item score">
                             Score: {topic.score.toFixed(1)}

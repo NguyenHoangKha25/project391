@@ -142,9 +142,12 @@
 }
 
 .meta-item.count {
-  background-color: #f8fafc;
-  color: #64748b;
-  border: 1px solid #f1f5f9;
+  background-color: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
 }
 
 .meta-item.growth {
