@@ -28,7 +28,7 @@ import "../styles/WorkspacePages.css";
 import "../styles/TopicsPage.css";
 
 /* ── Toast Notifications Hook ── */
-const TOPICS_CACHE_KEY = "topics_default_v2";
+const TOPICS_CACHE_KEY = "topics_default_v5";
 
 function getCachedTopicsData() {
   const cached = getPersistentCachedData(TOPICS_CACHE_KEY);

@@ -102,18 +102,18 @@ export function normalizePaper(paper = {}, index = 0) {
 // JournalResponse từ backend: dùng journal.journalId
 export function normalizeJournal(journal = {}, index = 0) {
   const rawId = typeof journal === "object" && journal !== null
-    ? (journal.journalId ?? journal.id ?? journal.sourceId ?? journal.journal_id)
+    ? (journal.journalId ?? journal.journal_id ?? journal.sourceId ?? journal.id)
     : null;
 
   const numericId = rawId !== null && rawId !== undefined && /^\d+$/.test(String(rawId))
     ? Number(rawId)
     : (typeof rawId === "number" ? rawId : null);
 
-  const validId = numericId ?? (typeof index === "number" ? index + 1 : 1);
+  const validId = numericId ?? (typeof journal === "object" && journal.id ? journal.id : `journal-${index + 1}`);
 
   return {
     id: validId,
-    journalId: validId,
+    journalId: numericId ?? validId,
     name: journal.name ?? journal.title ?? "Untitled journal",
     publisher: journal.publisher ?? "Unknown publisher",
     subject: journal.subject ?? journal.field ?? "General",
@@ -145,7 +145,7 @@ export function normalizeKeyword(keyword = {}, index = 0) {
     : "Untitled keyword";
 
   return {
-    id: keyword.keywordId ?? keyword.id ?? nestedKeyword.keywordId ?? nestedKeyword.id ?? (index + 1),
+    id: keyword.keywordId ?? keyword.id ?? nestedKeyword.keywordId ?? nestedKeyword.id ?? `keyword-${index + 1}`,
     name,
     paperCount: toNumber(
       keyword.paperCount
@@ -184,19 +184,19 @@ export function normalizeTopic(topic = {}, index = 0) {
     : (topic.name ?? topic.topic ?? topic.topicName ?? topic.title ?? "Untitled topic");
 
   const rawId = typeof topic === "object" && topic !== null
-    ? (topic.researchTopicId ?? topic.topicId ?? topic.id ?? topic.research_topic_id ?? topic.topic_id)
+    ? (topic.researchTopicId ?? topic.topicId ?? topic.research_topic_id ?? topic.topic_id ?? topic.id)
     : null;
 
   const numericId = rawId !== null && rawId !== undefined && /^\d+$/.test(String(rawId))
     ? Number(rawId)
     : (typeof rawId === "number" ? rawId : null);
 
-  const validId = numericId ?? (typeof index === "number" ? index + 1 : 1);
+  const validId = numericId ?? (typeof topic === "object" && topic.id ? topic.id : `topic-${index + 1}`);
 
   return {
     id: validId,
-    researchTopicId: validId,
-    topicId: validId,
+    researchTopicId: numericId ?? validId,
+    topicId: numericId ?? validId,
     name: topicName,
     paperCount: `${formatNumber(topic.paperCount ?? topic.totalPapers ?? topic.count ?? 0)} papers`,
     growth,
