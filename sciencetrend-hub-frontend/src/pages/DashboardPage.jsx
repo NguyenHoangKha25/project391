@@ -203,13 +203,13 @@ function DashboardPage() {
     if (!Array.isArray(raw) || raw.length === 0 || !raw.some(p => Number(p?.value) > 0)) {
       const currentYr = new Date().getFullYear();
       return [
-        { label: String(currentYr - 6), value: 1250 },
-        { label: String(currentYr - 5), value: 1820 },
-        { label: String(currentYr - 4), value: 2400 },
-        { label: String(currentYr - 3), value: 2950 },
-        { label: String(currentYr - 2), value: 3600 },
-        { label: String(currentYr - 1), value: 4120 },
-        { label: String(currentYr), value: 3980 },
+        { label: String(currentYr - 6), value: 6400 },
+        { label: String(currentYr - 5), value: 9200 },
+        { label: String(currentYr - 4), value: 12100 },
+        { label: String(currentYr - 3), value: 14800 },
+        { label: String(currentYr - 2), value: 17200 },
+        { label: String(currentYr - 1), value: 18500 },
+        { label: String(currentYr), value: 17800 },
       ];
     }
     const sorted = [...raw].sort((a, b) => parseInt(a.label || 0) - parseInt(b.label || 0));
@@ -263,9 +263,10 @@ function DashboardPage() {
     const values = papersByYear.map(p => Number(p.value) || 0);
     const rawMax = Math.max(...values, 10);
     
-    // Create ceiling with 25% target headroom so bars match Y-axis tick marks accurately
+    // Scale ceiling to 20K target scale
     let maxScale;
     if (rawMax > 100000) maxScale = Math.ceil((rawMax * 1.2) / 20000) * 20000;
+    else if (rawMax > 12000) maxScale = 20000;
     else if (rawMax > 10000) maxScale = Math.ceil((rawMax * 1.2) / 5000) * 5000;
     else if (rawMax > 1000) maxScale = Math.ceil((rawMax * 1.25) / 1000) * 1000;
     else maxScale = Math.ceil((rawMax * 1.25) / 100) * 100;
