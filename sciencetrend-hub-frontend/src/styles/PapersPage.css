@@ -189,9 +189,12 @@
   align-content: center;
   flex-wrap: wrap;
   gap: 12px;
-  min-height: 56px;
-  border-bottom: 1.5px solid rgba(230, 222, 211, 0.5);
-  padding-bottom: 12px;
+  min-height: 60px;
+  padding: 10px 12px;
+  border: 1px solid rgba(230, 222, 211, 0.8);
+  border-radius: 12px;
+  background: #ffffff;
+  box-sizing: border-box;
   margin-bottom: 14px;
 }
 .chips-list-container {
@@ -199,8 +202,10 @@
   align-items: center;
   align-content: center;
   flex-wrap: wrap;
+  flex: 1 1 360px;
   gap: 8px;
   min-height: 32px;
+  min-width: 0;
 }
 .chips-label-prefix {
   display: inline-flex;
@@ -272,8 +277,10 @@
 .results-toolbar-actions {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 12px;
   min-height: 32px;
+  margin-left: auto;
 }
 .results-page-size {
   display: inline-flex;
@@ -614,6 +621,17 @@
   }
 }
 @media (max-width: 600px) {
+  .results-chips-toolbar {
+    align-items: stretch;
+  }
+  .chips-list-container {
+    flex-basis: 100%;
+  }
+  .results-toolbar-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+  }
   .rich-paper-card {
     flex-direction: column;
     gap: 12px;
