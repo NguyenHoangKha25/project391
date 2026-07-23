@@ -75,7 +75,6 @@ function Navbar({
   );
   const role = displayRole;
   const canUseReports = ["LECTURER", "RESEARCHER", "ADMIN"].includes(rawRole);
-  const initials = getInitials(displayName) || "R";
 
   useEffect(() => {
     function handlePointerDown(event) {
