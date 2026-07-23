@@ -1,7 +1,7 @@
 // Simple memory cache for API responses to enable instant page loads during navigation
 const cache = {};
 const PERSISTENT_CACHE_KEY = "sciencetrend_api_cache_v1";
-const MAX_PERSISTENT_ENTRIES = 40;
+const MAX_PERSISTENT_ENTRIES = 80;
 let persistentCache = null;
 
 function loadPersistentCache() {

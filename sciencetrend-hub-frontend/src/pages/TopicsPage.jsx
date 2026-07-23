@@ -34,8 +34,12 @@ function getCachedTopicsData() {
   const cached = getPersistentCachedData(TOPICS_CACHE_KEY);
   if (!cached || typeof cached !== "object") return null;
 
-  const topics = Array.isArray(cached.topics) ? cached.topics : [];
-  const trending = Array.isArray(cached.trending) ? cached.trending : [];
+  const topics = Array.isArray(cached.topics)
+    ? cached.topics.filter((topic) => topic?.name && topic.name !== "Untitled topic")
+    : [];
+  const trending = Array.isArray(cached.trending)
+    ? cached.trending.filter((topic) => topic?.name && topic.name !== "Untitled topic")
+    : [];
   return topics.length > 0 || trending.length > 0 ? { topics, trending } : null;
 }
 
@@ -109,10 +113,14 @@ function TopicsPage() {
       }
 
       const freshTrending = trendingResult.status === "fulfilled"
-        ? toArray(trendingResult.value).map((topic) => normalizeTopic(topic))
+        ? toArray(trendingResult.value)
+            .map((topic) => normalizeTopic(topic))
+            .filter((topic) => topic.name !== "Untitled topic")
         : [];
       const freshTopics = listResult.status === "fulfilled"
-        ? toArray(listResult.value).map((topic) => normalizeTopic(topic))
+        ? toArray(listResult.value)
+            .map((topic) => normalizeTopic(topic))
+            .filter((topic) => topic.name !== "Untitled topic")
         : [];
 
       if (isDefaultLoad) {
@@ -202,17 +210,30 @@ function TopicsPage() {
 
   // Open Recent Papers Drawer
   async function handleOpenTopicDetails(topic) {
+    const cacheKey = `topic_papers_${topic.id}`;
+    const storedPapers = getPersistentCachedData(cacheKey);
+    const cachedPapers = Array.isArray(storedPapers) && storedPapers.length > 0
+      ? storedPapers
+      : null;
+
     setActiveTopic(topic);
     setDrawerOpen(true);
-    setLoadingPapers(true);
-    setTopicPapers([]);
+    setLoadingPapers(!cachedPapers);
+    setTopicPapers(cachedPapers ?? []);
 
     try {
       const response = await getPapersByTopic(topic.id, 0, 10);
       const papersList = toArray(response, ["content", "papers"]);
-      setTopicPapers(papersList);
+      if (papersList.length > 0) {
+        setTopicPapers(papersList);
+        setPersistentCachedData(cacheKey, papersList);
+      } else if (!cachedPapers) {
+        setTopicPapers([]);
+      }
     } catch {
-      showToast("Could not retrieve papers for this topic.", "warning");
+      if (!cachedPapers) {
+        showToast("Could not retrieve papers for this topic.", "warning");
+      }
     } finally {
       setLoadingPapers(false);
     }

@@ -19,55 +19,61 @@ import { useAuth } from "../context/useAuth";
 import { getDashboardOverview } from "../services/dashboardService";
 import { getTrendingTopics } from "../services/trendService";
 import { normalizeDashboard, formatNumber, normalizeTopic, toArray } from "../utils/apiData";
-import { getCachedData, setCachedData } from "../utils/apiCache";
+import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import "../styles/DashboardPage.css";
 
 const DONUT_COLORS = ["#3b82f6", "#60a5fa", "#8b5cf6", "#a78bfa", "#f59e0b", "#94a3b8"];
+const DASHBOARD_OVERVIEW_CACHE_KEY = "dashboard_overview_v2";
+const DASHBOARD_TOPICS_CACHE_KEY = "dashboard_trending_topics_v2";
+
+function hasDashboardData(data) {
+  return Boolean(data)
+    && (
+      data.totalPapers > 0
+      || data.totalJournals > 0
+      || data.totalKeywords > 0
+      || (
+        Array.isArray(data.papersByYear)
+        && data.papersByYear.some((point) => Number(point?.value) > 0)
+      )
+    );
+}
+
+function getInitialDashboardData() {
+  const overview = getPersistentCachedData(DASHBOARD_OVERVIEW_CACHE_KEY);
+  const topics = getPersistentCachedData(DASHBOARD_TOPICS_CACHE_KEY);
+
+  return {
+    overview: hasDashboardData(overview) ? overview : null,
+    topics: Array.isArray(topics) && topics.length > 0 ? topics : [],
+  };
+}
 
 function DashboardPage() {
   const { user } = useAuth();
-  const [data, setData] = useState(null);
-  const [trendingTopics, setTrendingTopics] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [initialData] = useState(getInitialDashboardData);
+  const [data, setData] = useState(initialData.overview);
+  const [trendingTopics, setTrendingTopics] = useState(initialData.topics);
+  const [loading, setLoading] = useState(!initialData.overview && initialData.topics.length === 0);
   const [spinning, setSpinning] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const loadDashboard = useCallback(async (isRefresh = false) => {
-    // Check client-side memory cache first if not explicitly refreshing
-    const cachedOverview = getCachedData("dashboard_overview");
-    const cachedTopics = getCachedData("dashboard_trending_topics");
+    const storedOverview = getPersistentCachedData(DASHBOARD_OVERVIEW_CACHE_KEY);
+    const storedTopics = getPersistentCachedData(DASHBOARD_TOPICS_CACHE_KEY);
+    const cachedOverview = hasDashboardData(storedOverview) ? storedOverview : null;
+    const cachedTopics = Array.isArray(storedTopics) && storedTopics.length > 0 ? storedTopics : [];
+    const hasCachedData = Boolean(cachedOverview) || cachedTopics.length > 0;
 
-    if (cachedOverview && cachedTopics && !isRefresh) {
-      setData(cachedOverview);
-      setTrendingTopics(cachedTopics);
+    if (hasCachedData && !isRefresh) {
+      if (cachedOverview) setData(cachedOverview);
+      if (cachedTopics.length > 0) setTrendingTopics(cachedTopics);
       setLoading(false);
-
-      // Perform a silent background validation to refresh cache seamlessly
-      Promise.allSettled([
-        getDashboardOverview(),
-        getTrendingTopics({ limit: 3 })
-      ]).then(([overviewRes, topicsRes]) => {
-        if (overviewRes.status === "fulfilled") {
-          const normOverview = normalizeDashboard(overviewRes.value);
-          setData(normOverview);
-          if (normOverview.totalPapers > 0) {
-            setCachedData("dashboard_overview", normOverview);
-          }
-        }
-        if (topicsRes.status === "fulfilled") {
-          const normTopics = toArray(topicsRes.value).map(normalizeTopic);
-          setTrendingTopics(normTopics);
-          if (normTopics.length > 0) {
-            setCachedData("dashboard_trending_topics", normTopics);
-          }
-        }
-      });
-      return;
     }
 
     try {
       if (isRefresh) setSpinning(true);
-      else setLoading(true);
+      else if (!hasCachedData) setLoading(true);
       setErrorMessage("");
 
       const [overviewRes, topicsRes] = await Promise.allSettled([
@@ -77,21 +83,34 @@ function DashboardPage() {
 
       if (overviewRes.status === "fulfilled") {
         const normOverview = normalizeDashboard(overviewRes.value);
-        setData(normOverview);
-        if (normOverview.totalPapers > 0) {
-          setCachedData("dashboard_overview", normOverview);
+        if (hasDashboardData(normOverview)) {
+          setData(normOverview);
+          setPersistentCachedData(DASHBOARD_OVERVIEW_CACHE_KEY, normOverview);
         }
       }
+
       if (topicsRes.status === "fulfilled") {
-        const normTopics = toArray(topicsRes.value).map(normalizeTopic);
-        setTrendingTopics(normTopics);
+        const normTopics = toArray(topicsRes.value)
+          .map(normalizeTopic)
+          .filter((topic) => topic.name !== "Untitled topic");
         if (normTopics.length > 0) {
-          setCachedData("dashboard_trending_topics", normTopics);
+          setTrendingTopics(normTopics);
+          setPersistentCachedData(DASHBOARD_TOPICS_CACHE_KEY, normTopics);
         }
+      }
+
+      if (
+        overviewRes.status === "rejected"
+        && topicsRes.status === "rejected"
+        && !hasCachedData
+      ) {
+        setErrorMessage("Couldn't reach the server. Please try again in a moment.");
       }
     } catch (error) {
       console.error("Cannot load dashboard", error);
-      setErrorMessage(error.message || "Couldn't reach the server. Serving offline workspace.");
+      if (!hasCachedData) {
+        setErrorMessage(error.message || "Couldn't reach the server. Please try again in a moment.");
+      }
     } finally {
       setLoading(false);
       setSpinning(false);

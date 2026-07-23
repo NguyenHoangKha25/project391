@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiBookOpen, FiCheck, FiExternalLink, FiSearch, FiX } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
@@ -14,26 +14,52 @@ import {
   unfollowJournal,
 } from "../services/journalService";
 import { normalizeJournal, normalizePaper, toArray } from "../utils/apiData";
+import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/CatalogPages.css";
 
+const JOURNALS_CACHE_KEY = "journals_default_v1";
+
+function getCachedJournalsData() {
+  const cached = getPersistentCachedData(JOURNALS_CACHE_KEY);
+  if (!cached || typeof cached !== "object") return null;
+
+  const journals = Array.isArray(cached.journals) ? cached.journals : [];
+  const topIds = Array.isArray(cached.topIds) ? cached.topIds : [];
+  return journals.length > 0 ? { journals, topIds } : null;
+}
+
 function JournalsPage() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
+  const [initialData] = useState(getCachedJournalsData);
   const [query, setQuery] = useState("");
-  const [journals, setJournals] = useState([]);
-  const [topIds, setTopIds] = useState(new Set());
+  const [journals, setJournals] = useState(() => initialData?.journals ?? []);
+  const [topIds, setTopIds] = useState(() => new Set(initialData?.topIds ?? []));
   const [followedIds, setFollowedIds] = useState(new Set());
   const [selected, setSelected] = useState(null);
   const [papers, setPapers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData);
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState("");
+  const loadRequestIdRef = useRef(0);
 
   const loadJournals = useCallback(async (search = "") => {
-    setLoading(true);
+    const requestId = loadRequestIdRef.current + 1;
+    loadRequestIdRef.current = requestId;
+    const isDefaultLoad = !search;
+    const cachedData = isDefaultLoad ? getCachedJournalsData() : null;
+
+    if (cachedData) {
+      setJournals(cachedData.journals);
+      setTopIds(new Set(cachedData.topIds));
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     setError("");
+
     try {
       const requests = [
         search ? searchJournals(search, { page: 0, size: 50 }) : getJournals({ page: 0, size: 50 }),
@@ -41,24 +67,55 @@ function JournalsPage() {
       ];
       if (isLoggedIn) requests.push(getFollowedJournals());
       const [listResult, topResult, followedResult] = await Promise.allSettled(requests);
-      if (listResult.status === "rejected") throw listResult.reason;
-      const list = toArray(listResult.value, ["journals"]).map(normalizeJournal);
-      setJournals(list);
-      setTopIds(new Set(
-        topResult.status === "fulfilled"
-          ? toArray(topResult.value, ["journals"]).map((item, index) => String(normalizeJournal(item, index).id))
-          : [],
-      ));
-      setFollowedIds(new Set(
-        followedResult?.status === "fulfilled"
-          ? toArray(followedResult.value, ["journals"]).map((item, index) => String(normalizeJournal(item, index).id))
-          : [],
-      ));
+      if (requestId !== loadRequestIdRef.current) return;
+
+      const freshJournals = listResult.status === "fulfilled"
+        ? toArray(listResult.value, ["journals"])
+            .map(normalizeJournal)
+            .filter((journal) => journal.name !== "Untitled journal")
+        : [];
+      const freshTopIds = topResult.status === "fulfilled"
+        ? toArray(topResult.value, ["journals"])
+            .map(normalizeJournal)
+            .filter((journal) => journal.name !== "Untitled journal")
+            .map((journal) => String(journal.id))
+        : [];
+
+      if (isDefaultLoad) {
+        const nextData = {
+          journals: freshJournals.length > 0 ? freshJournals : (cachedData?.journals ?? []),
+          topIds: freshTopIds.length > 0 ? freshTopIds : (cachedData?.topIds ?? []),
+        };
+        setJournals(nextData.journals);
+        setTopIds(new Set(nextData.topIds));
+
+        if (freshJournals.length > 0 || freshTopIds.length > 0) {
+          setPersistentCachedData(JOURNALS_CACHE_KEY, nextData);
+        }
+      } else {
+        setJournals(freshJournals);
+        setTopIds(new Set(freshTopIds));
+      }
+
+      if (followedResult?.status === "fulfilled") {
+        setFollowedIds(new Set(
+          toArray(followedResult.value, ["journals"])
+            .map((item, index) => String(normalizeJournal(item, index).id)),
+        ));
+      }
+
+      if (listResult.status === "rejected" && !cachedData) {
+        setError(listResult.reason?.message || "Could not load journals.");
+      }
     } catch (loadError) {
-      setJournals([]);
-      setError(loadError.message || "Could not load journals.");
+      if (!cachedData) {
+        setJournals([]);
+        setError(loadError.message || "Could not load journals.");
+      }
     } finally {
-      setLoading(false);
+      if (requestId === loadRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [isLoggedIn]);
 
@@ -67,19 +124,41 @@ function JournalsPage() {
   }, [loadJournals]);
 
   async function openJournal(journal) {
-    setSelected(journal);
-    setPapers([]);
-    setDetailLoading(true);
+    const cacheKey = `journal_detail_${journal.id}`;
+    const cachedDetail = getPersistentCachedData(cacheKey);
+    const hasCachedDetail = cachedDetail
+      && typeof cachedDetail === "object"
+      && cachedDetail.journal;
+
+    setSelected(hasCachedDetail ? cachedDetail.journal : journal);
+    setPapers(hasCachedDetail && Array.isArray(cachedDetail.papers) ? cachedDetail.papers : []);
+    setDetailLoading(!hasCachedDetail);
+
     try {
       const [detailResult, papersResult] = await Promise.allSettled([
         getJournalById(journal.id),
         getPapersByJournal(journal.id, 0, 8),
       ]);
-      if (detailResult.status === "fulfilled") {
-        setSelected(normalizeJournal(detailResult.value));
-      }
-      if (papersResult.status === "fulfilled") {
-        setPapers(toArray(papersResult.value).map(normalizePaper));
+
+      const normalizedJournal = detailResult.status === "fulfilled"
+        ? normalizeJournal(detailResult.value)
+        : null;
+      const freshJournal = normalizedJournal?.name !== "Untitled journal"
+        ? normalizedJournal
+        : null;
+      const freshPapers = papersResult.status === "fulfilled"
+        ? toArray(papersResult.value).map(normalizePaper)
+        : [];
+      const nextDetail = {
+        journal: freshJournal ?? cachedDetail?.journal ?? journal,
+        papers: freshPapers.length > 0 ? freshPapers : (cachedDetail?.papers ?? []),
+      };
+
+      setSelected(nextDetail.journal);
+      setPapers(nextDetail.papers);
+
+      if (freshJournal || freshPapers.length > 0) {
+        setPersistentCachedData(cacheKey, nextDetail);
       }
     } finally {
       setDetailLoading(false);

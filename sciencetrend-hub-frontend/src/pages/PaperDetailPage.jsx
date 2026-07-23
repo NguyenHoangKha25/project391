@@ -6,39 +6,67 @@ import { useAuth } from "../context/useAuth";
 import { addBookmark, checkBookmarked, removeBookmark } from "../services/bookmarkService";
 import { getPaperById } from "../services/paperService";
 import { normalizePaper } from "../utils/apiData";
+import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/CatalogPages.css";
+
+function getCachedPaper(paperId) {
+  const cached = getPersistentCachedData(`paper_detail_${paperId}`);
+  return cached && typeof cached === "object" && cached.title ? cached : null;
+}
 
 function PaperDetailPage() {
   const { paperId } = useParams();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-  const [paper, setPaper] = useState(null);
+  const [initialPaper] = useState(() => getCachedPaper(paperId));
+  const [paper, setPaper] = useState(initialPaper);
   const [saved, setSaved] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPaper);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      setLoading(true);
+      const cachedPaper = getCachedPaper(paperId);
+      setError("");
+      if (cachedPaper) {
+        setPaper(cachedPaper);
+        setLoading(false);
+      } else {
+        setPaper(null);
+        setLoading(true);
+      }
+
       try {
         const [paperResult, bookmarkResult] = await Promise.allSettled([
           getPaperById(paperId),
           isLoggedIn ? checkBookmarked(paperId) : Promise.resolve(false),
         ]);
-        if (paperResult.status === "rejected") throw paperResult.reason;
+
         if (!cancelled) {
-          const normalized = normalizePaper(paperResult.value);
-          setPaper({ ...paperResult.value, ...normalized });
+          if (paperResult.status === "fulfilled") {
+            const normalized = normalizePaper(paperResult.value);
+            if (normalized.title !== "Untitled paper") {
+              const freshPaper = { ...paperResult.value, ...normalized };
+              setPaper(freshPaper);
+              setPersistentCachedData(`paper_detail_${paperId}`, freshPaper);
+              setError("");
+            }
+          } else if (!cachedPaper) {
+            setError(paperResult.reason?.message || "Could not load this paper.");
+          }
+
           if (bookmarkResult.status === "fulfilled") {
             const value = bookmarkResult.value;
             setSaved(Boolean(value?.bookmarked ?? value?.saved ?? value));
           }
         }
       } catch (loadError) {
-        if (!cancelled) setError(loadError.message || "Could not load this paper.");
+        if (!cancelled && !cachedPaper) {
+          setError(loadError.message || "Could not load this paper.");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

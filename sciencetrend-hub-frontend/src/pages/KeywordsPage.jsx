@@ -6,37 +6,64 @@ import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
 import { addKeywordBookmark, getBookmarkedKeywords, removeKeywordBookmark } from "../services/bookmarkService";
 import { normalizeKeyword, toArray } from "../utils/apiData";
+import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/CatalogPages.css";
 
+const KEYWORDS_CACHE_KEY = "keywords_catalog_v1";
+
+function getCachedKeywords() {
+  const cached = getPersistentCachedData(KEYWORDS_CACHE_KEY);
+  return Array.isArray(cached) && cached.length > 0 ? cached : null;
+}
+
 function KeywordsPage() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-  const [keywords, setKeywords] = useState([]);
+  const [initialKeywords] = useState(getCachedKeywords);
+  const [keywords, setKeywords] = useState(() => initialKeywords ?? []);
   const [savedIds, setSavedIds] = useState(new Set());
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialKeywords);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      setLoading(true);
+      const cachedKeywords = getCachedKeywords();
+      if (cachedKeywords) {
+        setKeywords(cachedKeywords);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+
       const requests = [getAllKeywords({ page: 0, size: 200 })];
       if (isLoggedIn) requests.push(getBookmarkedKeywords());
       const [keywordsResult, savedResult] = await Promise.allSettled(requests);
       if (cancelled) return;
+
       if (keywordsResult.status === "fulfilled") {
-        setKeywords(toArray(keywordsResult.value, ["keywords"]).map(normalizeKeyword));
-      } else {
+        const freshKeywords = toArray(keywordsResult.value, ["keywords"])
+          .map(normalizeKeyword)
+          .filter((keyword) => keyword.name !== "Untitled keyword");
+        if (freshKeywords.length > 0) {
+          setKeywords(freshKeywords);
+          setPersistentCachedData(KEYWORDS_CACHE_KEY, freshKeywords);
+        } else if (!cachedKeywords) {
+          setKeywords([]);
+        }
+      } else if (!cachedKeywords) {
         setError(keywordsResult.reason?.message || "Could not load keywords.");
       }
-      setSavedIds(new Set(
-        savedResult?.status === "fulfilled"
-          ? toArray(savedResult.value, ["keywords"]).map((item, index) => String(normalizeKeyword(item, index).id))
-          : [],
-      ));
+
+      if (savedResult?.status === "fulfilled") {
+        setSavedIds(new Set(
+          toArray(savedResult.value, ["keywords"])
+            .map((item, index) => String(normalizeKeyword(item, index).id)),
+        ));
+      }
       setLoading(false);
     }
     load();

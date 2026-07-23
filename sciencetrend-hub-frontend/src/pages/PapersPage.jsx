@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiSearch, FiX, FiFilter, FiChevronDown } from "react-icons/fi";
 import PaperCard from "../components/PaperCard";
@@ -8,12 +8,70 @@ import { toggleBookmark } from "../services/bookmarkService";
 import { getAllTopics } from "../services/topicService";
 import { getAllKeywords } from "../services/keywordService";
 import { normalizePaper, toArray, formatNumber } from "../utils/apiData";
+import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { useAuth } from "../context/useAuth";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/PapersPage.css";
 
 /* ── Toast Hook ── */
+const PAPERS_METADATA_CACHE_KEY = "papers_filter_metadata_v1";
+
+function buildPapersParams({
+  pageNum = 0,
+  resultsPerPage = 10,
+  sortBy = "citationCount",
+  search = "",
+  keyword = "",
+  author = "",
+  journal = "",
+  topic = "all",
+  yearFrom = "",
+  yearTo = "",
+}) {
+  const params = {
+    page: pageNum,
+    size: resultsPerPage,
+    sortBy,
+    sortDir: "desc",
+  };
+
+  if (search.trim()) params.search = search.trim();
+  if (keyword.trim()) params.keyword = keyword.trim();
+  if (author.trim()) params.author = author.trim();
+  if (journal.trim()) params.journal = journal.trim();
+  if (topic && topic !== "all") params.topic = topic;
+  if (yearFrom) params.yearFrom = parseInt(yearFrom);
+  if (yearTo) params.yearTo = parseInt(yearTo);
+  return params;
+}
+
+function getPapersCacheKey(params) {
+  const stableParams = Object.fromEntries(
+    Object.entries(params).sort(([left], [right]) => left.localeCompare(right)),
+  );
+  return `papers_query_v1_${JSON.stringify(stableParams)}`;
+}
+
+function getCachedPapersResult(params) {
+  const cached = getPersistentCachedData(getPapersCacheKey(params));
+  return cached
+    && typeof cached === "object"
+    && Array.isArray(cached.papers)
+    && cached.papers.length > 0
+    ? cached
+    : null;
+}
+
+function getCachedPapersMetadata() {
+  const cached = getPersistentCachedData(PAPERS_METADATA_CACHE_KEY);
+  if (!cached || typeof cached !== "object") return { topics: [], keywords: [] };
+  return {
+    topics: Array.isArray(cached.topics) ? cached.topics : [],
+    keywords: Array.isArray(cached.keywords) ? cached.keywords : [],
+  };
+}
+
 function useToast() {
   const [toast, setToast] = useState(null);
   useEffect(() => {
@@ -35,44 +93,74 @@ function PapersPage() {
   const { isLoggedIn } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
+  const initialKeyword = searchParams.get("keyword") || "";
+  const initialAuthor = searchParams.get("author") || "";
+  const initialJournal = searchParams.get("journal") || "";
+  const initialTopic = searchParams.get("topic") || "all";
+  const initialParams = buildPapersParams({
+    search: searchQuery,
+    keyword: initialKeyword,
+    author: initialAuthor,
+    journal: initialJournal,
+    topic: initialTopic,
+  });
+  const [initialMetadata] = useState(getCachedPapersMetadata);
+  const [initialResult] = useState(() => getCachedPapersResult(initialParams));
 
   // Dynamic filter states
   const [searchVal, setSearchVal] = useState(searchQuery);
-  const [keywordInput, setKeywordInput] = useState(searchParams.get("keyword") || "");
-  const [authorInput, setAuthorInput] = useState(searchParams.get("author") || "");
-  const [journalInput, setJournalInput] = useState(searchParams.get("journal") || "");
-  const [topicInput, setTopicInput] = useState(searchParams.get("topic") || "all");
+  const [keywordInput, setKeywordInput] = useState(initialKeyword);
+  const [authorInput, setAuthorInput] = useState(initialAuthor);
+  const [journalInput, setJournalInput] = useState(initialJournal);
+  const [topicInput, setTopicInput] = useState(initialTopic);
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
   const [sortBy, setSortBy] = useState("citationCount");
   const [resultsPerPage, setResultsPerPage] = useState(10);
 
   // Lists for dropdown options
-  const [availableTopics, setAvailableTopics] = useState([]);
-  const [availableKeywords, setAvailableKeywords] = useState([]);
+  const [availableTopics, setAvailableTopics] = useState(initialMetadata.topics);
+  const [availableKeywords, setAvailableKeywords] = useState(initialMetadata.keywords);
 
   // Data states
-  const [papers, setPapers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [papers, setPapers] = useState(() => initialResult?.papers ?? []);
+  const [loading, setLoading] = useState(!initialResult);
   const [errorMessage, setErrorMessage] = useState("");
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
+  const [page, setPage] = useState(initialResult?.page ?? 0);
+  const [totalPages, setTotalPages] = useState(initialResult?.totalPages ?? 0);
+  const [totalElements, setTotalElements] = useState(initialResult?.totalElements ?? 0);
+  const loadRequestIdRef = useRef(0);
   const { toast, showToast } = useToast();
 
   // Load available keywords and topics for filters
   useEffect(() => {
     async function fetchMetadata() {
       try {
+        const cachedMetadata = getCachedPapersMetadata();
         const [topicsRes, keywordsRes] = await Promise.allSettled([
           getAllTopics(),
           getAllKeywords(),
         ]);
+
+        const freshTopics = topicsRes.status === "fulfilled"
+          ? toArray(topicsRes.value)
+          : [];
+        const freshKeywords = keywordsRes.status === "fulfilled"
+          ? toArray(keywordsRes.value)
+          : [];
+        const nextMetadata = {
+          topics: freshTopics.length > 0 ? freshTopics : cachedMetadata.topics,
+          keywords: freshKeywords.length > 0 ? freshKeywords : cachedMetadata.keywords,
+        };
+
         if (topicsRes.status === "fulfilled") {
-          setAvailableTopics(toArray(topicsRes.value));
+          setAvailableTopics(nextMetadata.topics);
         }
         if (keywordsRes.status === "fulfilled") {
-          setAvailableKeywords(toArray(keywordsRes.value));
+          setAvailableKeywords(nextMetadata.keywords);
+        }
+        if (freshTopics.length > 0 || freshKeywords.length > 0) {
+          setPersistentCachedData(PAPERS_METADATA_CACHE_KEY, nextMetadata);
         }
       } catch (err) {
         // Suppress verbose metadata errors in production logs
@@ -84,44 +172,74 @@ function PapersPage() {
 
   // Fetch papers from backend based on dynamic active filters
   const loadPapers = useCallback(async (pageNum = 0, currentSearchQuery = searchVal) => {
-    try {
+    const requestId = loadRequestIdRef.current + 1;
+    loadRequestIdRef.current = requestId;
+    const params = buildPapersParams({
+      pageNum,
+      resultsPerPage,
+      sortBy,
+      search: currentSearchQuery,
+      keyword: keywordInput,
+      author: authorInput,
+      journal: journalInput,
+      topic: topicInput,
+      yearFrom,
+      yearTo,
+    });
+    const cacheKey = getPapersCacheKey(params);
+    const cachedResult = getCachedPapersResult(params);
+
+    if (cachedResult) {
+      setPapers(cachedResult.papers);
+      setTotalPages(cachedResult.totalPages);
+      setTotalElements(cachedResult.totalElements);
+      setPage(cachedResult.page);
+      setLoading(false);
+    } else {
       setLoading(true);
+    }
+
+    try {
       setErrorMessage("");
 
-      const params = {
-        page: pageNum,
-        size: resultsPerPage,
-        sortBy: sortBy,
-        sortDir: "desc",
-      };
-
-      if (currentSearchQuery.trim()) params.search = currentSearchQuery.trim();
-      if (keywordInput.trim()) params.keyword = keywordInput.trim();
-      if (authorInput.trim()) params.author = authorInput.trim();
-      if (journalInput.trim()) params.journal = journalInput.trim();
-      if (topicInput && topicInput !== "all") params.topic = topicInput;
-      if (yearFrom) params.yearFrom = parseInt(yearFrom);
-      if (yearTo) params.yearTo = parseInt(yearTo);
-
       const response = await getPapers(params);
+      if (requestId !== loadRequestIdRef.current) return;
       const items = toArray(response);
-
-      setPapers(
-        items.map((p, idx) => ({
-          ...normalizePaper(p, idx),
-          rank: pageNum * resultsPerPage + idx + 1,
+      const freshPapers = items
+        .map((paper, index) => ({
+          ...normalizePaper(paper, index),
+          rank: pageNum * resultsPerPage + index + 1,
         }))
-      );
-      setTotalPages(response?.totalPages ?? 0);
-      setTotalElements(response?.totalElements ?? items.length);
-      setPage(pageNum);
+        .filter((paper) => paper.title !== "Untitled paper");
+
+      if (freshPapers.length > 0) {
+        const freshResult = {
+          papers: freshPapers,
+          totalPages: response?.totalPages ?? 0,
+          totalElements: response?.totalElements ?? items.length,
+          page: pageNum,
+        };
+        setPapers(freshResult.papers);
+        setTotalPages(freshResult.totalPages);
+        setTotalElements(freshResult.totalElements);
+        setPage(freshResult.page);
+        setPersistentCachedData(cacheKey, freshResult);
+      } else if (!cachedResult) {
+        setPapers([]);
+        setTotalPages(response?.totalPages ?? 0);
+        setTotalElements(response?.totalElements ?? 0);
+        setPage(pageNum);
+      }
     } catch (error) {
-      // Gracefully capture query errors and warn
       console.warn("Papers query load failed", error);
-      setPapers([]);
-      setErrorMessage(error.message || "Couldn't load papers. Try again in a moment.");
+      if (!cachedResult && requestId === loadRequestIdRef.current) {
+        setPapers([]);
+        setErrorMessage(error.message || "Couldn't load papers. Try again in a moment.");
+      }
     } finally {
-      setLoading(false);
+      if (requestId === loadRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [keywordInput, authorInput, journalInput, topicInput, yearFrom, yearTo, sortBy, resultsPerPage, searchVal]);
 
