@@ -24,10 +24,25 @@ export function triggerAdminSync() {
   return apiRequest("/admin/sync", { method: "POST" });
 }
 
-export function triggerAdminBackfill({ fromYear, toYear }) {
+export function triggerAdminBackfill({
+  fromYear,
+  toYear,
+  fieldIds = ["17"],
+  maxResults,
+}) {
+  const body = {
+    fromYear,
+    toYear,
+    fieldIds,
+  };
+
+  if (maxResults) {
+    body.maxResults = maxResults;
+  }
+
   return apiRequest("/admin/sync/backfill", {
     method: "POST",
-    body: { fromYear, toYear },
+    body,
     // Historical OpenAlex imports can take longer than regular API requests.
     timeout: 120000,
   });
