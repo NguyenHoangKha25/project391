@@ -359,26 +359,43 @@
   padding-top: 6px;
   margin: 6px 0 0 0;
 }
-.comparison-legend-row {
+/* Multi-Line Comparison Chart Panel Styles (Matching User Image) */
+.multi-line-comp-panel {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-  border-top: 1px solid rgba(230, 222, 211, 0.4);
-  padding-top: 6px;
+  flex-direction: column;
 }
-.legend-chip-item {
-  display: inline-flex;
+.multi-line-legend-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+.multi-line-legend-item {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--st-muted-strong);
+  gap: 7px;
+  font-size: 10.5px;
+  font-weight: 750;
+  color: #334155;
+  line-height: 1.2;
 }
-.legend-chip-item .dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
+.legend-dot-pill {
+  width: 14px;
+  height: 4px;
+  border-radius: 99px;
+  flex: 0 0 14px;
+}
+.multi-line-svg {
+  height: 95px !important;
+  overflow: visible !important;
+}
+.multi-line-end-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
 }
 
 /* Compact Table inside middle grid */
