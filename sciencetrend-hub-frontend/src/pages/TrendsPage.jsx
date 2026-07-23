@@ -420,10 +420,10 @@ function TrendsPage() {
   const comparisonLines = useMemo(() => {
     const defaultTopics = [
       { name: "Large Language Models", color: "#3b82f6", baseVal: 92.1 },
-      { name: "Diffusion Models", color: "#10b981", baseVal: 63.7 },
-      { name: "Graph Neural Networks", color: "#8b5cf6", baseVal: 45.6 },
-      { name: "AI for Healthcare", color: "#f97316", baseVal: 38.9 },
-      { name: "Vision-Language Models", color: "#06b6d4", baseVal: 27.4 },
+      { name: "Diffusion Models", color: "#10b981", baseVal: 68.5 },
+      { name: "Graph Neural Networks", color: "#8b5cf6", baseVal: 48.2 },
+      { name: "AI for Healthcare", color: "#f97316", baseVal: 32.0 },
+      { name: "Vision-Language Models", color: "#06b6d4", baseVal: 18.5 },
     ];
 
     const activeItems = trendTab === "keyword"
@@ -445,20 +445,20 @@ function TrendsPage() {
     const width = 680;
     const height = 230;
     const paddingLeft = 20;
-    const paddingRight = 60;
-    const paddingTop = 20;
+    const paddingRight = 65;
+    const paddingTop = 22;
     const paddingBottom = 25;
 
     const maxVal = 100;
     const minVal = 0;
     const range = maxVal - minVal;
 
-    return itemsToRender.map((item) => {
+    const rawLines = itemsToRender.map((item) => {
       const numPoints = years.length;
       const values = years.map((_, idx) => {
         const progress = idx / Math.max(1, numPoints - 1);
-        const sCurve = Math.pow(progress, 1.8);
-        const baseline = 5 + item.baseVal * 0.15;
+        const sCurve = Math.pow(progress, 1.7);
+        const baseline = 4 + item.baseVal * 0.12;
         const val = baseline + (item.baseVal - baseline) * sCurve;
         return Math.round(val * 10) / 10;
       });
@@ -494,6 +494,20 @@ function TrendsPage() {
         coords,
         finalValStr,
         finalCoord,
+        rawY: finalCoord ? finalCoord.y : 0,
+      };
+    });
+
+    let prevY = -999;
+    return rawLines.map((line) => {
+      let labelY = line.rawY + 4;
+      if (labelY - prevY < 18) {
+        labelY = prevY + 18;
+      }
+      prevY = labelY;
+      return {
+        ...line,
+        labelY,
       };
     });
   }, [trendTab, dbKeywords, trendingTopics, effectiveChartData]);
@@ -669,7 +683,7 @@ function TrendsPage() {
                     {line.finalCoord && (
                       <text
                         x={line.finalCoord.x + 8}
-                        y={line.finalCoord.y + 4}
+                        y={line.labelY || (line.finalCoord.y + 4)}
                         fill={line.color}
                         fontSize="12.5"
                         fontWeight="850"
