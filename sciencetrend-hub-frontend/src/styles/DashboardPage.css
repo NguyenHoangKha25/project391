@@ -4,47 +4,12 @@
   animation: st-rise 220ms var(--ease-out) both;
 }
 
-/* Datepicker & Control bar */
-.db-controls-row {
+/* Dashboard actions */
+.db-actions-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 12px;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 16px;
-  background: rgba(13, 27, 23, 0.72);
-}
-.db-datepicker-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.db-datepicker-icon {
-  position: absolute;
-  left: 16px;
-  color: var(--st-primary);
-  font-size: 15px;
-  pointer-events: none;
-}
-.db-datepicker-select {
-  height: 40px;
-  padding: 0 32px 0 38px;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 14px;
-  background: #11221c;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
-  font-size: 13.5px;
-  font-weight: 800;
-  color: #ffffff;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.2s ease;
-}
-.db-datepicker-select:hover {
-  border-color: rgba(52, 211, 153, 0.5);
-  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12), 0 8px 22px rgba(0, 0, 0, 0.28);
 }
 .db-refresh-btn-premium {
   min-height: 40px;
@@ -695,11 +660,7 @@
   }
 }
 @media (max-width: 768px) {
-  .db-controls-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .db-datepicker, .db-refresh-btn-premium {
+  .db-actions-row .db-refresh-btn-premium {
     width: 100%;
     justify-content: center;
   }

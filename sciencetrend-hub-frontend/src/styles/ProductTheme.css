@@ -1145,7 +1145,6 @@ textarea {
 /* Shared workspace hierarchy */
 .st-layout :is(
   .workspace-toolbar,
-  .db-controls-row,
   .admin-tabs-bar,
   .library-tabs-bar,
   .following-toolbar,
@@ -1243,7 +1242,7 @@ textarea {
   color: #64748b !important;
 }
 
-.st-layout :is(input, select, textarea, .db-datepicker-select, .workspace-select) {
+.st-layout :is(input, select, textarea, .workspace-select) {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
   border: 1px solid #cbd5e1 !important;

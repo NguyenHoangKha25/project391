@@ -270,9 +270,7 @@ function DashboardPage() {
     <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
       <div className="premium-dashboard">
         
-        {/* Date Filter & Control bar */}
-        <div className="db-controls-row">
-          <div className="db-datepicker-wrapper"><FiDatabase className="db-datepicker-icon" /><span className="db-datepicker-select">All-time catalog</span></div>
+        <div className="db-actions-row">
           <button
             type="button"
             className="db-refresh-btn-premium"
