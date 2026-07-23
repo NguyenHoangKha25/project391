@@ -10,11 +10,34 @@ import { getTrendingTopics, getTrendStats } from "../services/trendService";
 import { getAllKeywords } from "../services/keywordService";
 import { getDashboardOverview } from "../services/dashboardService";
 import { normalizeChartPoint, normalizeKeyword, normalizeTopic, toArray, formatNumber, normalizeDashboard } from "../utils/apiData";
-import { getCachedData, setCachedData } from "../utils/apiCache";
+import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/TrendsPage.css";
 
 /* ── Toast Overlay ── */
+function hasUsableTrendSeries(points) {
+  return Array.isArray(points)
+    && points.length >= 2
+    && points.some((point) => Number(point?.value) > 0);
+}
+
+function hasUsableDashboard(dashboard) {
+  if (!dashboard) return false;
+  return dashboard.totalPapers > 0
+    || dashboard.totalJournals > 0
+    || dashboard.totalKeywords > 0
+    || hasUsableTrendSeries(dashboard.papersByYear);
+}
+
+function hasUsableMetadata(metadata) {
+  return Boolean(metadata)
+    && (
+      (Array.isArray(metadata.trendingTopics) && metadata.trendingTopics.length > 0)
+      || (Array.isArray(metadata.dbKeywords) && metadata.dbKeywords.length > 0)
+      || hasUsableDashboard(metadata.dashboard)
+    );
+}
+
 function useToast() {
   const [toast, setToast] = useState(null);
   useEffect(() => {
@@ -57,13 +80,14 @@ function TrendsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    const cacheKey = "trends_metadata_v2";
-    const cached = getCachedData(cacheKey, 300000);
+    const cacheKey = "trends_metadata_v3";
+    const storedMetadata = getPersistentCachedData(cacheKey);
+    const cached = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
 
     function applyMetadata(metadata) {
       if (cancelled) return;
-      const topics = metadata.trendingTopics ?? [];
-      const keywords = metadata.dbKeywords ?? [];
+      const topics = Array.isArray(metadata.trendingTopics) ? metadata.trendingTopics : [];
+      const keywords = Array.isArray(metadata.dbKeywords) ? metadata.dbKeywords : [];
       setTrendingTopics(topics);
       setDbKeywords(keywords);
       setDashboard(metadata.dashboard ?? null);
@@ -75,13 +99,13 @@ function TrendsPage() {
     }
 
     function updateMetadata(patch) {
-      const current = getCachedData(cacheKey, Number.MAX_SAFE_INTEGER) ?? cached ?? {
+      const current = getPersistentCachedData(cacheKey) ?? cached ?? {
         trendingTopics: [],
         dbKeywords: [],
         dashboard: null,
       };
       const next = { ...current, ...patch };
-      setCachedData(cacheKey, next);
+      setPersistentCachedData(cacheKey, next);
       applyMetadata(next);
     }
 
@@ -92,19 +116,36 @@ function TrendsPage() {
 
     const metadataRequests = [
       getTrendingTopics({ limit: 10 }).then((response) => {
-        updateMetadata({ trendingTopics: toArray(response).map(normalizeTopic) });
+        const topics = toArray(response)
+          .map(normalizeTopic)
+          .filter((topic) => topic.name && topic.name !== "Untitled topic");
+        if (topics.length === 0) return false;
+        updateMetadata({ trendingTopics: topics });
+        return true;
       }),
       getAllKeywords({ page: 0, size: 100 }).then((response) => {
-        updateMetadata({ dbKeywords: toArray(response, ["keywords"]).map(normalizeKeyword).map((keyword) => keyword.name) });
+        const keywords = toArray(response, ["keywords"])
+          .map(normalizeKeyword)
+          .map((keyword) => keyword.name)
+          .filter((keyword) => keyword && keyword !== "Untitled keyword");
+        if (keywords.length === 0) return false;
+        updateMetadata({ dbKeywords: keywords });
+        return true;
       }),
       getDashboardOverview().then((response) => {
-        updateMetadata({ dashboard: normalizeDashboard(response) });
+        const nextDashboard = normalizeDashboard(response);
+        if (!hasUsableDashboard(nextDashboard)) return false;
+        updateMetadata({ dashboard: nextDashboard });
+        return true;
       }),
     ];
 
     Promise.allSettled(metadataRequests).then((results) => {
-      if (!cancelled && !cached && results.every((result) => result.status === "rejected")) {
-        setErrorMessage("Could not load trend catalog data. Please try again.");
+      const receivedFreshData = results.some(
+        (result) => result.status === "fulfilled" && result.value === true,
+      );
+      if (!cancelled && !cached && !receivedFreshData) {
+        setErrorMessage("Trend catalog data is not available yet. Please try again.");
       }
     }).finally(() => {
       if (!cancelled) setMetadataLoading(false);
@@ -127,14 +168,12 @@ function TrendsPage() {
     let cancelled = false;
     const normalizedTerm = activeTrendTerm.trim().toLowerCase();
     const cacheKey = `trend_series_${trendTab}_${normalizedTerm}`;
-    const cached = getCachedData(cacheKey, 300000);
+    const storedSeries = getPersistentCachedData(cacheKey);
+    const cached = hasUsableTrendSeries(storedSeries) ? storedSeries : null;
 
     if (cached) {
       setChartData(cached);
       setChartLoading(false);
-      return () => {
-        cancelled = true;
-      };
     } else {
       setChartData([]);
       setChartLoading(true);
@@ -144,8 +183,14 @@ function TrendsPage() {
       .then((response) => {
         if (cancelled) return;
         const points = toArray(response).map(normalizeChartPoint);
+        if (!hasUsableTrendSeries(points)) {
+          if (!cached) {
+            setErrorMessage("No data is available for the selected trend yet.");
+          }
+          return;
+        }
         setChartData(points);
-        setCachedData(cacheKey, points);
+        setPersistentCachedData(cacheKey, points);
         setErrorMessage("");
       })
       .catch((error) => {
@@ -221,7 +266,7 @@ function TrendsPage() {
 
   // Compute clean, aggregated chart data grouped by valid Year (max 8-10 years)
   const effectiveChartData = useMemo(() => {
-    let sourceData = [];
+    let sourceData;
 
     if (Array.isArray(chartData) && chartData.length >= 2 && chartData.some((pt) => (pt?.value ?? 0) > 0)) {
       sourceData = chartData;
