@@ -485,10 +485,7 @@ function DashboardPage() {
           {/* Card 1: Top Cited Papers */}
           <article className="table-card glassmorphic-panel">
             <div className="panel-header-row">
-              <div>
-                <span className="db-eyebrow" style={{ display: "none" }}>Most cited</span>
-                <h3>Top Cited Papers</h3>
-              </div>
+              <h3>Top Cited Papers</h3>
               <Link to="/papers" className="footer-link">
                 Browse all <FiArrowUpRight />
               </Link>
@@ -498,34 +495,39 @@ function DashboardPage() {
               <table className="premium-table">
                 <thead>
                   <tr>
-                    <th>Paper</th>
-                    <th>Year</th>
-                    <th style={{ textAlign: "right" }}>Citations</th>
-                    <th style={{ textAlign: "right" }}>Citations / Year</th>
+                    <th style={{ width: "55%" }}>Paper</th>
+                    <th style={{ width: "12%" }}>Year</th>
+                    <th style={{ width: "18%", textAlign: "right" }}>Citations</th>
+                    <th style={{ width: "15%", textAlign: "right" }}>Citations / Yr</th>
                   </tr>
                 </thead>
                 <tbody>
                   {topCitedPapers.length > 0 ? (
-                    topCitedPapers.map((paper, idx) => (
-                      <tr key={paper.id}>
-                        <td>
-                          <div className="paper-info-col">
-                            <span className="paper-rank">{idx + 1}</span>
-                            <div>
-                              <h4 className="paper-title-link">{paper.title}</h4>
-                              <p className="paper-authors-sub">{paper.authors}</p>
+                    topCitedPapers.map((paper, idx) => {
+                      const cleanTitle = (paper.title || "").replace(/<[^>]*>?/gm, "");
+                      return (
+                        <tr key={paper.id || idx}>
+                          <td>
+                            <div className="paper-info-col">
+                              <span className={`paper-rank-badge rank-bg-${idx % 3}`}>{idx + 1}</span>
+                              <div>
+                                <h4 className="paper-title-link" title={cleanTitle}>{cleanTitle}</h4>
+                                <p className="paper-authors-sub">{paper.authors}</p>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td>{paper.year}</td>
-                        <td style={{ textAlign: "right", fontWeight: 800, color: "var(--st-heading)" }}>
-                          {formatNumber(paper.citationCount)}
-                        </td>
-                        <td style={{ textAlign: "right", color: "var(--st-success)", fontWeight: 700 }}>
-                          {paper.citationsPerYear > 0 ? `+${paper.citationsPerYear}/yr` : "—"}
-                        </td>
-                      </tr>
-                    ))
+                          </td>
+                          <td style={{ fontWeight: "750", color: "#64748b" }}>{paper.year}</td>
+                          <td style={{ textAlign: "right" }}>
+                            <span className="pub-count-pill" style={{ background: "rgba(37, 99, 235, 0.08)", color: "#1d4ed8" }}>
+                              {formatNumber(paper.citationCount)}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: "right", color: "#047857", fontWeight: "800", fontSize: "12px" }}>
+                            {paper.citationsPerYear > 0 ? `+${paper.citationsPerYear}/yr` : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
                       <td colSpan="4" style={{ textAlign: "center", padding: "40px 0", color: "var(--st-muted-strong)", fontSize: "13px" }}>
@@ -555,11 +557,13 @@ function DashboardPage() {
                       <strong>{topic.name}</strong>
                       <span className="topic-badge">Trending</span>
                     </div>
-                    <p className="topic-mini-desc">{topic.description}</p>
+                    {topic.description && (
+                      <p className="topic-mini-desc">{topic.description}</p>
+                    )}
                     <div className="topic-mini-stats">
-                      <span>{formatNumber(topic.paperCount)} papers</span>
-                      <span>•</span>
-                      <span>{formatNumber(topic.followerCount)} followers</span>
+                      <span>{formatNumber(topic.paperCount || 0)} papers</span>
+                      <span className="dot-sep">•</span>
+                      <span>{formatNumber(topic.followerCount || 0)} followers</span>
                     </div>
                   </div>
                 ))
