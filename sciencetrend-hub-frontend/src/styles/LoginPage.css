@@ -358,8 +358,91 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  border-radius: 99px;
-  text-transform: uppercase;
+  font-size: 12.5px;
+  font-weight: 750;
+  color: #e2e8f0;
+}
+.auth-widget-trend-label .trend-icon {
+  color: #34d399;
+  font-size: 15px;
+}
+.trend-growth-badge {
+  font-size: 11px;
+  font-weight: 850;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.auth-widget-svg-wrap {
+  width: 100%;
+  height: 44px;
+  margin-top: 4px;
+}
+.auth-widget-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Registration Page Specific Hero Styling */
+.auth-badge.reg-badge {
+  border-color: rgba(251, 191, 36, 0.4) !important;
+  color: #fbbf24 !important;
+  background: rgba(251, 191, 36, 0.08) !important;
+}
+.auth-badge.reg-badge::before {
+  background: #fbbf24;
+  box-shadow: 0 0 10px #fbbf24;
+}
+
+.reg-title {
+  background: linear-gradient(135deg, #ffffff 0%, #38bdf8 45%, #fbbf24 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+.auth-widget-dot.dot-amber {
+  background: #fbbf24;
+  box-shadow: 0 0 10px #fbbf24;
+}
+.auth-widget-badge.badge-amber {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.reg-checklist-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.reg-check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 650;
+  color: #e2e8f0;
+}
+.reg-check-icon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.18);
+  color: #34d399;
+  font-size: 12px;
+  font-weight: 900;
 }
 .badge-q1 {
   background: rgba(89, 215, 149, 0.12);

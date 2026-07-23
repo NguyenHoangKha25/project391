@@ -175,71 +175,52 @@ function RegisterPage() {
 
           <div className="auth-left-premium-content">
             <div className="auth-premium-hero">
-              <span className="auth-badge">START YOUR RESEARCH</span>
-              <h2>Accelerate Your Research Discovery</h2>
+              <span className="auth-badge reg-badge">✦ MEMBER ONBOARDING</span>
+              <h2 className="reg-title">Unlock Full Academic Workspace</h2>
               <p>
-                Create your workspace to explore publication analytics, track journals, and export structured research reports.
+                Join thousands of researchers tracking emerging topics, bookmarking top journals, and exporting custom analytics.
               </p>
             </div>
 
-            {/* Glassmorphic Live Analytics Preview Widget (Human-crafted SaaS style) */}
-            <div className="auth-widget-preview-card">
+            {/* Glassmorphic Member Access Preview Card */}
+            <div className="auth-widget-preview-card reg-preview-card">
               <div className="auth-widget-header">
                 <div className="auth-widget-title-group">
-                  <span className="auth-widget-dot"></span>
-                  <span className="auth-widget-title">LIVE PLATFORM METRICS</span>
+                  <span className="auth-widget-dot dot-amber"></span>
+                  <span className="auth-widget-title">RESEARCHER MEMBERSHIP</span>
                 </div>
-                <span className="auth-widget-badge">🟢 Real-Time Sync</span>
+                <span className="auth-widget-badge badge-amber">✨ Free Account</span>
               </div>
 
               {/* Stat Counters Row */}
               <div className="auth-widget-stats-grid">
                 <div className="auth-widget-stat-card">
-                  <span className="stat-num">12,200+</span>
-                  <span className="stat-label">Publications</span>
+                  <span className="stat-num">10,000+</span>
+                  <span className="stat-label">Active Users</span>
                 </div>
                 <div className="auth-widget-stat-card">
-                  <span className="stat-num">4,850+</span>
-                  <span className="stat-label">Top Journals</span>
+                  <span className="stat-num">150+</span>
+                  <span className="stat-label">Disciplines</span>
                 </div>
                 <div className="auth-widget-stat-card">
-                  <span className="stat-num">98.4%</span>
-                  <span className="stat-label">Accuracy Rate</span>
+                  <span className="stat-num">Instant</span>
+                  <span className="stat-label">Workspace</span>
                 </div>
               </div>
 
-              {/* Mini Trend Graph Graphic Box */}
-              <div className="auth-widget-trend-box">
-                <div className="auth-widget-trend-info">
-                  <div className="auth-widget-trend-label">
-                    <FiTrendingUp className="trend-icon" />
-                    <span>Machine Learning Trends</span>
-                  </div>
-                  <span className="trend-growth-badge">+340% Growth</span>
+              {/* Feature Checklist Box for Registration */}
+              <div className="reg-checklist-box">
+                <div className="reg-check-item">
+                  <span className="reg-check-icon"><FiCheck /></span>
+                  <span>Unlimited paper bookmarks & reading lists</span>
                 </div>
-                
-                {/* SVG Glowing Curve Preview */}
-                <div className="auth-widget-svg-wrap">
-                  <svg viewBox="0 0 340 50" className="auth-widget-svg">
-                    <defs>
-                      <linearGradient id="regSvgGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M 0,45 C 50,40 80,35 120,25 C 160,15 200,30 250,12 C 290,2 320,10 340,4"
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="2.5"
-                    />
-                    <path
-                      d="M 0,45 C 50,40 80,35 120,25 C 160,15 200,30 250,12 C 290,2 320,10 340,4 L 340,50 L 0,50 Z"
-                      fill="url(#regSvgGrad)"
-                    />
-                    <circle cx="250" cy="12" r="3.5" fill="#10b981" />
-                    <circle cx="340" cy="4" r="4.5" fill="#34d399" />
-                  </svg>
+                <div className="reg-check-item">
+                  <span className="reg-check-icon"><FiCheck /></span>
+                  <span>Follow journals & receive publication updates</span>
+                </div>
+                <div className="reg-check-item">
+                  <span className="reg-check-icon"><FiCheck /></span>
+                  <span>Export structured summary & growth reports</span>
                 </div>
               </div>
             </div>
