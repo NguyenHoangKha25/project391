@@ -197,14 +197,29 @@ function TrendsPage() {
   const trendingKeywords = useMemo(() => {
     if (Array.isArray(dbKeywords) && dbKeywords.length > 0) {
       return dbKeywords.map((kw, idx) => {
-        const name = typeof kw === "string" ? kw : (kw.name || "Keyword");
-        const countVal = typeof kw === "object" && kw.paperCount ? kw.paperCount : Math.round(250 + (idx * 97) % 650);
-        const growthVal = Math.round(140 + (idx * 73) % 380);
+        const name = typeof kw === "string" ? kw : (kw.name || kw.keyword || kw.term || "Keyword");
+        const rawCount = typeof kw === "object" ? (kw.paperCount ?? kw.count ?? kw.paper_count ?? kw.totalPapers) : null;
+        const countNum = Number(rawCount);
+        
+        let displayCount = "";
+        if (Number.isFinite(countNum) && countNum > 0) {
+          displayCount = `${formatNumber(countNum)} papers`;
+        } else if (typeof rawCount === "string" && rawCount.trim()) {
+          displayCount = rawCount.includes("paper") ? rawCount : `${rawCount} papers`;
+        } else {
+          displayCount = `${Math.round(250 + (idx * 97) % 650)} papers`;
+        }
+
+        const rawGrowth = typeof kw === "object" ? (kw.growth ?? kw.growthRate ?? kw.percentage) : null;
+        const growthStr = rawGrowth !== null && rawGrowth !== undefined
+          ? (String(rawGrowth).startsWith("+") ? String(rawGrowth) : `+${rawGrowth}%`)
+          : `+${Math.round(140 + (idx * 73) % 380)}%`;
+
         return {
           id: kw.id ?? idx + 1,
           name,
-          paperCount: `${countVal} papers`,
-          growth: `+${growthVal}%`,
+          paperCount: displayCount,
+          growth: growthStr,
         };
       });
     }
@@ -759,8 +774,12 @@ function TrendsPage() {
                       <td style={{ textAlign: "right" }}>
                         <span className="pub-count-pill">
                           {typeof item.paperCount === "number"
-                            ? `${item.paperCount} papers`
-                            : (item.paperCount || "0 papers")}
+                            ? `${formatNumber(item.paperCount)} papers`
+                            : (item.paperCount
+                                ? (String(item.paperCount).includes("paper")
+                                    ? item.paperCount
+                                    : `${formatNumber(item.paperCount)} papers`)
+                                : "0 papers")}
                         </span>
                       </td>
                     </tr>
