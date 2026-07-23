@@ -51,6 +51,17 @@ function safeFormatPaperCount(count) {
   return "0 papers";
 }
 
+function safePaperCountValue(count) {
+  if (typeof count === "number") {
+    return formatNumber(count);
+  }
+  if (typeof count === "string" && count.trim()) {
+    const numericValue = Number(count.replace(/,/g, "").replace(/\s*papers?$/i, "").trim());
+    return Number.isFinite(numericValue) ? formatNumber(numericValue) : "0";
+  }
+  return "0";
+}
+
 function safeFormatScore(score) {
   const n = Number(score);
   return Number.isFinite(n) && n > 0 ? n.toFixed(1) : null;
@@ -496,7 +507,7 @@ function TopicsPage() {
             <div className="drawer-stats">
               <div className="drawer-stat-item">
                 <span className="label">Total Papers</span>
-                <span className="value">{activeTopic?.paperCount.split(" ")[0]}</span>
+                <span className="value">{safePaperCountValue(activeTopic?.paperCount)}</span>
               </div>
               <div className="drawer-stat-item">
                 <span className="label">Topic Status</span>
