@@ -542,10 +542,76 @@ function TrendsPage() {
       };
     });
 
+    const spreadCoordsByLine = rawLines.map((line) =>
+      line.coords.map((coord) => ({ ...coord }))
+    );
+    const pointCount = spreadCoordsByLine[0]?.length || 0;
+    const minSeriesY = paddingTop;
+    const maxSeriesY = height - paddingBottom;
+
+    for (let pointIndex = 0; pointIndex < pointCount; pointIndex += 1) {
+      const progress = pointIndex / Math.max(1, pointCount - 1);
+      const seriesGap = 7 + progress * 12;
+      const sortedAtPoint = spreadCoordsByLine
+        .map((coords, lineIndex) => ({
+          lineIndex,
+          y: coords[pointIndex].y,
+        }))
+        .sort((a, b) => a.y - b.y);
+      const resolvedY = sortedAtPoint.map(({ y }) =>
+        Math.min(maxSeriesY, Math.max(minSeriesY, y))
+      );
+
+      for (let index = 1; index < resolvedY.length; index += 1) {
+        resolvedY[index] = Math.max(
+          resolvedY[index],
+          resolvedY[index - 1] + seriesGap
+        );
+      }
+
+      if (resolvedY.at(-1) > maxSeriesY) {
+        resolvedY[resolvedY.length - 1] = maxSeriesY;
+        for (let index = resolvedY.length - 2; index >= 0; index -= 1) {
+          resolvedY[index] = Math.min(
+            resolvedY[index],
+            resolvedY[index + 1] - seriesGap
+          );
+        }
+      }
+
+      sortedAtPoint.forEach(({ lineIndex }, index) => {
+        spreadCoordsByLine[lineIndex][pointIndex].y = resolvedY[index];
+      });
+    }
+
+    const spreadLines = rawLines.map((line, lineIndex) => {
+      const coords = spreadCoordsByLine[lineIndex];
+      let linePath = "";
+
+      if (coords.length > 0) {
+        linePath = `M ${coords[0].x.toFixed(1)},${coords[0].y.toFixed(1)}`;
+        for (let index = 0; index < coords.length - 1; index += 1) {
+          const current = coords[index];
+          const next = coords[index + 1];
+          const controlX = (current.x + next.x) / 2;
+          linePath += ` C ${controlX.toFixed(1)},${current.y.toFixed(1)} ${controlX.toFixed(1)},${next.y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`;
+        }
+      }
+
+      const finalCoord = coords[coords.length - 1];
+      return {
+        ...line,
+        coords,
+        linePath,
+        finalCoord,
+        rawY: finalCoord ? finalCoord.y : 0,
+      };
+    });
+
     const labelGap = 19;
     const minLabelY = paddingTop + 4;
     const maxLabelY = height - paddingBottom + 4;
-    const sortedLines = rawLines
+    const sortedLines = spreadLines
       .map((line, index) => ({ ...line, originalIndex: index }))
       .sort((a, b) => a.rawY - b.rawY);
     const labelPositions = sortedLines.map((line) =>
@@ -573,7 +639,7 @@ function TrendsPage() {
       sortedLines.map((line, index) => [line.originalIndex, labelPositions[index]])
     );
 
-    return rawLines.map((line, index) => ({
+    return spreadLines.map((line, index) => ({
       ...line,
       labelY: resolvedLabelY.get(index) ?? line.rawY + 4,
     }));
