@@ -307,20 +307,20 @@
 /* Trends middle grid panels */
 .trends-middle-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1.2fr 1fr;
+  grid-template-columns: 1.8fr 1fr;
   gap: 14px;
   margin-bottom: 16px;
 }
 .trends-chart-panel,
 .trends-table-panel,
 .trends-bottom-panel {
-  min-height: 230px;
-  max-height: 250px;
-  padding: 16px 18px !important;
-  border-radius: 20px;
+  min-height: 420px;
+  max-height: 440px;
+  padding: 20px 22px !important;
+  border-radius: 24px;
   border: 1px solid rgba(230, 222, 211, 0.8);
   background: #ffffff;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.015);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   transition: transform 0.25s var(--ease-out), box-shadow 0.25s ease;
 }
 .trends-chart-panel:hover,
@@ -335,24 +335,26 @@
   flex-direction: column;
   gap: 2px;
   margin-top: 6px;
+  flex: 1;
 }
 .trends-svg-chart {
   width: 100%;
-  height: 90px;
+  height: 230px;
   overflow: visible;
 }
 .trends-chart-axis-x {
   display: flex;
   justify-content: space-between;
-  font-size: 9.5px;
+  font-size: 11.5px;
   color: var(--st-muted);
-  font-weight: 750;
-  padding-inline: 10px;
-  border-top: 1px dashed rgba(230, 222, 211, 0.5);
-  padding-top: 4px;
+  font-weight: 800;
+  padding-inline: 12px;
+  border-top: 1px dashed rgba(230, 222, 211, 0.6);
+  padding-top: 8px;
+  margin-top: 6px;
 }
 .trends-chart-subtext {
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--st-muted-strong);
   line-height: 1.4;
   border-top: 1px solid rgba(230, 222, 211, 0.4);
@@ -368,32 +370,32 @@
 .multi-line-legend-container {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  margin-top: 4px;
-  margin-bottom: 2px;
+  gap: 5px;
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 .multi-line-legend-item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 10.5px;
-  font-weight: 750;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 780;
   color: #334155;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 .legend-dot-pill {
-  width: 14px;
-  height: 4px;
+  width: 18px;
+  height: 5px;
   border-radius: 99px;
-  flex: 0 0 14px;
+  flex: 0 0 18px;
 }
 .multi-line-svg {
-  height: 95px !important;
+  height: 240px !important;
   overflow: visible !important;
 }
 .multi-line-end-label {
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 850;
   letter-spacing: -0.02em;
 }

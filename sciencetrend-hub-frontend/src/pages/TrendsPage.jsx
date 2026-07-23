@@ -442,12 +442,12 @@ function TrendsPage() {
       ? effectiveChartData.map((pt) => pt.label)
       : [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
-    const width = 420;
-    const height = 150;
-    const paddingLeft = 14;
-    const paddingRight = 48;
-    const paddingTop = 16;
-    const paddingBottom = 20;
+    const width = 680;
+    const height = 230;
+    const paddingLeft = 20;
+    const paddingRight = 60;
+    const paddingTop = 20;
+    const paddingBottom = 25;
 
     const maxVal = 100;
     const minVal = 0;
@@ -620,64 +620,8 @@ function TrendsPage() {
           </div>
         </div>
 
-        {/* Middle row: Area chart, lines comparison chart, top trending table */}
+        {/* Middle row: Multi-line comparison chart and top trending table */}
         <div className="trends-middle-grid">
-          
-          {/* Card 1: Area Chart */}
-          <article className="trends-chart-panel glassmorphic-panel">
-            <div className="panel-header-row">
-              <h3>Publication Count by Year</h3>
-              <span className="badge-chip badge-purple">Yearly</span>
-            </div>
-            <div className="trends-svg-chart-container">
-              {areaChartPathData.points.length > 0 ? (
-                <>
-                  <svg viewBox="0 0 380 120" className="trends-svg-chart">
-                    <defs>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.45" />
-                        <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.05" />
-                      </linearGradient>
-                      <linearGradient id="areaLineGrad" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#8b5cf6" />
-                        <stop offset="50%" stopColor="#3b82f6" />
-                        <stop offset="100%" stopColor="#06b6d4" />
-                      </linearGradient>
-                    </defs>
-                    <path d={areaChartPathData.areaPath} fill="url(#areaGrad)" />
-                    <path d={areaChartPathData.linePath} fill="none" stroke="url(#areaLineGrad)" strokeWidth="3.2" strokeLinecap="round" />
-                    {areaChartPathData.coords.map((c, i) => (
-                      <circle 
-                        key={i} 
-                        cx={c.x} 
-                        cy={c.y} 
-                        r="4" 
-                        fill="#ffffff" 
-                        stroke="#8b5cf6" 
-                        strokeWidth="2.5"
-                        className="trend-chart-point"
-                      >
-                        <title>{`Year ${c.label}: ${c.value} papers`}</title>
-                      </circle>
-                    ))}
-                  </svg>
-                  <div className="trends-chart-axis-x">
-                    <span>{areaChartPathData.labels[0] || "2019"}</span>
-                    <span>{areaChartPathData.labels[Math.floor(areaChartPathData.labels.length / 2)] || "2022"}</span>
-                    <span>{areaChartPathData.labels[areaChartPathData.labels.length - 1] || "2026"}</span>
-                  </div>
-                </>
-              ) : (
-                <div className="chart-empty-placeholder" style={{ display: "grid", placeItems: "center", width: "100%", height: "100px", color: "var(--st-muted-strong)", fontSize: "13px" }}>
-                  No yearly publication data found.
-                </div>
-              )}
-            </div>
-            <p className="trends-chart-subtext">
-              Annual publication distribution & growth trajectory.
-            </p>
-          </article>
 
           {/* Card 2: Keyword/Topic Comparison */}
           <article className="trends-chart-panel glassmorphic-panel multi-line-comp-panel">
@@ -697,14 +641,14 @@ function TrendsPage() {
             </div>
 
             <div className="trends-svg-chart-container">
-              <svg viewBox="0 0 420 150" className="trends-svg-chart multi-line-svg">
+              <svg viewBox="0 0 680 230" className="trends-svg-chart multi-line-svg">
                 {comparisonLines.map((line, idx) => (
                   <g key={idx} className="multi-line-group">
                     <path
                       d={line.linePath}
                       fill="none"
                       stroke={line.color}
-                      strokeWidth="2.8"
+                      strokeWidth="3.5"
                       strokeLinecap="round"
                     />
                     {line.coords.map((c, i) => (
@@ -712,10 +656,10 @@ function TrendsPage() {
                         key={i}
                         cx={c.x}
                         cy={c.y}
-                        r="3.5"
+                        r="4.5"
                         fill="#ffffff"
                         stroke={line.color}
-                        strokeWidth="2"
+                        strokeWidth="2.8"
                         className="trend-chart-point"
                       >
                         <title>{`${line.label} (${c.label}): ${c.value}K papers`}</title>
@@ -724,11 +668,11 @@ function TrendsPage() {
                     {/* End of line value label (e.g. 92.1K) */}
                     {line.finalCoord && (
                       <text
-                        x={line.finalCoord.x + 6}
+                        x={line.finalCoord.x + 8}
                         y={line.finalCoord.y + 4}
                         fill={line.color}
-                        fontSize="10.5"
-                        fontWeight="800"
+                        fontSize="12.5"
+                        fontWeight="850"
                         className="multi-line-end-label"
                       >
                         {line.finalValStr}
