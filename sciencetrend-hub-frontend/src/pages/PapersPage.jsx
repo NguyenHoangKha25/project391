@@ -20,7 +20,7 @@ const PAPERS_METADATA_CACHE_KEY = "papers_filter_metadata_v1";
 function buildPapersParams({
   pageNum = 0,
   resultsPerPage = 10,
-  sortBy = "citationCount",
+  sortBy = "",
   search = "",
   keyword = "",
   author = "",
@@ -32,10 +32,12 @@ function buildPapersParams({
   const params = {
     page: pageNum,
     size: resultsPerPage,
-    sortBy,
-    sortDir: "desc",
   };
 
+  if (sortBy) {
+    params.sortBy = sortBy;
+    params.sortDir = "desc";
+  }
   if (search.trim()) params.search = search.trim();
   if (keyword.trim()) params.keyword = keyword.trim();
   if (author.trim()) params.author = author.trim();
@@ -115,7 +117,7 @@ function PapersPage() {
   const [topicInput, setTopicInput] = useState(initialTopic);
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
-  const [sortBy, setSortBy] = useState("citationCount");
+  const [sortBy, setSortBy] = useState("");
   const [resultsPerPage, setResultsPerPage] = useState(10);
 
   // Lists for dropdown options
@@ -171,20 +173,20 @@ function PapersPage() {
   }, []);
 
   // Fetch papers from backend based on dynamic active filters
-  const loadPapers = useCallback(async (pageNum = 0, currentSearchQuery = searchVal) => {
+  const loadPapers = useCallback(async (pageNum = 0, currentSearchQuery = searchVal, overrides = {}) => {
     const requestId = loadRequestIdRef.current + 1;
     loadRequestIdRef.current = requestId;
     const params = buildPapersParams({
       pageNum,
-      resultsPerPage,
-      sortBy,
+      resultsPerPage: overrides.resultsPerPage ?? resultsPerPage,
+      sortBy: overrides.sortBy ?? sortBy,
       search: currentSearchQuery,
-      keyword: keywordInput,
-      author: authorInput,
-      journal: journalInput,
-      topic: topicInput,
-      yearFrom,
-      yearTo,
+      keyword: overrides.keyword ?? keywordInput,
+      author: overrides.author ?? authorInput,
+      journal: overrides.journal ?? journalInput,
+      topic: overrides.topic ?? topicInput,
+      yearFrom: overrides.yearFrom ?? yearFrom,
+      yearTo: overrides.yearTo ?? yearTo,
     });
     const cacheKey = getPapersCacheKey(params);
     const cachedResult = getCachedPapersResult(params);
@@ -208,7 +210,7 @@ function PapersPage() {
       const freshPapers = items
         .map((paper, index) => ({
           ...normalizePaper(paper, index),
-          rank: pageNum * resultsPerPage + index + 1,
+          rank: pageNum * params.size + index + 1,
         }))
         .filter((paper) => paper.title !== "Untitled paper");
 
@@ -265,14 +267,23 @@ function PapersPage() {
     setTopicInput("all");
     setYearFrom("");
     setYearTo("");
-    setSortBy("citationCount");
+    setSortBy("");
     setResultsPerPage(10);
     setSearchVal("");
     setSearchParams({}); // Clear query parameter from URL as well
     
     // Trigger load with empty filters
     setTimeout(() => {
-      loadPapers(0, "");
+      loadPapers(0, "", {
+        keyword: "",
+        author: "",
+        journal: "",
+        topic: "all",
+        yearFrom: "",
+        yearTo: "",
+        sortBy: "",
+        resultsPerPage: 10,
+      });
     }, 50);
   }
 
@@ -284,23 +295,23 @@ function PapersPage() {
       loadPapers(0, "");
     } else if (type === "keyword") {
       setKeywordInput("");
-      setTimeout(() => loadPapers(0), 50);
+      setTimeout(() => loadPapers(0, searchVal, { keyword: "" }), 50);
     } else if (type === "author") {
       setAuthorInput("");
-      setTimeout(() => loadPapers(0), 50);
+      setTimeout(() => loadPapers(0, searchVal, { author: "" }), 50);
     } else if (type === "journal") {
       setJournalInput("");
-      setTimeout(() => loadPapers(0), 50);
+      setTimeout(() => loadPapers(0, searchVal, { journal: "" }), 50);
     } else if (type === "topic") {
       setTopicInput("all");
-      setTimeout(() => loadPapers(0), 50);
+      setTimeout(() => loadPapers(0, searchVal, { topic: "all" }), 50);
     } else if (type === "year") {
       setYearFrom("");
       setYearTo("");
-      setTimeout(() => loadPapers(0), 50);
+      setTimeout(() => loadPapers(0, searchVal, { yearFrom: "", yearTo: "" }), 50);
     } else if (type === "sort") {
-      setSortBy("year");
-      setTimeout(() => loadPapers(0), 50);
+      setSortBy("");
+      setTimeout(() => loadPapers(0, searchVal, { sortBy: "" }), 50);
     }
   }
 
@@ -359,8 +370,12 @@ function PapersPage() {
   if (yearFrom || yearTo) {
     activeChips.push({ type: "year", label: `Year: ${yearFrom || "Min"} - ${yearTo || "Max"}` });
   }
-  if (sortBy !== "year") {
-    const sortLabel = sortBy === "citationCount" ? "Most Cited" : sortBy === "title" ? "Title" : sortBy;
+  if (sortBy) {
+    const sortLabel = sortBy === "citationCount"
+      ? "Most Cited"
+      : sortBy === "title"
+        ? "Title"
+        : "Publication Year";
     activeChips.push({ type: "sort", label: `Sort: ${sortLabel}` });
   }
 
@@ -509,6 +524,7 @@ function PapersPage() {
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                   >
+                    <option value="">Default order</option>
                     <option value="citationCount">Most Cited</option>
                     <option value="year">Publication Year</option>
                     <option value="title">Alphabetical Title</option>
