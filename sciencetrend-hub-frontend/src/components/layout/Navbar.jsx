@@ -10,6 +10,9 @@ import {
   FiSettings,
   FiUser,
   FiTag,
+  FiShield,
+  FiAward,
+  FiBookOpen,
 } from "react-icons/fi";
 import { useAuth } from "../../context/useAuth";
 import { ROUTE_PATHS } from "../../routes/routePaths";
@@ -17,14 +20,34 @@ import { searchPapers } from "../../services/paperService";
 import { normalizePaper, toArray } from "../../utils/apiData";
 import "../../styles/layout.css";
 
-function getInitials(name) {
-  return String(name || "")
-    .trim()
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+function UserAvatar({ name, role, size = "sm" }) {
+  const initial = String(name || "R").trim().charAt(0).toUpperCase();
+
+  let RoleIcon = FiUser;
+  let roleClass = "role-user";
+  const r = String(role || "").toUpperCase();
+  if (r.includes("ADMIN")) {
+    RoleIcon = FiShield;
+    roleClass = "role-admin";
+  } else if (r.includes("LECTURER")) {
+    RoleIcon = FiBookOpen;
+    roleClass = "role-lecturer";
+  } else if (r.includes("RESEARCHER")) {
+    RoleIcon = FiAward;
+    roleClass = "role-researcher";
+  }
+
+  return (
+    <div className={`st-avatar-wrap size-${size}`}>
+      <div className="st-avatar-badge">
+        <span className="st-avatar-letter">{initial}</span>
+        <FiUser className="st-avatar-icon-bg" />
+      </div>
+      <span className={`st-avatar-role-tag ${roleClass}`} title={role}>
+        <RoleIcon />
+      </span>
+    </div>
+  );
 }
 
 function Navbar({
@@ -287,7 +310,7 @@ function Navbar({
             aria-expanded={accountOpen}
             onClick={() => setAccountOpen((current) => !current)}
           >
-            <span className="st-avatar">{initials}</span>
+            <UserAvatar name={displayName} role={rawRole || role} size="sm" />
             <span className="st-user-copy">
               <strong title={displayName}>{displayName}</strong>
               <small>{role}</small>
@@ -300,7 +323,7 @@ function Navbar({
           {accountOpen && (
             <div className="st-account-menu">
               <div className="st-account-summary">
-                <span className="st-avatar">{initials}</span>
+                <UserAvatar name={displayName} role={rawRole || role} size="lg" />
                 <div>
                   <strong>{displayName}</strong>
                   <small>{user.email || role}</small>
