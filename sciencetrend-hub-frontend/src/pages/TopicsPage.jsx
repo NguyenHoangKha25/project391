@@ -107,7 +107,8 @@ function TopicsPage() {
         const nextFollowedIds = new Set(
           toArray(followedResult.value)
             .map((topic) => normalizeTopic(topic))
-            .map((topic) => String(topic.id)),
+            .map((topic) => String(topic.researchTopicId || topic.id))
+            .filter((id) => id && id !== "null" && id !== "undefined" && !id.startsWith("topic-")),
         );
         setFollowedIds(nextFollowedIds);
       }
@@ -163,40 +164,49 @@ function TopicsPage() {
   }, [searchQuery, loadData]);
 
   // Toggle follow status
-  async function handleToggleFollow(topicId, topicName) {
+  async function handleToggleFollow(targetTopic, topicNameInput) {
     if (!isLoggedIn) {
       navigate(ROUTE_PATHS.LOGIN, { state: { from: ROUTE_PATHS.TOPICS } });
       return;
     }
-    if (!topicId || topicId === 0 || topicId === "0") {
-      showToast("Cannot follow: topic does not have a valid ID", "warning");
+
+    const topicObj = typeof targetTopic === "object" && targetTopic !== null ? targetTopic : null;
+    const rawId = topicObj?.researchTopicId ?? topicObj?.topicId ?? targetTopic;
+    const numericId = Number(rawId);
+
+    if (Number.isNaN(numericId) || !Number.isInteger(numericId) || numericId <= 0) {
+      showToast("Cannot follow: missing valid numeric topic ID", "warning");
       return;
     }
-    if (followProcessing.has(topicId)) return;
+
+    const topicName = topicNameInput || topicObj?.name || "Topic";
+    const topicIdKey = String(numericId);
+
+    if (followProcessing.has(topicIdKey)) return;
 
     // Set processing state
     setFollowProcessing((prev) => {
       const next = new Set(prev);
-      next.add(topicId);
+      next.add(topicIdKey);
       return next;
     });
 
-    const isFollowing = followedIds.has(String(topicId));
+    const isFollowing = followedIds.has(topicIdKey);
 
     try {
       if (isFollowing) {
-        await unfollowTopic(topicId);
+        await unfollowTopic(numericId);
         setFollowedIds((prev) => {
           const next = new Set(prev);
-          next.delete(String(topicId));
+          next.delete(topicIdKey);
           return next;
         });
         showToast(`Unfollowed topic: ${topicName}`, "success");
       } else {
-        await followTopic(topicId);
+        await followTopic(numericId);
         setFollowedIds((prev) => {
           const next = new Set(prev);
-          next.add(String(topicId));
+          next.add(topicIdKey);
           return next;
         });
         showToast(`Following topic: ${topicName}`, "success");
@@ -206,7 +216,7 @@ function TopicsPage() {
     } finally {
       setFollowProcessing((prev) => {
         const next = new Set(prev);
-        next.delete(topicId);
+        next.delete(topicIdKey);
         return next;
       });
     }

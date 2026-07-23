@@ -191,12 +191,12 @@ export function normalizeTopic(topic = {}, index = 0) {
     ? Number(rawId)
     : (typeof rawId === "number" ? rawId : null);
 
-  const validId = numericId ?? (typeof topic === "object" && topic.id ? topic.id : `topic-${index + 1}`);
+  const validId = numericId ?? (typeof topic === "object" && typeof topic.id === "number" ? topic.id : `topic-${index + 1}`);
 
   return {
     id: validId,
-    researchTopicId: numericId ?? validId,
-    topicId: numericId ?? validId,
+    researchTopicId: numericId,
+    topicId: numericId,
     name: topicName,
     paperCount: `${formatNumber(topic.paperCount ?? topic.totalPapers ?? topic.count ?? 0)} papers`,
     growth,
