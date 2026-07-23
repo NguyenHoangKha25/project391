@@ -49,21 +49,11 @@ function getInitialTrendData() {
   const metadata = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
   const keywords = Array.isArray(metadata?.dbKeywords) ? metadata.dbKeywords : [];
   const topics = Array.isArray(metadata?.trendingTopics) ? metadata.trendingTopics : [];
-  const topicNames = topics.map((topic) => topic.name).filter(Boolean);
-  const activeKeyword = keywords[0] || "";
-  const activeTopic = topicNames[0] || "";
-  const storedSeries = activeKeyword
-    ? getPersistentCachedData(getTrendSeriesCacheKey("keyword", activeKeyword))
-    : null;
 
   return {
     metadata,
     keywords,
     topics,
-    topicNames,
-    activeKeyword,
-    activeTopic,
-    series: hasUsableTrendSeries(storedSeries) ? storedSeries : [],
   };
 }
 
@@ -91,18 +81,18 @@ function TrendsPage() {
   const [searchVal, setSearchVal] = useState("");
   
   // Keyword chips state
-  const [keywordChips, setKeywordChips] = useState(() => initialTrendData.keywords.slice(0, 5));
+  const [keywordChips, setKeywordChips] = useState([]);
   // Topic chips state
-  const [topicChips, setTopicChips] = useState(() => initialTrendData.topicNames.slice(0, 5));
-  const [activeKeyword, setActiveKeyword] = useState(initialTrendData.activeKeyword);
-  const [activeTopicState, setActiveTopicState] = useState(initialTrendData.activeTopic);
+  const [topicChips, setTopicChips] = useState([]);
+  const [activeKeyword, setActiveKeyword] = useState("");
+  const [activeTopicState, setActiveTopicState] = useState("");
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [showAddKeywordInput, setShowAddKeywordInput] = useState(false);
 
   // Data states from backend
   const [trendingTopics, setTrendingTopics] = useState(initialTrendData.topics);
   const [dbKeywords, setDbKeywords] = useState(initialTrendData.keywords);
-  const [chartData, setChartData] = useState(initialTrendData.series);
+  const [chartData, setChartData] = useState([]);
   const [dashboard, setDashboard] = useState(initialTrendData.metadata?.dashboard ?? null);
   const [metadataLoading, setMetadataLoading] = useState(!initialTrendData.metadata);
   const [chartLoading, setChartLoading] = useState(false);
@@ -122,11 +112,6 @@ function TrendsPage() {
       setTrendingTopics(topics);
       setDbKeywords(keywords);
       setDashboard(metadata.dashboard ?? null);
-      setKeywordChips((current) => current.length > 0 ? current : keywords.slice(0, 5));
-      setActiveKeyword((current) => current || keywords[0] || "");
-      const topicNames = topics.map((topic) => topic.name).filter(Boolean);
-      setTopicChips((current) => current.length > 0 ? current : topicNames.slice(0, 5));
-      setActiveTopicState((current) => current || topicNames[0] || "");
     }
 
     function updateMetadata(patch) {
@@ -193,6 +178,7 @@ function TrendsPage() {
     if (!activeTrendTerm) {
       setChartData([]);
       setChartLoading(false);
+      setErrorMessage("");
       return;
     }
 
