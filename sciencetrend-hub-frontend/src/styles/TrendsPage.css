@@ -115,6 +115,33 @@
   background: var(--st-primary-soft);
 }
 
+.trends-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 750;
+  color: #047857;
+  box-shadow: var(--sh-xs);
+}
+.trends-status-badge .live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  animation: st-pulse 2s infinite ease-in-out;
+}
+@keyframes st-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(1.15); }
+}
+
 /* Keyword traces chips row */
 .trends-keyword-chips-row {
   display: flex;

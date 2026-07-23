@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  FiSearch,
   FiX,
   FiPlus,
   FiLayers,
+  FiCalendar,
+  FiChevronDown,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { getTrendingTopics, getTrendStats } from "../services/trendService";
@@ -99,7 +100,7 @@ function TrendsPage() {
 
   // Navigation tab: 'keyword' | 'topic'
   const [trendTab, setTrendTab] = useState("keyword");
-  const [searchVal, setSearchVal] = useState("");
+  const [timeRange, setTimeRange] = useState("8y");
   
   // Data states from backend
   const [trendingTopics, setTrendingTopics] = useState(initialTrendData.topics);
@@ -362,26 +363,27 @@ function TrendsPage() {
     });
 
     const sortedYears = Object.keys(yearMap).sort((a, b) => Number(a) - Number(b));
+    const maxYears = timeRange === "3y" ? 3 : timeRange === "5y" ? 5 : 8;
 
     if (sortedYears.length >= 2) {
-      // Take up to recent 8 clean years
-      const recentYears = sortedYears.slice(-8);
+      // Take up to recent maxYears clean years
+      const recentYears = sortedYears.slice(-maxYears);
       return recentYears.map((yr) => ({
         label: yr,
         value: yearMap[yr],
       }));
     }
 
-    // Fallback smooth 7-year dataset
+    // Fallback smooth dataset for selected maxYears
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: 7 }, (_, i) => {
-      const yr = currentYear - 6 + i;
+    return Array.from({ length: maxYears }, (_, i) => {
+      const yr = currentYear - (maxYears - 1) + i;
       return {
         label: String(yr),
         value: Math.round(20 + i * 28 + Math.sin(i * 1.5) * 12),
       };
     });
-  }, [chartData, dashboard]);
+  }, [chartData, dashboard, timeRange]);
 
   // Calculate smooth Bezier SVG Area & Line path (Publication Count by Year)
   const areaChartPathData = useMemo(() => {
@@ -549,42 +551,25 @@ function TrendsPage() {
           </div>
 
           <div className="trends-filter-inputs-group">
-            <div className="trends-search-box-wrap">
-              <FiSearch />
-              <input
-                type="text"
-                placeholder={trendTab === "keyword" ? "Search keywords..." : "Search topics..."}
-                value={searchVal}
-                onChange={(e) => setSearchVal(e.target.value)}
-                list="trend-option-list"
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" || !searchVal.trim()) return;
-                  event.preventDefault();
-                  if (trendTab === "keyword") {
-                    setActiveKeyword(searchVal.trim());
-                    setKeywordChips((current) => current.includes(searchVal.trim()) ? current : [...current, searchVal.trim()]);
-                  } else {
-                    setActiveTopicState(searchVal.trim());
-                    setTopicChips((current) => current.includes(searchVal.trim()) ? current : [...current, searchVal.trim()]);
-                  }
-                }}
-              />
-              <datalist id="trend-option-list">
-                {trendTab === "keyword"
-                  ? dbKeywords.map((kw) => <option key={typeof kw === "string" ? kw : kw.name} value={typeof kw === "string" ? kw : kw.name} />)
-                  : trendingTopics.map((t) => <option key={t.name} value={t.name} />)}
-              </datalist>
+            <div className="trends-select-wrapper-custom">
+              <FiCalendar style={{ left: "12px", right: "auto", position: "absolute", color: "var(--st-primary)" }} />
+              <select 
+                value={timeRange} 
+                onChange={(e) => setTimeRange(e.target.value)} 
+                style={{ paddingLeft: "34px", paddingRight: "30px", fontWeight: 700, color: "var(--st-heading)" }} 
+                aria-label="Select trend time horizon"
+              >
+                <option value="8y">Range: Recent 8 Years</option>
+                <option value="5y">Range: Recent 5 Years</option>
+                <option value="3y">Range: Recent 3 Years</option>
+              </select>
+              <FiChevronDown />
             </div>
 
-            {searchVal && (
-              <button
-                type="button"
-                className="trends-clear-filters-link"
-                onClick={() => setSearchVal("")}
-              >
-                Clear all
-              </button>
-            )}
+            <div className="trends-status-badge">
+              <span className="live-dot" />
+              <span>Live Analytics Engine</span>
+            </div>
           </div>
         </div>
 
