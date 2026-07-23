@@ -259,6 +259,12 @@ function PapersPage() {
     loadPapers(0);
   }
 
+  function handleResultsPerPageChange(event) {
+    const nextSize = Number(event.target.value);
+    setResultsPerPage(nextSize);
+    loadPapers(0, searchVal, { resultsPerPage: nextSize });
+  }
+
   // Reset all advanced filters
   function handleResetFilters() {
     setKeywordInput("");
@@ -533,23 +539,6 @@ function PapersPage() {
                 </div>
               </div>
 
-              {/* Results Per Page */}
-              <div className="filter-form-group">
-                <label htmlFor="size-filter">Results Per Page</label>
-                <div className="filter-select-wrapper">
-                  <select
-                    id="size-filter"
-                    value={resultsPerPage}
-                    onChange={(e) => setResultsPerPage(parseInt(e.target.value))}
-                  >
-                    <option value={10}>10 results</option>
-                    <option value={25}>25 results</option>
-                    <option value={50}>50 results</option>
-                  </select>
-                  <FiChevronDown />
-                </div>
-              </div>
-
               <button type="submit" className="filters-submit-btn-premium">
                 Apply Filters
               </button>
@@ -582,6 +571,18 @@ function PapersPage() {
                 <span className="results-found-count">
                   {loading ? "Searching..." : `${formatNumber(totalElements)} results found`}
                 </span>
+                <label className="results-page-size">
+                  <span>Per page</span>
+                  <select
+                    value={resultsPerPage}
+                    onChange={handleResultsPerPageChange}
+                    aria-label="Results per page"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                  </select>
+                </label>
               </div>
             </div>
 

@@ -17,7 +17,7 @@
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(230, 222, 211, 0.8);
   border-radius: 18px;
-  padding: 16px 18px;
+  padding: 14px 16px;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.015);
   position: sticky;
   top: 90px;
@@ -26,9 +26,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   border-bottom: 1.5px solid rgba(230, 222, 211, 0.5);
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 .filters-panel-header h3 {
   display: flex;
@@ -63,12 +63,12 @@
 .filters-form-element {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 9px;
 }
 .filter-form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
 }
 .filter-form-group label {
   font-size: 11px;
@@ -88,7 +88,7 @@
 .filter-input-wrapper input,
 .filter-select-wrapper select {
   width: 100%;
-  height: 38px;
+  height: 36px;
   border: 1px solid rgba(230, 222, 211, 0.92);
   border-radius: 11px;
   padding: 0 12px;
@@ -158,9 +158,9 @@
 
 /* Filter Submit Button */
 .filters-submit-btn-premium {
-  height: 40px;
+  height: 38px;
   width: 100%;
-  margin-top: 6px;
+  margin-top: 2px;
   border: none;
   border-radius: 11px;
   background: linear-gradient(135deg, var(--st-primary), var(--st-primary-dark));
@@ -274,6 +274,27 @@
   align-items: center;
   gap: 12px;
   min-height: 32px;
+}
+.results-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--st-muted-strong);
+  font-size: 11.5px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.results-page-size select {
+  width: 58px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--st-border);
+  border-radius: 8px;
+  color: var(--st-heading);
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
 }
 .results-found-count {
   display: inline-flex;
