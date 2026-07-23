@@ -13,6 +13,7 @@ import {
   searchJournals,
   unfollowJournal,
 } from "../services/journalService";
+import { getDashboardOverview } from "../services/dashboardService";
 import { normalizeJournal, normalizePaper, toArray } from "../utils/apiData";
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { ROUTE_PATHS } from "../routes/routePaths";
@@ -21,13 +22,41 @@ import "../styles/CatalogPages.css";
 
 const JOURNALS_CACHE_KEY = "journals_default_v1";
 
+function getDashboardJournalSummaries(dashboard) {
+  return Array.isArray(dashboard?.topJournals)
+    ? dashboard.topJournals
+        .filter((journal) => journal?.label)
+        .map((journal) => ({
+          id: `summary-${journal.label}`,
+          name: journal.label,
+          publisher: "Publication catalog",
+          subject: "Research journal",
+          paperCount: Number(journal.value) || 0,
+          summaryOnly: true,
+        }))
+    : [];
+}
+
 function getCachedJournalsData() {
   const cached = getPersistentCachedData(JOURNALS_CACHE_KEY);
-  if (!cached || typeof cached !== "object") return null;
+  if (cached && typeof cached === "object") {
+    const journals = Array.isArray(cached.journals) ? cached.journals : [];
+    const topIds = Array.isArray(cached.topIds) ? cached.topIds : [];
+    if (journals.length > 0) return { journals, topIds };
+  }
 
-  const journals = Array.isArray(cached.journals) ? cached.journals : [];
-  const topIds = Array.isArray(cached.topIds) ? cached.topIds : [];
-  return journals.length > 0 ? { journals, topIds } : null;
+  const dashboard = getPersistentCachedData("dashboard_overview_v2");
+  const dashboardJournals = getDashboardJournalSummaries(dashboard);
+
+  return dashboardJournals.length > 0
+    ? { journals: dashboardJournals, topIds: [] }
+    : null;
+}
+
+function normalizeJournalList(response) {
+  return toArray(response, ["journals"])
+    .map(normalizeJournal)
+    .filter((journal) => journal.name !== "Untitled journal");
 }
 
 function JournalsPage() {
@@ -61,29 +90,72 @@ function JournalsPage() {
     setError("");
 
     try {
+      let quickFallbackJournals = cachedData?.journals ?? [];
+      const listRequest = search
+        ? searchJournals(search, { page: 0, size: 20 })
+        : getJournals({ page: 0, size: 20 });
+      const topRequest = getTopJournals(20);
+
+      if (isDefaultLoad && !cachedData) {
+        getDashboardOverview().then((response) => {
+          if (requestId !== loadRequestIdRef.current) return;
+          const summaryJournals = getDashboardJournalSummaries(response);
+          if (summaryJournals.length === 0) return;
+
+          quickFallbackJournals = summaryJournals;
+          const summaryData = { journals: summaryJournals, topIds: [] };
+          setJournals(summaryJournals);
+          setLoading(false);
+          setPersistentCachedData(JOURNALS_CACHE_KEY, summaryData);
+        }).catch(() => {});
+
+        topRequest.then((response) => {
+          if (requestId !== loadRequestIdRef.current) return;
+          const quickJournals = normalizeJournalList(response);
+          if (quickJournals.length === 0) return;
+
+          quickFallbackJournals = quickJournals;
+          const quickData = {
+            journals: quickJournals,
+            topIds: quickJournals.map((journal) => String(journal.id)),
+          };
+          setJournals(quickData.journals);
+          setTopIds(new Set(quickData.topIds));
+          setLoading(false);
+          setPersistentCachedData(JOURNALS_CACHE_KEY, quickData);
+        }).catch(() => {});
+      }
+
       const requests = [
-        search ? searchJournals(search, { page: 0, size: 50 }) : getJournals({ page: 0, size: 50 }),
-        getTopJournals(10),
+        listRequest,
+        topRequest,
       ];
       if (isLoggedIn) requests.push(getFollowedJournals());
       const [listResult, topResult, followedResult] = await Promise.allSettled(requests);
       if (requestId !== loadRequestIdRef.current) return;
 
       const freshJournals = listResult.status === "fulfilled"
-        ? toArray(listResult.value, ["journals"])
-            .map(normalizeJournal)
-            .filter((journal) => journal.name !== "Untitled journal")
+        ? normalizeJournalList(listResult.value)
         : [];
-      const freshTopIds = topResult.status === "fulfilled"
-        ? toArray(topResult.value, ["journals"])
-            .map(normalizeJournal)
-            .filter((journal) => journal.name !== "Untitled journal")
-            .map((journal) => String(journal.id))
+      const freshTopJournals = topResult.status === "fulfilled"
+        ? normalizeJournalList(topResult.value)
         : [];
+      const matchingTopJournals = search
+        ? freshTopJournals.filter((journal) => (
+            `${journal.name} ${journal.publisher} ${journal.subject}`
+              .toLowerCase()
+              .includes(search.toLowerCase())
+          ))
+        : freshTopJournals;
+      const freshTopIds = freshTopJournals.map((journal) => String(journal.id));
 
       if (isDefaultLoad) {
         const nextData = {
-          journals: freshJournals.length > 0 ? freshJournals : (cachedData?.journals ?? []),
+          journals: freshJournals.length > 0
+              ? freshJournals
+              : matchingTopJournals.length > 0
+                ? matchingTopJournals
+                : quickFallbackJournals,
           topIds: freshTopIds.length > 0 ? freshTopIds : (cachedData?.topIds ?? []),
         };
         setJournals(nextData.journals);
@@ -93,7 +165,7 @@ function JournalsPage() {
           setPersistentCachedData(JOURNALS_CACHE_KEY, nextData);
         }
       } else {
-        setJournals(freshJournals);
+        setJournals(freshJournals.length > 0 ? freshJournals : matchingTopJournals);
         setTopIds(new Set(freshTopIds));
       }
 
@@ -104,7 +176,12 @@ function JournalsPage() {
         ));
       }
 
-      if (listResult.status === "rejected" && !cachedData) {
+      if (
+        listResult.status === "rejected"
+        && matchingTopJournals.length === 0
+        && !cachedData
+        && quickFallbackJournals.length === 0
+      ) {
         setError(listResult.reason?.message || "Could not load journals.");
       }
     } catch (loadError) {
@@ -232,10 +309,22 @@ function JournalsPage() {
                       {journal.issn && <span>ISSN {journal.issn}</span>}
                     </div>
                     <div className="catalog-actions">
-                      <button type="button" className="workspace-button" onClick={() => openJournal(journal)}>View journal</button>
-                      <button type="button" className={`workspace-button ${followed ? "is-active" : ""}`} onClick={() => toggleFollow(journal.id)}>
-                        {followed ? <><FiCheck /> Following</> : "Follow"}
-                      </button>
+                      {journal.summaryOnly ? (
+                        <button
+                          type="button"
+                          className="workspace-button"
+                          onClick={() => navigate(`${ROUTE_PATHS.PAPERS}?journal=${encodeURIComponent(journal.name)}`)}
+                        >
+                          View papers
+                        </button>
+                      ) : (
+                        <>
+                          <button type="button" className="workspace-button" onClick={() => openJournal(journal)}>View journal</button>
+                          <button type="button" className={`workspace-button ${followed ? "is-active" : ""}`} onClick={() => toggleFollow(journal.id)}>
+                            {followed ? <><FiCheck /> Following</> : "Follow"}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </article>

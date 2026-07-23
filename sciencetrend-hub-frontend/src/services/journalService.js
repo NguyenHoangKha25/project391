@@ -6,7 +6,7 @@ import { apiRequest } from "./api";
  * @returns {Promise<Array>} List of journal profiles.
  */
 export function getJournals(params = {}) {
-  return apiRequest("/journals", { params, auth: false });
+  return apiRequest("/journals", { params, auth: false, timeout: 30000 });
 }
 
 /**
@@ -16,7 +16,11 @@ export function getJournals(params = {}) {
  * @returns {Promise<Array>} List of matching journal profiles.
  */
 export function searchJournals(keyword, params = {}) {
-  return apiRequest("/journals/search", { params: { ...params, keyword }, auth: false });
+  return apiRequest("/journals/search", {
+    params: { ...params, keyword },
+    auth: false,
+    timeout: 30000,
+  });
 }
 
 /**
@@ -26,7 +30,7 @@ export function searchJournals(keyword, params = {}) {
  * @returns {Promise<Array>} Sorted list of top journals.
  */
 export function getTopJournals(limit = 10) {
-  return apiRequest("/journals/top", { params: { limit }, auth: false });
+  return apiRequest("/journals/top", { params: { limit }, auth: false, timeout: 30000 });
 }
 
 /**
