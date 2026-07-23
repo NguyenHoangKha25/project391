@@ -7,7 +7,7 @@ import { getPapers } from "../services/paperService";
 import { toggleBookmark } from "../services/bookmarkService";
 import { getAllTopics } from "../services/topicService";
 import { getAllKeywords } from "../services/keywordService";
-import { normalizePaper, toArray, formatNumber } from "../utils/apiData";
+import { normalizeKeyword, normalizePaper, toArray, formatNumber } from "../utils/apiData";
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { useAuth } from "../context/useAuth";
 import { ROUTE_PATHS } from "../routes/routePaths";
@@ -55,6 +55,20 @@ function getPapersCacheKey(params) {
   return `papers_query_v1_${JSON.stringify(stableParams)}`;
 }
 
+function normalizeKeywordOptions(items = []) {
+  const seenNames = new Set();
+
+  return items
+    .map(normalizeKeyword)
+    .filter((keyword) => {
+      const name = keyword.name?.trim();
+      const normalizedName = name?.toLowerCase();
+      if (!name || name === "Untitled keyword" || seenNames.has(normalizedName)) return false;
+      seenNames.add(normalizedName);
+      return true;
+    });
+}
+
 function getCachedPapersResult(params) {
   const cached = getPersistentCachedData(getPapersCacheKey(params));
   return cached
@@ -70,7 +84,7 @@ function getCachedPapersMetadata() {
   if (!cached || typeof cached !== "object") return { topics: [], keywords: [] };
   return {
     topics: Array.isArray(cached.topics) ? cached.topics : [],
-    keywords: Array.isArray(cached.keywords) ? cached.keywords : [],
+    keywords: Array.isArray(cached.keywords) ? normalizeKeywordOptions(cached.keywords) : [],
   };
 }
 
@@ -148,7 +162,7 @@ function PapersPage() {
           ? toArray(topicsRes.value)
           : [];
         const freshKeywords = keywordsRes.status === "fulfilled"
-          ? toArray(keywordsRes.value)
+          ? normalizeKeywordOptions(toArray(keywordsRes.value))
           : [];
         const nextMetadata = {
           topics: freshTopics.length > 0 ? freshTopics : cachedMetadata.topics,
@@ -427,7 +441,7 @@ function PapersPage() {
                   />
                   <datalist id="paper-keyword-options">
                     {availableKeywords.map((keyword, index) => (
-                      <option key={keyword.keywordId ?? keyword.id ?? index} value={keyword.name ?? keyword.keyword ?? String(keyword)} />
+                      <option key={keyword.id ?? index} value={keyword.name} />
                     ))}
                   </datalist>
                   <FiSearch />

@@ -120,11 +120,37 @@ export function normalizeKeyword(keyword = {}, index = 0) {
   if (typeof keyword === "string") {
     return { id: keyword, name: keyword, paperCount: 0, bookmarked: false };
   }
+
+  const nestedKeyword = keyword.keyword && typeof keyword.keyword === "object"
+    ? keyword.keyword
+    : {};
+  const rawName = keyword.name
+    ?? nestedKeyword.name
+    ?? (typeof keyword.keyword === "string" ? keyword.keyword : null)
+    ?? keyword.term
+    ?? nestedKeyword.term;
+  const name = typeof rawName === "string" && rawName.trim()
+    ? rawName.trim()
+    : "Untitled keyword";
+
   return {
-    id: keyword.keywordId ?? keyword.id ?? index,
-    name: keyword.name ?? keyword.keyword ?? keyword.term ?? "Untitled keyword",
-    paperCount: toNumber(keyword.paperCount ?? keyword.count ?? keyword.worksCount),
-    bookmarked: Boolean(keyword.bookmarked ?? keyword.saved ?? false),
+    id: keyword.keywordId ?? keyword.id ?? nestedKeyword.keywordId ?? nestedKeyword.id ?? index,
+    name,
+    paperCount: toNumber(
+      keyword.paperCount
+      ?? keyword.count
+      ?? keyword.worksCount
+      ?? nestedKeyword.paperCount
+      ?? nestedKeyword.count
+      ?? nestedKeyword.worksCount,
+    ),
+    bookmarked: Boolean(
+      keyword.bookmarked
+      ?? keyword.saved
+      ?? nestedKeyword.bookmarked
+      ?? nestedKeyword.saved
+      ?? false,
+    ),
   };
 }
 
@@ -132,7 +158,7 @@ export function normalizeKeyword(keyword = {}, index = 0) {
 export function normalizeTopic(topic = {}, index = 0) {
   const rawGrowth = topic.growth ?? topic.growthRate ?? topic.change ?? 0;
   const growthNumber = Number(rawGrowth);
-  let growth = "0%";
+  let growth;
   if (Number.isFinite(growthNumber)) {
     const pct = (growthNumber > -1 && growthNumber < 1 && growthNumber !== 0)
       ? Math.round(growthNumber * 100)
