@@ -743,9 +743,8 @@ function TrendsPage() {
               <table className="trends-compact-table">
                 <thead>
                   <tr>
-                    <th>{trendTab === "keyword" ? "Keyword" : "Topic"}</th>
-                    <th>Publications</th>
-                    <th>Growth</th>
+                    <th style={{ width: "62%" }}>{trendTab === "keyword" ? "Keyword" : "Topic"}</th>
+                    <th style={{ width: "38%", textAlign: "right" }}>Publications</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -754,20 +753,21 @@ function TrendsPage() {
                       <td>
                         <div className="trends-topic-cell">
                           <span className={`rank-num rank-num-${idx % 5}`}>{idx + 1}</span>
-                          <span className="topic-name">{item.name}</span>
+                          <span className="topic-name" title={item.name}>{item.name}</span>
                         </div>
                       </td>
-                      <td>
-                        <span className="pub-count-pill">{typeof item.paperCount === "string" ? item.paperCount : (item.paperCount ?? "0")}</span>
-                      </td>
-                      <td>
-                        <span className="growth-pill">{item.growth || "—"}</span>
+                      <td style={{ textAlign: "right" }}>
+                        <span className="pub-count-pill">
+                          {typeof item.paperCount === "number"
+                            ? `${item.paperCount} papers`
+                            : (item.paperCount || "0 papers")}
+                        </span>
                       </td>
                     </tr>
                   ))}
                   {activeTrendItems.length === 0 && (
                     <tr>
-                      <td colSpan="3" style={{ textAlign: "center", padding: "30px 0", color: "var(--st-muted-strong)", fontSize: "13px" }}>
+                      <td colSpan="2" style={{ textAlign: "center", padding: "30px 0", color: "var(--st-muted-strong)", fontSize: "13px" }}>
                         No trending data available.
                       </td>
                     </tr>
