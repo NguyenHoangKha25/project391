@@ -247,8 +247,21 @@ function DashboardPage() {
     return Math.max(...topKeywords.map(k => k.value), 1);
   }, [topKeywords]);
 
-  const maxPaperVal = useMemo(() => {
-    return Math.max(...papersByYear.map(p => p.value), 1);
+  const yAxisScale = useMemo(() => {
+    const rawMax = Math.max(...papersByYear.map(p => Number(p.value) || 0), 10);
+    
+    let maxScale;
+    if (rawMax > 100000) maxScale = Math.ceil(rawMax / 20000) * 20000;
+    else if (rawMax > 10000) maxScale = Math.ceil(rawMax / 5000) * 5000;
+    else if (rawMax > 1000) maxScale = Math.ceil(rawMax / 1000) * 1000;
+    else maxScale = Math.ceil(rawMax / 100) * 100;
+
+    const label4 = maxScale >= 1000 ? `${(maxScale / 1000).toFixed(0)}K` : `${maxScale}`;
+    const label3 = maxScale >= 1000 ? `${((maxScale * 0.66) / 1000).toFixed(1).replace(/\.0$/, "")}K` : `${Math.round(maxScale * 0.66)}`;
+    const label2 = maxScale >= 1000 ? `${((maxScale * 0.33) / 1000).toFixed(1).replace(/\.0$/, "")}K` : `${Math.round(maxScale * 0.33)}`;
+    const label1 = "0";
+
+    return { maxScale, labels: [label4, label3, label2, label1] };
   }, [papersByYear]);
 
   if (loading) {
@@ -327,15 +340,14 @@ function DashboardPage() {
             
             <div className="bar-chart-container">
               <div className="bar-chart-y-axis">
-                <span>120K</span>
-                <span>80K</span>
-                <span>40K</span>
-                <span>0</span>
+                {yAxisScale.labels.map((lbl, i) => (
+                  <span key={i}>{lbl}</span>
+                ))}
               </div>
               <div className="bar-chart-columns">
                 {papersByYear.length > 0 ? (
                   papersByYear.map((p, idx) => {
-                    const heightPercent = (p.value / maxPaperVal) * 100;
+                    const heightPercent = Math.min(100, Math.max(8, (p.value / yAxisScale.maxScale) * 100));
                     return (
                       <div key={idx} className="chart-bar-col">
                         <div className="bar-wrapper">
