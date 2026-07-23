@@ -2082,8 +2082,9 @@ textarea {
   padding-top: 1px;
   color: #334155 !important;
   background:
-    radial-gradient(circle at 13% 8%, rgba(37, 99, 235, 0.08), transparent 27rem),
-    radial-gradient(circle at 88% 38%, rgba(124, 58, 237, 0.055), transparent 30rem),
+    radial-gradient(circle at 13% 8%, rgba(37, 99, 235, 0.12), transparent 28rem),
+    radial-gradient(circle at 88% 38%, rgba(124, 58, 237, 0.09), transparent 31rem),
+    radial-gradient(circle at 12% 78%, rgba(6, 182, 212, 0.07), transparent 25rem),
     #f7f9fc !important;
 }
 
@@ -2112,9 +2113,9 @@ textarea {
   border-color: #dbe3ee !important;
   border-radius: 0 0 28px 28px !important;
   background:
-    radial-gradient(circle at 92% 2%, rgba(37, 99, 235, 0.13), transparent 28rem),
-    radial-gradient(circle at 4% 96%, rgba(99, 102, 241, 0.07), transparent 24rem),
-    linear-gradient(145deg, #ffffff 0%, #f5f8fc 100%) !important;
+    radial-gradient(circle at 92% 2%, rgba(37, 99, 235, 0.18), transparent 29rem),
+    radial-gradient(circle at 4% 96%, rgba(124, 58, 237, 0.11), transparent 25rem),
+    linear-gradient(145deg, #ffffff 0%, #f0f7ff 62%, #f7f3ff 100%) !important;
   box-shadow: 0 22px 64px rgba(15, 23, 42, 0.08) !important;
 }
 
@@ -2444,6 +2445,21 @@ textarea {
   padding: 18px 22px;
 }
 
+.home-value-rail > div::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 22px;
+  right: 22px;
+  height: 3px;
+  border-radius: 0 0 999px 999px;
+}
+
+.home-value-rail > div:nth-child(1)::before { background: #3b82f6; }
+.home-value-rail > div:nth-child(2)::before { background: #8b5cf6; }
+.home-value-rail > div:nth-child(3)::before { background: #06b6d4; }
+.home-value-rail > div:nth-child(4)::before { background: #f59e0b; }
+
 .home-value-rail > div + div {
   border-left: 1px solid #e2e8f0;
 }
@@ -2515,6 +2531,26 @@ textarea {
   border-color: #cbd5e1 !important;
   box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08) !important;
   transform: translateY(-3px) !important;
+}
+
+.home-page-refresh .home-feature-card-refresh.tone-blue {
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 42%) !important;
+  box-shadow: inset 0 3px 0 #60a5fa, 0 1px 1px rgba(15, 23, 42, 0.02) !important;
+}
+
+.home-page-refresh .home-feature-card-refresh.tone-violet {
+  background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 42%) !important;
+  box-shadow: inset 0 3px 0 #a78bfa, 0 1px 1px rgba(15, 23, 42, 0.02) !important;
+}
+
+.home-page-refresh .home-feature-card-refresh.tone-cyan {
+  background: linear-gradient(180deg, #ecfeff 0%, #ffffff 42%) !important;
+  box-shadow: inset 0 3px 0 #22d3ee, 0 1px 1px rgba(15, 23, 42, 0.02) !important;
+}
+
+.home-page-refresh .home-feature-card-refresh.tone-amber {
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 42%) !important;
+  box-shadow: inset 0 3px 0 #fbbf24, 0 1px 1px rgba(15, 23, 42, 0.02) !important;
 }
 
 .home-feature-card-top {
@@ -2667,6 +2703,14 @@ textarea {
   background: #ffffff;
 }
 
+.home-audience-grid article:first-child {
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 58%);
+}
+
+.home-audience-grid article:last-child {
+  background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 58%);
+}
+
 .home-audience-icon {
   width: 48px;
   height: 48px;
@@ -2711,7 +2755,7 @@ textarea {
   overflow: hidden;
   border: 1px solid #dbe3ee !important;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.96) !important;
+  background: linear-gradient(110deg, #ffffff 0%, #f3f7ff 68%, #f7f3ff 100%) !important;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.045);
 }
 
