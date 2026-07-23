@@ -176,55 +176,70 @@ function RegisterPage() {
           <div className="auth-left-premium-content">
             <div className="auth-premium-hero">
               <span className="auth-badge">START YOUR RESEARCH</span>
-              <h2>Join ScienceTrend Hub</h2>
+              <h2>Accelerate Your Research Discovery</h2>
               <p>
                 Create your workspace to explore publication analytics, track journals, and export structured research reports.
               </p>
-
-              <div className="auth-premium-features-row">
-                <div className="auth-premium-feature-tag tag-blue">
-                  <span className="auth-tag-icon auth-tag-icon-blue"><FiBarChart2 /></span>
-                  <span>Analytics</span>
-                </div>
-                <div className="auth-premium-feature-tag tag-green">
-                  <span className="auth-tag-icon auth-tag-icon-green"><FiBookOpen /></span>
-                  <span>Journals</span>
-                </div>
-                <div className="auth-premium-feature-tag tag-yellow">
-                  <span className="auth-tag-icon auth-tag-icon-amber"><FiFileText /></span>
-                  <span>Reports</span>
-                </div>
-              </div>
             </div>
 
-            <div className="auth-premium-preview-card" aria-label="Platform Highlights">
-              <div style={{ padding: "0 0 6px", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", marginBottom: "8px" }}>
-                <span style={{ fontSize: "10.5px", letterSpacing: "0.08em", fontWeight: "700", color: "#60a5fa", textTransform: "uppercase" }}>PLATFORM HIGHLIGHTS</span>
+            {/* Glassmorphic Live Analytics Preview Widget (Human-crafted SaaS style) */}
+            <div className="auth-widget-preview-card">
+              <div className="auth-widget-header">
+                <div className="auth-widget-title-group">
+                  <span className="auth-widget-dot"></span>
+                  <span className="auth-widget-title">LIVE PLATFORM METRICS</span>
+                </div>
+                <span className="auth-widget-badge">🟢 Real-Time Sync</span>
               </div>
 
-              <div className="auth-highlight-list">
-                <div className="auth-highlight-item">
-                  <span className="auth-highlight-icon auth-highlight-icon-blue"><FiSearch /></span>
-                  <div className="auth-highlight-copy">
-                    <h5>Multi-Source Discovery</h5>
-                    <p>Cross-reference papers, authors, citations, and journal quartiles (Q1–Q4).</p>
-                  </div>
+              {/* Stat Counters Row */}
+              <div className="auth-widget-stats-grid">
+                <div className="auth-widget-stat-card">
+                  <span className="stat-num">12,200+</span>
+                  <span className="stat-label">Publications</span>
                 </div>
-
-                <div className="auth-highlight-item">
-                  <span className="auth-highlight-icon auth-highlight-icon-green"><FiBookmark /></span>
-                  <div className="auth-highlight-copy">
-                    <h5>Research Library</h5>
-                    <p>Bookmark key publications, follow journals, and track emerging topics.</p>
-                  </div>
+                <div className="auth-widget-stat-card">
+                  <span className="stat-num">4,850+</span>
+                  <span className="stat-label">Top Journals</span>
                 </div>
+                <div className="auth-widget-stat-card">
+                  <span className="stat-num">98.4%</span>
+                  <span className="stat-label">Accuracy Rate</span>
+                </div>
+              </div>
 
-                <div className="auth-highlight-item">
-                  <span className="auth-highlight-icon auth-highlight-icon-amber"><FiTrendingUp /></span>
-                  <div className="auth-highlight-copy">
-                    <h5>Trend & Summary Reports</h5>
-                    <p>Visualize annual growth curves and export structured summary reports.</p>
+              {/* Mini Trend Graph Graphic Box */}
+              <div className="auth-widget-trend-box">
+                <div className="auth-widget-trend-info">
+                  <div className="auth-widget-trend-label">
+                    <FiTrendingUp className="trend-icon" />
+                    <span>Machine Learning Trends</span>
                   </div>
+                  <span className="trend-growth-badge">+340% Growth</span>
+                </div>
+                
+                {/* SVG Glowing Curve Preview */}
+                <div className="auth-widget-svg-wrap">
+                  <svg viewBox="0 0 340 50" className="auth-widget-svg">
+                    <defs>
+                      <linearGradient id="regSvgGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M 0,45 C 50,40 80,35 120,25 C 160,15 200,30 250,12 C 290,2 320,10 340,4"
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="2.5"
+                    />
+                    <path
+                      d="M 0,45 C 50,40 80,35 120,25 C 160,15 200,30 250,12 C 290,2 320,10 340,4 L 340,50 L 0,50 Z"
+                      fill="url(#regSvgGrad)"
+                    />
+                    <circle cx="250" cy="12" r="3.5" fill="#10b981" />
+                    <circle cx="340" cy="4" r="4.5" fill="#34d399" />
+                  </svg>
                 </div>
               </div>
             </div>
