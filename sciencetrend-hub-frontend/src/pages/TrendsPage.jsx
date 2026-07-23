@@ -418,23 +418,52 @@ function TrendsPage() {
   }, [effectiveChartData]);
 
   const comparisonLines = useMemo(() => {
-    const defaultTopics = [
-      { name: "Large Language Models", color: "#3b82f6", baseVal: 92.1 },
-      { name: "Diffusion Models", color: "#10b981", baseVal: 68.5 },
-      { name: "Graph Neural Networks", color: "#8b5cf6", baseVal: 48.2 },
-      { name: "AI for Healthcare", color: "#f97316", baseVal: 32.0 },
-      { name: "Vision-Language Models", color: "#06b6d4", baseVal: 18.5 },
+    const colors = ["#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#06b6d4"];
+
+    const defaultKeywords = [
+      { name: "Large Language Models", baseVal: 98.4, displayStr: "98.4K" },
+      { name: "Diffusion Models", baseVal: 74.2, displayStr: "74.2K" },
+      { name: "Graph Neural Networks", baseVal: 52.6, displayStr: "52.6K" },
+      { name: "AI for Healthcare", baseVal: 36.1, displayStr: "36.1K" },
+      { name: "Vision-Language Models", baseVal: 21.8, displayStr: "21.8K" },
     ];
 
-    const activeItems = trendTab === "keyword"
-      ? (dbKeywords.length > 0 ? dbKeywords.slice(0, 5).map(k => k.keyword || k.term || String(k)) : [])
-      : (trendingTopics.length > 0 ? trendingTopics.slice(0, 5).map(t => t.name || String(t)) : []);
+    const defaultTopics = [
+      { name: "Artificial Intelligence in Education", baseVal: 88.0, displayStr: "1.8K" },
+      { name: "Engineering Education and Technology", baseVal: 65.0, displayStr: "1.2K" },
+      { name: "Artificial Intelligence in Healthcare and Education", baseVal: 48.0, displayStr: "860" },
+      { name: "Educational Leadership and Innovation", baseVal: 33.0, displayStr: "540" },
+      { name: "Intelligent Tutoring Systems and Adaptive Learning", baseVal: 20.0, displayStr: "290" },
+    ];
 
-    const itemsToRender = defaultTopics.map((defItem, idx) => {
-      const realName = activeItems[idx] || defItem.name;
+    const defaults = trendTab === "keyword" ? defaultKeywords : defaultTopics;
+    const rawDataList = trendTab === "keyword" ? dbKeywords : trendingTopics;
+
+    const itemsToRender = defaults.map((defItem, idx) => {
+      const realObj = Array.isArray(rawDataList) ? rawDataList[idx] : null;
+      let realName = defItem.name;
+      let valNum = defItem.baseVal;
+      let valStr = defItem.displayStr;
+
+      if (realObj) {
+        realName = realObj.name || realObj.keyword || realObj.term || realName;
+        const count = Number(realObj.paperCount ?? realObj.count ?? realObj.paper_count ?? realObj.followerCount);
+        if (Number.isFinite(count) && count > 0) {
+          if (count >= 1000) {
+            valStr = `${(count / 1000).toFixed(1)}K`;
+            valNum = Math.min(95, Math.max(15, count / 50));
+          } else {
+            valStr = `${count}`;
+            valNum = Math.min(95, Math.max(15, count / 10));
+          }
+        }
+      }
+
       return {
-        ...defItem,
         name: realName,
+        color: colors[idx % colors.length],
+        baseVal: valNum,
+        displayStr: valStr,
       };
     });
 
@@ -484,7 +513,7 @@ function TrendsPage() {
         }
       }
 
-      const finalValStr = `${item.baseVal}K`;
+      const finalValStr = item.displayStr;
       const finalCoord = coords[coords.length - 1];
 
       return {
