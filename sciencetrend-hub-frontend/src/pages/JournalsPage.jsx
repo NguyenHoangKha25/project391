@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiBookOpen, FiCheck, FiExternalLink, FiSearch, FiX } from "react-icons/fi";
+import { FiBookOpen, FiCheck, FiExternalLink, FiLoader, FiSearch, FiX } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import {
@@ -67,16 +67,20 @@ function JournalsPage() {
   const [journals, setJournals] = useState(() => initialData?.journals ?? []);
   const [topIds, setTopIds] = useState(() => new Set(initialData?.topIds ?? []));
   const [followedIds, setFollowedIds] = useState(new Set());
+  const [followProcessing, setFollowProcessing] = useState(new Set());
+  const [followNotice, setFollowNotice] = useState(null);
   const [selected, setSelected] = useState(null);
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(!initialData);
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState("");
   const loadRequestIdRef = useRef(0);
+  const followActionVersionRef = useRef(0);
 
   const loadJournals = useCallback(async (search = "") => {
     const requestId = loadRequestIdRef.current + 1;
     loadRequestIdRef.current = requestId;
+    const followActionVersion = followActionVersionRef.current;
     const isDefaultLoad = !search;
     const cachedData = isDefaultLoad ? getCachedJournalsData() : null;
 
@@ -169,7 +173,10 @@ function JournalsPage() {
         setTopIds(new Set(freshTopIds));
       }
 
-      if (followedResult?.status === "fulfilled") {
+      if (
+        followedResult?.status === "fulfilled"
+        && followActionVersion === followActionVersionRef.current
+      ) {
         setFollowedIds(new Set(
           toArray(followedResult.value, ["journals"])
             .map((item, index) => String(normalizeJournal(item, index).id)),
@@ -199,6 +206,12 @@ function JournalsPage() {
   useEffect(() => {
     loadJournals();
   }, [loadJournals]);
+
+  useEffect(() => {
+    if (!followNotice) return undefined;
+    const timer = setTimeout(() => setFollowNotice(null), 3000);
+    return () => clearTimeout(timer);
+  }, [followNotice]);
 
   async function openJournal(journal) {
     const cacheKey = `journal_detail_${journal.id}`;
@@ -247,19 +260,63 @@ function JournalsPage() {
       navigate(ROUTE_PATHS.LOGIN, { state: { from: ROUTE_PATHS.JOURNALS } });
       return;
     }
-    const key = String(journalId);
+
+    const numericId = Number(journalId);
+    if (!Number.isInteger(numericId) || numericId <= 0) {
+      setFollowNotice({ type: "warning", message: "Cannot follow this journal because its ID is invalid." });
+      return;
+    }
+
+    const key = String(numericId);
+    if (followProcessing.has(key)) return;
+
     const following = followedIds.has(key);
+    followActionVersionRef.current += 1;
+    setFollowProcessing((current) => new Set(current).add(key));
     setFollowedIds((current) => {
       const next = new Set(current);
       if (following) next.delete(key); else next.add(key);
       return next;
     });
+
     try {
-      if (following) await unfollowJournal(journalId); else await followJournal(journalId);
-    } catch {
+      if (following) await unfollowJournal(numericId); else await followJournal(numericId);
+      setFollowNotice({
+        type: "success",
+        message: following ? "Journal unfollowed." : "Journal followed successfully.",
+      });
+    } catch (followError) {
+      const message = String(followError?.message || "").toLowerCase();
+
+      if (!following && message.includes("already followed")) {
+        setFollowedIds((current) => new Set(current).add(key));
+        setFollowNotice({ type: "info", message: "You are already following this journal." });
+        return;
+      }
+
+      if (following && message.includes("follow not found")) {
+        setFollowedIds((current) => {
+          const next = new Set(current);
+          next.delete(key);
+          return next;
+        });
+        setFollowNotice({ type: "info", message: "This journal was already unfollowed." });
+        return;
+      }
+
       setFollowedIds((current) => {
         const next = new Set(current);
         if (following) next.add(key); else next.delete(key);
+        return next;
+      });
+      setFollowNotice({
+        type: "warning",
+        message: followError?.message || "Could not update this journal. Please try again.",
+      });
+    } finally {
+      setFollowProcessing((current) => {
+        const next = new Set(current);
+        next.delete(key);
         return next;
       });
     }
@@ -269,6 +326,11 @@ function JournalsPage() {
 
   return (
     <MainLayout title="Journals" subtitle="Browse publication venues and the papers they publish">
+      {followNotice && (
+        <div className={`st-toast ${followNotice.type}`}>
+          <span>{followNotice.message}</span>
+        </div>
+      )}
       <section className="workspace-page catalog-page">
         <form className="catalog-toolbar" onSubmit={(event) => { event.preventDefault(); loadJournals(query.trim()); }}>
           <div>
@@ -292,6 +354,7 @@ function JournalsPage() {
           <div className="catalog-grid">
             {journals.map((journal) => {
               const followed = followedIds.has(String(journal.id));
+              const processing = followProcessing.has(String(journal.id));
               return (
                 <article className="catalog-card" key={journal.id}>
                   <div className="catalog-card-icon"><FiBookOpen /></div>
@@ -320,8 +383,17 @@ function JournalsPage() {
                       ) : (
                         <>
                           <button type="button" className="workspace-button" onClick={() => openJournal(journal)}>View journal</button>
-                          <button type="button" className={`workspace-button ${followed ? "is-active" : ""}`} onClick={() => toggleFollow(journal.id)}>
-                            {followed ? <><FiCheck /> Following</> : "Follow"}
+                          <button
+                            type="button"
+                            className={`workspace-button ${followed ? "is-active" : ""}`}
+                            onClick={() => toggleFollow(journal.id)}
+                            disabled={processing}
+                          >
+                            {processing
+                              ? <><FiLoader className="is-spinning" /> Updating…</>
+                              : followed
+                                ? <><FiCheck /> Following</>
+                                : "Follow"}
                           </button>
                         </>
                       )}
