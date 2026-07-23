@@ -2139,7 +2139,10 @@ textarea {
 
 .home-page-refresh .home-hero-copy h1 .hero-highlight {
   color: #2563eb !important;
-  -webkit-text-fill-color: #2563eb !important;
+  background: linear-gradient(95deg, #2563eb 0%, #7c3aed 54%, #0891b2 100%) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
 }
 
 .home-page-refresh .home-hero-copy > p {
@@ -2154,6 +2157,17 @@ textarea {
   min-height: 48px !important;
   padding-inline: 20px !important;
   border-radius: 11px !important;
+}
+
+.home-page-refresh .home-primary-link {
+  border-color: transparent !important;
+  background: linear-gradient(110deg, #2563eb 0%, #6d4aff 58%, #7c3aed 100%) !important;
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.24) !important;
+}
+
+.home-page-refresh .home-primary-link:hover {
+  background: linear-gradient(110deg, #1d4ed8 0%, #5b3bea 58%, #6d28d9 100%) !important;
+  box-shadow: 0 13px 28px rgba(79, 70, 229, 0.3) !important;
 }
 
 .home-page-refresh .home-primary-link svg,
@@ -2494,6 +2508,24 @@ textarea {
   padding-top: 92px;
 }
 
+.home-features-refresh .home-eyebrow {
+  color: #6d28d9 !important;
+  border-color: #ddd6fe !important;
+  background: #f5f3ff !important;
+}
+
+.home-workflow-refresh .home-eyebrow {
+  color: #0e7490 !important;
+  border-color: #a5f3fc !important;
+  background: #ecfeff !important;
+}
+
+.home-audience .home-eyebrow {
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+  background: #fffbeb !important;
+}
+
 .home-section-heading-split {
   max-width: none !important;
   display: grid;
@@ -2589,6 +2621,11 @@ textarea {
   text-transform: uppercase;
 }
 
+.home-feature-card-refresh.tone-blue :is(.home-feature-eyebrow, .home-feature-link) { color: #2563eb; }
+.home-feature-card-refresh.tone-violet :is(.home-feature-eyebrow, .home-feature-link) { color: #7c3aed; }
+.home-feature-card-refresh.tone-cyan :is(.home-feature-eyebrow, .home-feature-link) { color: #0891b2; }
+.home-feature-card-refresh.tone-amber :is(.home-feature-eyebrow, .home-feature-link) { color: #b45309; }
+
 .home-page-refresh .home-feature-card-refresh h3 {
   margin: 9px 0 10px !important;
   font-size: 18px !important;
@@ -2672,6 +2709,24 @@ textarea {
   background: #eff6ff;
 }
 
+.home-workflow-item-refresh:nth-child(1) > span {
+  color: #2563eb !important;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.home-workflow-item-refresh:nth-child(2) > span {
+  color: #7c3aed !important;
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+}
+
+.home-workflow-item-refresh:nth-child(3) > span {
+  color: #0e7490 !important;
+  border-color: #a5f3fc;
+  background: #ecfeff;
+}
+
 .home-workflow-item-refresh strong {
   display: block;
   margin: 2px 0 8px;
@@ -2719,6 +2774,11 @@ textarea {
   color: #2563eb;
   border-radius: 13px;
   background: #eff6ff;
+}
+
+.home-audience-grid article:last-child .home-audience-icon {
+  color: #7c3aed;
+  background: #f3e8ff;
 }
 
 .home-audience-icon svg {
