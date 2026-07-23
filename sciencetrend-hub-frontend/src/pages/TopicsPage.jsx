@@ -31,15 +31,19 @@ import "../styles/TopicsPage.css";
 /* ── Toast Notifications Hook ── */
 const TOPICS_CACHE_KEY = "topics_default_v6";
 
+function isUsableTopic(topic) {
+  return Boolean(topic && typeof topic === "object" && topic.name && topic.name !== "Untitled topic");
+}
+
 function getCachedTopicsData() {
   const cached = getPersistentCachedData(TOPICS_CACHE_KEY);
   if (!cached || typeof cached !== "object") return null;
 
   const topics = Array.isArray(cached.topics)
-    ? cached.topics.filter((topic) => topic?.name && topic.name !== "Untitled topic" && (topic.researchTopicId || (typeof topic.id === "number" && topic.id > 0)))
+    ? cached.topics.filter(isUsableTopic)
     : [];
   const trending = Array.isArray(cached.trending)
-    ? cached.trending.filter((topic) => topic?.name && topic.name !== "Untitled topic" && (topic.researchTopicId || (typeof topic.id === "number" && topic.id > 0)))
+    ? cached.trending.filter(isUsableTopic)
     : [];
   return topics.length > 0 || trending.length > 0 ? { topics, trending } : null;
 }
@@ -107,7 +111,7 @@ function TopicsPage() {
       if (followedResult.status === "fulfilled") {
         const nextFollowedIds = new Set(
           toArray(followedResult.value)
-            .map((topic) => normalizeTopic(topic))
+            .map((topic, i) => normalizeTopic(topic, i))
             .map((topic) => String(topic.researchTopicId || topic.id))
             .filter((id) => id && id !== "null" && id !== "undefined" && !id.startsWith("topic-")),
         );
@@ -116,13 +120,13 @@ function TopicsPage() {
 
       const freshTrending = trendingResult.status === "fulfilled"
         ? toArray(trendingResult.value)
-            .map((topic) => normalizeTopic(topic))
-            .filter((topic) => topic.name !== "Untitled topic" && (topic.researchTopicId || typeof topic.id === "number"))
+            .map((topic, i) => normalizeTopic(topic, i))
+            .filter(isUsableTopic)
         : [];
       const freshTopics = listResult.status === "fulfilled"
         ? toArray(listResult.value)
-            .map((topic) => normalizeTopic(topic))
-            .filter((topic) => topic.name !== "Untitled topic" && (topic.researchTopicId || typeof topic.id === "number"))
+            .map((topic, i) => normalizeTopic(topic, i))
+            .filter(isUsableTopic)
         : [];
 
       if (isDefaultLoad) {
