@@ -186,8 +186,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  align-content: center;
   flex-wrap: wrap;
   gap: 12px;
+  min-height: 56px;
   border-bottom: 1.5px solid rgba(230, 222, 211, 0.5);
   padding-bottom: 12px;
   margin-bottom: 14px;
@@ -195,34 +197,51 @@
 .chips-list-container {
   display: flex;
   align-items: center;
+  align-content: center;
   flex-wrap: wrap;
   gap: 8px;
+  min-height: 32px;
 }
 .chips-label-prefix {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
   font-size: 12px;
+  line-height: 1;
   color: var(--st-muted-strong);
   font-weight: 800;
   margin-right: 4px;
+  white-space: nowrap;
 }
 .filter-active-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  min-height: 32px;
+  padding: 0 10px;
   background: #f7f2ea;
   border: 1px solid rgba(230, 222, 211, 0.7);
   border-radius: 99px;
   font-size: 11.5px;
+  line-height: 1;
   font-weight: 750;
   color: var(--st-heading);
+  white-space: nowrap;
+}
+.filter-active-chip > span {
+  line-height: 1;
 }
 .filter-active-chip button {
+  width: 20px;
+  height: 20px;
   background: none;
   border: none;
   display: grid;
   place-items: center;
-  padding: 2px;
+  flex: 0 0 20px;
+  padding: 0;
   border-radius: 50%;
+  line-height: 1;
   cursor: pointer;
   color: var(--st-muted-strong);
   transition: all 0.15s ease;
@@ -232,7 +251,11 @@
   background: var(--st-danger-soft);
 }
 .chips-clear-all-link {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
   font-size: 12px;
+  line-height: 1;
   color: var(--st-primary);
   font-weight: 780;
   background: none;
@@ -240,6 +263,7 @@
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 4px;
+  white-space: nowrap;
 }
 .chips-clear-all-link:hover {
   text-decoration: underline;
@@ -249,11 +273,20 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-height: 32px;
 }
 .results-found-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 112px;
+  height: 32px;
   font-size: 12px;
+  line-height: 1;
   color: var(--st-muted-strong);
   font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .save-search-btn-mock {
   display: inline-flex;
