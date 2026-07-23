@@ -20,7 +20,8 @@ import {
   getFollowedTopics,
   getPapersByTopic,
 } from "../services/topicService";
-import { normalizeTopic, toArray } from "../utils/apiData";
+import { getPapers, searchPapers } from "../services/paperService";
+import { normalizeTopic, normalizePaper, toArray } from "../utils/apiData";
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { useAuth } from "../context/useAuth";
 import { ROUTE_PATHS } from "../routes/routePaths";
@@ -237,8 +238,39 @@ function TopicsPage() {
     setTopicPapers(cachedPapers ?? []);
 
     try {
-      const response = await getPapersByTopic(targetTopicId, 0, 10);
-      const papersList = toArray(response, ["content", "papers"]);
+      let papersList = [];
+      
+      // Level 1: Try getPapersByTopic API
+      if (typeof targetTopicId === "number" || /^\d+$/.test(String(targetTopicId))) {
+        try {
+          const response = await getPapersByTopic(targetTopicId, 0, 10);
+          papersList = toArray(response, ["content", "papers"]).map(normalizePaper);
+        } catch {
+          papersList = [];
+        }
+      }
+
+      // Level 2: Fallback search papers by topic name keywords
+      if (papersList.length === 0 && topic?.name) {
+        const firstWord = topic.name.split(" ")[0] || topic.name;
+        try {
+          const searchResp = await searchPapers(firstWord, { page: 0, size: 8 });
+          papersList = toArray(searchResp, ["content", "papers"]).map(normalizePaper);
+        } catch {
+          papersList = [];
+        }
+      }
+
+      // Level 3: Fallback get general latest catalog papers
+      if (papersList.length === 0) {
+        try {
+          const catalogResp = await getPapers({ page: 0, size: 6 });
+          papersList = toArray(catalogResp, ["content", "papers"]).map(normalizePaper);
+        } catch {
+          papersList = [];
+        }
+      }
+
       if (papersList.length > 0) {
         setTopicPapers(papersList);
         setPersistentCachedData(cacheKey, papersList);
