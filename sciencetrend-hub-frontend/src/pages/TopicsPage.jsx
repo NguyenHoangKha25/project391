@@ -29,7 +29,7 @@ import "../styles/WorkspacePages.css";
 import "../styles/TopicsPage.css";
 
 /* ── Toast Notifications Hook & Helpers ── */
-const TOPICS_CACHE_KEY = "topics_default_v7";
+const TOPICS_CACHE_KEY = "topics_default_v8";
 
 function isUsableTopic(topic) {
   return Boolean(
@@ -65,6 +65,25 @@ function safePaperCountValue(count) {
 function safeFormatScore(score) {
   const n = Number(score);
   return Number.isFinite(n) && n > 0 ? n.toFixed(1) : null;
+}
+
+function mergeTrendingTopicIds(trendingTopics, catalogTopics) {
+  const catalogByName = new Map(
+    catalogTopics.map((topic) => [topic.name.trim().toLowerCase(), topic]),
+  );
+
+  return trendingTopics.map((topic) => {
+    const catalogTopic = catalogByName.get(topic.name.trim().toLowerCase());
+    if (!catalogTopic) return topic;
+
+    return {
+      ...topic,
+      id: catalogTopic.id,
+      researchTopicId: catalogTopic.researchTopicId,
+      topicId: catalogTopic.topicId,
+      followerCount: catalogTopic.followerCount,
+    };
+  });
 }
 
 function getCachedTopicsData() {
@@ -154,16 +173,20 @@ function TopicsPage() {
         setFollowedIds(nextFollowedIds);
       }
 
-      const freshTrending = trendingResult.status === "fulfilled"
-        ? toArray(trendingResult.value)
-            .map((topic, i) => normalizeTopic(topic, i))
-            .filter(isUsableTopic)
-        : [];
       const freshTopics = listResult.status === "fulfilled"
         ? toArray(listResult.value)
             .map((topic, i) => normalizeTopic(topic, i))
             .filter(isUsableTopic)
         : [];
+      const normalizedTrending = trendingResult.status === "fulfilled"
+        ? toArray(trendingResult.value)
+            .map((topic, i) => normalizeTopic(topic, i))
+            .filter(isUsableTopic)
+        : [];
+      const freshTrending = mergeTrendingTopicIds(
+        normalizedTrending,
+        freshTopics.length > 0 ? freshTopics : (cachedData?.topics ?? []),
+      );
 
       if (isDefaultLoad) {
         const nextData = {
@@ -362,7 +385,7 @@ function TopicsPage() {
             <div className="topics-grid trending-grid">
               {trending.map((topic, index) => {
                 const isFollowing = followedIds.has(String(topic.id));
-                const processing = followProcessing.has(topic.id);
+                const processing = followProcessing.has(String(topic.id));
 
                 return (
                   <article key={`trending-${topic.id}`} className="topic-card trending-card">
@@ -422,7 +445,7 @@ function TopicsPage() {
             <div className="topics-grid explore-grid">
               {topics.map((topic) => {
                 const isFollowing = followedIds.has(String(topic.id));
-                const processing = followProcessing.has(topic.id);
+                const processing = followProcessing.has(String(topic.id));
                 const scoreStr = safeFormatScore(topic.score);
 
                 return (
