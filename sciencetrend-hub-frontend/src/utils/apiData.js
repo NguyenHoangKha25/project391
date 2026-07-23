@@ -101,11 +101,15 @@ export function normalizePaper(paper = {}, index = 0) {
 
 // JournalResponse từ backend: dùng journal.journalId
 export function normalizeJournal(journal = {}, index = 0) {
-  const numericId = typeof journal === "object" && journal !== null
-    ? (journal.journalId ?? (typeof journal.id === "number" || /^\d+$/.test(String(journal.id)) ? Number(journal.id) : null) ?? journal.sourceId)
+  const rawId = typeof journal === "object" && journal !== null
+    ? (journal.journalId ?? journal.id ?? journal.sourceId ?? journal.journal_id)
     : null;
 
-  const validId = numericId ?? (typeof index === "number" ? index : 0);
+  const numericId = rawId !== null && rawId !== undefined && /^\d+$/.test(String(rawId))
+    ? Number(rawId)
+    : (typeof rawId === "number" ? rawId : null);
+
+  const validId = numericId ?? (typeof index === "number" ? index + 1 : 1);
 
   return {
     id: validId,
@@ -141,7 +145,7 @@ export function normalizeKeyword(keyword = {}, index = 0) {
     : "Untitled keyword";
 
   return {
-    id: keyword.keywordId ?? keyword.id ?? nestedKeyword.keywordId ?? nestedKeyword.id ?? index,
+    id: keyword.keywordId ?? keyword.id ?? nestedKeyword.keywordId ?? nestedKeyword.id ?? (index + 1),
     name,
     paperCount: toNumber(
       keyword.paperCount
@@ -179,11 +183,15 @@ export function normalizeTopic(topic = {}, index = 0) {
     ? topic 
     : (topic.name ?? topic.topic ?? topic.topicName ?? topic.title ?? "Untitled topic");
 
-  const numericId = typeof topic === "object" && topic !== null
-    ? (topic.researchTopicId ?? topic.topicId ?? (typeof topic.id === "number" || /^\d+$/.test(String(topic.id)) ? Number(topic.id) : null))
+  const rawId = typeof topic === "object" && topic !== null
+    ? (topic.researchTopicId ?? topic.topicId ?? topic.id ?? topic.research_topic_id ?? topic.topic_id)
     : null;
 
-  const validId = numericId ?? (typeof index === "number" ? index : 0);
+  const numericId = rawId !== null && rawId !== undefined && /^\d+$/.test(String(rawId))
+    ? Number(rawId)
+    : (typeof rawId === "number" ? rawId : null);
+
+  const validId = numericId ?? (typeof index === "number" ? index + 1 : 1);
 
   return {
     id: validId,

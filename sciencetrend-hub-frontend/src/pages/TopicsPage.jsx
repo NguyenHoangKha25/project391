@@ -168,6 +168,10 @@ function TopicsPage() {
       navigate(ROUTE_PATHS.LOGIN, { state: { from: ROUTE_PATHS.TOPICS } });
       return;
     }
+    if (!topicId || topicId === 0 || topicId === "0") {
+      showToast("Cannot follow: topic does not have a valid ID", "warning");
+      return;
+    }
     if (followProcessing.has(topicId)) return;
 
     // Set processing state
