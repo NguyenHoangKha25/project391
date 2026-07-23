@@ -16,6 +16,8 @@ import { getCurrentUser } from "../services/userService";
 import { formatRoleForDisplay, normalizeRoleValue } from "../utils/authStorage";
 import "../styles/MyAccountPage.css";
 
+const REPORT_ROLES = new Set(["LECTURER", "RESEARCHER", "ADMIN"]);
+
 function getInitials(value) {
   const source = String(value || "").trim();
   if (!source) return "U";
@@ -56,6 +58,7 @@ function MyAccountPage() {
   const displayName = profile.username || profile.email || "Researcher";
   const email = profile.email || "Email is not available yet";
   const roleLabel = formatRoleForDisplay(profile.role || displayRole);
+  const canViewReports = REPORT_ROLES.has(normalizeRoleValue(profile.role || displayRole));
   const initials = useMemo(() => getInitials(displayName || email), [displayName, email]);
 
   useEffect(() => {
@@ -154,7 +157,9 @@ function MyAccountPage() {
             <span className="account-eyebrow">Quick access</span>
             <h3>Your workspace</h3>
             <p>
-              Continue with saved papers or open reports directly from your account page.
+              {canViewReports
+                ? "Continue with saved papers or open reports directly from your account page."
+                : "Continue with papers you have saved for later."}
             </p>
 
             <div className="account-actions">
@@ -162,10 +167,12 @@ function MyAccountPage() {
                 <FiBookOpen />
                 Open my bookmarks
               </Link>
-              <Link to={ROUTE_PATHS.REPORTS}>
-                <FiFileText />
-                View reports
-              </Link>
+              {canViewReports && (
+                <Link to={ROUTE_PATHS.REPORTS}>
+                  <FiFileText />
+                  View reports
+                </Link>
+              )}
             </div>
           </aside>
         </div>
