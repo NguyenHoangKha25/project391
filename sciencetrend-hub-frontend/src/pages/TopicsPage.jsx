@@ -28,24 +28,49 @@ import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/TopicsPage.css";
 
-/* ── Toast Notifications Hook ── */
-const TOPICS_CACHE_KEY = "topics_default_v6";
+/* ── Toast Notifications Hook & Helpers ── */
+const TOPICS_CACHE_KEY = "topics_default_v7";
 
 function isUsableTopic(topic) {
-  return Boolean(topic && typeof topic === "object" && topic.name && topic.name !== "Untitled topic");
+  return Boolean(
+    topic &&
+    typeof topic === "object" &&
+    typeof topic.name === "string" &&
+    topic.name.trim() !== "" &&
+    topic.name !== "Untitled topic"
+  );
+}
+
+function safeFormatPaperCount(count) {
+  if (typeof count === "number") {
+    return `${formatNumber(count)} papers`;
+  }
+  if (typeof count === "string" && count.trim()) {
+    return count.includes("paper") ? count : `${count} papers`;
+  }
+  return "0 papers";
+}
+
+function safeFormatScore(score) {
+  const n = Number(score);
+  return Number.isFinite(n) && n > 0 ? n.toFixed(1) : null;
 }
 
 function getCachedTopicsData() {
-  const cached = getPersistentCachedData(TOPICS_CACHE_KEY);
-  if (!cached || typeof cached !== "object") return null;
+  try {
+    const cached = getPersistentCachedData(TOPICS_CACHE_KEY);
+    if (!cached || typeof cached !== "object") return null;
 
-  const topics = Array.isArray(cached.topics)
-    ? cached.topics.filter(isUsableTopic)
-    : [];
-  const trending = Array.isArray(cached.trending)
-    ? cached.trending.filter(isUsableTopic)
-    : [];
-  return topics.length > 0 || trending.length > 0 ? { topics, trending } : null;
+    const topics = Array.isArray(cached.topics)
+      ? cached.topics.filter(isUsableTopic)
+      : [];
+    const trending = Array.isArray(cached.trending)
+      ? cached.trending.filter(isUsableTopic)
+      : [];
+    return topics.length > 0 || trending.length > 0 ? { topics, trending } : null;
+  } catch {
+    return null;
+  }
 }
 
 function useToast() {
@@ -335,9 +360,7 @@ function TopicsPage() {
                       <h3>{topic.name}</h3>
                       <div className="topic-meta">
                         <span className="meta-item count">
-                          {typeof topic.paperCount === "number"
-                            ? `${formatNumber(topic.paperCount)} papers`
-                            : (topic.paperCount ? (String(topic.paperCount).includes("paper") ? topic.paperCount : `${topic.paperCount} papers`) : "0 papers")}
+                          {safeFormatPaperCount(topic.paperCount)}
                         </span>
                         {topic.growth && (
                           <span className={`meta-item growth positive`}>
@@ -389,6 +412,7 @@ function TopicsPage() {
               {topics.map((topic) => {
                 const isFollowing = followedIds.has(String(topic.id));
                 const processing = followProcessing.has(topic.id);
+                const scoreStr = safeFormatScore(topic.score);
 
                 return (
                   <article key={`explore-${topic.id}`} className="topic-card explore-card">
@@ -396,13 +420,11 @@ function TopicsPage() {
                       <h3>{topic.name}</h3>
                       <div className="topic-meta">
                         <span className="meta-item count">
-                          {typeof topic.paperCount === "number"
-                            ? `${formatNumber(topic.paperCount)} papers`
-                            : (topic.paperCount ? (String(topic.paperCount).includes("paper") ? topic.paperCount : `${topic.paperCount} papers`) : "0 papers")}
+                          {safeFormatPaperCount(topic.paperCount)}
                         </span>
-                        {topic.score > 0 && (
+                        {scoreStr && (
                           <span className="meta-item score">
-                            Score: {topic.score.toFixed(1)}
+                            Score: {scoreStr}
                           </span>
                         )}
                       </div>
