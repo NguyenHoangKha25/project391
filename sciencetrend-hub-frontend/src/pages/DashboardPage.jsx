@@ -263,17 +263,19 @@ function DashboardPage() {
     const values = papersByYear.map(p => Number(p.value) || 0);
     const rawMax = Math.max(...values, 10);
     
-    // Scale ceiling to 20K target scale
-    let maxScale;
-    if (rawMax > 100000) maxScale = Math.ceil((rawMax * 1.2) / 20000) * 20000;
-    else if (rawMax > 12000) maxScale = 20000;
-    else if (rawMax > 10000) maxScale = Math.ceil((rawMax * 1.2) / 5000) * 5000;
-    else if (rawMax > 1000) maxScale = Math.ceil((rawMax * 1.25) / 1000) * 1000;
-    else maxScale = Math.ceil((rawMax * 1.25) / 100) * 100;
+    // Guarantee minimum 20K (20,000 papers) target scale ceiling
+    const maxScale = Math.max(20000, Math.ceil((rawMax * 1.15) / 5000) * 5000);
 
-    const label4 = maxScale >= 1000 ? `${(maxScale / 1000).toFixed(0)}K` : `${maxScale}`;
-    const label3 = maxScale >= 1000 ? `${((maxScale * 0.66) / 1000).toFixed(1).replace(/\.0$/, "")}K` : `${Math.round(maxScale * 0.66)}`;
-    const label2 = maxScale >= 1000 ? `${((maxScale * 0.33) / 1000).toFixed(1).replace(/\.0$/, "")}K` : `${Math.round(maxScale * 0.33)}`;
+    if (maxScale === 20000) {
+      return {
+        maxScale: 20000,
+        labels: ["20K", "13.3K", "6.6K", "0"]
+      };
+    }
+
+    const label4 = `${(maxScale / 1000).toFixed(0)}K`;
+    const label3 = `${((maxScale * 0.66) / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+    const label2 = `${((maxScale * 0.33) / 1000).toFixed(1).replace(/\.0$/, "")}K`;
     const label1 = "0";
 
     return { maxScale, labels: [label4, label3, label2, label1] };
