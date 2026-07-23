@@ -170,13 +170,15 @@ export function normalizeTopic(topic = {}, index = 0) {
   const rawGrowth = topic.growth ?? topic.growthRate ?? topic.change ?? 0;
   const growthNumber = Number(rawGrowth);
   let growth;
-  if (Number.isFinite(growthNumber)) {
-    const pct = (growthNumber > -1 && growthNumber < 1 && growthNumber !== 0)
+  if (Number.isFinite(growthNumber) && growthNumber !== 0) {
+    const pct = (growthNumber > -1 && growthNumber < 1)
       ? Math.round(growthNumber * 100)
       : Math.round(growthNumber);
     growth = `${pct >= 0 ? "+" : ""}${pct}%`;
+  } else if (typeof rawGrowth === "string" && rawGrowth.trim()) {
+    growth = String(rawGrowth);
   } else {
-    growth = String(rawGrowth || "0%");
+    growth = "";
   }
 
   const topicName = typeof topic === "string" 
@@ -193,12 +195,20 @@ export function normalizeTopic(topic = {}, index = 0) {
 
   const validId = numericId ?? (typeof topic === "object" && typeof topic.id === "number" ? topic.id : `topic-${index + 1}`);
 
+  const rawPaperCount = topic.paperCount ?? topic.totalPapers ?? topic.count;
+  const paperCountNum = rawPaperCount !== undefined && rawPaperCount !== null ? (Number(rawPaperCount) || 0) : 0;
+
+  const rawFollowerCount = topic.followerCount ?? topic.followersCount ?? topic.followers;
+  const followerCountNum = rawFollowerCount !== undefined && rawFollowerCount !== null ? (Number(rawFollowerCount) || 0) : null;
+
   return {
     id: validId,
     researchTopicId: numericId,
     topicId: numericId,
     name: topicName,
-    paperCount: `${formatNumber(topic.paperCount ?? topic.totalPapers ?? topic.count ?? 0)} papers`,
+    description: topic.description ?? "",
+    paperCount: paperCountNum,
+    followerCount: followerCountNum,
     growth,
     score: toNumber(topic.score ?? topic.percentage ?? 0),
   };

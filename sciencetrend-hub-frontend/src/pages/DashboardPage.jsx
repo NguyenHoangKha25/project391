@@ -563,22 +563,37 @@ function DashboardPage() {
 
             <div className="trending-topics-mini-list">
               {trendingTopics.length > 0 ? (
-                trendingTopics.map((topic) => (
-                  <div key={topic.id} className="trending-topic-mini-card">
-                    <div className="topic-mini-header">
-                      <strong>{topic.name}</strong>
-                      <span className="topic-badge">Trending</span>
+                trendingTopics.map((topic) => {
+                  const hasPapers = Boolean(topic.paperCount && topic.paperCount > 0);
+                  const hasFollowers = Boolean(topic.followerCount && topic.followerCount > 0);
+                  const badgeText = topic.growth || "Trending";
+
+                  return (
+                    <div key={topic.id} className="trending-topic-mini-card">
+                      <div className="topic-mini-header">
+                        <strong>{topic.name}</strong>
+                        <span className="topic-badge">{badgeText}</span>
+                      </div>
+                      {topic.description ? (
+                        <p className="topic-mini-desc">{topic.description}</p>
+                      ) : null}
+                      <div className="topic-mini-stats">
+                        {hasPapers && (
+                          <span>{formatNumber(topic.paperCount)} papers</span>
+                        )}
+                        {hasPapers && hasFollowers && (
+                          <span className="dot-sep">•</span>
+                        )}
+                        {hasFollowers && (
+                          <span>{formatNumber(topic.followerCount)} followers</span>
+                        )}
+                        {!hasPapers && !hasFollowers && (
+                          <span>Active Topic</span>
+                        )}
+                      </div>
                     </div>
-                    {topic.description && (
-                      <p className="topic-mini-desc">{topic.description}</p>
-                    )}
-                    <div className="topic-mini-stats">
-                      <span>{formatNumber(topic.paperCount || 0)} papers</span>
-                      <span className="dot-sep">•</span>
-                      <span>{formatNumber(topic.followerCount || 0)} followers</span>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="chart-empty-placeholder" style={{ padding: "40px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
                   No trending topics active.
