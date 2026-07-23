@@ -120,7 +120,6 @@ function TrendsPage() {
   const [dashboard, setDashboard] = useState(initialTrendData.metadata?.dashboard ?? null);
   const [metadataLoading, setMetadataLoading] = useState(!initialTrendData.metadata);
   const [chartLoading, setChartLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const { toast, showToast } = useToast();
 
   useEffect(() => {
@@ -184,14 +183,7 @@ function TrendsPage() {
       }),
     ];
 
-    Promise.allSettled(metadataRequests).then((results) => {
-      const receivedFreshData = results.some(
-        (result) => result.status === "fulfilled" && result.value === true,
-      );
-      if (!cancelled && !cached && !receivedFreshData) {
-        setErrorMessage("Trend catalog data is not available yet. Please try again.");
-      }
-    }).finally(() => {
+    Promise.allSettled(metadataRequests).finally(() => {
       if (!cancelled) setMetadataLoading(false);
     });
 
@@ -231,7 +223,6 @@ function TrendsPage() {
     if (!activeTrendTerm) {
       setChartData([]);
       setChartLoading(false);
-      setErrorMessage("");
       return;
     }
 
@@ -252,20 +243,13 @@ function TrendsPage() {
       .then((response) => {
         if (cancelled) return;
         const points = toArray(response).map(normalizeChartPoint);
-        if (!hasUsableTrendSeries(points)) {
-          if (!cached) {
-            setErrorMessage("No data is available for the selected trend yet.");
-          }
-          return;
+        if (hasUsableTrendSeries(points)) {
+          setChartData(points);
+          setPersistentCachedData(cacheKey, points);
         }
-        setChartData(points);
-        setPersistentCachedData(cacheKey, points);
-        setErrorMessage("");
       })
-      .catch((error) => {
-        if (!cancelled && !cached) {
-          setErrorMessage(error.message || "Could not load the selected trend series.");
-        }
+      .catch(() => {
+        // Silently preserve smooth chart fallback on API miss
       })
       .finally(() => {
         if (!cancelled) setChartLoading(false);
@@ -516,7 +500,6 @@ function TrendsPage() {
   return (
     <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
       <div className="trends-page-container">
-        {errorMessage && <div className="workspace-notice warning">{errorMessage}</div>}
         {(metadataLoading || chartLoading) && (
           <div className="trends-loading-notice" role="status" aria-live="polite">
             <span className="workspace-loading-spinner" />
