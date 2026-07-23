@@ -157,21 +157,6 @@ function LoginPage() {
 
         <div className="auth-right">
           <div className="auth-premium-card-box" style={{ position: "relative" }}>
-            <div style={{
-              position: "absolute",
-              top: "-1px",
-              left: "-1px",
-              right: "-1px",
-              height: "30px",
-              backgroundImage: "linear-gradient(90deg, var(--st-primary), var(--st-accent))",
-              backgroundSize: "100% 6px",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "top left",
-              borderRadius: "30px 30px 0 0",
-              zIndex: 5,
-              pointerEvents: "none"
-            }} />
-
             <div className="auth-card-header">
               <h2 style={{
                 fontFamily: "var(--font-display)",

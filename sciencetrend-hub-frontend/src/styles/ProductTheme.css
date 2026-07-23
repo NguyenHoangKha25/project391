@@ -1703,14 +1703,30 @@ textarea {
   transform: none !important;
 }
 
+.auth-premium-card-box,
+.register-premium-card-box {
+  border-color: #cddaf0 !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.08), transparent 15rem),
+    linear-gradient(145deg, #ffffff 0%, #f7faff 64%, #faf7ff 100%) !important;
+  box-shadow: 0 18px 44px rgba(37, 99, 235, 0.1) !important;
+}
+
 .auth-premium-card-box::before,
 .register-premium-card-box::before {
-  height: 4px !important;
-  background: #2563eb !important;
+  height: 5px !important;
+  background: linear-gradient(90deg, #2563eb 0%, #7c3aed 56%, #06b6d4 100%) !important;
 }
 
 .auth-card-header h2,
-.register-header h2,
+.register-header h2 {
+  color: #2563eb !important;
+  background: linear-gradient(95deg, #1d4ed8 0%, #7c3aed 72%, #0891b2 100%) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
 .forgot-header h2,
 .reset-header h2 {
   color: #0f172a !important;
