@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff, FiUser, FiLock, FiBarChart2, FiBookOpen, FiFileText, FiSearch, FiBookmark, FiTrendingUp } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiLock, FiTrendingUp, FiUser } from "react-icons/fi";
 import logo from "../assets/images/logo-login.png";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { useAuth } from "../context/useAuth";

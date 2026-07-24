@@ -39,7 +39,7 @@ function hasUsableMetadata(metadata) {
     );
 }
 
-const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v3";
+const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v4";
 
 function getTrendSeriesCacheKey(tab, term) {
   return `trend_series_${tab}_${term.trim().toLowerCase()}`;
@@ -168,9 +168,8 @@ function TrendsPage() {
       }),
       getAllKeywords({ page: 0, size: 100 }).then((response) => {
         const keywords = toArray(response, ["keywords"])
-          .map(normalizeKeyword)
-          .map((keyword) => keyword.name)
-          .filter((keyword) => keyword && keyword !== "Untitled keyword");
+          .map((kw, i) => normalizeKeyword(kw, i))
+          .filter((keyword) => keyword.name && keyword.name !== "Untitled keyword");
         if (keywords.length === 0) return false;
         updateMetadata({ dbKeywords: keywords });
         return true;
@@ -435,43 +434,36 @@ function TrendsPage() {
   const comparisonLines = useMemo(() => {
     const colors = ["#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#06b6d4"];
 
-    const defaultKeywords = [
-      { name: "Large Language Models", baseVal: 98.4, displayStr: "98.4K" },
-      { name: "Diffusion Models", baseVal: 74.2, displayStr: "74.2K" },
-      { name: "Graph Neural Networks", baseVal: 52.6, displayStr: "52.6K" },
-      { name: "AI for Healthcare", baseVal: 36.1, displayStr: "36.1K" },
-      { name: "Vision-Language Models", baseVal: 21.8, displayStr: "21.8K" },
-    ];
-
-    const defaultTopics = [
-      { name: "Artificial Intelligence in Education", baseVal: 88.0, displayStr: "1.8K" },
-      { name: "Engineering Education and Technology", baseVal: 65.0, displayStr: "1.2K" },
-      { name: "Artificial Intelligence in Healthcare and Education", baseVal: 48.0, displayStr: "860" },
-      { name: "Educational Leadership and Innovation", baseVal: 33.0, displayStr: "540" },
-      { name: "Intelligent Tutoring Systems and Adaptive Learning", baseVal: 20.0, displayStr: "290" },
-    ];
-
-    const defaults = trendTab === "keyword" ? defaultKeywords : defaultTopics;
     const rawDataList = trendTab === "keyword" ? dbKeywords : trendingTopics;
+    const sourceList = Array.isArray(rawDataList) && rawDataList.length > 0
+      ? rawDataList.slice(0, 5)
+      : (trendTab === "keyword"
+          ? [
+              { name: "Transformer", paperCount: 1420 },
+              { name: "Deep Learning", paperCount: 1850 },
+              { name: "Natural Language Processing", paperCount: 1120 },
+              { name: "Computer Vision", paperCount: 980 },
+              { name: "Reinforcement Learning", paperCount: 760 },
+            ]
+          : DEFAULT_TOPICS);
 
-    const itemsToRender = defaults.map((defItem, idx) => {
-      const realObj = Array.isArray(rawDataList) ? rawDataList[idx] : null;
-      let realName = defItem.name;
-      let valNum = defItem.baseVal;
-      let valStr = defItem.displayStr;
+    const itemsToRender = sourceList.map((item, idx) => {
+      const realName = typeof item === "string" ? item : (item.name || item.keyword || item.topic || `Item ${idx + 1}`);
+      const rawCount = typeof item === "object" && item !== null
+        ? (item.paperCount ?? item.totalPapers ?? item.count ?? item.followerCount ?? 0)
+        : 0;
 
-      if (realObj) {
-        realName = realObj.name || realObj.keyword || realObj.term || realName;
-        const count = Number(realObj.paperCount ?? realObj.count ?? realObj.paper_count ?? realObj.followerCount);
-        if (Number.isFinite(count) && count > 0) {
-          if (count >= 1000) {
-            valStr = `${(count / 1000).toFixed(1)}K`;
-            valNum = Math.min(95, Math.max(15, count / 50));
-          } else {
-            valStr = `${count}`;
-            valNum = Math.min(95, Math.max(15, count / 10));
-          }
-        }
+      const numericCount = Number(rawCount) || 0;
+      let valStr = "";
+      let valNum = Math.max(15, 90 - idx * 16);
+
+      if (numericCount > 0) {
+        valStr = numericCount >= 1000 ? `${(numericCount / 1000).toFixed(1)}K` : formatNumber(numericCount);
+        valNum = Math.min(95, Math.max(15, 90 - idx * 16));
+      } else if (typeof item === "object" && item?.displayStr) {
+        valStr = item.displayStr;
+      } else {
+        valStr = `${(12.5 - idx * 1.8).toFixed(1)}K`;
       }
 
       return {

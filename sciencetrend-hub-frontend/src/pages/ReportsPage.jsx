@@ -109,11 +109,11 @@ function DonutChart({ points }) {
   const sliceColors = ["#6366f1", "#06b6d4", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6"];
   const total = points.reduce((sum, p) => sum + p.value, 0) || 1;
 
-  let cumulativePercent = 0;
   const slices = points.slice(0, 5).map((p, idx) => {
     const pct = Math.round((p.value / total) * 100);
-    const startPct = cumulativePercent;
-    cumulativePercent += pct;
+    const startPct = points
+      .slice(0, idx)
+      .reduce((sum, item) => sum + Math.round((item.value / total) * 100), 0);
     return {
       ...p,
       pct,
@@ -211,22 +211,20 @@ function BarChart({ points }) {
   );
 }
 
-function ReportChart({ chart, index = 0 }) {
+function ReportChart({ chart }) {
   const points = chartPoints(chart);
   const title = (chart.title || chart.name || "").toLowerCase();
 
-  let chartType = "bar";
-  if (title.includes("overall") || title.includes("statistics") || title.includes("tổng quan")) {
-    chartType = "stats";
-  } else if (title.includes("year") || title.includes("năm")) {
-    chartType = "line";
-  } else if (title.includes("journal") || title.includes("tạp chí")) {
-    chartType = "donut";
-  } else if (title.includes("keyword") || title.includes("từ khóa")) {
-    chartType = "column";
-  } else {
-    chartType = "bar";
-  }
+  const chartType =
+    title.includes("overall") || title.includes("statistics") || title.includes("tổng quan")
+      ? "stats"
+      : title.includes("year") || title.includes("năm")
+        ? "line"
+        : title.includes("journal") || title.includes("tạp chí")
+          ? "donut"
+          : title.includes("keyword") || title.includes("từ khóa")
+            ? "column"
+            : "bar";
 
   const badgeLabels = {
     stats: "KPI Metric Cards",
@@ -432,7 +430,7 @@ function ReportsPage() {
               </div>
               {selected.charts && selected.charts.length > 0 && (
                 <div className="report-charts">
-                  {selected.charts.map((chart, index) => <ReportChart key={chart.id ?? chart.title ?? index} chart={chart} index={index} />)}
+                  {selected.charts.map((chart, index) => <ReportChart key={chart.id ?? chart.title ?? index} chart={chart} />)}
                 </div>
               )}
               <div style={{ marginTop: "16px", display: "flex", gap: "12px" }}>
