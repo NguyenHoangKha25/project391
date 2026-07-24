@@ -39,10 +39,11 @@ function hasUsableMetadata(metadata) {
     );
 }
 
-const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v4";
+const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v5";
 
 function getTrendSeriesCacheKey(tab, term) {
-  return `trend_series_${tab}_${term.trim().toLowerCase()}`;
+  const termStr = typeof term === "string" ? term : (term?.name || term?.keyword || term?.term || String(term || ""));
+  return `trend_series_${tab}_${termStr.trim().toLowerCase()}`;
 }
 
 const DEFAULT_KEYWORDS = [
@@ -106,12 +107,28 @@ function TrendsPage() {
   const [trendingTopics, setTrendingTopics] = useState(initialTrendData.topics);
   const [dbKeywords, setDbKeywords] = useState(initialTrendData.keywords);
 
-  // Keyword & Topic chips state initialized with top defaults
-  const [keywordChips, setKeywordChips] = useState(() => initialTrendData.keywords.slice(0, 3));
-  const [topicChips, setTopicChips] = useState(() => initialTrendData.topics.map(t => typeof t === "string" ? t : t.name).slice(0, 3));
+  // Keyword & Topic chips state initialized with top defaults (safely mapped to string names)
+  const [keywordChips, setKeywordChips] = useState(() => {
+    return initialTrendData.keywords
+      .map((k) => (typeof k === "string" ? k : (k?.name || k?.keyword || "")))
+      .filter(Boolean)
+      .slice(0, 3);
+  });
+  const [topicChips, setTopicChips] = useState(() => {
+    return initialTrendData.topics
+      .map((t) => (typeof t === "string" ? t : (t?.name || t?.topic || "")))
+      .filter(Boolean)
+      .slice(0, 3);
+  });
   
-  const [activeKeyword, setActiveKeyword] = useState(() => initialTrendData.keywords[0] || "Transformer");
-  const [activeTopicState, setActiveTopicState] = useState(() => (typeof initialTrendData.topics[0] === "string" ? initialTrendData.topics[0] : initialTrendData.topics[0]?.name) || "Topic Modeling");
+  const [activeKeyword, setActiveKeyword] = useState(() => {
+    const first = initialTrendData.keywords[0];
+    return typeof first === "string" ? first : (first?.name || first?.keyword || "Transformer");
+  });
+  const [activeTopicState, setActiveTopicState] = useState(() => {
+    const first = initialTrendData.topics[0];
+    return typeof first === "string" ? first : (first?.name || first?.topic || "Topic Modeling");
+  });
   
   const [newKeywordInput, setNewKeywordInput] = useState("");
   const [showAddKeywordInput, setShowAddKeywordInput] = useState(false);
