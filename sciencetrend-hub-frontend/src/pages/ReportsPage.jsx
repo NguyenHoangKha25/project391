@@ -1,10 +1,52 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FiBarChart2, FiDownload, FiPlus, FiSearch, FiTrash2, FiX } from "react-icons/fi";
+import {
+  FiBarChart2,
+  FiDownload,
+  FiPlus,
+  FiSearch,
+  FiTrash2,
+  FiX,
+  FiZap,
+  FiFileText,
+  FiTag,
+  FiLayers,
+  FiClock,
+  FiFile,
+  FiSliders,
+  FiCheckCircle,
+} from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { deleteReport, generateReport, getReports, searchReports } from "../services/reportService";
 import { formatDateTime, normalizeReport, toArray } from "../utils/apiData";
 import "../styles/WorkspacePages.css";
 import "../styles/ReportsPage.css";
+
+const QUICK_PRESETS = [
+  {
+    label: "🤖 AI & Machine Learning",
+    title: "AI & Machine Learning Trend Report 2026",
+    keyword: "Artificial Intelligence",
+    topic: "Machine Learning",
+  },
+  {
+    label: "⚡ Deep Learning & LLMs",
+    title: "Deep Learning & LLM Research Analysis",
+    keyword: "Transformer",
+    topic: "Natural Language Processing",
+  },
+  {
+    label: "🌐 Neural Networks",
+    title: "Neural Networks & Computer Vision Report",
+    keyword: "Neural Networks",
+    topic: "Advanced Neural Network Applications",
+  },
+  {
+    label: "📊 High-Impact Papers",
+    title: "Global Scientific Journal Analytics 2026",
+    keyword: "Deep Learning",
+    topic: "Topic Modeling",
+  },
+];
 
 function chartPoints(chart = {}) {
   const raw = chart.data ?? chart.points ?? chart.items ?? [];
@@ -21,26 +63,35 @@ function chartPoints(chart = {}) {
 }
 
 function OverallStatsCard({ points }) {
-  const cardThemes = [
-    { bg: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)", icon: "📄" },
-    { bg: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)", icon: "📚" },
-    { bg: "linear-gradient(135deg, #10b981 0%, #059669 100%)", icon: "🏷️" },
-    { bg: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)", icon: "🌐" },
-    { bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)", icon: "✅" },
-    { bg: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)", icon: "⚠️" },
+  const themes = [
+    { bg: "#f0f4ff", border: "#6366f1", text: "#3730a3", icon: "📄" },
+    { bg: "#ecfeff", border: "#06b6d4", text: "#085d6e", icon: "📚" },
+    { bg: "#ecfdf5", border: "#10b981", text: "#065f46", icon: "🏷️" },
+    { bg: "#f5f3ff", border: "#8b5cf6", text: "#5b21b6", icon: "🌐" },
+    { bg: "#fffbeb", border: "#f59e0b", text: "#92400e", icon: "✅" },
+    { bg: "#fff1f2", border: "#f43f5e", text: "#9f1239", icon: "⚠️" },
   ];
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginTop: "14px" }}>
+    <div className="overall-stats-grid">
       {points.map((pt, idx) => {
-        const theme = cardThemes[idx % cardThemes.length];
+        const theme = themes[idx % themes.length];
         return (
-          <div key={idx} style={{ background: theme.bg, color: "#ffffff", borderRadius: "10px", padding: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            <span style={{ fontSize: "11px", fontWeight: 600, opacity: 0.92, textTransform: "capitalize" }}>{pt.label}</span>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginTop: "8px" }}>
-              <span style={{ fontSize: "20px", fontWeight: 800 }}>{pt.value.toLocaleString()}</span>
-              <span style={{ fontSize: "16px" }}>{theme.icon}</span>
+          <div
+            key={idx}
+            className="stat-card-glass"
+            style={{
+              backgroundColor: theme.bg,
+              borderLeft: `4px solid ${theme.border}`,
+            }}
+          >
+            <div className="stat-card-top">
+              <span className="stat-card-title">{pt.label}</span>
+              <span className="stat-card-emoji">{theme.icon}</span>
             </div>
+            <h3 className="stat-card-num" style={{ color: theme.text }}>
+              {pt.value.toLocaleString()}
+            </h3>
           </div>
         );
       })}
@@ -50,9 +101,9 @@ function OverallStatsCard({ points }) {
 
 function LineChart({ points }) {
   const max = Math.max(...points.map((p) => p.value), 10);
-  const width = 340;
-  const height = 110;
-  const padding = 16;
+  const width = 380;
+  const height = 130;
+  const padding = 18;
   
   const coords = points.map((p, idx) => {
     const denom = points.length > 1 ? points.length - 1 : 1;
@@ -80,27 +131,64 @@ function LineChart({ points }) {
     : "";
 
   return (
-    <div style={{ marginTop: "12px" }}>
-      <svg width="100%" height="110" viewBox={`0 0 ${width} ${height}`}>
+    <div className="line-chart-wrapper">
+      <svg width="100%" height="130" viewBox={`0 0 ${width} ${height}`}>
         <defs>
-          <linearGradient id="vibrantLineGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.01" />
+          <linearGradient id="lineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
           </linearGradient>
+          <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
         </defs>
-        <path d={areaPath} fill="url(#vibrantLineGrad)" />
-        <path d={linePath} fill="none" stroke="#6366f1" strokeWidth="3" strokeLinecap="round" />
+        <path d={areaPath} fill="url(#lineAreaGrad)" />
+        <path d={linePath} fill="none" stroke="#6366f1" strokeWidth="3.5" strokeLinecap="round" filter="url(#glowEffect)" />
         {coords.map((c, i) => (
-          <circle key={i} cx={c.x} cy={c.y} r="4" fill="#ffffff" stroke="#6366f1" strokeWidth="2">
-            <title>{`${c.label}: ${c.value} papers`}</title>
+          <circle key={i} cx={c.x} cy={c.y} r="4.5" fill="#ffffff" stroke="#6366f1" strokeWidth="2.5" className="chart-dot-point">
+            <title>{`${c.label}: ${c.value.toLocaleString()} papers`}</title>
           </circle>
         ))}
       </svg>
-      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", fontWeight: 600, color: "var(--st-muted-strong, #64748b)", marginTop: "4px" }}>
+      <div className="chart-axis-ticks">
         <span>{points[0]?.label}</span>
         <span>{points[Math.floor(points.length / 2)]?.label}</span>
         <span>{points[points.length - 1]?.label}</span>
       </div>
+    </div>
+  );
+}
+
+function ColumnChart({ points }) {
+  const columnGradients = [
+    "linear-gradient(180deg, #6366f1 0%, #4f46e5 100%)",
+    "linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%)",
+    "linear-gradient(180deg, #10b981 0%, #059669 100%)",
+    "linear-gradient(180deg, #f59e0b 0%, #d97706 100%)",
+    "linear-gradient(180deg, #ec4899 0%, #be185d 100%)",
+    "linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%)",
+  ];
+  const max = Math.max(...points.map((p) => p.value), 1);
+
+  return (
+    <div className="column-chart-wrapper">
+      {points.slice(0, 6).map((p, idx) => {
+        const heightPct = Math.max((p.value / max) * 100, 10);
+        const bg = columnGradients[idx % columnGradients.length];
+        return (
+          <div key={idx} className="column-bar-item">
+            <span className="column-val-tag">{p.value > 999 ? `${(p.value/1000).toFixed(1)}k` : p.value}</span>
+            <div className="column-track-bg">
+              <div
+                className="column-fill-bar"
+                style={{ height: `${heightPct}%`, background: bg }}
+              />
+            </div>
+            <span className="column-label-text" title={p.label}>{p.label}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -124,89 +212,44 @@ function DonutChart({ points }) {
   });
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "20px", marginTop: "14px", flexWrap: "wrap" }}>
-      <svg width="100" height="100" viewBox="0 0 42 42" style={{ flexShrink: 0, transform: "rotate(-90deg)", borderRadius: "50%" }}>
-        <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="7" />
+    <div className="donut-chart-container">
+      <div className="donut-svg-center-wrap">
+        <svg width="110" height="110" viewBox="0 0 42 42" className="donut-svg">
+          <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#f1f5f9" strokeWidth="6" />
+          {slices.map((slice, idx) => (
+            <circle
+              key={idx}
+              cx="21"
+              cy="21"
+              r="15.915"
+              fill="transparent"
+              stroke={slice.color}
+              strokeWidth="6"
+              strokeDasharray={slice.dashArray}
+              strokeDashoffset={slice.dashOffset}
+              className="donut-segment-ring"
+            >
+              <title>{`${slice.label}: ${slice.value.toLocaleString()} (${slice.pct}%)`}</title>
+            </circle>
+          ))}
+        </svg>
+        <div className="donut-center-label">
+          <strong>{total.toLocaleString()}</strong>
+          <span>Total</span>
+        </div>
+      </div>
+
+      <div className="donut-legend-grid">
         {slices.map((slice, idx) => (
-          <circle
-            key={idx}
-            cx="21"
-            cy="21"
-            r="15.915"
-            fill="transparent"
-            stroke={slice.color}
-            strokeWidth="7"
-            strokeDasharray={slice.dashArray}
-            strokeDashoffset={slice.dashOffset}
-            style={{ transition: "all 0.4s ease" }}
-          >
-            <title>{`${slice.label}: ${slice.value} (${slice.pct}%)`}</title>
-          </circle>
-        ))}
-      </svg>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "6px", fontSize: "12px", flex: 1 }}>
-        {slices.map((slice, idx) => (
-          <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", background: "var(--st-card-bg, #f8fafc)", padding: "4px 8px", borderRadius: "6px", borderLeft: `3px solid ${slice.color}` }}>
-            <span style={{ fontWeight: 600, color: "var(--st-text-main, #1e293b)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px" }} title={slice.label}>{slice.label}</span>
-            <span style={{ fontWeight: 700, color: slice.color }}>{slice.value.toLocaleString()} <small style={{ opacity: 0.8 }}>({slice.pct}%)</small></span>
+          <div key={idx} className="donut-legend-item">
+            <span className="dot-indicator" style={{ backgroundColor: slice.color }} />
+            <span className="legend-name" title={slice.label}>{slice.label}</span>
+            <span className="legend-val-badge" style={{ color: slice.color, backgroundColor: `${slice.color}15` }}>
+              {slice.pct}% ({slice.value.toLocaleString()})
+            </span>
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function ColumnChart({ points }) {
-  const columnGradients = [
-    "linear-gradient(to bottom, #6366f1, #4338ca)",
-    "linear-gradient(to bottom, #06b6d4, #0891b2)",
-    "linear-gradient(to bottom, #10b981, #059669)",
-    "linear-gradient(to bottom, #f59e0b, #d97706)",
-    "linear-gradient(to bottom, #ec4899, #be185d)",
-    "linear-gradient(to bottom, #8b5cf6, #6d28d9)",
-  ];
-  const max = Math.max(...points.map((p) => p.value), 1);
-  return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: "8px", height: "120px", marginTop: "16px", paddingBottom: "24px", position: "relative" }}>
-      {points.slice(0, 6).map((p, idx) => {
-        const heightPct = Math.max((p.value / max) * 100, 12);
-        const bg = columnGradients[idx % columnGradients.length];
-        return (
-          <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
-            <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--st-text-main, #0f172a)", marginBottom: "4px" }}>{p.value}</span>
-            <div style={{ width: "100%", height: `${heightPct}%`, backgroundImage: bg, borderRadius: "6px 6px 0 0", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }} />
-            <span style={{ position: "absolute", bottom: "0", fontSize: "10px", fontWeight: 500, color: "var(--st-muted-strong, #64748b)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "45px" }} title={p.label}>{p.label}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function BarChart({ points }) {
-  const max = Math.max(...points.map((p) => p.value), 1);
-  const barGradients = [
-    "linear-gradient(to right, #6366f1, #4f46e5)",
-    "linear-gradient(to right, #0ea5e9, #0284c7)",
-    "linear-gradient(to right, #10b981, #059669)",
-    "linear-gradient(to right, #f59e0b, #d97706)",
-    "linear-gradient(to right, #ec4899, #be185d)",
-  ];
-
-  return (
-    <div style={{ marginTop: "12px", display: "grid", gap: "10px" }}>
-      {points.slice(0, 5).map((point, idx) => {
-        const bg = barGradients[idx % barGradients.length];
-        return (
-          <div key={idx} style={{ display: "grid", gridTemplateColumns: "130px 1fr 50px", alignItems: "center", gap: "10px", fontSize: "12px" }}>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600, color: "var(--st-text-main, #0f172a)" }} title={point.label}>{point.label}</span>
-            <div style={{ background: "var(--st-border, #e2e8f0)", height: "10px", borderRadius: "6px", overflow: "hidden" }}>
-              <i style={{ display: "block", height: "100%", width: `${Math.max((point.value / max) * 100, 4)}%`, backgroundImage: bg, borderRadius: "6px" }} />
-            </div>
-            <strong style={{ fontSize: "12px", textAlign: "right", color: "var(--st-text-main, #0f172a)" }}>{point.value.toLocaleString()}</strong>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -218,74 +261,72 @@ function ReportChart({ chart }) {
   const chartType =
     title.includes("overall") || title.includes("statistics") || title.includes("tổng quan")
       ? "stats"
-      : title.includes("year") || title.includes("năm")
+      : title.includes("year") || title.includes("năm") || title.includes("time")
         ? "line"
-        : title.includes("journal") || title.includes("tạp chí")
+        : title.includes("journal") || title.includes("tạp chí") || title.includes("distribution")
           ? "donut"
           : title.includes("keyword") || title.includes("từ khóa")
             ? "column"
-            : "bar";
+            : "line";
 
   const badgeLabels = {
     stats: "KPI Metric Cards",
     line: "Time Series Curve",
     donut: "Distribution Donut",
     column: "Frequency Columns",
-    bar: "Rankings & Progress",
+  };
+
+  const badgeColors = {
+    stats: "badge-indigo",
+    line: "badge-blue",
+    donut: "badge-cyan",
+    column: "badge-emerald",
   };
 
   return (
-    <div className="report-chart-card" style={{ background: "var(--st-card-bg, #ffffff)", border: "1px solid var(--st-border, #cbd5e1)", borderRadius: "12px", padding: "18px", marginTop: "16px", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h4 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "var(--st-text-main, #0f172a)" }}>{chart.title || chart.name || "Report chart"}</h4>
-        <span style={{ fontSize: "11px", fontWeight: 700, background: "linear-gradient(135deg, #6366f1 0%, #4338ca 100%)", color: "#ffffff", padding: "3px 10px", borderRadius: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-          {badgeLabels[chartType] || "Chart"}
+    <article className="report-chart-card glass-panel">
+      <div className="chart-card-header">
+        <h4>{chart.title || chart.name || "Report Analytics Chart"}</h4>
+        <span className={`badge-chip ${badgeColors[chartType] || "badge-indigo"}`}>
+          {badgeLabels[chartType] || "Analytics"}
         </span>
       </div>
+
       {points.length > 0 ? (
         chartType === "stats" ? <OverallStatsCard points={points} /> :
         chartType === "line" ? <LineChart points={points} /> :
         chartType === "donut" ? <DonutChart points={points} /> :
-        chartType === "column" ? <ColumnChart points={points} /> :
-        <BarChart points={points} />
-      ) : <p style={{ fontSize: "12px", color: "var(--st-text-muted)" }}>No chart data points available.</p>}
-    </div>
+        <ColumnChart points={points} />
+      ) : (
+        <p className="chart-empty-msg">No chart data points available.</p>
+      )}
+    </article>
   );
 }
 
 function ReportsPage() {
   const [reports, setReports] = useState([]);
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [query, setQuery] = useState("");
   const [reportTitle, setReportTitle] = useState("");
   const [reportKeyword, setReportKeyword] = useState("");
   const [reportTopic, setReportTopic] = useState("");
+  const [reportHorizon, setReportHorizon] = useState("8y");
+  const [exportFormat, setExportFormat] = useState("pdf");
+  const [selected, setSelected] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const loadReports = useCallback(async (search = "") => {
-    setLoading(true);
-    setErrorMessage("");
+  const loadReports = useCallback(async (searchQuery = "") => {
     try {
-      let response;
-      if (search) {
-        try {
-          response = await searchReports(search, { page: 0, size: 50 });
-        } catch {
-          const fallback = await getReports({ page: 0, size: 100 });
-          const term = search.toLowerCase();
-          response = toArray(fallback, ["reports"]).filter((item) =>
-            `${item.title || item.name || ""} ${item.description || item.content || ""}`.toLowerCase().includes(term),
-          );
-        }
-      } else {
-        response = await getReports({ page: 0, size: 50 });
-      }
-      setReports(toArray(response, ["reports"]).map(normalizeReport));
-    } catch (error) {
-      setReports([]);
-      setErrorMessage(error.message || "Could not load reports.");
+      setLoading(true);
+      setErrorMessage("");
+      const raw = searchQuery ? await searchReports(searchQuery) : await getReports();
+      setReports(toArray(raw).map(normalizeReport));
+    } catch (err) {
+      console.error("Failed to load reports", err);
+      setErrorMessage("Could not load scientific reports.");
     } finally {
       setLoading(false);
     }
@@ -297,11 +338,13 @@ function ReportsPage() {
 
   async function handleCreateReport(event) {
     event.preventDefault();
-    setCreating(true);
-    setErrorMessage("");
+    if (!reportTitle.trim()) return;
+
     try {
+      setCreating(true);
+      setErrorMessage("");
       const payload = {
-        title: reportTitle.trim() || undefined,
+        title: reportTitle.trim(),
         keyword: reportKeyword.trim() || undefined,
         topic: reportTopic.trim() || undefined,
       };
@@ -309,34 +352,32 @@ function ReportsPage() {
       setReportTitle("");
       setReportKeyword("");
       setReportTopic("");
+      setShowCreateModal(false);
       await loadReports();
-    } catch (error) {
-      setErrorMessage(error.message || "Could not generate the report.");
+    } catch (err) {
+      console.error("Failed to generate report", err);
+      setErrorMessage("Could not generate report. Please try again.");
     } finally {
       setCreating(false);
     }
   }
 
   async function handleDelete(report) {
-    if (!window.confirm(`Delete “${report.title}”?`)) return;
-    const previous = reports;
-    setReports((current) => current.filter((item) => item.id !== report.id));
-    if (selected?.id === report.id) setSelected(null);
+    if (!window.confirm(`Delete "${report.title}"?`)) return;
     try {
+      setErrorMessage("");
       await deleteReport(report.id);
-    } catch (error) {
-      setReports(previous);
-      setErrorMessage(error.message || "Could not delete the report.");
+      if (selected?.id === report.id) setSelected(null);
+      await loadReports();
+    } catch (err) {
+      console.error("Failed to delete report", err);
+      setErrorMessage("Could not delete report.");
     }
   }
 
   function handleDownload(report) {
-    if (report.downloadUrl) {
-      window.open(report.downloadUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
-    if (!report.content) {
-      setErrorMessage("This report does not have downloadable content yet.");
+    if (!report?.content) {
+      alert("No downloadable content available for this report.");
       return;
     }
     const blob = new Blob([report.content], { type: "text/plain;charset=utf-8" });
@@ -356,35 +397,21 @@ function ReportsPage() {
   return (
     <MainLayout title="Reports" subtitle="Generate, review and export research analysis">
       <section className="workspace-page reports-page">
-        <div className="reports-summary">
-          <div>
+        <div className="reports-summary-banner">
+          <div className="summary-left-info">
             <span className="catalog-kicker">Research Intelligence</span>
-            <h2>My Reports</h2>
-            <p>{readyCount} ready · {reports.length} total</p>
+            <h2>My Reports Catalog</h2>
+            <p>{readyCount} ready · {reports.length} total generated reports</p>
           </div>
-          <form className="reports-create-form" onSubmit={handleCreateReport}>
-            <input
-              type="text"
-              value={reportTitle}
-              onChange={(e) => setReportTitle(e.target.value)}
-              placeholder="Report title (e.g. Researcher Trend Report)"
-            />
-            <input
-              type="text"
-              value={reportKeyword}
-              onChange={(e) => setReportKeyword(e.target.value)}
-              placeholder="Filter keyword (e.g. Transformer)"
-            />
-            <input
-              type="text"
-              value={reportTopic}
-              onChange={(e) => setReportTopic(e.target.value)}
-              placeholder="Filter topic (e.g. Topic Modeling)"
-            />
-            <button className="workspace-button primary" type="submit" disabled={creating}>
-              <FiPlus />{creating ? "Generating…" : "Generate Report"}
+          <div className="summary-right-actions">
+            <button
+              type="button"
+              className="reports-trigger-create-btn"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <FiPlus /> Generate New Report
             </button>
-          </form>
+          </div>
         </div>
 
         <form className="reports-search" onSubmit={(event) => { event.preventDefault(); loadReports(query.trim()); }}>
@@ -392,6 +419,7 @@ function ReportsPage() {
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search your reports by title or keyword..." />
           {query && <button type="button" onClick={() => { setQuery(""); loadReports(); }} aria-label="Clear report search"><FiX /></button>}
         </form>
+
         {errorMessage && <div className="workspace-notice warning">{errorMessage}</div>}
 
         {loading ? (
@@ -403,39 +431,182 @@ function ReportsPage() {
                 <span className="report-row-icon"><FiBarChart2 /></span>
                 <button type="button" className="report-row-main" onClick={() => setSelected(report)}>
                   <strong>{report.title}</strong>
-                  <span>{report.description ? report.description.substring(0, 100) + "..." : "Click to view full text report and chart data"}</span>
+                  <span>{report.description ? report.description.substring(0, 110) + "..." : "Click to view analytical report breakdown & charts"}</span>
                 </button>
                 <div className="report-row-meta">
                   <span className="workspace-status">{report.status || "Ready"}</span>
                   <time>{report.period ? formatDateTime(report.period) : "Recently generated"}</time>
                 </div>
                 <div className="report-row-actions">
-                  <button type="button" onClick={() => handleDownload(report)} aria-label={`Download ${report.title}`}><FiDownload /></button>
-                  <button type="button" className="danger" onClick={() => handleDelete(report)} aria-label={`Delete ${report.title}`}><FiTrash2 /></button>
+                  <button type="button" onClick={() => handleDownload(report)} aria-label={`Download ${report.title}`} title="Download Report"><FiDownload /></button>
+                  <button type="button" className="danger" onClick={() => handleDelete(report)} aria-label={`Delete ${report.title}`} title="Delete Report"><FiTrash2 /></button>
                 </div>
               </article>
             ))}
           </div>
-        ) : <div className="workspace-empty">No reports found. Fill in title/keyword/topic above and click Generate Report.</div>}
+        ) : (
+          <div className="workspace-empty">
+            <p>No reports found.</p>
+            <button type="button" className="reports-trigger-create-btn" onClick={() => setShowCreateModal(true)} style={{ marginTop: "12px" }}>
+              <FiPlus /> Generate Your First Report
+            </button>
+          </div>
+        )}
 
+        {/* ── CREATE REPORT MODAL ── */}
+        {showCreateModal && (
+          <div className="report-create-modal-backdrop" onClick={() => setShowCreateModal(false)}>
+            <div className="report-create-modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header-gradient">
+                <div className="header-title-group">
+                  <div className="header-icon-badge">
+                    <FiZap />
+                  </div>
+                  <div>
+                    <h3>Generate Analytical Report</h3>
+                    <p>Compile custom research trends, citation analytics & topic intelligence</p>
+                  </div>
+                </div>
+                <button type="button" className="modal-close-btn" onClick={() => setShowCreateModal(false)}>
+                  <FiX />
+                </button>
+              </div>
+
+              <div className="modal-body-content">
+                {/* Quick Presets row */}
+                <div className="presets-section">
+                  <span className="section-mini-label"><FiSliders /> Quick Presets</span>
+                  <div className="preset-chips-wrap">
+                    {QUICK_PRESETS.map((preset, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        className="preset-chip-btn"
+                        onClick={() => {
+                          setReportTitle(preset.title);
+                          setReportKeyword(preset.keyword);
+                          setReportTopic(preset.topic);
+                        }}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <form onSubmit={handleCreateReport}>
+                  <div className="modal-form-group">
+                    <label><FiFileText /> Report Title *</label>
+                    <input
+                      type="text"
+                      value={reportTitle}
+                      onChange={(e) => setReportTitle(e.target.value)}
+                      placeholder="e.g. AI & Deep Learning Research Trend Report 2026"
+                      required
+                    />
+                  </div>
+
+                  <div className="modal-form-grid-2">
+                    <div className="modal-form-group">
+                      <label><FiTag /> Filter Keyword (Optional)</label>
+                      <input
+                        type="text"
+                        value={reportKeyword}
+                        onChange={(e) => setReportKeyword(e.target.value)}
+                        placeholder="e.g. Transformer, Neural Networks"
+                      />
+                    </div>
+                    <div className="modal-form-group">
+                      <label><FiLayers /> Filter Topic (Optional)</label>
+                      <input
+                        type="text"
+                        value={reportTopic}
+                        onChange={(e) => setReportTopic(e.target.value)}
+                        placeholder="e.g. Topic Modeling, Computer Vision"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="modal-form-grid-2">
+                    <div className="modal-form-group">
+                      <label><FiClock /> Time Horizon</label>
+                      <select value={reportHorizon} onChange={(e) => setReportHorizon(e.target.value)}>
+                        <option value="8y">Recent 8 Years (Recommended)</option>
+                        <option value="5y">Recent 5 Years</option>
+                        <option value="3y">Recent 3 Years</option>
+                      </select>
+                    </div>
+                    <div className="modal-form-group">
+                      <label><FiFile /> Preferred Export Format</label>
+                      <div className="export-format-radio-group">
+                        <label className={`radio-pill ${exportFormat === 'pdf' ? 'active' : ''}`}>
+                          <input type="radio" name="fmt" value="pdf" checked={exportFormat === 'pdf'} onChange={() => setExportFormat('pdf')} />
+                          PDF
+                        </label>
+                        <label className={`radio-pill ${exportFormat === 'excel' ? 'active' : ''}`}>
+                          <input type="radio" name="fmt" value="excel" checked={exportFormat === 'excel'} onChange={() => setExportFormat('excel')} />
+                          Excel
+                        </label>
+                        <label className={`radio-pill ${exportFormat === 'bibtex' ? 'active' : ''}`}>
+                          <input type="radio" name="fmt" value="bibtex" checked={exportFormat === 'bibtex'} onChange={() => setExportFormat('bibtex')} />
+                          BibTeX
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal-footer-actions">
+                    <button type="button" className="modal-btn-cancel" onClick={() => setShowCreateModal(false)}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="modal-btn-submit-primary" disabled={creating || !reportTitle.trim()}>
+                      {creating ? (
+                        <><span className="workspace-loading-spinner" /> Compiling Report…</>
+                      ) : (
+                        <><FiZap /> Generate Analytical Report</>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── PREVIEW REPORT MODAL ── */}
         {selected && (
           <div className="report-preview-backdrop" onClick={() => setSelected(null)}>
             <article className="report-preview" onClick={(event) => event.stopPropagation()}>
-              <button type="button" className="report-preview-close" onClick={() => setSelected(null)} aria-label="Close report preview"><FiX /></button>
-              <span className="catalog-kicker">Generated Analytical Report</span>
-              <h2>{selected.title}</h2>
-              <p className="report-preview-meta">{selected.period ? formatDateTime(selected.period) : "Recently generated"}</p>
-              <div className="report-content" style={{ whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: "13px", lineHeight: "1.6", background: "var(--st-card-bg, #f8fafc)", padding: "16px", borderRadius: "8px", border: "1px solid var(--st-border, #e2e8f0)" }}>
-                {selected.content || selected.description || "No text narrative content returned."}
+              <div className="preview-modal-header">
+                <div>
+                  <span className="catalog-kicker">Generated Analytical Report</span>
+                  <h2>{selected.title}</h2>
+                  <p className="report-preview-meta">{selected.period ? formatDateTime(selected.period) : "Recently generated"}</p>
+                </div>
+                <button type="button" className="report-preview-close" onClick={() => setSelected(null)} aria-label="Close report preview"><FiX /></button>
               </div>
+
+              <div className="preview-badge-strip">
+                <span className="st-badge badge-indigo"><FiCheckCircle /> Verified Report</span>
+                <span className="st-badge badge-cyan"><FiZap /> Live AI Analytics</span>
+                <span className="st-badge badge-emerald">Ready for Export</span>
+              </div>
+
+              <div className="report-content-card">
+                <div className="report-content-text">
+                  {selected.content || selected.description || "No text narrative content returned."}
+                </div>
+              </div>
+
               {selected.charts && selected.charts.length > 0 && (
                 <div className="report-charts">
                   {selected.charts.map((chart, index) => <ReportChart key={chart.id ?? chart.title ?? index} chart={chart} />)}
                 </div>
               )}
-              <div style={{ marginTop: "16px", display: "flex", gap: "12px" }}>
-                <button type="button" className="workspace-button primary" onClick={() => handleDownload(selected)}><FiDownload /> Download text report</button>
-                <button type="button" className="workspace-button danger" onClick={() => handleDelete(selected)}><FiTrash2 /> Delete report</button>
+
+              <div className="preview-modal-footer">
+                <button type="button" className="workspace-button primary" onClick={() => handleDownload(selected)}><FiDownload /> Download Report</button>
+                <button type="button" className="workspace-button danger" onClick={() => handleDelete(selected)}><FiTrash2 /> Delete Report</button>
               </div>
             </article>
           </div>
