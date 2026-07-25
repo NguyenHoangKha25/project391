@@ -63,18 +63,21 @@ function chartPoints(chart = {}) {
 }
 
 function OverallStatsCard({ points }) {
+  const filteredPoints = points.filter((pt) => {
+    const lbl = String(pt.label || "").toLowerCase();
+    return !lbl.includes("sync") && !lbl.includes("successful") && !lbl.includes("failed");
+  });
+
   const themes = [
     { bg: "#f0f4ff", border: "#6366f1", text: "#3730a3", icon: "📄" },
     { bg: "#ecfeff", border: "#06b6d4", text: "#085d6e", icon: "📚" },
     { bg: "#ecfdf5", border: "#10b981", text: "#065f46", icon: "🏷️" },
     { bg: "#f5f3ff", border: "#8b5cf6", text: "#5b21b6", icon: "🌐" },
-    { bg: "#fffbeb", border: "#f59e0b", text: "#92400e", icon: "✅" },
-    { bg: "#fff1f2", border: "#f43f5e", text: "#9f1239", icon: "⚠️" },
   ];
 
   return (
     <div className="overall-stats-grid">
-      {points.map((pt, idx) => {
+      {filteredPoints.map((pt, idx) => {
         const theme = themes[idx % themes.length];
         return (
           <div
@@ -350,19 +353,24 @@ function ReportFormattedNarrative({ content }) {
               </div>
             )}
             <div className="narrative-items-grid">
-              {items.map((item, itemIdx) => {
-                const clean = item.replace(/^-\s*/, "");
-                const parts = clean.split(":");
-                const label = parts[0]?.trim();
-                const value = parts.slice(1).join(":")?.trim();
+              {items
+                .filter((item) => {
+                  const lower = item.toLowerCase();
+                  return !lower.includes("sync") && !lower.includes("successful") && !lower.includes("failed");
+                })
+                .map((item, itemIdx) => {
+                  const clean = item.replace(/^-\s*/, "");
+                  const parts = clean.split(":");
+                  const label = parts[0]?.trim();
+                  const value = parts.slice(1).join(":")?.trim();
 
-                return (
-                  <div key={itemIdx} className="narrative-item-chip">
-                    <span className="item-label">{label}</span>
-                    {value && <strong className="item-val">{value}</strong>}
-                  </div>
-                );
-              })}
+                  return (
+                    <div key={itemIdx} className="narrative-item-chip">
+                      <span className="item-label">{label}</span>
+                      {value && <strong className="item-val">{value}</strong>}
+                    </div>
+                  );
+                })}
             </div>
           </div>
         );
