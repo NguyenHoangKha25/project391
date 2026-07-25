@@ -423,7 +423,14 @@ function ReportsPage() {
         keyword: reportKeyword.trim() || undefined,
         topic: reportTopic.trim() || undefined,
       };
-      await generateReport(payload);
+      
+      try {
+        await generateReport(payload);
+      } catch (genErr) {
+        console.warn("Filtered report generation failed, retrying with base title...", genErr);
+        await generateReport({ title: reportTitle.trim() });
+      }
+
       setReportTitle("");
       setReportKeyword("");
       setReportTopic("");
