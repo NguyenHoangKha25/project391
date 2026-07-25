@@ -31,6 +31,7 @@ import {
   normalizePaper,
   normalizeJournal,
   normalizeTopic,
+  normalizeKeyword,
   normalizeNotification,
   toArray,
   formatDateTime,
@@ -38,6 +39,8 @@ import {
 import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/BookmarksPage.css";
+
+const LIBRARY_CACHE_KEY = "user_library_v5";
 
 /* ── Toast Overlay ── */
 function useToast() {
@@ -94,10 +97,7 @@ function BookmarksPage() {
       ]).then(([papersRes, keywordsRes, journalsRes, topicsRes, notifsRes]) => {
         const freshData = {
           savedPapers: papersRes.status === "fulfilled" ? toArray(papersRes.value).map(normalizePaper) : [],
-          savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => ({
-            id: kw.keywordId ?? kw.id ?? i,
-            name: kw.name ?? kw.keyword ?? String(kw),
-          })) : [],
+          savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => normalizeKeyword(kw, i)) : [],
           followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(normalizeJournal) : [],
           followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
           notifications: notifsRes.status === "fulfilled" ? toArray(notifsRes.value).map(normalizeNotification) : []
@@ -126,10 +126,7 @@ function BookmarksPage() {
 
       const freshData = {
         savedPapers: papersRes.status === "fulfilled" ? toArray(papersRes.value).map(normalizePaper) : [],
-        savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => ({
-          id: kw.keywordId ?? kw.id ?? i,
-          name: kw.name ?? kw.keyword ?? String(kw),
-        })) : [],
+        savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => normalizeKeyword(kw, i)) : [],
         followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(normalizeJournal) : [],
         followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
         notifications: notifsRes.status === "fulfilled" ? toArray(notifsRes.value).map(normalizeNotification) : []
@@ -551,7 +548,7 @@ function BookmarksPage() {
                   {savedKeywords.map((kw) => (
                     <div key={kw.id} className="lib-keyword-badge-card">
                       <FiTag />
-                      <span>{kw.name}</span>
+                      <span>{typeof kw.name === "string" ? kw.name : (kw.name?.name || kw.name?.keyword || String(kw.name || "Keyword"))}</span>
                       <button
                         type="button"
                         disabled={untrackProcessing.has(`keyword-${kw.id}`)}
