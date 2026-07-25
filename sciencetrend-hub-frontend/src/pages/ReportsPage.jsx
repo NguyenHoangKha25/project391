@@ -304,6 +304,73 @@ function ReportChart({ chart }) {
   );
 }
 
+function ReportFormattedNarrative({ content }) {
+  if (!content) return <div className="report-empty-content">No report narrative available.</div>;
+
+  // Normalize string by inserting line breaks before section numbers like "1. Overall", "2. Papers", "3. Top", "4. Top", "7. Top"
+  const normalizedStr = content
+    .replace(/(\d+\.\s+[A-Za-z\s]+)/g, "\n$1\n")
+    .replace(/\s+-\s+/g, "\n- ");
+
+  const lines = normalizedStr.split("\n").map((l) => l.trim()).filter(Boolean);
+  const sections = [];
+  let currentSec = { title: "", items: [] };
+
+  lines.forEach((line) => {
+    if (/^\d+\.\s+/.test(line)) {
+      if (currentSec.title || currentSec.items.length > 0) {
+        sections.push(currentSec);
+      }
+      currentSec = { title: line.replace(/^\d+\.\s+/, ""), items: [] };
+    } else if (line.toUpperCase().includes("REPORT") && line.length < 80) {
+      if (currentSec.title || currentSec.items.length > 0) {
+        sections.push(currentSec);
+      }
+      currentSec = { title: line, items: [] };
+    } else {
+      currentSec.items.push(line);
+    }
+  });
+  if (currentSec.title || currentSec.items.length > 0) {
+    sections.push(currentSec);
+  }
+
+  return (
+    <div className="report-formatted-narrative">
+      {sections.map((sec, idx) => {
+        const secTitle = sec.title.trim();
+        const items = sec.items;
+
+        return (
+          <div key={idx} className="narrative-section-box">
+            {secTitle && (
+              <div className="narrative-section-header">
+                <span className="narrative-sec-badge">{idx + 1}</span>
+                <h4>{secTitle}</h4>
+              </div>
+            )}
+            <div className="narrative-items-grid">
+              {items.map((item, itemIdx) => {
+                const clean = item.replace(/^-\s*/, "");
+                const parts = clean.split(":");
+                const label = parts[0]?.trim();
+                const value = parts.slice(1).join(":")?.trim();
+
+                return (
+                  <div key={itemIdx} className="narrative-item-chip">
+                    <span className="item-label">{label}</span>
+                    {value && <strong className="item-val">{value}</strong>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function ReportsPage() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -593,9 +660,7 @@ function ReportsPage() {
               </div>
 
               <div className="report-content-card">
-                <div className="report-content-text">
-                  {selected.content || selected.description || "No text narrative content returned."}
-                </div>
+                <ReportFormattedNarrative content={selected.content || selected.description} />
               </div>
 
               {selected.charts && selected.charts.length > 0 && (
