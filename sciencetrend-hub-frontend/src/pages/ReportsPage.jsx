@@ -645,11 +645,7 @@ function ReportsPage() {
                 <button type="button" className="report-preview-close" onClick={() => setSelected(null)} aria-label="Close report preview"><FiX /></button>
               </div>
 
-              <div className="preview-badge-strip">
-                <span className="st-badge badge-indigo"><FiCheckCircle /> Verified Report</span>
-                <span className="st-badge badge-cyan"><FiZap /> Live AI Analytics</span>
-                <span className="st-badge badge-emerald">Ready for Export</span>
-              </div>
+
 
               <div className="report-content-card">
                 <ReportFormattedNarrative content={selected.content || selected.description} />
