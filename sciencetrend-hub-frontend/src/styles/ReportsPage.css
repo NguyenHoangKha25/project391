@@ -843,3 +843,44 @@
     display: none;
   }
 }
+
+/* ── Custom Sleek Scrollbar for Modals ── */
+.report-preview,
+.report-create-modal-card,
+.report-preview-backdrop,
+.report-create-modal-backdrop {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+}
+
+.report-preview::-webkit-scrollbar,
+.report-create-modal-card::-webkit-scrollbar,
+.report-preview-backdrop::-webkit-scrollbar,
+.report-create-modal-backdrop::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.report-preview::-webkit-scrollbar-track,
+.report-create-modal-card::-webkit-scrollbar-track,
+.report-preview-backdrop::-webkit-scrollbar-track,
+.report-create-modal-backdrop::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.report-preview::-webkit-scrollbar-thumb,
+.report-create-modal-card::-webkit-scrollbar-thumb,
+.report-preview-backdrop::-webkit-scrollbar-thumb,
+.report-create-modal-backdrop::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.report-preview::-webkit-scrollbar-thumb:hover,
+.report-create-modal-card::-webkit-scrollbar-thumb:hover,
+.report-preview-backdrop::-webkit-scrollbar-thumb:hover,
+.report-create-modal-backdrop::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.6);
+}
