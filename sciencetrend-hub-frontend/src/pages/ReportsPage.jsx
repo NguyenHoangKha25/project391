@@ -380,7 +380,7 @@ function ReportsPage() {
   const [reportKeyword, setReportKeyword] = useState("");
   const [reportTopic, setReportTopic] = useState("");
   const [reportHorizon, setReportHorizon] = useState("8y");
-  const [exportFormat, setExportFormat] = useState("pdf");
+  const [exportFormat, setExportFormat] = useState("txt");
   const [selected, setSelected] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -606,17 +606,9 @@ function ReportsPage() {
                     <div className="modal-form-group">
                       <label><FiFile /> Preferred Export Format</label>
                       <div className="export-format-radio-group">
-                        <label className={`radio-pill ${exportFormat === 'pdf' ? 'active' : ''}`}>
-                          <input type="radio" name="fmt" value="pdf" checked={exportFormat === 'pdf'} onChange={() => setExportFormat('pdf')} />
-                          PDF
-                        </label>
-                        <label className={`radio-pill ${exportFormat === 'excel' ? 'active' : ''}`}>
-                          <input type="radio" name="fmt" value="excel" checked={exportFormat === 'excel'} onChange={() => setExportFormat('excel')} />
-                          Excel
-                        </label>
-                        <label className={`radio-pill ${exportFormat === 'bibtex' ? 'active' : ''}`}>
-                          <input type="radio" name="fmt" value="bibtex" checked={exportFormat === 'bibtex'} onChange={() => setExportFormat('bibtex')} />
-                          BibTeX
+                        <label className="radio-pill active">
+                          <input type="radio" name="fmt" value="txt" checked readOnly />
+                          📄 TXT Text File (.txt)
                         </label>
                       </div>
                     </div>
