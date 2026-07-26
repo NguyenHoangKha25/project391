@@ -13,11 +13,18 @@ import {
   FiClock,
   FiFile,
   FiSliders,
-  FiCheckCircle,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
+import { getAllKeywords } from "../services/keywordService";
 import { deleteReport, generateReport, getReports, searchReports } from "../services/reportService";
-import { formatDateTime, normalizeReport, toArray } from "../utils/apiData";
+import { getAllTopics } from "../services/topicService";
+import {
+  formatDateTime,
+  normalizeKeyword,
+  normalizeReport,
+  normalizeTopic,
+  toArray,
+} from "../utils/apiData";
 import "../styles/WorkspacePages.css";
 import "../styles/ReportsPage.css";
 
@@ -47,6 +54,169 @@ const QUICK_PRESETS = [
     topic: "Topic Modeling",
   },
 ];
+
+function uniqueSuggestionNames(items = []) {
+  const seen = new Set();
+
+  return items
+    .map((item) => String(item || "").trim())
+    .filter((name) => {
+      const normalizedName = name.toLocaleLowerCase();
+      if (!name || normalizedName.startsWith("untitled ") || seen.has(normalizedName)) return false;
+      seen.add(normalizedName);
+      return true;
+    });
+}
+
+const FALLBACK_REPORT_KEYWORDS = uniqueSuggestionNames(
+  QUICK_PRESETS.map((preset) => preset.keyword),
+);
+const FALLBACK_REPORT_TOPICS = uniqueSuggestionNames(
+  QUICK_PRESETS.map((preset) => preset.topic),
+);
+
+function ReportAutocomplete({
+  inputId,
+  icon,
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  loading,
+  optionType,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const listboxId = `${inputId}-suggestions`;
+
+  const filteredOptions = useMemo(() => {
+    const normalizedQuery = value.trim().toLocaleLowerCase();
+
+    return options
+      .map((name) => ({
+        name,
+        normalizedName: name.toLocaleLowerCase(),
+      }))
+      .filter((option) => !normalizedQuery || option.normalizedName.includes(normalizedQuery))
+      .sort((left, right) => {
+        const leftStartsWith = normalizedQuery && left.normalizedName.startsWith(normalizedQuery);
+        const rightStartsWith = normalizedQuery && right.normalizedName.startsWith(normalizedQuery);
+        if (leftStartsWith !== rightStartsWith) return leftStartsWith ? -1 : 1;
+        return left.name.localeCompare(right.name);
+      })
+      .slice(0, 8)
+      .map((option) => option.name);
+  }, [options, value]);
+
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [value]);
+
+  function selectOption(option) {
+    onChange(option);
+    setIsOpen(false);
+    setActiveIndex(-1);
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setIsOpen(true);
+      if (filteredOptions.length > 0) {
+        setActiveIndex((current) => (current + 1) % filteredOptions.length);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setIsOpen(true);
+      if (filteredOptions.length > 0) {
+        setActiveIndex((current) => (
+          current <= 0 ? filteredOptions.length - 1 : current - 1
+        ));
+      }
+      return;
+    }
+
+    if (event.key === "Enter" && isOpen && activeIndex >= 0) {
+      event.preventDefault();
+      selectOption(filteredOptions[activeIndex]);
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setIsOpen(false);
+      setActiveIndex(-1);
+    }
+  }
+
+  return (
+    <div className="modal-form-group report-autocomplete">
+      <label htmlFor={inputId}>{icon} {label}</label>
+      <input
+        id={inputId}
+        type="text"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
+        aria-activedescendant={
+          isOpen && activeIndex >= 0
+            ? `${inputId}-option-${activeIndex}`
+            : undefined
+        }
+        aria-busy={loading}
+        value={value}
+        onChange={(event) => {
+          onChange(event.target.value);
+          setIsOpen(true);
+        }}
+        onFocus={() => setIsOpen(true)}
+        onBlur={() => {
+          setIsOpen(false);
+          setActiveIndex(-1);
+        }}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        autoComplete="off"
+      />
+
+      {isOpen && (
+        <div id={listboxId} className="report-autocomplete-menu" role="listbox">
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((option, index) => (
+              <button
+                key={option}
+                id={`${inputId}-option-${index}`}
+                type="button"
+                role="option"
+                aria-selected={index === activeIndex}
+                className={`report-autocomplete-option${index === activeIndex ? " active" : ""}`}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => selectOption(option)}
+              >
+                <span>{option}</span>
+                <small>{optionType}</small>
+              </button>
+            ))
+          ) : loading ? (
+            <div className="report-autocomplete-status">
+              <span className="workspace-loading-spinner" />
+              Loading suggestions…
+            </div>
+          ) : (
+            <div className="report-autocomplete-status">
+              No matching {optionType.toLocaleLowerCase()} — you can keep your custom value.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function chartPoints(chart = {}) {
   const raw = chart.data ?? chart.points ?? chart.items ?? [];
@@ -388,10 +558,13 @@ function ReportsPage() {
   const [reportKeyword, setReportKeyword] = useState("");
   const [reportTopic, setReportTopic] = useState("");
   const [reportHorizon, setReportHorizon] = useState("8y");
-  const [exportFormat, setExportFormat] = useState("txt");
   const [selected, setSelected] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [keywordSuggestions, setKeywordSuggestions] = useState(FALLBACK_REPORT_KEYWORDS);
+  const [topicSuggestions, setTopicSuggestions] = useState(FALLBACK_REPORT_TOPICS);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
 
   const loadReports = useCallback(async (searchQuery = "") => {
     try {
@@ -410,6 +583,45 @@ function ReportsPage() {
   useEffect(() => {
     loadReports();
   }, [loadReports]);
+
+  useEffect(() => {
+    if (!showCreateModal || suggestionsLoaded) return undefined;
+
+    let cancelled = false;
+    setSuggestionsLoading(true);
+
+    Promise.allSettled([
+      getAllKeywords({ page: 0, size: 200 }),
+      getAllTopics(),
+    ]).then(([keywordsResult, topicsResult]) => {
+      if (cancelled) return;
+
+      const keywordNames = keywordsResult.status === "fulfilled"
+        ? toArray(keywordsResult.value, ["keywords"])
+          .map((keyword, index) => normalizeKeyword(keyword, index).name)
+        : [];
+      const topicNames = topicsResult.status === "fulfilled"
+        ? toArray(topicsResult.value, ["topics"])
+          .map((topic, index) => normalizeTopic(topic, index).name)
+        : [];
+
+      setKeywordSuggestions(uniqueSuggestionNames([
+        ...keywordNames,
+        ...FALLBACK_REPORT_KEYWORDS,
+      ]));
+      setTopicSuggestions(uniqueSuggestionNames([
+        ...topicNames,
+        ...FALLBACK_REPORT_TOPICS,
+      ]));
+      setSuggestionsLoaded(true);
+    }).finally(() => {
+      if (!cancelled) setSuggestionsLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showCreateModal, suggestionsLoaded]);
 
   async function handleCreateReport(event) {
     event.preventDefault();
@@ -589,24 +801,28 @@ function ReportsPage() {
                   </div>
 
                   <div className="modal-form-grid-2">
-                    <div className="modal-form-group">
-                      <label><FiTag /> Filter Keyword (Optional)</label>
-                      <input
-                        type="text"
-                        value={reportKeyword}
-                        onChange={(e) => setReportKeyword(e.target.value)}
-                        placeholder="e.g. Transformer, Neural Networks"
-                      />
-                    </div>
-                    <div className="modal-form-group">
-                      <label><FiLayers /> Filter Topic (Optional)</label>
-                      <input
-                        type="text"
-                        value={reportTopic}
-                        onChange={(e) => setReportTopic(e.target.value)}
-                        placeholder="e.g. Topic Modeling, Computer Vision"
-                      />
-                    </div>
+                    <ReportAutocomplete
+                      inputId="report-keyword"
+                      icon={<FiTag />}
+                      label="Filter Keyword (Optional)"
+                      value={reportKeyword}
+                      onChange={setReportKeyword}
+                      options={keywordSuggestions}
+                      placeholder="Type to search keywords…"
+                      loading={suggestionsLoading}
+                      optionType="Keyword"
+                    />
+                    <ReportAutocomplete
+                      inputId="report-topic"
+                      icon={<FiLayers />}
+                      label="Filter Topic (Optional)"
+                      value={reportTopic}
+                      onChange={setReportTopic}
+                      options={topicSuggestions}
+                      placeholder="Type to search topics…"
+                      loading={suggestionsLoading}
+                      optionType="Topic"
+                    />
                   </div>
 
                   <div className="modal-form-grid-2">
