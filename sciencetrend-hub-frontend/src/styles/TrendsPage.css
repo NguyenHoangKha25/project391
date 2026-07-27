@@ -410,6 +410,17 @@
   font-weight: 850;
   letter-spacing: -0.02em;
 }
+.trend-comparison-empty {
+  min-height: 330px;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  color: var(--st-muted-strong);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.55;
+  text-align: center;
+}
 
 /* Compact Table inside middle grid */
 .trends-compact-table-wrap {

@@ -233,7 +233,7 @@ export function normalizeTopic(topic = {}, index = 0) {
 export function normalizeChartPoint(item = {}, index = 0) {
   return {
     label: String(item.label ?? item.year ?? item.month ?? item.name ?? index + 1),
-    value: toNumber(item.value ?? item.count ?? item.total ?? 0),
+    value: toNumber(item.value ?? item.paperCount ?? item.count ?? item.total ?? 0),
   };
 }
 

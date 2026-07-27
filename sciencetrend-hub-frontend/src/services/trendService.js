@@ -15,6 +15,18 @@ export function getTrendingTopics(params = {}) {
   return apiRequest("/topics/trending", { params: { limit }, auth: false });
 }
 
+// Connect to GET /api/trends/top-keywords from backend
+export function getTrendingKeywords(params = {}) {
+  const limit = params.limit || 10;
+  return apiRequest("/trends/top-keywords", {
+    params: {
+      limit,
+      ...(params.fromYear ? { fromYear: params.fromYear } : {}),
+    },
+    auth: false,
+  });
+}
+
 // Helper endpoints
 export function getTrendByKeyword(keyword) {
   return apiRequest("/trends/keyword", { params: { keyword }, auth: false });

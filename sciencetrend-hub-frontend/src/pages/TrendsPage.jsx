@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  FiX,
-  FiPlus,
   FiLayers,
   FiCalendar,
   FiChevronDown,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
-import { getTrendingTopics, getTrendStats } from "../services/trendService";
-import { getAllKeywords } from "../services/keywordService";
+import { getTrendingKeywords, getTrendingTopics, getTrendStats } from "../services/trendService";
 import { getDashboardOverview } from "../services/dashboardService";
 import { normalizeChartPoint, normalizeKeyword, normalizeTopic, toArray, formatNumber, normalizeDashboard } from "../utils/apiData";
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
@@ -18,7 +15,7 @@ import "../styles/TrendsPage.css";
 /* ── Toast Overlay ── */
 function hasUsableTrendSeries(points) {
   return Array.isArray(points)
-    && points.length >= 2
+    && points.length > 0
     && points.some((point) => Number(point?.value) > 0);
 }
 
@@ -39,39 +36,32 @@ function hasUsableMetadata(metadata) {
     );
 }
 
-const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v5";
+const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v6";
 
 function getTrendSeriesCacheKey(tab, term) {
   const termStr = typeof term === "string" ? term : (term?.name || term?.keyword || term?.term || String(term || ""));
   return `trend_series_${tab}_${termStr.trim().toLowerCase()}`;
 }
 
-const DEFAULT_KEYWORDS = [
-  "Transformer",
-  "Deep Learning",
-  "Natural Language Processing",
-  "Computer Vision",
-  "Reinforcement Learning",
-  "Neural Networks",
-];
-
-const DEFAULT_TOPICS = [
-  { id: 1, name: "Advanced Neural Network Applications", paperCount: "745 papers", growth: "+744%" },
-  { id: 2, name: "Topic Modeling", paperCount: "799 papers", growth: "+399%" },
-  { id: 3, name: "Multimodal Machine Learning Applications", paperCount: "330 papers", growth: "+329%" },
-  { id: 4, name: "Domain Adaptation and Few-Shot Learning", paperCount: "267 papers", growth: "+266%" },
-  { id: 5, name: "Natural Language Processing Techniques", paperCount: "319 papers", growth: "+159%" },
-];
+function formatPaperCount(value) {
+  if (value === null || value === undefined || value === "" || value === "—") return "—";
+  if (typeof value === "number") return `${formatNumber(value)} papers`;
+  const text = String(value).trim();
+  if (!text) return "—";
+  if (/papers?/i.test(text)) return text;
+  const numericValue = Number(text.replace(/,/g, ""));
+  return Number.isFinite(numericValue) ? `${formatNumber(numericValue)} papers` : text;
+}
 
 function getInitialTrendData() {
   const storedMetadata = getPersistentCachedData(TRENDS_METADATA_CACHE_KEY);
   const metadata = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
   const keywords = Array.isArray(metadata?.dbKeywords) && metadata.dbKeywords.length > 0
     ? metadata.dbKeywords
-    : DEFAULT_KEYWORDS;
+    : [];
   const topics = Array.isArray(metadata?.trendingTopics) && metadata.trendingTopics.length > 0
     ? metadata.trendingTopics
-    : DEFAULT_TOPICS;
+    : [];
 
   return {
     metadata,
@@ -107,37 +97,22 @@ function TrendsPage() {
   const [trendingTopics, setTrendingTopics] = useState(initialTrendData.topics);
   const [dbKeywords, setDbKeywords] = useState(initialTrendData.keywords);
 
-  // Keyword & Topic chips state initialized with top defaults (safely mapped to string names)
-  const [keywordChips, setKeywordChips] = useState(() => {
-    return initialTrendData.keywords
-      .map((k) => (typeof k === "string" ? k : (k?.name || k?.keyword || "")))
-      .filter(Boolean)
-      .slice(0, 3);
-  });
-  const [topicChips, setTopicChips] = useState(() => {
-    return initialTrendData.topics
-      .map((t) => (typeof t === "string" ? t : (t?.name || t?.topic || "")))
-      .filter(Boolean)
-      .slice(0, 3);
-  });
-  
   const [activeKeyword, setActiveKeyword] = useState(() => {
     const first = initialTrendData.keywords[0];
-    return typeof first === "string" ? first : (first?.name || first?.keyword || "Transformer");
+    return typeof first === "string" ? first : (first?.name || first?.keyword || "");
   });
   const [activeTopicState, setActiveTopicState] = useState(() => {
     const first = initialTrendData.topics[0];
-    return typeof first === "string" ? first : (first?.name || first?.topic || "Topic Modeling");
+    return typeof first === "string" ? first : (first?.name || first?.topic || "");
   });
   
-  const [newKeywordInput, setNewKeywordInput] = useState("");
-  const [showAddKeywordInput, setShowAddKeywordInput] = useState(false);
-
   const [chartData, setChartData] = useState([]);
   const [dashboard, setDashboard] = useState(initialTrendData.metadata?.dashboard ?? null);
   const [metadataLoading, setMetadataLoading] = useState(!initialTrendData.metadata);
   const [chartLoading, setChartLoading] = useState(false);
-  const { toast, showToast } = useToast();
+  const [comparisonSeries, setComparisonSeries] = useState([]);
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     let cancelled = false;
@@ -149,10 +124,10 @@ function TrendsPage() {
       if (cancelled) return;
       const topics = Array.isArray(metadata.trendingTopics) && metadata.trendingTopics.length > 0
         ? metadata.trendingTopics
-        : DEFAULT_TOPICS;
+        : [];
       const keywords = Array.isArray(metadata.dbKeywords) && metadata.dbKeywords.length > 0
         ? metadata.dbKeywords
-        : DEFAULT_KEYWORDS;
+        : [];
       setTrendingTopics(topics);
       setDbKeywords(keywords);
       setDashboard(metadata.dashboard ?? null);
@@ -160,8 +135,8 @@ function TrendsPage() {
 
     function updateMetadata(patch) {
       const current = getPersistentCachedData(cacheKey) ?? cached ?? {
-        trendingTopics: DEFAULT_TOPICS,
-        dbKeywords: DEFAULT_KEYWORDS,
+        trendingTopics: [],
+        dbKeywords: [],
         dashboard: null,
       };
       const next = { ...current, ...patch };
@@ -183,9 +158,21 @@ function TrendsPage() {
         updateMetadata({ trendingTopics: topics });
         return true;
       }),
-      getAllKeywords({ page: 0, size: 100 }).then((response) => {
+      getTrendingKeywords({ limit: 10 }).then((response) => {
         const keywords = toArray(response, ["keywords"])
-          .map((kw, i) => normalizeKeyword(kw, i))
+          .map((kw, i) => {
+            const keyword = normalizeKeyword(kw, i);
+            const rawGrowth = kw?.growthRate ?? kw?.growth ?? kw?.percentage;
+            const growthNumber = Number(rawGrowth);
+            const growth = Number.isFinite(growthNumber)
+              ? `${growthNumber >= 0 ? "+" : ""}${Math.round(growthNumber)}%`
+              : (typeof rawGrowth === "string" ? rawGrowth : "");
+            return {
+              ...keyword,
+              growth,
+              totalPapers: Number(kw?.totalPapers) || keyword.paperCount,
+            };
+          })
           .filter((keyword) => keyword.name && keyword.name !== "Untitled keyword");
         if (keywords.length === 0) return false;
         updateMetadata({ dbKeywords: keywords });
@@ -208,6 +195,22 @@ function TrendsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const names = dbKeywords
+      .map((keyword) => (typeof keyword === "string" ? keyword : (keyword?.name || keyword?.keyword || "")))
+      .filter(Boolean);
+    if (names.length === 0) return;
+    setActiveKeyword((current) => current || names[0]);
+  }, [dbKeywords]);
+
+  useEffect(() => {
+    const names = trendingTopics
+      .map((topic) => (typeof topic === "string" ? topic : (topic?.name || topic?.topic || "")))
+      .filter(Boolean);
+    if (names.length === 0) return;
+    setActiveTopicState((current) => current || names[0]);
+  }, [trendingTopics]);
+
   const activeTrendTerm = trendTab === "keyword" ? activeKeyword : activeTopicState;
 
   const trendingKeywords = useMemo(() => {
@@ -217,19 +220,18 @@ function TrendsPage() {
         const rawCount = typeof kw === "object" ? (kw.paperCount ?? kw.count ?? kw.paper_count ?? kw.totalPapers) : null;
         const countNum = Number(rawCount);
         
-        let displayCount = "";
-        if (Number.isFinite(countNum) && countNum > 0) {
-          displayCount = `${formatNumber(countNum)} papers`;
-        } else if (typeof rawCount === "string" && rawCount.trim()) {
-          displayCount = rawCount.includes("paper") ? rawCount : `${rawCount} papers`;
-        } else {
-          displayCount = `${Math.round(250 + (idx * 97) % 650)} papers`;
-        }
+        const displayCount = Number.isFinite(countNum) && countNum > 0
+          ? `${formatNumber(countNum)} papers`
+          : (typeof rawCount === "string" && rawCount.trim()
+              ? (rawCount.includes("paper") ? rawCount : `${rawCount} papers`)
+              : "—");
 
         const rawGrowth = typeof kw === "object" ? (kw.growth ?? kw.growthRate ?? kw.percentage) : null;
-        const growthStr = rawGrowth !== null && rawGrowth !== undefined
-          ? (String(rawGrowth).startsWith("+") ? String(rawGrowth) : `+${rawGrowth}%`)
-          : `+${Math.round(140 + (idx * 73) % 380)}%`;
+        const growthStr = rawGrowth !== null && rawGrowth !== undefined && String(rawGrowth).trim()
+          ? (String(rawGrowth).startsWith("+") || String(rawGrowth).endsWith("%")
+              ? String(rawGrowth)
+              : `+${rawGrowth}%`)
+          : "—";
 
         return {
           id: kw.id ?? idx + 1,
@@ -239,16 +241,15 @@ function TrendsPage() {
         };
       });
     }
-    return [
-      { id: 1, name: "Transformer", paperCount: "780 papers", growth: "+450%" },
-      { id: 2, name: "Deep Learning", paperCount: "920 papers", growth: "+310%" },
-      { id: 3, name: "Natural Language Processing", paperCount: "640 papers", growth: "+280%" },
-      { id: 4, name: "Computer Vision", paperCount: "590 papers", growth: "+210%" },
-      { id: 5, name: "Reinforcement Learning", paperCount: "420 papers", growth: "+195%" },
-    ];
+    return [];
   }, [dbKeywords]);
 
   const activeTrendItems = trendTab === "keyword" ? trendingKeywords : trendingTopics;
+  const comparisonTermKey = useMemo(() => activeTrendItems
+    .slice(0, 5)
+    .map((item) => (typeof item === "string" ? item : (item?.name || item?.keyword || item?.topic || "")))
+    .filter(Boolean)
+    .join("\u0001"), [activeTrendItems]);
 
   useEffect(() => {
     if (!activeTrendTerm) {
@@ -277,10 +278,12 @@ function TrendsPage() {
         if (hasUsableTrendSeries(points)) {
           setChartData(points);
           setPersistentCachedData(cacheKey, points);
+        } else {
+          setChartData([]);
         }
       })
       .catch(() => {
-        // Silently preserve smooth chart fallback on API miss
+        if (!cancelled && !cached) setChartData([]);
       })
       .finally(() => {
         if (!cancelled) setChartLoading(false);
@@ -291,85 +294,56 @@ function TrendsPage() {
     };
   }, [activeTrendTerm, trendTab]);
 
-  // Chip management
-  function handleAddChip(e) {
-    e.preventDefault();
-    const val = newKeywordInput.trim();
-    if (trendTab === "keyword") {
-      if (val && !keywordChips.includes(val)) {
-        setKeywordChips((curr) => [...curr, val]);
-        setActiveKeyword(val);
-        setNewKeywordInput("");
-        setShowAddKeywordInput(false);
-        showToast(`Added keyword trace: "${val}"`, "success");
-      }
-    } else {
-      if (val && !topicChips.includes(val)) {
-        setTopicChips((curr) => [...curr, val]);
-        setActiveTopicState(val);
-        setNewKeywordInput("");
-        setShowAddKeywordInput(false);
-        showToast(`Added topic trace: "${val}"`, "success");
-      }
+  useEffect(() => {
+    const terms = comparisonTermKey ? comparisonTermKey.split("\u0001") : [];
+    if (terms.length === 0) {
+      setComparisonSeries([]);
+      setComparisonLoading(false);
+      return;
     }
-  }
 
-  function handleRemoveChip(chipToRemove) {
-    if (trendTab === "keyword") {
-      setKeywordChips((curr) => {
-        const next = curr.filter((c) => c !== chipToRemove);
-        if (activeKeyword === chipToRemove) {
-          setActiveKeyword(next[0] || "");
-        }
-        return next;
+    let cancelled = false;
+    const cachedSeries = terms.flatMap((term) => {
+      const points = getPersistentCachedData(getTrendSeriesCacheKey(trendTab, term));
+      return hasUsableTrendSeries(points) ? [{ name: term, points }] : [];
+    });
+
+    setComparisonSeries(cachedSeries);
+    setComparisonLoading(cachedSeries.length < terms.length);
+
+    Promise.allSettled(terms.map(async (term) => {
+      const response = await getTrendStats(
+        trendTab === "keyword" ? { keyword: term } : { topic: term },
+      );
+      const points = toArray(response).map(normalizeChartPoint);
+      if (!hasUsableTrendSeries(points)) return null;
+      setPersistentCachedData(getTrendSeriesCacheKey(trendTab, term), points);
+      return { name: term, points };
+    }))
+      .then((results) => {
+        if (cancelled) return;
+        const cachedByName = new Map(cachedSeries.map((series) => [series.name, series]));
+        const availableSeries = results.flatMap((result, index) => {
+          if (result.status === "fulfilled" && result.value) return [result.value];
+          const cachedResult = cachedByName.get(terms[index]);
+          return cachedResult ? [cachedResult] : [];
+        });
+        setComparisonSeries(availableSeries);
+      })
+      .finally(() => {
+        if (!cancelled) setComparisonLoading(false);
       });
-      showToast(`Removed keyword trace: "${chipToRemove}"`, "info");
-    } else {
-      setTopicChips((curr) => {
-        const next = curr.filter((c) => c !== chipToRemove);
-        if (activeTopicState === chipToRemove) {
-          setActiveTopicState(next[0] || "");
-        }
-        return next;
-      });
-      showToast(`Removed topic trace: "${chipToRemove}"`, "info");
-    }
-  }
 
-  function handleClearAllChips() {
-    if (trendTab === "keyword") {
-      setKeywordChips([]);
-      setActiveKeyword("");
-      showToast("Cleared keyword traces.", "info");
-    } else {
-      setTopicChips([]);
-      setActiveTopicState("");
-      showToast("Cleared topic traces.", "info");
-    }
-  }
+    return () => {
+      cancelled = true;
+    };
+  }, [comparisonTermKey, trendTab]);
 
-  // Compute clean, aggregated chart data grouped by valid Year (max 8-10 years)
+  // Aggregate only the selected API series by year. Never substitute catalog-wide or generated values.
   const effectiveChartData = useMemo(() => {
-    let sourceData;
-
-    if (Array.isArray(chartData) && chartData.length >= 2 && chartData.some((pt) => (pt?.value ?? 0) > 0)) {
-      sourceData = chartData;
-    } else if (dashboard && Array.isArray(dashboard.papersByYear) && dashboard.papersByYear.length >= 2 && dashboard.papersByYear.some((pt) => (pt?.value ?? 0) > 0)) {
-      sourceData = dashboard.papersByYear;
-    } else {
-      const currentYear = new Date().getFullYear();
-      sourceData = Array.from({ length: 7 }, (_, i) => {
-        const yr = currentYear - 6 + i;
-        return {
-          label: String(yr),
-          value: Math.round(18 + i * 25 + Math.sin(i * 1.2) * 15),
-        };
-      });
-    }
-
-    // Group and aggregate by 4-digit Year label to prevent 50+ jammed dots
+    if (!hasUsableTrendSeries(chartData)) return [];
     const yearMap = {};
-    sourceData.forEach((item) => {
+    chartData.forEach((item) => {
       if (!item) return;
       const yr = String(item.label ?? item.year ?? "").trim();
       if (/^\d{4}$/.test(yr)) {
@@ -379,148 +353,54 @@ function TrendsPage() {
 
     const sortedYears = Object.keys(yearMap).sort((a, b) => Number(a) - Number(b));
     const maxYears = timeRange === "3y" ? 3 : timeRange === "5y" ? 5 : 8;
-
-    if (sortedYears.length >= 2) {
-      // Take up to recent maxYears clean years
-      const recentYears = sortedYears.slice(-maxYears);
-      return recentYears.map((yr) => ({
-        label: yr,
-        value: yearMap[yr],
-      }));
-    }
-
-    // Fallback smooth dataset for selected maxYears
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: maxYears }, (_, i) => {
-      const yr = currentYear - (maxYears - 1) + i;
-      return {
-        label: String(yr),
-        value: Math.round(20 + i * 28 + Math.sin(i * 1.5) * 12),
-      };
-    });
-  }, [chartData, dashboard, timeRange]);
-
-  // Calculate smooth Bezier SVG Area & Line path (Publication Count by Year)
-  const areaChartPathData = useMemo(() => {
-    const safeChartData = effectiveChartData;
-    const points = safeChartData.map((pt) => pt?.value ?? 0);
-    
-    const width = 380;
-    const height = 120;
-    const padding = 16;
-    
-    if (points.length === 0) {
-      return { linePath: "", areaPath: "", coords: [], points: [], labels: [] };
-    }
-    
-    const maxVal = Math.max(...points, 10);
-    const minVal = 0;
-    const range = maxVal - minVal || 1;
-    
-    const coords = points.map((val, idx) => {
-      const denominator = points.length > 1 ? points.length - 1 : 1;
-      const x = padding + (idx * (width - 2 * padding)) / denominator;
-      const y = height - padding - ((val - minVal) * (height - 2 * padding)) / range;
-      return { x, y, value: val, label: safeChartData[idx]?.label || "" };
-    });
-
-    // Create smooth curved line path using control points
-    let linePath = "";
-    if (coords.length > 0) {
-      linePath = `M ${coords[0].x.toFixed(1)},${coords[0].y.toFixed(1)}`;
-      for (let i = 0; i < coords.length - 1; i++) {
-        const curr = coords[i];
-        const next = coords[i + 1];
-        const cp1x = (curr.x + next.x) / 2;
-        const cp1y = curr.y;
-        const cp2x = (curr.x + next.x) / 2;
-        const cp2y = next.y;
-        linePath += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`;
-      }
-    }
-
-    const areaPath = coords.length > 0
-      ? `${linePath} L ${coords[coords.length - 1].x.toFixed(1)},${(height - padding).toFixed(1)} L ${coords[0].x.toFixed(1)},${(height - padding).toFixed(1)} Z`
-      : "";
-
-    const labels = coords.map((c) => c.label);
-
-    return { linePath, areaPath, coords, points, labels };
-  }, [effectiveChartData]);
+    return sortedYears.slice(-maxYears).map((year) => ({
+      label: year,
+      value: yearMap[year],
+    }));
+  }, [chartData, timeRange]);
 
   const comparisonLines = useMemo(() => {
     const colors = ["#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#06b6d4"];
+    if (comparisonSeries.length === 0) return [];
 
-    const rawDataList = trendTab === "keyword" ? dbKeywords : trendingTopics;
-    const sourceList = Array.isArray(rawDataList) && rawDataList.length > 0
-      ? rawDataList.slice(0, 5)
-      : (trendTab === "keyword"
-          ? [
-              { name: "Transformer", paperCount: 1420 },
-              { name: "Deep Learning", paperCount: 1850 },
-              { name: "Natural Language Processing", paperCount: 1120 },
-              { name: "Computer Vision", paperCount: 980 },
-              { name: "Reinforcement Learning", paperCount: 760 },
-            ]
-          : DEFAULT_TOPICS);
+    const maxYears = timeRange === "3y" ? 3 : timeRange === "5y" ? 5 : 8;
+    const years = [...new Set(comparisonSeries.flatMap((series) =>
+      series.points
+        .map((point) => String(point?.label ?? "").trim())
+        .filter((label) => /^\d{4}$/.test(label))
+    ))]
+      .sort((left, right) => Number(left) - Number(right))
+      .slice(-maxYears);
 
-    const itemsToRender = sourceList.map((item, idx) => {
-      const realName = typeof item === "string" ? item : (item.name || item.keyword || item.topic || `Item ${idx + 1}`);
-      const rawCount = typeof item === "object" && item !== null
-        ? (item.paperCount ?? item.totalPapers ?? item.count ?? item.followerCount ?? 0)
-        : 0;
-
-      const numericCount = Number(rawCount) || 0;
-      let valStr = "";
-      let valNum = Math.max(15, 90 - idx * 16);
-
-      if (numericCount > 0) {
-        valStr = numericCount >= 1000 ? `${(numericCount / 1000).toFixed(1)}K` : formatNumber(numericCount);
-        valNum = Math.min(95, Math.max(15, 90 - idx * 16));
-      } else if (typeof item === "object" && item?.displayStr) {
-        valStr = item.displayStr;
-      } else {
-        valStr = `${(12.5 - idx * 1.8).toFixed(1)}K`;
-      }
-
-      return {
-        name: realName,
-        color: colors[idx % colors.length],
-        baseVal: valNum,
-        displayStr: valStr,
-      };
-    });
-
-    const years = effectiveChartData.length >= 5
-      ? effectiveChartData.map((pt) => pt.label)
-      : [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+    if (years.length === 0) return [];
 
     const width = 680;
     const height = 230;
     const paddingLeft = 20;
-    const paddingRight = 65;
+    const paddingRight = 90;
     const paddingTop = 22;
     const paddingBottom = 25;
-
-    const maxVal = 100;
-    const minVal = 0;
-    const range = maxVal - minVal;
-
-    const rawLines = itemsToRender.map((item) => {
-      const numPoints = years.length;
-      const values = years.map((_, idx) => {
-        const progress = idx / Math.max(1, numPoints - 1);
-        const sCurve = Math.pow(progress, 1.7);
-        const baseline = 4 + item.baseVal * 0.12;
-        const val = baseline + (item.baseVal - baseline) * sCurve;
-        return Math.round(val * 10) / 10;
+    const valuesBySeries = comparisonSeries.map((series) => {
+      const yearlyValues = new Map();
+      series.points.forEach((point) => {
+        const year = String(point?.label ?? "").trim();
+        if (!/^\d{4}$/.test(year)) return;
+        yearlyValues.set(year, (yearlyValues.get(year) || 0) + (Number(point?.value) || 0));
       });
+      return years.map((year) => yearlyValues.get(year) || 0);
+    });
+    const maxVal = Math.max(1, ...valuesBySeries.flat());
 
-      const coords = values.map((val, idx) => {
-        const denominator = numPoints > 1 ? numPoints - 1 : 1;
-        const x = paddingLeft + (idx * (width - paddingLeft - paddingRight)) / denominator;
-        const y = height - paddingBottom - ((val - minVal) * (height - paddingTop - paddingBottom)) / range;
-        return { x, y, value: val, label: years[idx] };
+    const rawLines = comparisonSeries.map((series, seriesIndex) => {
+      const numPoints = years.length;
+      const values = valuesBySeries[seriesIndex];
+      const coords = values.map((value, index) => {
+        const x = numPoints === 1
+          ? (paddingLeft + width - paddingRight) / 2
+          : paddingLeft + (index * (width - paddingLeft - paddingRight)) / (numPoints - 1);
+        const y = height - paddingBottom
+          - (value / maxVal) * (height - paddingTop - paddingBottom);
+        return { x, y, value, label: years[index] };
       });
 
       let linePath = "";
@@ -537,81 +417,14 @@ function TrendsPage() {
         }
       }
 
-      const finalValStr = item.displayStr;
       const finalCoord = coords[coords.length - 1];
 
       return {
-        label: item.name,
-        color: item.color,
+        label: series.name,
+        color: colors[seriesIndex % colors.length],
         linePath,
         coords,
-        finalValStr,
-        finalCoord,
-        rawY: finalCoord ? finalCoord.y : 0,
-      };
-    });
-
-    const spreadCoordsByLine = rawLines.map((line) =>
-      line.coords.map((coord) => ({ ...coord }))
-    );
-    const pointCount = spreadCoordsByLine[0]?.length || 0;
-    const minSeriesY = paddingTop;
-    const maxSeriesY = height - paddingBottom;
-
-    for (let pointIndex = 0; pointIndex < pointCount; pointIndex += 1) {
-      const progress = pointIndex / Math.max(1, pointCount - 1);
-      const seriesGap = 7 + progress * 12;
-      const sortedAtPoint = spreadCoordsByLine
-        .map((coords, lineIndex) => ({
-          lineIndex,
-          y: coords[pointIndex].y,
-        }))
-        .sort((a, b) => a.y - b.y);
-      const resolvedY = sortedAtPoint.map(({ y }) =>
-        Math.min(maxSeriesY, Math.max(minSeriesY, y))
-      );
-
-      for (let index = 1; index < resolvedY.length; index += 1) {
-        resolvedY[index] = Math.max(
-          resolvedY[index],
-          resolvedY[index - 1] + seriesGap
-        );
-      }
-
-      if (resolvedY.at(-1) > maxSeriesY) {
-        resolvedY[resolvedY.length - 1] = maxSeriesY;
-        for (let index = resolvedY.length - 2; index >= 0; index -= 1) {
-          resolvedY[index] = Math.min(
-            resolvedY[index],
-            resolvedY[index + 1] - seriesGap
-          );
-        }
-      }
-
-      sortedAtPoint.forEach(({ lineIndex }, index) => {
-        spreadCoordsByLine[lineIndex][pointIndex].y = resolvedY[index];
-      });
-    }
-
-    const spreadLines = rawLines.map((line, lineIndex) => {
-      const coords = spreadCoordsByLine[lineIndex];
-      let linePath = "";
-
-      if (coords.length > 0) {
-        linePath = `M ${coords[0].x.toFixed(1)},${coords[0].y.toFixed(1)}`;
-        for (let index = 0; index < coords.length - 1; index += 1) {
-          const current = coords[index];
-          const next = coords[index + 1];
-          const controlX = (current.x + next.x) / 2;
-          linePath += ` C ${controlX.toFixed(1)},${current.y.toFixed(1)} ${controlX.toFixed(1)},${next.y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`;
-        }
-      }
-
-      const finalCoord = coords[coords.length - 1];
-      return {
-        ...line,
-        coords,
-        linePath,
+        finalValStr: formatNumber(finalCoord?.value ?? 0),
         finalCoord,
         rawY: finalCoord ? finalCoord.y : 0,
       };
@@ -620,7 +433,7 @@ function TrendsPage() {
     const labelGap = 19;
     const minLabelY = paddingTop + 4;
     const maxLabelY = height - paddingBottom + 4;
-    const sortedLines = spreadLines
+    const sortedLines = rawLines
       .map((line, index) => ({ ...line, originalIndex: index }))
       .sort((a, b) => a.rawY - b.rawY);
     const labelPositions = sortedLines.map((line) =>
@@ -648,40 +461,41 @@ function TrendsPage() {
       sortedLines.map((line, index) => [line.originalIndex, labelPositions[index]])
     );
 
-    return spreadLines.map((line, index) => ({
+    return rawLines.map((line, index) => ({
       ...line,
       labelY: resolvedLabelY.get(index) ?? line.rawY + 4,
     }));
-  }, [trendTab, dbKeywords, trendingTopics, effectiveChartData]);
+  }, [comparisonSeries, timeRange]);
 
   const annualGrowth = useMemo(() => {
-    if (!effectiveChartData || effectiveChartData.length < 2) return 18.5;
-    const first = Number(effectiveChartData[0]?.value) || 1;
-    const last = Number(effectiveChartData[effectiveChartData.length - 1]?.value) || first;
+    if (!effectiveChartData || effectiveChartData.length < 2) return null;
+    const first = Number(effectiveChartData[0]?.value);
+    const last = Number(effectiveChartData[effectiveChartData.length - 1]?.value);
     const numYears = Math.max(1, effectiveChartData.length - 1);
 
-    if (first <= 0 || last <= 0) return 18.5;
+    if (!Number.isFinite(first) || !Number.isFinite(last) || first <= 0 || last <= 0) {
+      return null;
+    }
 
     // Compound Annual Growth Rate (CAGR) Formula: ((last / first) ^ (1 / n) - 1) * 100
     const ratio = last / first;
     const cagr = (Math.pow(ratio, 1 / numYears) - 1) * 100;
-
-    if (Number.isFinite(cagr) && cagr >= -90 && cagr <= 250) {
-      return cagr;
-    }
-    
-    // Average YoY fallback capped at 199.9%
-    const avgYoY = ((last - first) / (first * numYears)) * 100;
-    return Number.isFinite(avgYoY) ? Math.min(Math.max(avgYoY, -99.9), 199.9) : 18.5;
+    return Number.isFinite(cagr) ? cagr : null;
   }, [effectiveChartData]);
 
   return (
     <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
       <div className="trends-page-container">
-        {(metadataLoading || chartLoading) && (
+        {(metadataLoading || chartLoading || comparisonLoading) && (
           <div className="trends-loading-notice" role="status" aria-live="polite">
             <span className="workspace-loading-spinner" />
-            <span>{metadataLoading ? "Loading trend catalog…" : `Updating ${trendTab} chart…`}</span>
+            <span>
+              {metadataLoading
+                ? "Loading trend catalog…"
+                : comparisonLoading
+                  ? `Loading real ${trendTab} comparison data…`
+                  : `Updating ${trendTab} chart…`}
+            </span>
           </div>
         )}
         {toast && <div className={`papers-toast papers-toast--${toast.type}`}>{toast.message}</div>}
@@ -692,20 +506,14 @@ function TrendsPage() {
             <button
               type="button"
               className={`trends-btn-toggle ${trendTab === "keyword" ? "active" : ""}`}
-              onClick={() => {
-                setTrendTab("keyword");
-                if (!activeKeyword && keywordChips.length > 0) setActiveKeyword(keywordChips[0]);
-              }}
+              onClick={() => setTrendTab("keyword")}
             >
               Keyword Trend
             </button>
             <button
               type="button"
               className={`trends-btn-toggle ${trendTab === "topic" ? "active" : ""}`}
-              onClick={() => {
-                setTrendTab("topic");
-                if (!activeTopicState && topicChips.length > 0) setActiveTopicState(topicChips[0]);
-              }}
+              onClick={() => setTrendTab("topic")}
             >
               Topic Trend
             </button>
@@ -739,7 +547,7 @@ function TrendsPage() {
           <div className="trend-stat-card card-accent-blue">
             <span className="stat-card-label">Total Publications</span>
             <h3 className="stat-card-value">
-              {dashboard ? formatNumber(dashboard.totalPapers) : "12,220"}
+              {dashboard ? formatNumber(dashboard.totalPapers) : "—"}
             </h3>
             <span className="stat-card-trend-text positive">
               <span className="sub">Live catalog total</span>
@@ -758,8 +566,8 @@ function TrendsPage() {
             <span className="stat-card-label">{trendTab === "keyword" ? "Emerging Keywords" : "Emerging Topics"}</span>
             <h3 className="stat-card-value">
               {trendTab === "keyword"
-                ? formatNumber(dashboard?.totalKeywords || dbKeywords.length || 7098)
-                : formatNumber(trendingTopics.length || 10)}
+                ? (dashboard?.totalKeywords > 0 ? formatNumber(dashboard.totalKeywords) : (dbKeywords.length || "—"))
+                : (trendingTopics.length || "—")}
             </h3>
             <span className="stat-card-trend-text positive">
               <span className="sub">{trendTab === "keyword" ? "Indexed keywords" : "Indexed topics"}</span>
@@ -783,67 +591,76 @@ function TrendsPage() {
           <article className="trends-chart-panel glassmorphic-panel multi-line-comp-panel">
             <div className="panel-header-row">
               <h3>{trendTab === "keyword" ? "Keyword Comparison" : "Topic Comparison"}</h3>
-              <span className="badge-chip badge-cyan">Cumulative</span>
+              <span className="badge-chip badge-cyan">Papers / year</span>
             </div>
 
-            {/* Top-Left Legends List (Stacked clean style matching user image) */}
-            <div className="multi-line-legend-container">
-              {comparisonLines.map((line, idx) => (
-                <div key={idx} className="multi-line-legend-item">
-                  <span className="legend-dot-pill" style={{ backgroundColor: line.color }} />
-                  <span className="legend-text">{line.label}</span>
+            {comparisonLines.length > 0 ? (
+              <>
+                <div className="multi-line-legend-container">
+                  {comparisonLines.map((line) => (
+                    <div key={line.label} className="multi-line-legend-item">
+                      <span className="legend-dot-pill" style={{ backgroundColor: line.color }} />
+                      <span className="legend-text">{line.label}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <div className="trends-svg-chart-container">
-              <svg viewBox="0 0 680 230" className="trends-svg-chart multi-line-svg">
-                {comparisonLines.map((line, idx) => (
-                  <g key={idx} className="multi-line-group">
-                    <path
-                      d={line.linePath}
-                      fill="none"
-                      stroke={line.color}
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                    />
-                    {line.coords.map((c, i) => (
-                      <circle
-                        key={i}
-                        cx={c.x}
-                        cy={c.y}
-                        r="4.5"
-                        fill="#ffffff"
-                        stroke={line.color}
-                        strokeWidth="2.8"
-                        className="trend-chart-point"
-                      >
-                        <title>{`${line.label} (${c.label}): ${c.value}K papers`}</title>
-                      </circle>
+                <div className="trends-svg-chart-container">
+                  <svg viewBox="0 0 680 230" className="trends-svg-chart multi-line-svg">
+                    {comparisonLines.map((line) => (
+                      <g key={line.label} className="multi-line-group">
+                        <path
+                          d={line.linePath}
+                          fill="none"
+                          stroke={line.color}
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                        />
+                        {line.coords.map((point) => (
+                          <circle
+                            key={point.label}
+                            cx={point.x}
+                            cy={point.y}
+                            r="4.5"
+                            fill="#ffffff"
+                            stroke={line.color}
+                            strokeWidth="2.8"
+                            className="trend-chart-point"
+                          >
+                            <title>{`${line.label} (${point.label}): ${formatNumber(point.value)} papers`}</title>
+                          </circle>
+                        ))}
+                        {line.finalCoord && (
+                          <text
+                            x={line.finalCoord.x + 16}
+                            y={line.labelY || (line.finalCoord.y + 4)}
+                            fill={line.color}
+                            fontSize="12.5"
+                            fontWeight="850"
+                            className="multi-line-end-label"
+                          >
+                            {line.finalValStr}
+                            <title>{`${line.finalValStr} papers in ${line.finalCoord.label}`}</title>
+                          </text>
+                        )}
+                      </g>
                     ))}
-                    {/* End of line value label (e.g. 92.1K) */}
-                    {line.finalCoord && (
-                      <text
-                        x={line.finalCoord.x + 16}
-                        y={line.labelY || (line.finalCoord.y + 4)}
-                        fill={line.color}
-                        fontSize="12.5"
-                        fontWeight="850"
-                        className="multi-line-end-label"
-                      >
-                        {line.finalValStr}
-                      </text>
-                    )}
-                  </g>
-                ))}
-              </svg>
+                  </svg>
 
-              <div className="trends-chart-axis-x">
-                {comparisonLines[0]?.coords.map((c, i) => (
-                  <span key={i}>{c.label}</span>
-                ))}
+                  <div className="trends-chart-axis-x">
+                    {comparisonLines[0]?.coords.map((point) => (
+                      <span key={point.label}>{point.label}</span>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="trend-comparison-empty" role="status">
+                {comparisonLoading
+                  ? "Loading publication history from the backend…"
+                  : `No yearly publication data is available for these ${trendTab}s.`}
               </div>
-            </div>
+            )}
           </article>
 
           {/* Card 3: Top Trending Topics list */}
@@ -871,13 +688,7 @@ function TrendsPage() {
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <span className="pub-count-pill">
-                          {typeof item.paperCount === "number"
-                            ? `${formatNumber(item.paperCount)} papers`
-                            : (item.paperCount
-                                ? (String(item.paperCount).includes("paper")
-                                    ? item.paperCount
-                                    : `${formatNumber(item.paperCount)} papers`)
-                                : "0 papers")}
+                          {formatPaperCount(item.paperCount)}
                         </span>
                       </td>
                     </tr>
