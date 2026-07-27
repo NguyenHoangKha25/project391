@@ -37,6 +37,9 @@ function hasUsableMetadata(metadata) {
 }
 
 const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v6";
+const COMPARISON_CHART_WIDTH = 680;
+const COMPARISON_CHART_HEIGHT = 270;
+const COMPARISON_AXIS_Y = 232;
 
 function getTrendSeriesCacheKey(tab, term) {
   const termStr = typeof term === "string" ? term : (term?.name || term?.keyword || term?.term || String(term || ""));
@@ -374,7 +377,7 @@ function TrendsPage() {
 
     if (years.length === 0) return [];
 
-    const width = 680;
+    const width = COMPARISON_CHART_WIDTH;
     const height = 230;
     const paddingLeft = 20;
     const paddingRight = 90;
@@ -606,7 +609,10 @@ function TrendsPage() {
                 </div>
 
                 <div className="trends-svg-chart-container">
-                  <svg viewBox="0 0 680 230" className="trends-svg-chart multi-line-svg">
+                  <svg
+                    viewBox={`0 0 ${COMPARISON_CHART_WIDTH} ${COMPARISON_CHART_HEIGHT}`}
+                    className="trends-svg-chart multi-line-svg"
+                  >
                     {comparisonLines.map((line) => (
                       <g key={line.label} className="multi-line-group">
                         <path
@@ -631,27 +637,52 @@ function TrendsPage() {
                           </circle>
                         ))}
                         {line.finalCoord && (
-                          <text
-                            x={line.finalCoord.x + 16}
-                            y={line.labelY || (line.finalCoord.y + 4)}
-                            fill={line.color}
-                            fontSize="12.5"
-                            fontWeight="850"
-                            className="multi-line-end-label"
-                          >
-                            {line.finalValStr}
-                            <title>{`${line.finalValStr} papers in ${line.finalCoord.label}`}</title>
-                          </text>
+                          <>
+                            <line
+                              x1={line.finalCoord.x + 6}
+                              y1={line.finalCoord.y}
+                              x2={line.finalCoord.x + 13}
+                              y2={line.labelY || line.finalCoord.y}
+                              stroke={line.color}
+                              className="multi-line-label-connector"
+                            />
+                            <text
+                              x={line.finalCoord.x + 17}
+                              y={line.labelY || line.finalCoord.y}
+                              fill={line.color}
+                              fontSize="12.5"
+                              fontWeight="850"
+                              dominantBaseline="middle"
+                              className="multi-line-end-label"
+                            >
+                              {line.finalValStr}
+                              <title>{`${line.finalValStr} papers in ${line.finalCoord.label}`}</title>
+                            </text>
+                          </>
                         )}
                       </g>
                     ))}
-                  </svg>
-
-                  <div className="trends-chart-axis-x">
+                    <g className="trend-chart-axis" aria-hidden="true">
+                      <line
+                        x1={comparisonLines[0]?.coords[0]?.x}
+                        y1={COMPARISON_AXIS_Y}
+                        x2={comparisonLines[0]?.coords[comparisonLines[0].coords.length - 1]?.x}
+                        y2={COMPARISON_AXIS_Y}
+                        className="trend-chart-axis-line"
+                      />
                     {comparisonLines[0]?.coords.map((point) => (
-                      <span key={point.label}>{point.label}</span>
+                      <text
+                        key={point.label}
+                        x={point.x}
+                        y={COMPARISON_AXIS_Y + 24}
+                        textAnchor="middle"
+                        className="trend-chart-axis-label"
+                      >
+                        {point.label}
+                      </text>
                     ))}
-                  </div>
+                    </g>
+                  </svg>
                 </div>
               </>
             ) : (
