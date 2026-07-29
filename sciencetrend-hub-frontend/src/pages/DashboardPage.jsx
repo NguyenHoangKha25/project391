@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FiRefreshCw,
+  FiActivity,
   FiFileText,
   FiBookOpen,
   FiKey,
@@ -296,68 +297,47 @@ function DashboardPage() {
     <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
       <div className="premium-dashboard">
 
-        <section className="db-overview-hero" aria-labelledby="dashboard-overview-title">
-          <div className="db-overview-main">
-            <span className="db-overview-kicker">
-              <span className="db-overview-status-dot" aria-hidden="true" />
-              Research workspace
+        <section className="db-control-center" aria-labelledby="dashboard-control-title">
+          <div className="db-control-identity">
+            <span className="db-control-icon" aria-hidden="true">
+              <FiActivity />
             </span>
-            <h2 id="dashboard-overview-title">See the shape of your research catalog.</h2>
-            <p>
-              Review publication volume, emerging keywords, leading journals,
-              and active research topics from one clear overview.
-            </p>
-
-            <nav className="db-quick-actions" aria-label="Dashboard quick actions">
-              <Link to="/papers" className="db-quick-link primary">
-                <FiFileText aria-hidden="true" />
-                Search papers
-                <FiArrowUpRight aria-hidden="true" />
-              </Link>
-              <Link to="/trends" className="db-quick-link">
-                <FiTrendingUp aria-hidden="true" />
-                Explore trends
-              </Link>
-              <Link to="/journals" className="db-quick-link">
-                <FiBookOpen aria-hidden="true" />
-                Browse journals
-              </Link>
-            </nav>
+            <div>
+              <span className="db-control-eyebrow">Analytics overview</span>
+              <h2 id="dashboard-control-title">Research catalog pulse</h2>
+              <p>Current signals from the indexed publication data.</p>
+            </div>
           </div>
 
-          <div className="db-overview-summary">
-            <div className="db-overview-summary-heading">
+          <div className="db-control-statuses" aria-label="Dashboard data status">
+            <div className="db-control-status">
+              <span
+                className={`db-control-status-dot ${data ? "is-ready" : "is-waiting"}`}
+                aria-hidden="true"
+              />
               <div>
-                <span>Catalog coverage</span>
-                <strong>{formatNumber(data?.totalPapers ?? 0)}</strong>
-              </div>
-              <div className="db-overview-summary-icon" aria-hidden="true">
-                <FiDatabase />
+                <span>Catalog status</span>
+                <strong>{data ? "Data available" : "Awaiting data"}</strong>
               </div>
             </div>
-            <p>Papers indexed across the current research catalog</p>
-
-            <div className="db-overview-mini-metrics" aria-label="Catalog totals">
+            <div className="db-control-status">
+              <FiDatabase aria-hidden="true" />
               <div>
-                <span>Journals</span>
-                <strong>{formatNumber(data?.totalJournals ?? 0)}</strong>
-              </div>
-              <div>
-                <span>Keywords</span>
-                <strong>{formatNumber(data?.totalKeywords ?? 0)}</strong>
+                <span>Primary source</span>
+                <strong>OpenAlex index</strong>
               </div>
             </div>
-
-            <button
-              type="button"
-              className="db-refresh-btn-premium"
-              onClick={() => loadDashboard(true)}
-              disabled={spinning}
-            >
-              <FiRefreshCw className={spinning ? "is-spinning" : ""} />
-              <span>{spinning ? "Refreshing..." : "Refresh Board"}</span>
-            </button>
           </div>
+
+          <button
+            type="button"
+            className="db-refresh-btn-premium db-control-refresh"
+            onClick={() => loadDashboard(true)}
+            disabled={spinning}
+          >
+            <FiRefreshCw className={spinning ? "is-spinning" : ""} />
+            <span>{spinning ? "Refreshing..." : "Refresh data"}</span>
+          </button>
         </section>
 
         {errorMessage && (
