@@ -309,26 +309,6 @@ function DashboardPage() {
             </div>
           </div>
 
-          <div className="db-control-statuses" aria-label="Dashboard data status">
-            <div className="db-control-status">
-              <span
-                className={`db-control-status-dot ${data ? "is-ready" : "is-waiting"}`}
-                aria-hidden="true"
-              />
-              <div>
-                <span>Catalog status</span>
-                <strong>{data ? "Data available" : "Awaiting data"}</strong>
-              </div>
-            </div>
-            <div className="db-control-status">
-              <FiDatabase aria-hidden="true" />
-              <div>
-                <span>Primary source</span>
-                <strong>OpenAlex index</strong>
-              </div>
-            </div>
-          </div>
-
           <button
             type="button"
             className="db-refresh-btn-premium db-control-refresh"
