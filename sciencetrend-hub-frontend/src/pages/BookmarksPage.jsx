@@ -40,8 +40,6 @@ import { getCachedData, setCachedData } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/BookmarksPage.css";
 
-const LIBRARY_CACHE_KEY = "user_library_v5";
-
 /* ── Toast Overlay ── */
 function useToast() {
   const [toast, setToast] = useState(null);
