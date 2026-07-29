@@ -491,13 +491,7 @@ function TrendsPage() {
         {(metadataLoading || chartLoading || comparisonLoading) && (
           <div className="trends-loading-notice" role="status" aria-live="polite">
             <span className="workspace-loading-spinner" />
-            <span>
-              {metadataLoading
-                ? "Loading trend catalog…"
-                : comparisonLoading
-                  ? `Loading real ${trendTab} comparison data…`
-                  : `Updating ${trendTab} chart…`}
-            </span>
+            <span>Loading data…</span>
           </div>
         )}
         {toast && <div className={`papers-toast papers-toast--${toast.type}`}>{toast.message}</div>}
@@ -717,7 +711,7 @@ function TrendsPage() {
             ) : (
               <div className="trend-comparison-empty" role="status">
                 {comparisonLoading
-                  ? "Loading publication history from the backend…"
+                  ? "Loading data…"
                   : `No yearly publication data is available for these ${trendTab}s.`}
               </div>
             )}
