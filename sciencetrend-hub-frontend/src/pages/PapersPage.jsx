@@ -113,6 +113,7 @@ function PapersPage() {
   const initialAuthor = searchParams.get("author") || "";
   const initialJournal = searchParams.get("journal") || "";
   const initialTopic = searchParams.get("topic") || "all";
+  const urlParamsKey = searchParams.toString();
   const initialParams = buildPapersParams({
     search: searchQuery,
     keyword: initialKeyword,
@@ -259,13 +260,29 @@ function PapersPage() {
     }
   }, [keywordInput, authorInput, journalInput, topicInput, yearFrom, yearTo, sortBy, resultsPerPage, searchVal]);
 
-  // Trigger search on mount and whenever general searchQuery from URL changes
+  // Keep every supported URL filter in sync, including browser Back/Forward navigation.
   useEffect(() => {
-    setSearchVal(searchQuery);
-    loadPapers(0, searchQuery);
+    const currentParams = new URLSearchParams(urlParamsKey);
+    const nextSearch = currentParams.get("q") || "";
+    const nextKeyword = currentParams.get("keyword") || "";
+    const nextAuthor = currentParams.get("author") || "";
+    const nextJournal = currentParams.get("journal") || "";
+    const nextTopic = currentParams.get("topic") || "all";
+
+    setSearchVal(nextSearch);
+    setKeywordInput(nextKeyword);
+    setAuthorInput(nextAuthor);
+    setJournalInput(nextJournal);
+    setTopicInput(nextTopic);
+    loadPapers(0, nextSearch, {
+      keyword: nextKeyword,
+      author: nextAuthor,
+      journal: nextJournal,
+      topic: nextTopic,
+    });
   // The URL query is the trigger; adding loadPapers would also refetch on every filter keystroke.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+  }, [urlParamsKey]);
 
   // Handle advanced filter submit
   function handleFilterSubmit(e) {

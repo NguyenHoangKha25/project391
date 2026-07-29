@@ -32,7 +32,7 @@ function NotificationsPage() {
     } catch (error) {
       console.error("Cannot load notifications", error);
       setNotifications([]);
-      // Don't block page for 500 — show empty state instead
+      setErrorMessage("Couldn't load notifications. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -70,6 +70,12 @@ function NotificationsPage() {
       await markNotificationAsRead(notificationId);
     } catch (error) {
       console.error("Cannot mark notification as read", error);
+      setNotifications((current) =>
+        current.map((item) =>
+          item.id === notificationId ? { ...item, unread: true } : item
+        )
+      );
+      setErrorMessage("Couldn't mark this notification as read.");
     }
   }
 
@@ -85,7 +91,9 @@ function NotificationsPage() {
             <p>
               {loading
                 ? "Checking for updates…"
-                : unreadCount > 0
+                : errorMessage
+                  ? "Notifications are temporarily unavailable."
+                  : unreadCount > 0
                   ? `${unreadCount} unread update${unreadCount !== 1 ? "s" : ""}.`
                   : "You're all caught up."}
             </p>

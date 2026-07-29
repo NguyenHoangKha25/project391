@@ -61,9 +61,22 @@ export function formatRelativeTime(value) {
 }
 
 export function normalizePaper(paper = {}, index = 0) {
-  const kwList = Array.isArray(paper.keywords) 
+  const rawKeywords = Array.isArray(paper.keywords)
     ? paper.keywords 
     : (paper.keyword ? [paper.keyword] : []);
+  const kwList = rawKeywords
+    .map((keyword) => {
+      if (typeof keyword === "string") return keyword.trim();
+      if (!keyword || typeof keyword !== "object") return "";
+      return String(
+        keyword.name
+        ?? keyword.keyword
+        ?? keyword.term
+        ?? keyword.keywordName
+        ?? "",
+      ).trim();
+    })
+    .filter(Boolean);
   const citationCount = toNumber(paper.citationCount);
   const publicationYear = Number(paper.year);
   const currentYear = new Date().getFullYear();
@@ -97,6 +110,14 @@ export function normalizePaper(paper = {}, index = 0) {
     parsedAuthors = paper.authors.trim();
   }
 
+  const rawDoi = String(paper.doi ?? "").trim();
+  const externalId = String(paper.externalId ?? "").trim();
+  const href = /^https?:\/\//i.test(rawDoi)
+    ? rawDoi
+    : rawDoi
+      ? `https://doi.org/${rawDoi.replace(/^doi:\s*/i, "")}`
+      : (/^https?:\/\//i.test(externalId) ? externalId : "");
+
   return {
     id: paper.researchPaperId ?? paper.paperId ?? paper.id ?? index,
     title: paper.title ?? "Untitled paper",
@@ -104,13 +125,13 @@ export function normalizePaper(paper = {}, index = 0) {
     authors: parsedAuthors || "Unknown Authors",
     year: paper.year ?? "",
     tag: kwList.length > 0 ? kwList[0] : "Paper",
-    href: paper.doi ? `https://doi.org/${paper.doi}` : (paper.externalId ?? ""),
+    href,
     saved: Boolean(paper.saved ?? paper.bookmarked ?? false),
     abstract: paper.abstractText ?? paper.abstract ?? "",
     citationCount,
     citationsPerYear,
     keywords: kwList,
-    doi: paper.doi ?? "",
+    doi: rawDoi,
   };
 }
 

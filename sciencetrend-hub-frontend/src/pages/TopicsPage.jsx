@@ -20,7 +20,7 @@ import {
   getFollowedTopics,
   getPapersByTopic,
 } from "../services/topicService";
-import { getPapers, searchPapers } from "../services/paperService";
+import { searchPapers } from "../services/paperService";
 import { normalizeTopic, normalizePaper, toArray, formatNumber } from "../utils/apiData";
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { useAuth } from "../context/useAuth";
@@ -135,6 +135,7 @@ function TopicsPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeTopic, setActiveTopic] = useState(null);
   const [topicPapers, setTopicPapers] = useState([]);
+  const [topicPapersSource, setTopicPapersSource] = useState("topic");
   const [loadingPapers, setLoadingPapers] = useState(false);
 
   const { toast, showToast } = useToast();
@@ -289,22 +290,24 @@ function TopicsPage() {
   // Open Recent Papers Drawer
   async function handleOpenTopicDetails(topic) {
     const targetTopicId = topic.researchTopicId || topic.id;
-    const cacheKey = `topic_papers_${targetTopicId}`;
-    const storedPapers = getPersistentCachedData(cacheKey);
-    const cachedPapers = Array.isArray(storedPapers) && storedPapers.length > 0
-      ? storedPapers
+    const hasNumericTopicId = typeof targetTopicId === "number" || /^\d+$/.test(String(targetTopicId));
+    const cacheKey = `topic_papers_v2_${targetTopicId}`;
+    const storedResult = getPersistentCachedData(cacheKey);
+    const cachedPapers = Array.isArray(storedResult?.papers) && storedResult.papers.length > 0
+      ? storedResult.papers
       : null;
 
     setActiveTopic(topic);
     setDrawerOpen(true);
     setLoadingPapers(!cachedPapers);
     setTopicPapers(cachedPapers ?? []);
+    setTopicPapersSource(storedResult?.source === "search" ? "search" : "topic");
 
     try {
       let papersList = [];
+      let source = "topic";
       
-      // Level 1: Try getPapersByTopic API
-      if (typeof targetTopicId === "number" || /^\d+$/.test(String(targetTopicId))) {
+      if (hasNumericTopicId) {
         try {
           const response = await getPapersByTopic(targetTopicId, 0, 10);
           papersList = toArray(response, ["content", "papers"]).map(normalizePaper);
@@ -313,22 +316,13 @@ function TopicsPage() {
         }
       }
 
-      // Level 2: Fallback search papers by topic name keywords
-      if (papersList.length === 0 && topic?.name) {
-        const firstWord = topic.name.split(" ")[0] || topic.name;
+      // Topics without a backend ID cannot use /topics/{id}/papers.
+      // A full-name search is shown as related search results, never as direct topic membership.
+      if (!hasNumericTopicId && topic?.name) {
         try {
-          const searchResp = await searchPapers(firstWord, { page: 0, size: 8 });
+          const searchResp = await searchPapers(topic.name, { page: 0, size: 8 });
           papersList = toArray(searchResp, ["content", "papers"]).map(normalizePaper);
-        } catch {
-          papersList = [];
-        }
-      }
-
-      // Level 3: Fallback get general latest catalog papers
-      if (papersList.length === 0) {
-        try {
-          const catalogResp = await getPapers({ page: 0, size: 6 });
-          papersList = toArray(catalogResp, ["content", "papers"]).map(normalizePaper);
+          source = "search";
         } catch {
           papersList = [];
         }
@@ -336,9 +330,11 @@ function TopicsPage() {
 
       if (papersList.length > 0) {
         setTopicPapers(papersList);
-        setPersistentCachedData(cacheKey, papersList);
+        setTopicPapersSource(source);
+        setPersistentCachedData(cacheKey, { papers: papersList, source });
       } else if (!cachedPapers) {
         setTopicPapers([]);
+        setTopicPapersSource(source);
       }
     } catch {
       if (!cachedPapers) {
@@ -540,7 +536,8 @@ function TopicsPage() {
 
             <div className="drawer-papers-section">
               <h3>
-                <FiBookOpen /> Recent Publications
+                <FiBookOpen />
+                {topicPapersSource === "search" ? " Related Search Results" : " Recent Publications"}
               </h3>
 
               {loadingPapers ? (
@@ -550,18 +547,14 @@ function TopicsPage() {
                   {topicPapers.map((paper) => (
                     <article key={paper.id || paper.paperId} className="drawer-paper-card">
                       <h4>{paper.title || "Untitled Paper"}</h4>
-                      <p className="paper-authors">
-                        {paper.authors
-                          ? toArray(paper.authors).map(a => a.name || a).join(", ")
-                          : "Unknown Authors"}
-                      </p>
+                      <p className="paper-authors">{paper.authors || "Unknown Authors"}</p>
                       <div className="paper-meta">
-                        <span>{paper.publicationYear}</span>
+                        <span>{paper.year}</span>
                         <span>{paper.journalName || paper.source}</span>
                       </div>
-                      {paper.doi && (
+                      {paper.href && (
                         <a
-                          href={`https://doi.org/${paper.doi}`}
+                          href={paper.href}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="paper-link"

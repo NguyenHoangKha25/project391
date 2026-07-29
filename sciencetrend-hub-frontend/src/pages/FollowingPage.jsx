@@ -13,6 +13,7 @@ import { getFollowedJournals, unfollowJournal } from "../services/journalService
 import { normalizeTopic, normalizeJournal, toArray } from "../utils/apiData";
 import { getCachedData, setCachedData } from "../utils/apiCache";
 import { ROUTE_PATHS } from "../routes/routePaths";
+import { useAuth } from "../context/useAuth";
 import "../styles/WorkspacePages.css";
 import "../styles/FollowingPage.css";
 
@@ -34,6 +35,9 @@ function useToast() {
 }
 
 function FollowingPage() {
+  const { user } = useAuth();
+  const cacheOwner = user?.userId ?? user?.id ?? user?.email ?? user?.username ?? "current";
+  const followingCacheKey = `following_data_${cacheOwner}`;
   const [activeTab, setActiveTab] = useState("topics"); // 'topics' | 'journals'
   
   const [followedTopics, setFollowedTopics] = useState([]);
@@ -46,7 +50,7 @@ function FollowingPage() {
   const { toast, showToast } = useToast();
 
   const loadData = useCallback(async () => {
-    const cacheKey = "following_data";
+    const cacheKey = followingCacheKey;
     const cachedData = getCachedData(cacheKey);
 
     if (cachedData) {
@@ -60,8 +64,8 @@ function FollowingPage() {
         getFollowedJournals(),
       ]).then(([topicsRes, journalsRes]) => {
         const freshData = {
-          followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(t => normalizeTopic(t)) : [],
-          followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(j => normalizeJournal(j)) : []
+          followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(t => normalizeTopic(t)) : cachedData.followedTopics,
+          followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(j => normalizeJournal(j)) : cachedData.followedJournals
         };
         setFollowedTopics(freshData.followedTopics);
         setFollowedJournals(freshData.followedJournals);
@@ -76,6 +80,9 @@ function FollowingPage() {
         getFollowedTopics(),
         getFollowedJournals(),
       ]);
+      if (topicsRes.status === "rejected" && journalsRes.status === "rejected") {
+        showToast("Failed to load followed content.", "warning");
+      }
 
       const freshData = {
         followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(t => normalizeTopic(t)) : [],
@@ -90,7 +97,7 @@ function FollowingPage() {
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [followingCacheKey, showToast]);
 
   useEffect(() => {
     loadData();

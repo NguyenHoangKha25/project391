@@ -210,7 +210,7 @@ function AdminPage() {
                     <article className="admin-stat-card-custom" key={label}>
                       <div className="card-header"><span className="card-label">{label}</span><span className="card-icon-circle"><Icon /></span></div>
                       <h3 className="card-value">{formatNumber(value)}</h3>
-                      <div className="card-footer"><span className="card-trend-sub">Live backend data</span></div>
+                      <div className="card-footer"><span className="card-trend-sub">Current system value</span></div>
                     </article>
                   ))}
                 </div>

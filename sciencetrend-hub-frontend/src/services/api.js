@@ -1,8 +1,22 @@
 import { clearCache } from "../utils/apiCache";
+import { clearAuthSession } from "../utils/authStorage";
 
 const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api"
 ).replace(/\/$/, "");
+let refreshRequest = null;
+
+function notifyAuthStateChanged() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("sciencetrend:auth-changed"));
+  }
+}
+
+function expireLocalSession() {
+  clearAuthSession();
+  clearCache();
+  notifyAuthStateChanged();
+}
 
 function getStoredToken() {
   return localStorage.getItem("token") || "";
@@ -12,9 +26,12 @@ function getStoredRefreshToken() {
   return localStorage.getItem("refreshToken") || "";
 }
 
-async function refreshAccessToken() {
+async function requestRefreshedAccessToken() {
   const refreshToken = getStoredRefreshToken();
-  if (!refreshToken) return "";
+  if (!refreshToken) {
+    expireLocalSession();
+    return "";
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
@@ -22,7 +39,10 @@ async function refreshAccessToken() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
     });
-    if (!response.ok) return "";
+    if (!response.ok) {
+      if ([400, 401, 403].includes(response.status)) expireLocalSession();
+      return "";
+    }
 
     const payload = await response.json().catch(() => ({}));
     const data = payload?.data ?? payload;
@@ -31,10 +51,20 @@ async function refreshAccessToken() {
 
     localStorage.setItem("token", token);
     if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken);
+    notifyAuthStateChanged();
     return token;
   } catch {
     return "";
   }
+}
+
+function refreshAccessToken() {
+  if (!refreshRequest) {
+    refreshRequest = requestRefreshedAccessToken().finally(() => {
+      refreshRequest = null;
+    });
+  }
+  return refreshRequest;
 }
 
 function normalizeEndpoint(endpoint) {
@@ -138,6 +168,11 @@ export async function apiRequest(endpoint, options = {}) {
           body: requestBody,
           signal: retryController.signal,
         });
+      } catch (error) {
+        if (error.name === "AbortError") {
+          throw new Error("Request timed out. Please check your network connection.", { cause: error });
+        }
+        throw new Error("Network request failed. Please check your connection.", { cause: error });
       } finally {
         clearTimeout(retryTimeoutId);
       }

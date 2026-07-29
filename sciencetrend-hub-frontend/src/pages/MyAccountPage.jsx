@@ -76,10 +76,10 @@ function MyAccountPage() {
       localStorage.setItem("user", JSON.stringify(nextProfile));
       setProfile(nextProfile);
       refreshAuthState?.();
-      setNotice("Account information updated from backend.");
+      setNotice("Account information refreshed.");
     } catch (error) {
       console.error("Cannot refresh account profile", error);
-      setNotice("Cannot reach backend now. Showing the account saved after login.");
+      setNotice("Couldn't refresh account information. Showing the last saved details.");
     } finally {
       setLoading(false);
     }

@@ -45,7 +45,7 @@ function getCachedJournalsData() {
     if (journals.length > 0) return { journals, topIds };
   }
 
-  const dashboard = getPersistentCachedData("dashboard_overview_v2");
+  const dashboard = getPersistentCachedData("dashboard_overview_v3");
   const dashboardJournals = getDashboardJournalSummaries(dashboard);
 
   return dashboardJournals.length > 0

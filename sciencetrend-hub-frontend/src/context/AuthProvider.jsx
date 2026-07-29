@@ -41,6 +41,11 @@ function AuthProvider({ children }) {
     return nextState;
   }, []);
 
+  useEffect(() => {
+    window.addEventListener("sciencetrend:auth-changed", refreshAuthState);
+    return () => window.removeEventListener("sciencetrend:auth-changed", refreshAuthState);
+  }, [refreshAuthState]);
+
   const loginUser = useCallback(
     (response, fallbackUser = {}) => {
       const session = saveAuthSession(response, fallbackUser);

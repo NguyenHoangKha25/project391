@@ -87,7 +87,12 @@ function DashboardPage() {
         if (hasDashboardData(normOverview)) {
           setData(normOverview);
           setPersistentCachedData(DASHBOARD_OVERVIEW_CACHE_KEY, normOverview);
+        } else if (!cachedOverview) {
+          setData(normOverview);
+          setErrorMessage("No dashboard statistics are available in the catalog yet.");
         }
+      } else if (!cachedOverview) {
+        setErrorMessage("Couldn't load dashboard statistics. Please try again in a moment.");
       }
 
       if (topicsRes.status === "fulfilled") {
@@ -122,7 +127,10 @@ function DashboardPage() {
     loadDashboard();
   }, [loadDashboard]);
 
-  const displayName = user?.username || user?.fullName || user?.email || "Dr. Researcher";
+  const displayName = user?.username || user?.fullName || user?.email || "";
+  const dashboardSubtitle = displayName
+    ? `Welcome back, ${displayName} 👋`
+    : "Explore the latest data available in the research catalog";
 
   const dashboardStats = useMemo(() => {
     const totalPapers = data?.totalPapers ?? 0;
@@ -139,36 +147,36 @@ function DashboardPage() {
         title: "Total Papers",
         value: formatNumber(totalPapers),
         icon: FiFileText,
-        change: totalPapers > 0 ? "+12.4%" : "—",
+        change: "Current",
         trendText: "catalog total",
-        trendType: totalPapers > 0 ? "positive" : "neutral",
+        trendType: "neutral",
         themeClass: "kpi-theme-emerald"
       },
       {
         title: "Journals",
         value: formatNumber(totalJournals),
         icon: FiBookOpen,
-        change: totalJournals > 0 ? "+8.6%" : "—",
+        change: "Current",
         trendText: "catalog total",
-        trendType: totalJournals > 0 ? "positive" : "neutral",
+        trendType: "neutral",
         themeClass: "kpi-theme-indigo"
       },
       {
         title: "Keywords",
         value: formatNumber(totalKeywords),
         icon: FiKey,
-        change: totalKeywords > 0 ? "+15.2%" : "—",
+        change: "Current",
         trendText: "catalog total",
-        trendType: totalKeywords > 0 ? "positive" : "neutral",
+        trendType: "neutral",
         themeClass: "kpi-theme-purple"
       },
       {
         title: "OpenAlex Papers",
         value: formatNumber(openAlexPapers),
         icon: FiDatabase,
-        change: openAlexPapers > 0 ? "+24.1%" : "—",
+        change: "Current",
         trendText: "OpenAlex records",
-        trendType: openAlexPapers > 0 ? "positive" : "neutral",
+        trendType: "neutral",
         themeClass: "kpi-theme-amber"
       }
     ];
@@ -179,9 +187,9 @@ function DashboardPage() {
           title: "Successful Syncs",
           value: formatNumber(successfulSyncs),
           icon: FiCheckCircle,
-          change: successfulSyncs > 0 ? "+100%" : "—",
+          change: "Recorded",
           trendText: "completed runs",
-          trendType: "positive",
+          trendType: "neutral",
           themeClass: "kpi-theme-emerald"
         },
         {
@@ -200,19 +208,8 @@ function DashboardPage() {
   }, [data, user]);
 
   const papersByYear = useMemo(() => {
-    let raw = data?.papersByYear || [];
-    if (!Array.isArray(raw) || raw.length === 0 || !raw.some(p => Number(p?.value) > 0)) {
-      const currentYr = new Date().getFullYear();
-      return [
-        { label: String(currentYr - 6), value: 6400 },
-        { label: String(currentYr - 5), value: 9200 },
-        { label: String(currentYr - 4), value: 12100 },
-        { label: String(currentYr - 3), value: 14800 },
-        { label: String(currentYr - 2), value: 17200 },
-        { label: String(currentYr - 1), value: 18500 },
-        { label: String(currentYr), value: 17800 },
-      ];
-    }
+    const raw = data?.papersByYear || [];
+    if (!Array.isArray(raw) || !raw.some((point) => Number(point?.value) > 0)) return [];
     const sorted = [...raw].sort((a, b) => parseInt(a.label || 0) - parseInt(b.label || 0));
     return sorted.slice(-7);
   }, [data]);
@@ -284,7 +281,7 @@ function DashboardPage() {
 
   if (loading) {
     return (
-      <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
+      <MainLayout title="Dashboard" subtitle={dashboardSubtitle}>
         <div className="cm-loading" style={{ minHeight: "60vh" }}>
           <div className="cm-spinner" />
           <p style={{ fontWeight: "750", color: "#60a5fa", fontSize: "16px" }}>Loading dashboard overview statistics...</p>
@@ -294,7 +291,7 @@ function DashboardPage() {
   }
 
   return (
-    <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
+    <MainLayout title="Dashboard" subtitle={dashboardSubtitle}>
       <div className="premium-dashboard">
 
         <section className="db-control-center" aria-labelledby="dashboard-control-title">
@@ -332,7 +329,7 @@ function DashboardPage() {
             <span>Catalog snapshot</span>
             <h2>Key research metrics</h2>
           </div>
-          <p>Coverage and growth signals from the current index.</p>
+          <p>Coverage totals from the current index.</p>
         </div>
 
         {/* Dynamic Metrics Grid */}

@@ -100,40 +100,38 @@ function LoginPage() {
               </p>
             </div>
 
-            {/* Glassmorphic Live Analytics Preview Widget (Human-crafted SaaS style) */}
+            {/* Product workflow preview — no fabricated analytics */}
             <div className="auth-widget-preview-card">
               <div className="auth-widget-header">
                 <div className="auth-widget-title-group">
                   <span className="auth-widget-dot"></span>
-                  <span className="auth-widget-title">LIVE PLATFORM METRICS</span>
+                  <span className="auth-widget-title">RESEARCH WORKFLOW</span>
                 </div>
-                <span className="auth-widget-badge">🟢 Real-Time Sync</span>
+                <span className="auth-widget-badge">Connected workspace</span>
               </div>
 
-              {/* Stat Counters Row */}
               <div className="auth-widget-stats-grid">
                 <div className="auth-widget-stat-card">
-                  <span className="stat-num">12,200+</span>
-                  <span className="stat-label">Publications</span>
+                  <span className="stat-num">Search</span>
+                  <span className="stat-label">Find relevant publications</span>
                 </div>
                 <div className="auth-widget-stat-card">
-                  <span className="stat-num">4,850+</span>
-                  <span className="stat-label">Top Journals</span>
+                  <span className="stat-num">Organize</span>
+                  <span className="stat-label">Save papers and sources</span>
                 </div>
                 <div className="auth-widget-stat-card">
-                  <span className="stat-num">98.4%</span>
-                  <span className="stat-label">Accuracy Rate</span>
+                  <span className="stat-num">Monitor</span>
+                  <span className="stat-label">Follow topics and journals</span>
                 </div>
               </div>
 
-              {/* Mini Trend Graph Graphic Box */}
               <div className="auth-widget-trend-box">
                 <div className="auth-widget-trend-info">
                   <div className="auth-widget-trend-label">
                     <FiTrendingUp className="trend-icon" />
-                    <span>Machine Learning Trends</span>
+                    <span>From discovery to report</span>
                   </div>
-                  <span className="trend-growth-badge">+340% Growth</span>
+                  <span className="trend-growth-badge">One workspace</span>
                 </div>
                 
                 {/* SVG Glowing Curve Preview */}
@@ -242,10 +240,7 @@ function LoginPage() {
               </div>
 
               <div className="auth-options">
-                <label className="auth-remember" style={{ fontWeight: "600" }}>
-                  <input type="checkbox" />
-                  <span>Remember me</span>
-                </label>
+                <span className="auth-remember" style={{ fontWeight: "600" }}>Secure account access</span>
                 <Link to={ROUTE_PATHS.FORGOT_PASSWORD} style={{ fontWeight: "750" }}>Forgot password?</Link>
               </div>
 

@@ -397,8 +397,7 @@ function RegisterPage() {
             </form>
 
             <p className="register-terms">
-              By creating an account you agree to our{" "}
-              <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.
+              By creating an account, you agree to use the workspace responsibly and protect your account credentials.
             </p>
           </div>
         </div>

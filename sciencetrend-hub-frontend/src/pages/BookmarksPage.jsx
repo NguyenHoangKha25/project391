@@ -37,6 +37,7 @@ import {
   formatDateTime,
 } from "../utils/apiData";
 import { getCachedData, setCachedData } from "../utils/apiCache";
+import { useAuth } from "../context/useAuth";
 import "../styles/WorkspacePages.css";
 import "../styles/BookmarksPage.css";
 
@@ -58,6 +59,9 @@ function useToast() {
 }
 
 function BookmarksPage() {
+  const { user } = useAuth();
+  const cacheOwner = user?.userId ?? user?.id ?? user?.email ?? user?.username ?? "current";
+  const libraryCacheKey = `library_data_${cacheOwner}`;
   // Tab states: 'overview' | 'papers' | 'keywords' | 'journals' | 'topics' | 'notifications'
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -74,7 +78,7 @@ function BookmarksPage() {
   const { toast, showToast } = useToast();
 
   const loadLibraryData = useCallback(async () => {
-    const cacheKey = "library_data";
+    const cacheKey = libraryCacheKey;
     const cachedData = getCachedData(cacheKey);
 
     if (cachedData) {
@@ -94,11 +98,11 @@ function BookmarksPage() {
         getNotifications(),
       ]).then(([papersRes, keywordsRes, journalsRes, topicsRes, notifsRes]) => {
         const freshData = {
-          savedPapers: papersRes.status === "fulfilled" ? toArray(papersRes.value).map(normalizePaper) : [],
-          savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => normalizeKeyword(kw, i)) : [],
-          followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(normalizeJournal) : [],
-          followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
-          notifications: notifsRes.status === "fulfilled" ? toArray(notifsRes.value).map(normalizeNotification) : []
+          savedPapers: papersRes.status === "fulfilled" ? toArray(papersRes.value).map(normalizePaper) : cachedData.savedPapers,
+          savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => normalizeKeyword(kw, i)) : cachedData.savedKeywords,
+          followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(normalizeJournal) : cachedData.followedJournals,
+          followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : cachedData.followedTopics,
+          notifications: notifsRes.status === "fulfilled" ? toArray(notifsRes.value).map(normalizeNotification) : cachedData.notifications
         };
         setSavedPapers(freshData.savedPapers);
         setSavedKeywords(freshData.savedKeywords);
@@ -121,6 +125,10 @@ function BookmarksPage() {
         getFollowedTopics(),
         getNotifications(),
       ]);
+      const results = [papersRes, keywordsRes, journalsRes, topicsRes, notifsRes];
+      if (results.every((result) => result.status === "rejected")) {
+        setErrorMessage("Could not load scientific library contents.");
+      }
 
       const freshData = {
         savedPapers: papersRes.status === "fulfilled" ? toArray(papersRes.value).map(normalizePaper) : [],
@@ -142,7 +150,7 @@ function BookmarksPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [libraryCacheKey]);
 
   useEffect(() => {
     loadLibraryData();

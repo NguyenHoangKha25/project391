@@ -10,9 +10,6 @@ import {
   FiFileText,
   FiTag,
   FiLayers,
-  FiClock,
-  FiFile,
-  FiSliders,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { getAllKeywords } from "../services/keywordService";
@@ -28,33 +25,6 @@ import {
 import "../styles/WorkspacePages.css";
 import "../styles/ReportsPage.css";
 
-const QUICK_PRESETS = [
-  {
-    label: "🤖 AI & Machine Learning",
-    title: "AI & Machine Learning Trend Report 2026",
-    keyword: "Artificial Intelligence",
-    topic: "Machine Learning",
-  },
-  {
-    label: "⚡ Deep Learning & LLMs",
-    title: "Deep Learning & LLM Research Analysis",
-    keyword: "Transformer",
-    topic: "Natural Language Processing",
-  },
-  {
-    label: "🌐 Neural Networks",
-    title: "Neural Networks & Computer Vision Report",
-    keyword: "Neural Networks",
-    topic: "Advanced Neural Network Applications",
-  },
-  {
-    label: "📊 High-Impact Papers",
-    title: "Global Scientific Journal Analytics 2026",
-    keyword: "Deep Learning",
-    topic: "Topic Modeling",
-  },
-];
-
 function uniqueSuggestionNames(items = []) {
   const seen = new Set();
 
@@ -67,13 +37,6 @@ function uniqueSuggestionNames(items = []) {
       return true;
     });
 }
-
-const FALLBACK_REPORT_KEYWORDS = uniqueSuggestionNames(
-  QUICK_PRESETS.map((preset) => preset.keyword),
-);
-const FALLBACK_REPORT_TOPICS = uniqueSuggestionNames(
-  QUICK_PRESETS.map((preset) => preset.topic),
-);
 
 function ReportAutocomplete({
   inputId,
@@ -557,12 +520,11 @@ function ReportsPage() {
   const [reportTitle, setReportTitle] = useState("");
   const [reportKeyword, setReportKeyword] = useState("");
   const [reportTopic, setReportTopic] = useState("");
-  const [reportHorizon, setReportHorizon] = useState("8y");
   const [selected, setSelected] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [keywordSuggestions, setKeywordSuggestions] = useState(FALLBACK_REPORT_KEYWORDS);
-  const [topicSuggestions, setTopicSuggestions] = useState(FALLBACK_REPORT_TOPICS);
+  const [keywordSuggestions, setKeywordSuggestions] = useState([]);
+  const [topicSuggestions, setTopicSuggestions] = useState([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
 
@@ -605,14 +567,8 @@ function ReportsPage() {
           .map((topic, index) => normalizeTopic(topic, index).name)
         : [];
 
-      setKeywordSuggestions(uniqueSuggestionNames([
-        ...keywordNames,
-        ...FALLBACK_REPORT_KEYWORDS,
-      ]));
-      setTopicSuggestions(uniqueSuggestionNames([
-        ...topicNames,
-        ...FALLBACK_REPORT_TOPICS,
-      ]));
+      setKeywordSuggestions(uniqueSuggestionNames(keywordNames));
+      setTopicSuggestions(uniqueSuggestionNames(topicNames));
       setSuggestionsLoaded(true);
     }).finally(() => {
       if (!cancelled) setSuggestionsLoading(false);
@@ -636,12 +592,7 @@ function ReportsPage() {
         topic: reportTopic.trim() || undefined,
       };
       
-      try {
-        await generateReport(payload);
-      } catch (genErr) {
-        console.warn("Filtered report generation failed, retrying with base title...", genErr);
-        await generateReport({ title: reportTitle.trim() });
-      }
+      await generateReport(payload);
 
       setReportTitle("");
       setReportKeyword("");
@@ -670,6 +621,15 @@ function ReportsPage() {
   }
 
   function handleDownload(report) {
+    if (report?.downloadUrl) {
+      const link = document.createElement("a");
+      link.href = report.downloadUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.click();
+      return;
+    }
+
     if (!report?.content) {
       alert("No downloadable content available for this report.");
       return;
@@ -684,7 +644,11 @@ function ReportsPage() {
   }
 
   const readyCount = useMemo(
-    () => reports.filter((report) => String(report.status).toLowerCase() !== "pending").length,
+    () => reports.filter((report) => {
+      const status = String(report.status || "").toLowerCase();
+      return ["completed", "complete", "ready", "success", "generated"].includes(status)
+        || (!status && Boolean(report.content || report.downloadUrl));
+    }).length,
     [reports],
   );
 
@@ -767,27 +731,6 @@ function ReportsPage() {
               </div>
 
               <div className="modal-body-content">
-                {/* Quick Presets row */}
-                <div className="presets-section">
-                  <span className="section-mini-label"><FiSliders /> Quick Presets</span>
-                  <div className="preset-chips-wrap">
-                    {QUICK_PRESETS.map((preset, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        className="preset-chip-btn"
-                        onClick={() => {
-                          setReportTitle(preset.title);
-                          setReportKeyword(preset.keyword);
-                          setReportTopic(preset.topic);
-                        }}
-                      >
-                        {preset.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 <form onSubmit={handleCreateReport}>
                   <div className="modal-form-group">
                     <label><FiFileText /> Report Title *</label>
@@ -825,25 +768,9 @@ function ReportsPage() {
                     />
                   </div>
 
-                  <div className="modal-form-grid-2">
-                    <div className="modal-form-group">
-                      <label><FiClock /> Time Horizon</label>
-                      <select value={reportHorizon} onChange={(e) => setReportHorizon(e.target.value)}>
-                        <option value="8y">Recent 8 Years (Recommended)</option>
-                        <option value="5y">Recent 5 Years</option>
-                        <option value="3y">Recent 3 Years</option>
-                      </select>
-                    </div>
-                    <div className="modal-form-group">
-                      <label><FiFile /> Preferred Export Format</label>
-                      <div className="export-format-radio-group">
-                        <label className="radio-pill active">
-                          <input type="radio" name="fmt" value="txt" checked readOnly />
-                          📄 TXT Text File (.txt)
-                        </label>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="modal-form-help">
+                    The report period and available download format are determined by the generated report.
+                  </p>
 
                   <div className="modal-footer-actions">
                     <button type="button" className="modal-btn-cancel" onClick={() => setShowCreateModal(false)}>

@@ -62,6 +62,13 @@ function formatPaperCount(value) {
   return Number.isFinite(numericValue) ? `${formatNumber(numericValue)} papers` : text;
 }
 
+function parseMetricNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  const match = String(value ?? "").replace(/,/g, "").match(/-?\d+(?:\.\d+)?/);
+  const parsed = match ? Number(match[0]) : NaN;
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function getInitialTrendData() {
   const storedMetadata = getPersistentCachedData(TRENDS_METADATA_CACHE_KEY);
   const metadata = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
@@ -254,6 +261,18 @@ function TrendsPage() {
   }, [dbKeywords]);
 
   const activeTrendItems = trendTab === "keyword" ? trendingKeywords : trendingTopics;
+  const topGrowingItems = useMemo(() => activeTrendItems
+    .map((item) => ({ item, value: parseMetricNumber(item?.growth) }))
+    .filter((entry) => entry.value !== null)
+    .sort((left, right) => right.value - left.value)
+    .slice(0, 3)
+    .map((entry) => entry.item), [activeTrendItems]);
+  const mostActiveItems = useMemo(() => activeTrendItems
+    .map((item) => ({ item, value: parseMetricNumber(item?.paperCount) }))
+    .filter((entry) => entry.value !== null)
+    .sort((left, right) => right.value - left.value)
+    .slice(0, 3)
+    .map((entry) => entry.item), [activeTrendItems]);
   const comparisonTermKey = useMemo(() => activeTrendItems
     .slice(0, 5)
     .map((item) => (typeof item === "string" ? item : (item?.name || item?.keyword || item?.topic || "")))
@@ -287,7 +306,7 @@ function TrendsPage() {
         if (hasUsableTrendSeries(points)) {
           setChartData(points);
           setPersistentCachedData(cacheKey, points);
-        } else {
+        } else if (!cached) {
           setChartData([]);
         }
       })
@@ -559,7 +578,7 @@ function TrendsPage() {
             </span>
           </div>
           <div className="trend-stat-card card-accent-purple">
-            <span className="stat-card-label">{trendTab === "keyword" ? "Emerging Keywords" : "Emerging Topics"}</span>
+            <span className="stat-card-label">{trendTab === "keyword" ? "Indexed Keywords" : "Trending Topics"}</span>
             <h3 className="stat-card-value">
               {trendTab === "keyword"
                 ? (dashboard?.totalKeywords > 0 ? formatNumber(dashboard.totalKeywords) : (dbKeywords.length || "—"))
@@ -570,12 +589,12 @@ function TrendsPage() {
             </span>
           </div>
           <div className="trend-stat-card card-accent-rose">
-            <span className="stat-card-label">{trendTab === "keyword" ? "Breakout Keywords" : "Breakout Topics"}</span>
+            <span className="stat-card-label">{trendTab === "keyword" ? "Available Keywords" : "Available Topics"}</span>
             <h3 className="stat-card-value">
-              {trendTab === "keyword" ? Math.min(dbKeywords.length, 10) : trendingTopics.length}
+              {activeTrendItems.length || "—"}
             </h3>
             <span className="stat-card-trend-text positive">
-              <span className="sub">{trendTab === "keyword" ? "Returned by keywords API" : "Returned by trends API"}</span>
+              <span className="sub">Available for trend comparison</span>
             </span>
           </div>
         </div>
@@ -771,7 +790,7 @@ function TrendsPage() {
               <span className="badge-chip badge-emerald">Growth</span>
             </div>
             <div className="trends-sparkline-list">
-              {activeTrendItems.slice(0, 3).map((item, idx) => (
+              {topGrowingItems.map((item, idx) => (
                 <div key={item.id ?? idx} className={`trends-sparkline-row row-color-${idx % 3}`}>
                   <div className="topic-rank-name">
                     <span className={`bullet-dot ${idx === 0 ? "bullet-emerald" : idx === 1 ? "bullet-purple" : "bullet-rose"}`} />
@@ -782,7 +801,7 @@ function TrendsPage() {
                   </div>
                 </div>
               ))}
-              {activeTrendItems.length === 0 && (
+              {topGrowingItems.length === 0 && (
                 <div className="chart-empty-placeholder" style={{ padding: "30px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
                   No growth data.
                 </div>
@@ -797,7 +816,7 @@ function TrendsPage() {
               <span className="badge-chip badge-blue">Activity</span>
             </div>
             <div className="trends-sparkline-list">
-              {activeTrendItems.slice(3, 6).map((item, idx) => (
+              {mostActiveItems.map((item, idx) => (
                 <div key={item.id ?? idx} className={`trends-sparkline-row row-active-${idx % 3}`}>
                   <div className="topic-rank-name">
                     <span className={`bullet-dot ${idx === 0 ? "bullet-blue" : idx === 1 ? "bullet-cyan" : "bullet-amber"}`} />
@@ -808,7 +827,7 @@ function TrendsPage() {
                   </div>
                 </div>
               ))}
-              {activeTrendItems.length === 0 && (
+              {mostActiveItems.length === 0 && (
                 <div className="chart-empty-placeholder" style={{ padding: "30px 0", textAlign: "center", color: "var(--st-muted-strong)", fontSize: "13px" }}>
                   No momentum data.
                 </div>

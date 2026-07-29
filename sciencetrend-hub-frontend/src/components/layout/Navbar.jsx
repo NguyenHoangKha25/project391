@@ -65,6 +65,7 @@ function Navbar({
 
   // Search suggestions states
   const searchRef = useRef(null);
+  const suggestionRequestRef = useRef(0);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
@@ -99,10 +100,13 @@ function Navbar({
   }, []);
 
   async function fetchSuggestions(query) {
+    const requestId = suggestionRequestRef.current + 1;
+    suggestionRequestRef.current = requestId;
     try {
       setLoadingSuggestions(true);
       setShowSuggestions(true);
       const response = await searchPapers(query, { size: 12 });
+      if (requestId !== suggestionRequestRef.current) return;
       const papersList = toArray(response ? (response.content || response) : []);
 
       const list = [];
@@ -152,16 +156,23 @@ function Navbar({
       setSuggestions(unique.slice(0, 8)); // Limit to max 8 suggestions
       setShowSuggestions(true);
     } catch (err) {
+      if (requestId !== suggestionRequestRef.current) return;
       console.error("Error fetching search suggestions", err);
       setSuggestions([]);
     } finally {
-      setLoadingSuggestions(false);
+      if (requestId === suggestionRequestRef.current) setLoadingSuggestions(false);
     }
   }
 
   // Debounced autocomplete search
   useEffect(() => {
-    if (searchValue.trim().length < 2) return;
+    if (searchValue.trim().length < 2) {
+      suggestionRequestRef.current += 1;
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setLoadingSuggestions(false);
+      return;
+    }
 
     const timer = setTimeout(() => {
       fetchSuggestions(searchValue.trim());
@@ -299,7 +310,6 @@ function Navbar({
               onClick={() => navigate(ROUTE_PATHS.NOTIFICATIONS)}
             >
               <FiBell />
-              <span className="st-notification-dot" />
             </button>
 
             <div className="st-account" ref={accountRef}>

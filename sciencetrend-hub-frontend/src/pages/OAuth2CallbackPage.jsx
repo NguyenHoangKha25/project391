@@ -3,7 +3,12 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import logo from "../assets/images/logo-login.png";
 import { useAuth } from "../context/useAuth";
 import { ROUTE_PATHS } from "../routes/routePaths";
-import { getDefaultAuthenticatedPath, saveCurrentUser, saveOAuthSessionFromQuery } from "../utils/authStorage";
+import {
+  clearAuthSession,
+  getDefaultAuthenticatedPath,
+  saveCurrentUser,
+  saveOAuthSessionFromQuery,
+} from "../utils/authStorage";
 import { getCurrentUser } from "../services/userService";
 import "../styles/AuthStatusPage.css";
 
@@ -47,6 +52,8 @@ function OAuth2CallbackPage() {
         navigate(getDefaultAuthenticatedPath(), { replace: true });
       } catch (err) {
         console.error("Google login callback failed", err);
+        clearAuthSession();
+        refreshAuthState();
         setErrorMsg(err.message || "An unexpected error occurred during Google sign-in.");
       }
     }
