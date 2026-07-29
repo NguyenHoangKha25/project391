@@ -26,8 +26,6 @@ const featureItems = [
     eyebrow: "Discover",
     title: "Search the research catalog",
     description: "Find papers, journals, topics, and keywords from one focused search experience.",
-    action: "Browse papers",
-    path: ROUTE_PATHS.PAPERS,
     tone: "blue",
   },
   {
@@ -35,8 +33,6 @@ const featureItems = [
     eyebrow: "Organize",
     title: "Keep a useful research library",
     description: "Save important papers and keep followed journals and topics close at hand.",
-    action: "Open bookmarks",
-    path: ROUTE_PATHS.BOOKMARKS,
     tone: "violet",
   },
   {
@@ -44,8 +40,6 @@ const featureItems = [
     eyebrow: "Monitor",
     title: "See where a field is moving",
     description: "Compare publication activity and follow the topics gaining real momentum.",
-    action: "Explore trends",
-    path: ROUTE_PATHS.TRENDS,
     tone: "cyan",
   },
   {
@@ -53,8 +47,6 @@ const featureItems = [
     eyebrow: "Communicate",
     title: "Turn evidence into a report",
     description: "Create structured summaries from the research trail you have already built.",
-    action: "View reports",
-    path: ROUTE_PATHS.REPORTS,
     tone: "amber",
   },
 ];
@@ -86,28 +78,24 @@ const catalogItems = [
     icon: FiFileText,
     title: "Papers",
     description: "Search, filter, and open publication details.",
-    path: ROUTE_PATHS.PAPERS,
     tone: "blue",
   },
   {
     icon: FiBookOpen,
     title: "Journals",
     description: "Browse venues and follow the journals that matter.",
-    path: ROUTE_PATHS.JOURNALS,
     tone: "violet",
   },
   {
     icon: FiLayers,
     title: "Topics",
     description: "Explore research themes and their related papers.",
-    path: ROUTE_PATHS.TOPICS,
     tone: "cyan",
   },
   {
     icon: FiDatabase,
     title: "Keywords",
     description: "Move through the catalog by indexed research terms.",
-    path: ROUTE_PATHS.KEYWORDS,
     tone: "amber",
   },
 ];
@@ -162,7 +150,7 @@ function HomePage() {
           <a href="#features">Product</a>
           <a href="#workflow">Workflow</a>
           <a href="#audience">For researchers</a>
-          <Link to={ROUTE_PATHS.PAPERS}>Browse papers</Link>
+          <a href="#catalog">Catalog</a>
         </nav>
 
         <div className="home-nav-actions">
@@ -200,9 +188,9 @@ function HomePage() {
               {primaryLabel}
               <FiArrowRight aria-hidden="true" />
             </Link>
-            <Link to={ROUTE_PATHS.PAPERS} className="home-secondary-link">
-              Browse the catalog
-            </Link>
+            <a href="#workflow" className="home-secondary-link">
+              See how it works
+            </a>
           </div>
 
           <ul className="home-hero-assurances" aria-label="Platform benefits">
@@ -244,7 +232,6 @@ function HomePage() {
                     <strong>{label}</strong>
                     <small>{detail}</small>
                   </div>
-                  <FiArrowRight aria-hidden="true" />
                 </div>
               ))}
             </div>
@@ -264,7 +251,7 @@ function HomePage() {
         <div><span>04</span><strong>Report</strong><small>Communicate what matters</small></div>
       </section>
 
-      <section className="home-section home-catalog" aria-labelledby="catalog-title">
+      <section className="home-section home-catalog" id="catalog" aria-labelledby="catalog-title">
         <div className="home-catalog-shell">
           <div className="home-catalog-intro">
             <span className="home-eyebrow">
@@ -280,15 +267,15 @@ function HomePage() {
           </div>
 
           <div className="home-catalog-grid">
-            {catalogItems.map(({ icon: Icon, title, description, path, tone }) => (
-              <Link to={path} className={`home-catalog-card tone-${tone}`} key={title}>
+            {catalogItems.map(({ icon: Icon, title, description, tone }) => (
+              <article className={`home-catalog-card tone-${tone}`} key={title}>
                 <span className="home-catalog-card-icon"><Icon aria-hidden="true" /></span>
                 <div>
                   <strong>{title}</strong>
                   <p>{description}</p>
                 </div>
-                <FiArrowRight className="home-catalog-card-arrow" aria-hidden="true" />
-              </Link>
+                <FiCheckCircle className="home-catalog-card-check" aria-hidden="true" />
+              </article>
             ))}
           </div>
         </div>
@@ -319,9 +306,6 @@ function HomePage() {
                 <small className="home-feature-eyebrow">{item.eyebrow}</small>
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
-                <Link to={item.path} className="home-feature-link">
-                  {item.action} <FiArrowRight aria-hidden="true" />
-                </Link>
               </article>
             );
           })}
@@ -337,9 +321,6 @@ function HomePage() {
           <p>
             The workspace follows the natural shape of research instead of forcing you into another complicated system.
           </p>
-          <Link to={primaryPath} className="home-inline-link">
-            {primaryLabel} <FiArrowRight aria-hidden="true" />
-          </Link>
         </div>
 
         <ol className="home-workflow-list home-workflow-list-refresh">
@@ -407,16 +388,11 @@ function HomePage() {
           </div>
 
           <nav className="home-footer-nav" aria-label="Footer navigation">
-            <Link to={ROUTE_PATHS.PAPERS}>Papers</Link>
-            <Link to={ROUTE_PATHS.TOPICS}>Topics</Link>
-            <Link to={ROUTE_PATHS.JOURNALS}>Journals</Link>
-            <Link to={ROUTE_PATHS.TRENDS}>Trends</Link>
+            <a href="#features">Product</a>
+            <a href="#workflow">Workflow</a>
+            <a href="#audience">For researchers</a>
+            <a href="#catalog">Catalog</a>
           </nav>
-
-          <Link to={primaryPath} className="home-footer-action">
-            {isLoggedIn ? "Open workspace" : "Get started"}
-            <FiArrowRight aria-hidden="true" />
-          </Link>
         </div>
 
         <div className="home-footer-bottom">
