@@ -40,6 +40,12 @@ const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v6";
 const COMPARISON_CHART_WIDTH = 680;
 const COMPARISON_CHART_HEIGHT = 270;
 const COMPARISON_AXIS_Y = 232;
+const COMPARISON_PLOT_HEIGHT = 230;
+const COMPARISON_PLOT_LEFT = 46;
+const COMPARISON_PLOT_RIGHT = 90;
+const COMPARISON_PLOT_TOP = 22;
+const COMPARISON_PLOT_BOTTOM = 25;
+const COMPARISON_GRID_LEVELS = [1, 0.67, 0.33, 0];
 
 function getTrendSeriesCacheKey(tab, term) {
   const termStr = typeof term === "string" ? term : (term?.name || term?.keyword || term?.term || String(term || ""));
@@ -378,11 +384,11 @@ function TrendsPage() {
     if (years.length === 0) return [];
 
     const width = COMPARISON_CHART_WIDTH;
-    const height = 230;
-    const paddingLeft = 20;
-    const paddingRight = 90;
-    const paddingTop = 22;
-    const paddingBottom = 25;
+    const height = COMPARISON_PLOT_HEIGHT;
+    const paddingLeft = COMPARISON_PLOT_LEFT;
+    const paddingRight = COMPARISON_PLOT_RIGHT;
+    const paddingTop = COMPARISON_PLOT_TOP;
+    const paddingBottom = COMPARISON_PLOT_BOTTOM;
     const valuesBySeries = comparisonSeries.map((series) => {
       const yearlyValues = new Map();
       series.points.forEach((point) => {
@@ -406,19 +412,11 @@ function TrendsPage() {
         return { x, y, value, label: years[index] };
       });
 
-      let linePath = "";
-      if (coords.length > 0) {
-        linePath = `M ${coords[0].x.toFixed(1)},${coords[0].y.toFixed(1)}`;
-        for (let i = 0; i < coords.length - 1; i++) {
-          const curr = coords[i];
-          const next = coords[i + 1];
-          const cp1x = (curr.x + next.x) / 2;
-          const cp1y = curr.y;
-          const cp2x = (curr.x + next.x) / 2;
-          const cp2y = next.y;
-          linePath += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${next.x.toFixed(1)},${next.y.toFixed(1)}`;
-        }
-      }
+      const linePath = coords
+        .map((point, index) => (
+          `${index === 0 ? "M" : "L"} ${point.x.toFixed(1)},${point.y.toFixed(1)}`
+        ))
+        .join(" ");
 
       const finalCoord = coords[coords.length - 1];
 
@@ -430,6 +428,7 @@ function TrendsPage() {
         finalValStr: formatNumber(finalCoord?.value ?? 0),
         finalCoord,
         rawY: finalCoord ? finalCoord.y : 0,
+        axisMax: maxVal,
       };
     });
 
@@ -613,24 +612,54 @@ function TrendsPage() {
                     viewBox={`0 0 ${COMPARISON_CHART_WIDTH} ${COMPARISON_CHART_HEIGHT}`}
                     className="trends-svg-chart multi-line-svg"
                   >
+                    <g className="trend-chart-grid" aria-hidden="true">
+                      {COMPARISON_GRID_LEVELS.map((level) => {
+                        const gridY = COMPARISON_PLOT_TOP
+                          + (1 - level)
+                          * (COMPARISON_PLOT_HEIGHT - COMPARISON_PLOT_TOP - COMPARISON_PLOT_BOTTOM);
+                        return (
+                          <g key={level}>
+                            <line
+                              x1={COMPARISON_PLOT_LEFT}
+                              y1={gridY}
+                              x2={COMPARISON_CHART_WIDTH - COMPARISON_PLOT_RIGHT}
+                              y2={gridY}
+                              className="trend-chart-grid-line"
+                            />
+                            <text
+                              x={COMPARISON_PLOT_LEFT - 9}
+                              y={gridY}
+                              textAnchor="end"
+                              dominantBaseline="middle"
+                              className="trend-chart-grid-label"
+                            >
+                              {formatNumber(Math.round((comparisonLines[0]?.axisMax ?? 0) * level))}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </g>
                     {comparisonLines.map((line) => (
                       <g key={line.label} className="multi-line-group">
                         <path
                           d={line.linePath}
                           fill="none"
                           stroke={line.color}
-                          strokeWidth="3.5"
+                          strokeWidth="2.6"
                           strokeLinecap="round"
+                          strokeLinejoin="round"
+                          vectorEffect="non-scaling-stroke"
                         />
                         {line.coords.map((point) => (
                           <circle
                             key={point.label}
                             cx={point.x}
                             cy={point.y}
-                            r="4.5"
+                            r="3.7"
                             fill="#ffffff"
                             stroke={line.color}
-                            strokeWidth="2.8"
+                            strokeWidth="2.2"
+                            vectorEffect="non-scaling-stroke"
                             className="trend-chart-point"
                           >
                             <title>{`${line.label} (${point.label}): ${formatNumber(point.value)} papers`}</title>

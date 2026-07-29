@@ -392,6 +392,17 @@
   height: 280px !important;
   overflow: visible !important;
 }
+.trend-chart-grid-line {
+  stroke: rgba(148, 163, 184, 0.2);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+}
+.trend-chart-grid-label {
+  fill: #94a3b8;
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 700;
+}
 .trend-chart-axis-line {
   stroke: rgba(148, 163, 184, 0.38);
   stroke-width: 1;
