@@ -2358,6 +2358,18 @@ textarea {
   }
 }
 
+/* Let the registration panel grow with its form so the legal copy is never clipped. */
+.register-page {
+  height: auto !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.register-wrapper {
+  max-height: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
