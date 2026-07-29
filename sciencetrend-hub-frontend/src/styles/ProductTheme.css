@@ -2370,6 +2370,66 @@ textarea {
   max-height: none !important;
 }
 
+/* Keep the complete sign-in card inside short desktop viewports without scrolling. */
+@media (max-height: 650px) and (min-width: 1025px) {
+  .auth-layout {
+    max-height: calc(100vh - 16px) !important;
+  }
+
+  .auth-right {
+    padding: 8px 16px !important;
+  }
+
+  .auth-premium-card-box {
+    padding: 18px 22px !important;
+  }
+
+  .auth-card-header h2 {
+    font-size: 28px !important;
+  }
+
+  .auth-card-header p {
+    margin-top: 4px !important;
+    font-size: 13.5px !important;
+    line-height: 1.4 !important;
+  }
+
+  .auth-form {
+    margin-top: 14px !important;
+  }
+
+  .auth-form-group {
+    margin-bottom: 10px !important;
+  }
+
+  .auth-form-group label {
+    margin-bottom: 5px !important;
+  }
+
+  .auth-input-wrapper input {
+    height: 44px !important;
+  }
+
+  .auth-options {
+    margin: 0 0 12px !important;
+  }
+
+  .auth-login-btn,
+  .auth-google-btn {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .auth-divider {
+    margin: 14px 0 !important;
+  }
+
+  .auth-register-text {
+    margin: 12px 0 0 !important;
+    line-height: 1.35 !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
