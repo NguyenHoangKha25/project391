@@ -295,18 +295,70 @@ function DashboardPage() {
   return (
     <MainLayout title="Dashboard" subtitle={`Welcome back, ${displayName} 👋`}>
       <div className="premium-dashboard">
-        
-        <div className="db-actions-row">
-          <button
-            type="button"
-            className="db-refresh-btn-premium"
-            onClick={() => loadDashboard(true)}
-            disabled={spinning}
-          >
-            <FiRefreshCw className={spinning ? "is-spinning" : ""} />
-            <span>{spinning ? "Refreshing..." : "Refresh Board"}</span>
-          </button>
-        </div>
+
+        <section className="db-overview-hero" aria-labelledby="dashboard-overview-title">
+          <div className="db-overview-main">
+            <span className="db-overview-kicker">
+              <span className="db-overview-status-dot" aria-hidden="true" />
+              Research workspace
+            </span>
+            <h2 id="dashboard-overview-title">See the shape of your research catalog.</h2>
+            <p>
+              Review publication volume, emerging keywords, leading journals,
+              and active research topics from one clear overview.
+            </p>
+
+            <nav className="db-quick-actions" aria-label="Dashboard quick actions">
+              <Link to="/papers" className="db-quick-link primary">
+                <FiFileText aria-hidden="true" />
+                Search papers
+                <FiArrowUpRight aria-hidden="true" />
+              </Link>
+              <Link to="/trends" className="db-quick-link">
+                <FiTrendingUp aria-hidden="true" />
+                Explore trends
+              </Link>
+              <Link to="/journals" className="db-quick-link">
+                <FiBookOpen aria-hidden="true" />
+                Browse journals
+              </Link>
+            </nav>
+          </div>
+
+          <div className="db-overview-summary">
+            <div className="db-overview-summary-heading">
+              <div>
+                <span>Catalog coverage</span>
+                <strong>{formatNumber(data?.totalPapers ?? 0)}</strong>
+              </div>
+              <div className="db-overview-summary-icon" aria-hidden="true">
+                <FiDatabase />
+              </div>
+            </div>
+            <p>Papers indexed across the current research catalog</p>
+
+            <div className="db-overview-mini-metrics" aria-label="Catalog totals">
+              <div>
+                <span>Journals</span>
+                <strong>{formatNumber(data?.totalJournals ?? 0)}</strong>
+              </div>
+              <div>
+                <span>Keywords</span>
+                <strong>{formatNumber(data?.totalKeywords ?? 0)}</strong>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="db-refresh-btn-premium"
+              onClick={() => loadDashboard(true)}
+              disabled={spinning}
+            >
+              <FiRefreshCw className={spinning ? "is-spinning" : ""} />
+              <span>{spinning ? "Refreshing..." : "Refresh Board"}</span>
+            </button>
+          </div>
+        </section>
 
         {errorMessage && (
           <div className="db-notification-banner warning">
@@ -314,6 +366,14 @@ function DashboardPage() {
             <span>{errorMessage}</span>
           </div>
         )}
+
+        <div className="db-section-intro">
+          <div>
+            <span>Catalog snapshot</span>
+            <h2>Key research metrics</h2>
+          </div>
+          <p>Coverage and growth signals from the current index.</p>
+        </div>
 
         {/* Dynamic Metrics Grid */}
         <section className="db-metrics-grid" aria-label="Dashboard overview">
@@ -344,6 +404,14 @@ function DashboardPage() {
             );
           })}
         </section>
+
+        <div className="db-section-intro db-section-intro-compact">
+          <div>
+            <span>Research activity</span>
+            <h2>Where the catalog is moving</h2>
+          </div>
+          <p>Annual output, high-volume keywords, and leading journals.</p>
+        </div>
 
         {/* Middle Charts & Stats Panel */}
         <section className="db-charts-grid">
