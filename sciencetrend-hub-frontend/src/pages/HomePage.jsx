@@ -6,7 +6,9 @@ import {
   FiBookOpen,
   FiBookmark,
   FiCheckCircle,
+  FiDatabase,
   FiFileText,
+  FiLayers,
   FiSearch,
   FiShield,
   FiTrendingUp,
@@ -76,6 +78,61 @@ const workflowItems = [
   {
     title: "Share a clearer outcome",
     description: "Review trends and prepare a report from the research you have already organized.",
+  },
+];
+
+const catalogItems = [
+  {
+    icon: FiFileText,
+    title: "Papers",
+    description: "Search, filter, and open publication details.",
+    path: ROUTE_PATHS.PAPERS,
+    tone: "blue",
+  },
+  {
+    icon: FiBookOpen,
+    title: "Journals",
+    description: "Browse venues and follow the journals that matter.",
+    path: ROUTE_PATHS.JOURNALS,
+    tone: "violet",
+  },
+  {
+    icon: FiLayers,
+    title: "Topics",
+    description: "Explore research themes and their related papers.",
+    path: ROUTE_PATHS.TOPICS,
+    tone: "cyan",
+  },
+  {
+    icon: FiDatabase,
+    title: "Keywords",
+    description: "Move through the catalog by indexed research terms.",
+    path: ROUTE_PATHS.KEYWORDS,
+    tone: "amber",
+  },
+];
+
+const audienceItems = [
+  {
+    icon: FiBookmark,
+    label: "Students",
+    title: "Stay organized while you learn",
+    description: "Search confidently, save sources, and keep the journals and topics behind an assignment or project together.",
+    tone: "blue",
+  },
+  {
+    icon: FiBarChart2,
+    label: "Lecturers",
+    title: "Turn reading into a clear report",
+    description: "Review evidence, generate structured summaries, and move from a reading list to a useful teaching or research output.",
+    tone: "violet",
+  },
+  {
+    icon: FiTrendingUp,
+    label: "Researchers",
+    title: "Follow change across a field",
+    description: "Compare topic activity, monitor journals, and keep emerging research connected to the papers behind it.",
+    tone: "cyan",
   },
 ];
 
@@ -207,6 +264,36 @@ function HomePage() {
         <div><span>04</span><strong>Report</strong><small>Communicate what matters</small></div>
       </section>
 
+      <section className="home-section home-catalog" aria-labelledby="catalog-title">
+        <div className="home-catalog-shell">
+          <div className="home-catalog-intro">
+            <span className="home-eyebrow">
+              <FiDatabase aria-hidden="true" /> EXPLORE THE CATALOG
+            </span>
+            <h2 id="catalog-title">Choose a clear way into the research collection</h2>
+            <p>
+              Start from a publication, a journal, a broader topic, or a specific keyword. Every path leads back to the evidence behind it.
+            </p>
+            <Link to={ROUTE_PATHS.PAPERS} className="home-catalog-main-link">
+              Open publication directory <FiArrowRight aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="home-catalog-grid">
+            {catalogItems.map(({ icon: Icon, title, description, path, tone }) => (
+              <Link to={path} className={`home-catalog-card tone-${tone}`} key={title}>
+                <span className="home-catalog-card-icon"><Icon aria-hidden="true" /></span>
+                <div>
+                  <strong>{title}</strong>
+                  <p>{description}</p>
+                </div>
+                <FiArrowRight className="home-catalog-card-arrow" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="home-section home-features-refresh" id="features">
         <div className="home-section-heading home-section-heading-split">
           <div>
@@ -277,23 +364,35 @@ function HomePage() {
           <p>Different roles see the tools they need while sharing the same publication catalog and research language.</p>
         </div>
 
-        <div className="home-audience-grid">
-          <article>
-            <span className="home-audience-icon"><FiBookmark aria-hidden="true" /></span>
-            <div>
-              <small>Students</small>
-              <h3>Stay organized while you learn</h3>
-              <p>Search confidently, save sources, and keep the journals and topics behind an assignment or project together.</p>
-            </div>
-          </article>
-          <article>
-            <span className="home-audience-icon"><FiBarChart2 aria-hidden="true" /></span>
-            <div>
-              <small>Lecturers & researchers</small>
-              <h3>See patterns and explain them clearly</h3>
-              <p>Follow changes across a field, review supporting publications, and prepare structured research reports.</p>
-            </div>
-          </article>
+        <div className="home-audience-grid home-audience-grid-v2">
+          {audienceItems.map(({ icon: Icon, label, title, description, tone }) => (
+            <article className={`tone-${tone}`} key={label}>
+              <span className="home-audience-icon"><Icon aria-hidden="true" /></span>
+              <div>
+                <small>{label}</small>
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-final-cta" aria-labelledby="home-cta-title">
+        <div className="home-final-cta-copy">
+          <span>READY FOR YOUR NEXT RESEARCH QUESTION?</span>
+          <h2 id="home-cta-title">Keep the whole trail—from discovery to report—in one workspace.</h2>
+          <p>Start with the public catalog, then sign in when you are ready to save, follow, and report.</p>
+        </div>
+        <div className="home-final-cta-actions">
+          <Link to={primaryPath} className="home-final-cta-primary">
+            {primaryLabel} <FiArrowRight aria-hidden="true" />
+          </Link>
+          {!isLoggedIn && (
+            <Link to={ROUTE_PATHS.LOGIN} className="home-final-cta-secondary">
+              Sign in
+            </Link>
+          )}
         </div>
       </section>
 
