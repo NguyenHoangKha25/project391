@@ -169,12 +169,8 @@ function RegisterPage() {
 
   return (
     <div className="register-page">
-      {/* Background ambient glow orbs */}
-      <div className="register-bg-orb orb-1" aria-hidden="true" />
-      <div className="register-bg-orb orb-2" aria-hidden="true" />
-
       <div className="register-wrapper">
-        {/* Left Branding & Value Panel */}
+        {/* Left Branding Panel */}
         <div className="register-left">
           <Link to={ROUTE_PATHS.HOME} className="register-brand" aria-label="ScienceTrend Hub home">
             <span className="register-logo-box">
@@ -188,57 +184,26 @@ function RegisterPage() {
 
           <div className="auth-left-premium-content">
             <div className="auth-premium-hero">
-              <span className="auth-badge reg-badge">
-                <span className="badge-pulse-dot" /> MEMBER ONBOARDING
-              </span>
-              <h2 className="reg-title">
-                Unlock Your Full <span className="reg-title-highlight">Academic Workspace</span>
-              </h2>
+              <span className="auth-badge reg-badge">✦ MEMBER ONBOARDING</span>
+              <h2 className="reg-title">Unlock Full Academic Workspace</h2>
               <p className="reg-desc">
                 Join thousands of researchers tracking emerging topics, bookmarking top journals, and building custom analytics.
               </p>
             </div>
 
-            {/* Glassmorphic Member Access Preview Card */}
-            <div className="auth-widget-preview-card reg-preview-card">
-              <div className="auth-widget-header">
-                <div className="auth-widget-title-group">
-                  <span className="auth-widget-dot dot-emerald" />
-                  <span className="auth-widget-title">RESEARCHER MEMBERSHIP</span>
-                </div>
-                <span className="auth-widget-badge badge-emerald">✨ Free Account</span>
+            {/* Feature Checklist Box */}
+            <div className="reg-checklist-box">
+              <div className="reg-check-item">
+                <span className="reg-check-icon"><FiCheck /></span>
+                <span>Unlimited paper bookmarks & reading lists</span>
               </div>
-
-              {/* Stat Counters Row */}
-              <div className="auth-widget-stats-grid">
-                <div className="auth-widget-stat-card">
-                  <span className="stat-num">10,000+</span>
-                  <span className="stat-label">Active Users</span>
-                </div>
-                <div className="auth-widget-stat-card">
-                  <span className="stat-num">150+</span>
-                  <span className="stat-label">Disciplines</span>
-                </div>
-                <div className="auth-widget-stat-card">
-                  <span className="stat-num">Instant</span>
-                  <span className="stat-label">Workspace</span>
-                </div>
+              <div className="reg-check-item">
+                <span className="reg-check-icon"><FiCheck /></span>
+                <span>Follow journals & receive publication updates</span>
               </div>
-
-              {/* Feature Checklist Box */}
-              <div className="reg-checklist-box">
-                <div className="reg-check-item">
-                  <span className="reg-check-icon"><FiCheck /></span>
-                  <span>Unlimited paper bookmarks & reading lists</span>
-                </div>
-                <div className="reg-check-item">
-                  <span className="reg-check-icon"><FiCheck /></span>
-                  <span>Follow journals & receive publication updates</span>
-                </div>
-                <div className="reg-check-item">
-                  <span className="reg-check-icon"><FiCheck /></span>
-                  <span>Export structured summary & trend reports</span>
-                </div>
+              <div className="reg-check-item">
+                <span className="reg-check-icon"><FiCheck /></span>
+                <span>Export structured summary & trend reports</span>
               </div>
             </div>
           </div>
@@ -259,139 +224,137 @@ function RegisterPage() {
             )}
 
             <form className="register-form" onSubmit={handleRegister} noValidate>
-              <div className="register-form-grid">
-                {/* Username Field */}
-                <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username && !fieldErrors.username ? "is-valid" : ""}`}>
-                  <div className="form-label-row">
-                    <label htmlFor="username">Username</label>
-                    {fieldErrors.username && <span className="field-error-text">{fieldErrors.username}</span>}
-                  </div>
-                  <div className="input-wrap">
-                    <FiUser className="input-field-icon" />
-                    <input
-                      id="username"
-                      name="username"
-                      type="text"
-                      placeholder="e.g. john_doe"
-                      value={form.username}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      autoComplete="username"
-                    />
+              {/* Username Field */}
+              <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username && !fieldErrors.username ? "is-valid" : ""}`}>
+                <div className="form-label-row">
+                  <label htmlFor="username">Username</label>
+                  {fieldErrors.username && <span className="field-error-text">{fieldErrors.username}</span>}
+                </div>
+                <div className="input-wrap">
+                  <FiUser className="input-field-icon" />
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="e.g. john_doe"
+                    value={form.username}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="username"
+                  />
+                </div>
+              </div>
+
+              {/* Email Field */}
+              <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email && !fieldErrors.email ? "is-valid" : ""}`}>
+                <div className="form-label-row">
+                  <label htmlFor="email">Email address</label>
+                  {fieldErrors.email && <span className="field-error-text">{fieldErrors.email}</span>}
+                </div>
+                <div className="input-wrap">
+                  <FiMail className="input-field-icon" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={form.email}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
+                <div className="form-label-row">
+                  <label htmlFor="password">Password</label>
+                  <div className="password-strength-info">
+                    {fieldErrors.password ? (
+                      <span className="field-error-text">{fieldErrors.password}</span>
+                    ) : form.password ? (
+                      <span className="strength-badge">
+                        Strength: <strong style={{ color: passwordStrength.color }}>{passwordStrength.label}</strong>
+                      </span>
+                    ) : null}
                   </div>
                 </div>
-
-                {/* Email Field */}
-                <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email && !fieldErrors.email ? "is-valid" : ""}`}>
-                  <div className="form-label-row">
-                    <label htmlFor="email">Email address</label>
-                    {fieldErrors.email && <span className="field-error-text">{fieldErrors.email}</span>}
-                  </div>
-                  <div className="input-wrap">
-                    <FiMail className="input-field-icon" />
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={form.email}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      autoComplete="email"
-                    />
-                  </div>
+                <div className="input-wrap">
+                  <FiLock className="input-field-icon" />
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="At least 8 characters"
+                    value={form.password}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="eye-toggle"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
                 </div>
+              </div>
 
-                {/* Password Field */}
-                <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
-                  <div className="form-label-row">
-                    <label htmlFor="password">Password</label>
-                    <div className="password-strength-info">
-                      {fieldErrors.password ? (
-                        <span className="field-error-text">{fieldErrors.password}</span>
-                      ) : form.password ? (
-                        <span className="strength-badge">
-                          <strong style={{ color: passwordStrength.color }}>{passwordStrength.label}</strong>
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="input-wrap">
-                    <FiLock className="input-field-icon" />
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Min 8 chars"
-                      value={form.password}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      autoComplete="new-password"
-                    />
-                    <button
-                      type="button"
-                      className="eye-toggle"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                      onClick={() => setShowPassword((v) => !v)}
-                    >
-                      {showPassword ? <FiEyeOff /> : <FiEye />}
-                    </button>
-                  </div>
+              {/* Confirm Password Field */}
+              <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
+                <div className="form-label-row">
+                  <label htmlFor="confirmPassword">Confirm password</label>
+                  {fieldErrors.confirmPassword && <span className="field-error-text">{fieldErrors.confirmPassword}</span>}
                 </div>
-
-                {/* Confirm Password Field */}
-                <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
-                  <div className="form-label-row">
-                    <label htmlFor="confirmPassword">Confirm password</label>
-                    {fieldErrors.confirmPassword && <span className="field-error-text">{fieldErrors.confirmPassword}</span>}
-                  </div>
-                  <div className="input-wrap">
-                    <FiLock className="input-field-icon" />
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showConfirm ? "text" : "password"}
-                      placeholder="Repeat password"
-                      value={form.confirmPassword}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      autoComplete="new-password"
-                    />
-                    <button
-                      type="button"
-                      className="eye-toggle"
-                      aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
-                      onClick={() => setShowConfirm((v) => !v)}
-                    >
-                      {showConfirm ? <FiEyeOff /> : <FiEye />}
-                    </button>
-                  </div>
+                <div className="input-wrap">
+                  <FiLock className="input-field-icon" />
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="Repeat your password"
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="eye-toggle"
+                    aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
+                    onClick={() => setShowConfirm((v) => !v)}
+                  >
+                    {showConfirm ? <FiEyeOff /> : <FiEye />}
+                  </button>
                 </div>
+              </div>
 
-                {/* Account Type Role Field - Spans 2 columns */}
-                <div className={`form-group form-group-full ${fieldErrors.role ? "has-error" : touched.role && form.role && !fieldErrors.role ? "is-valid" : ""}`}>
-                  <div className="form-label-row">
-                    <label htmlFor="role">Account type</label>
-                    {fieldErrors.role && <span className="field-error-text">{fieldErrors.role}</span>}
-                  </div>
-                  <div className="select-wrap">
-                    <FiUsers className="input-field-icon" />
-                    <select
-                      id="role"
-                      name="role"
-                      value={form.role}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      required
-                    >
-                      <option value="">Select account type...</option>
-                      {REGISTER_ROLES.map((r) => (
-                        <option key={r.value} value={r.value}>
-                          {r.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/* Account Type Role Field */}
+              <div className={`form-group ${fieldErrors.role ? "has-error" : touched.role && form.role && !fieldErrors.role ? "is-valid" : ""}`}>
+                <div className="form-label-row">
+                  <label htmlFor="role">Account type</label>
+                  {fieldErrors.role && <span className="field-error-text">{fieldErrors.role}</span>}
+                </div>
+                <div className="select-wrap">
+                  <FiUsers className="input-field-icon" />
+                  <select
+                    id="role"
+                    name="role"
+                    value={form.role}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    required
+                  >
+                    <option value="">Select account type...</option>
+                    {REGISTER_ROLES.map((r) => (
+                      <option key={r.value} value={r.value}>
+                        {r.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -409,10 +372,6 @@ function RegisterPage() {
                 Already have an account? <Link to={ROUTE_PATHS.LOGIN} className="login-link">Sign in</Link>
               </p>
             </form>
-
-            <p className="register-terms">
-              By creating an account, you agree to use the workspace responsibly.
-            </p>
           </div>
         </div>
       </div>

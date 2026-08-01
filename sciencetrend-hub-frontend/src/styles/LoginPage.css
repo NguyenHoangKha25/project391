@@ -9,7 +9,7 @@
   position: relative;
   overflow: hidden;
   padding: clamp(10px, 1.8vh, 20px) 16px;
-  background: #060d0b !important;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
   display: flex;
   align-items: center;
   justify-content: center;
