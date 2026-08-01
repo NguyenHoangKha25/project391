@@ -191,21 +191,48 @@ function RegisterPage() {
               </p>
             </div>
 
-            {/* Feature Checklist Box */}
-            <div className="reg-checklist-container">
-              <div className="reg-check-row">
-                <span className="reg-check-bullet"><FiCheck /></span>
-                <span>Unlimited paper bookmarks & reading lists</span>
+            {/* Glassmorphic Stats & Features Card */}
+            <div className="reg-stats-card">
+              <div className="reg-stats-header">
+                <span className="reg-stats-title">RESEARCHER MEMBERSHIP</span>
+                <span className="reg-stats-badge">Free Access</span>
               </div>
-              <div className="reg-check-row">
-                <span className="reg-check-bullet"><FiCheck /></span>
-                <span>Follow journals & receive publication updates</span>
+
+              <div className="reg-stats-row">
+                <div className="reg-stat-item">
+                  <strong>10,000+</strong>
+                  <small>Active Users</small>
+                </div>
+                <div className="reg-stat-item">
+                  <strong>150+</strong>
+                  <small>Disciplines</small>
+                </div>
+                <div className="reg-stat-item">
+                  <strong>Instant</strong>
+                  <small>Workspace</small>
+                </div>
               </div>
-              <div className="reg-check-row">
-                <span className="reg-check-bullet"><FiCheck /></span>
-                <span>Export structured summary & trend reports</span>
+
+              <div className="reg-checklist-container">
+                <div className="reg-check-row">
+                  <span className="reg-check-bullet"><FiCheck /></span>
+                  <span>Unlimited paper bookmarks & reading lists</span>
+                </div>
+                <div className="reg-check-row">
+                  <span className="reg-check-bullet"><FiCheck /></span>
+                  <span>Follow journals & receive publication updates</span>
+                </div>
+                <div className="reg-check-row">
+                  <span className="reg-check-bullet"><FiCheck /></span>
+                  <span>Export structured summary & trend reports</span>
+                </div>
               </div>
             </div>
+          </div>
+
+          <div className="reg-left-footer">
+            <span className="reg-status-dot" />
+            <span>Workspace Platform Ready</span>
           </div>
         </div>
 
