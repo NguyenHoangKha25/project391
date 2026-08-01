@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ScienceTrend Hub - Register Page Perfectly Balanced Single-Viewport Theme
+   ScienceTrend Hub - Register Page Perfect Symmetrical 1-Page Light Theme
    ========================================================================== */
 
 /* Force page to fill 1 viewport without scrollbar */
@@ -18,12 +18,12 @@ html body .register-page {
   box-sizing: border-box !important;
 }
 
-/* Outer Window Container */
+/* Outer Window Container (630px Height for Perfect Vertical Padding) */
 html body .register-page .register-wrapper {
   position: relative !important;
   z-index: 1 !important;
-  width: min(1020px, 100%) !important;
-  height: min(580px, calc(100vh - 24px)) !important;
+  width: min(1040px, 100%) !important;
+  height: min(630px, calc(100vh - 24px)) !important;
   max-height: calc(100vh - 24px) !important;
   display: grid !important;
   grid-template-columns: 1.1fr 1fr !important;
@@ -52,7 +52,7 @@ html body .register-page .register-left {
   flex-direction: column !important;
   justify-content: space-between !important;
   gap: 16px !important;
-  padding: clamp(24px, 3vw, 36px) !important;
+  padding: clamp(28px, 3.5vw, 38px) !important;
   background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
   color: #ffffff !important;
   overflow: hidden !important;
@@ -121,7 +121,7 @@ html body .register-page .register-brand-text p {
 html body .register-page .reg-left-body {
   display: flex !important;
   flex-direction: column !important;
-  gap: 18px !important;
+  gap: 16px !important;
   margin-top: 0 !important;
 }
 
@@ -200,7 +200,7 @@ html body .register-page .reg-stats-badge {
   background: rgba(56, 189, 248, 0.18) !important;
   border: 1px solid rgba(56, 189, 248, 0.3) !important;
   padding: 2px 8px !important;
-  border-radius: 99px !important;
+  border-radius: 999px !important;
 }
 
 html body .register-page .reg-stats-row {
@@ -279,21 +279,23 @@ html body .register-page .reg-status-dot {
   box-shadow: 0 0 8px #38bdf8 !important;
 }
 
-/* Right Form Panel (Clean White Panel) */
+/* Right Form Panel (Clean White Panel - Centered Vertically with Generous Padding) */
 html body .register-page .register-right {
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-  padding: clamp(20px, 2.5vw, 32px) !important;
+  padding: clamp(24px, 3.5vw, 36px) clamp(20px, 3vw, 32px) !important;
   background: #ffffff !important;
   overflow: hidden !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
 }
 
 /* Form Container Card */
 html body .register-page .register-premium-card-box {
   width: 100% !important;
-  max-width: 400px !important;
+  max-width: 380px !important;
   margin: 0 auto !important;
   display: flex !important;
   flex-direction: column !important;
@@ -309,12 +311,12 @@ html body .register-page .register-header {
   border: none !important;
   border-top: none !important;
   padding: 0 !important;
-  margin: 0 0 2px 0 !important;
+  margin: 0 0 4px 0 !important;
 }
 html body .register-page .register-header h2 {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
-  font-size: 22px !important;
+  font-size: 24px !important;
   font-weight: 850 !important;
   letter-spacing: -0.03em !important;
   white-space: nowrap !important;
@@ -353,7 +355,7 @@ html body .register-page .register-msg-alert.success-msg {
 html body .register-page .register-form {
   display: flex !important;
   flex-direction: column !important;
-  gap: 8px !important;
+  gap: 6px !important;
 }
 
 html body .register-page .form-group {
@@ -370,7 +372,7 @@ html body .register-page .form-label-row {
 }
 html body .register-page .form-group label {
   color: #334155 !important;
-  font-size: 10.5px !important;
+  font-size: 10px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.06em !important;
@@ -378,12 +380,12 @@ html body .register-page .form-group label {
 }
 html body .register-page .field-error-text {
   color: #ef4444 !important;
-  font-size: 10px !important;
+  font-size: 9.5px !important;
   font-weight: 700 !important;
 }
 html body .register-page .strength-badge {
   color: #94a3b8 !important;
-  font-size: 10px !important;
+  font-size: 9.5px !important;
   text-transform: uppercase !important;
   font-weight: 700 !important;
 }
@@ -398,15 +400,15 @@ html body .register-page .select-wrap {
 html body .register-page .input-wrap input,
 html body .register-page .select-wrap select {
   width: 100% !important;
-  height: 38px !important;
-  min-height: 38px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   padding: 0 10px 0 34px !important;
   border: 1px solid #cbd5e1 !important;
-  border-radius: 10px !important;
+  border-radius: 9px !important;
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
   background: #ffffff !important;
-  font-size: 13px !important;
+  font-size: 12.5px !important;
   font-weight: 600 !important;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
   transition: all 0.2s ease !important;
@@ -463,7 +465,7 @@ html body .register-page .input-field-icon {
   top: 50% !important;
   transform: translateY(-50%) !important;
   color: #94a3b8 !important;
-  font-size: 14px !important;
+  font-size: 13.5px !important;
   pointer-events: none !important;
   transition: color 0.2s ease !important;
   z-index: 2 !important;
@@ -479,8 +481,8 @@ html body .register-page .eye-toggle {
   right: 4px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
-  width: 28px !important;
-  height: 28px !important;
+  width: 26px !important;
+  height: 26px !important;
   display: grid !important;
   place-items: center !important;
   border-radius: 6px !important;
@@ -498,16 +500,17 @@ html body .register-page .eye-toggle:hover {
 /* Primary Blue Action Button */
 html body .register-page .register-submit-btn {
   width: 100% !important;
-  height: 42px !important;
+  height: 40px !important;
   border: 1px solid #2563eb !important;
   border-radius: 10px !important;
-  font-size: 14px !important;
+  font-size: 13.5px !important;
   font-weight: 750 !important;
   color: #ffffff !important;
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
   cursor: pointer !important;
-  margin-top: 4px !important;
+  margin-top: 8px !important;
+  margin-bottom: 0 !important;
   transition: all 0.25s ease !important;
   display: flex !important;
   align-items: center !important;
@@ -535,12 +538,12 @@ html body .register-page .register-btn-spinner {
   to { transform: rotate(360deg); }
 }
 
-/* Redirect Link */
+/* Redirect Link - Always visible at bottom of form with margin */
 html body .register-page .register-signin-redirect {
-  font-size: 13px !important;
+  font-size: 12.5px !important;
   color: #64748b !important;
   text-align: center !important;
-  margin: 6px 0 0 0 !important;
+  margin: 8px 0 0 0 !important;
   display: block !important;
 }
 html body .register-page .register-signin-redirect .login-link {
