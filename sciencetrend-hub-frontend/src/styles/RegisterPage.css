@@ -1,158 +1,164 @@
 /* ==========================================================================
-   ScienceTrend Hub - Register Page Dark Glassmorphic Premium Theme
+   ScienceTrend Hub - Register Page Single-Viewport Dark Glassmorphism Theme
    ========================================================================== */
 
-.register-page {
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-  padding: clamp(20px, 3vw, 40px);
+/* Force page to fill exactly 1 viewport without scrollbar */
+html body .register-page {
+  min-height: 100vh !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  position: relative !important;
+  overflow: hidden !important;
+  padding: clamp(12px, 2vh, 28px) 20px !important;
   background: #060d0b !important;
-  display: grid;
-  place-items: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   color: #ffffff !important;
+  box-sizing: border-box !important;
   isolation: isolate;
 }
 
-/* Ambient glow orbs */
-.register-bg-orb {
+/* Ambient background glow orbs */
+html body .register-page .register-bg-orb {
   position: fixed;
   border-radius: 50%;
   pointer-events: none;
-  filter: blur(100px);
+  filter: blur(120px);
   z-index: 0;
 }
-.register-bg-orb.orb-1 {
+html body .register-page .register-bg-orb.orb-1 {
   width: 500px;
   height: 500px;
   top: -150px;
   left: -150px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%);
 }
-.register-bg-orb.orb-2 {
+html body .register-page .register-bg-orb.orb-2 {
   width: 450px;
   height: 450px;
   bottom: -100px;
   right: -100px;
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.18) 0%, transparent 70%);
 }
 
-/* Unified SaaS Workspace Window (Dark Theme Glassmorphism) */
-.register-wrapper {
-  position: relative;
-  z-index: 1;
-  width: min(1140px, 100%);
-  min-height: 640px;
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  border: 1px solid rgba(16, 185, 129, 0.25) !important;
-  border-radius: 30px;
+/* Unified SaaS Workspace Window (Compact 1-Page Height) */
+html body .register-page .register-wrapper {
+  position: relative !important;
+  z-index: 1 !important;
+  width: min(1080px, 100%) !important;
+  max-height: calc(100vh - 40px) !important;
+  display: grid !important;
+  grid-template-columns: 1.1fr 1fr !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  border-radius: 26px !important;
   background:
-    radial-gradient(circle at 86% 12%, rgba(16, 185, 129, 0.15), transparent 22rem),
-    radial-gradient(circle at 18% 100%, rgba(251, 191, 36, 0.1), transparent 20rem),
-    linear-gradient(145deg, #0a1714 0%, #0d221c 50%, #081411 100%);
+    radial-gradient(circle at 86% 12%, rgba(16, 185, 129, 0.16), transparent 22rem),
+    radial-gradient(circle at 18% 100%, rgba(251, 191, 36, 0.12), transparent 20rem),
+    linear-gradient(145deg, #091714 0%, #0d231c 50%, #071310 100%) !important;
   box-shadow: 
-    0 30px 80px rgba(0, 0, 0, 0.7),
-    0 0 35px rgba(16, 185, 129, 0.08);
-  overflow: hidden;
+    0 24px 70px rgba(0, 0, 0, 0.75),
+    0 0 35px rgba(16, 185, 129, 0.1) !important;
+  overflow: hidden !important;
 }
 
 /* Left Branding & Marketing Column */
-.register-left {
+html body .register-page .register-left {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 28px;
-  padding: clamp(32px, 4vw, 48px);
+  gap: 20px;
+  padding: clamp(24px, 3.2vw, 38px);
   color: #fff;
   overflow: hidden;
   text-align: left !important;
 }
-.register-left::before {
+html body .register-page .register-left::before {
   content: "";
   position: absolute;
   inset: -60px;
   pointer-events: none;
-  opacity: 0.1;
+  opacity: 0.12;
   background-image:
-    linear-gradient(rgba(16, 185, 129, 0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 185, 129, 0.2) 1px, transparent 1px);
-  background-size: 50px 50px;
+    linear-gradient(rgba(16, 185, 129, 0.25) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.25) 1px, transparent 1px);
+  background-size: 48px 48px;
   transform: rotate(-4deg) scale(1.1);
   mask-image: linear-gradient(180deg, #fff 0%, transparent 90%);
 }
-.register-left > * {
+html body .register-page .register-left > * {
   position: relative;
   z-index: 2;
 }
 
 /* Brand Header */
-.register-brand {
+html body .register-page .register-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
-  text-decoration: none;
+  gap: 12px;
+  text-decoration: none !important;
   width: fit-content;
 }
-.register-logo-box {
-  width: 52px;
-  height: 52px;
+html body .register-page .register-logo-box {
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
-  flex: 0 0 52px;
-  border-radius: 16px;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  background: #ffffff;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  flex: 0 0 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
   transition: transform 0.3s ease;
 }
-.register-brand:hover .register-logo-box {
+html body .register-page .register-brand:hover .register-logo-box {
   transform: scale(1.05) rotate(3deg);
 }
-.register-logo-img {
-  width: 36px;
-  height: 36px;
+html body .register-page .register-logo-img {
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
-.register-brand-text h1 {
+html body .register-page .register-brand-text h1 {
   color: #ffffff !important;
-  font-size: 22px;
-  line-height: 1.1;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  margin: 0;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 20px !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em !important;
+  margin: 0 !important;
 }
-.register-brand-text p {
-  margin: 3px 0 0 0;
+html body .register-page .register-brand-text p {
+  margin: 2px 0 0 0 !important;
   color: #a7f3d0 !important;
-  font-size: 12px;
-  font-weight: 550;
+  font-size: 11.5px !important;
+  font-weight: 550 !important;
 }
 
 /* Hero Section inside Left Panel */
-.auth-left-premium-content {
+html body .register-page .auth-left-premium-content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
-.auth-badge.reg-badge {
+html body .register-page .auth-badge.reg-badge {
   width: fit-content;
-  min-height: 30px;
+  min-height: 28px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 0 14px;
-  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  padding: 0 12px;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
   border-radius: 999px;
   color: #34d399 !important;
-  background: rgba(16, 185, 129, 0.12) !important;
-  font-size: 11px;
+  background: rgba(16, 185, 129, 0.14) !important;
+  font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.badge-pulse-dot {
+html body .register-page .badge-pulse-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -168,15 +174,16 @@
   100% { transform: scale(0.95); opacity: 0.7; }
 }
 
-.reg-title {
-  margin: 12px 0 10px !important;
+html body .register-page .reg-title {
+  margin: 8px 0 8px !important;
   color: #ffffff !important;
-  font-size: clamp(26px, 3vw, 36px) !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: clamp(24px, 2.6vw, 32px) !important;
   line-height: 1.15 !important;
   font-weight: 830 !important;
   letter-spacing: -0.03em !important;
 }
-.reg-title-highlight {
+html body .register-page .reg-title-highlight {
   background: linear-gradient(135deg, #10b981 0%, #34d399 50%, #fbbf24 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -184,263 +191,277 @@
   color: transparent !important;
   display: inline;
 }
-.reg-desc {
-  max-width: 460px;
+html body .register-page .reg-desc {
+  max-width: 440px;
   color: #94a3b8 !important;
-  font-size: 14.5px !important;
-  line-height: 1.65 !important;
-  margin: 0;
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
 }
 
 /* Glassmorphic Member Preview Card */
-.reg-preview-card {
-  padding: 20px;
-  border: 1px solid rgba(16, 185, 129, 0.2) !important;
-  border-radius: 20px;
-  background: rgba(13, 27, 23, 0.6) !important;
+html body .register-page .reg-preview-card {
+  padding: 16px;
+  border: 1px solid rgba(16, 185, 129, 0.22) !important;
+  border-radius: 18px;
+  background: rgba(13, 27, 23, 0.65) !important;
   backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
-.auth-widget-header {
+html body .register-page .auth-widget-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.auth-widget-title-group {
+html body .register-page .auth-widget-title-group {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.auth-widget-dot.dot-emerald {
+html body .register-page .auth-widget-dot.dot-emerald {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #34d399;
   box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
 }
-.auth-widget-title {
+html body .register-page .auth-widget-title {
   color: #f1f5f9 !important;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.08em;
 }
-.auth-widget-badge.badge-emerald {
-  font-size: 11px;
+html body .register-page .auth-widget-badge.badge-emerald {
+  font-size: 10.5px;
   font-weight: 700;
   color: #34d399;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  padding: 3px 10px;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 9px;
   border-radius: 99px;
 }
 
 /* Stats Counter Grid */
-.auth-widget-stats-grid {
+html body .register-page .auth-widget-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
-.auth-widget-stat-card {
-  padding: 12px 10px;
-  border-radius: 14px;
+html body .register-page .auth-widget-stat-card {
+  padding: 10px 8px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   text-align: center;
 }
-.auth-widget-stat-card .stat-num {
+html body .register-page .auth-widget-stat-card .stat-num {
   display: block;
   color: #ffffff !important;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   font-family: var(--font-display) !important;
 }
-.auth-widget-stat-card .stat-label {
+html body .register-page .auth-widget-stat-card .stat-label {
   display: block;
   color: #64748b !important;
-  font-size: 10.5px;
-  margin-top: 2px;
+  font-size: 10px;
+  margin-top: 1px;
 }
 
 /* Feature Checklist */
-.reg-checklist-box {
+html body .register-page .reg-checklist-box {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-top: 6px;
+  gap: 8px;
+  padding-top: 4px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
-.reg-check-item {
+html body .register-page .reg-check-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: #cbd5e1 !important;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 550;
 }
-.reg-check-icon {
-  width: 22px;
-  height: 22px;
+html body .register-page .reg-check-icon {
+  width: 20px;
+  height: 20px;
   border-radius: 6px;
   display: grid;
   place-items: center;
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.18);
   color: #34d399;
-  font-size: 12px;
+  font-size: 11px;
   flex-shrink: 0;
 }
 
 /* Right Form Column Panel */
-.register-right {
+html body .register-page .register-right {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: clamp(24px, 3vw, 36px);
-  background: rgba(11, 24, 20, 0.7);
-  border-left: 1px solid rgba(16, 185, 129, 0.15);
+  padding: clamp(20px, 2.5vw, 32px);
+  background: rgba(11, 24, 20, 0.75) !important;
+  border-left: 1px solid rgba(16, 185, 129, 0.18);
+  overflow: hidden;
 }
 
 /* Form Container Card */
-.register-premium-card-box {
+html body .register-page .register-premium-card-box {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.register-header h2 {
-  color: #ffffff !important;
-  font-size: 26px !important;
-  font-weight: 820 !important;
-  letter-spacing: -0.03em !important;
-  margin: 0 0 6px 0 !important;
-}
-.register-subtitle {
-  color: #94a3b8 !important;
-  font-size: 13.5px !important;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* Alerts */
-.register-msg-alert {
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-.register-msg-alert.error-msg {
-  background: rgba(239, 68, 68, 0.12) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
-  color: #fca5a5 !important;
-}
-.register-msg-alert.success-msg {
-  background: rgba(16, 185, 129, 0.12) !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
-  color: #6ee7b7 !important;
-}
-
-/* Form Layout */
-.register-form {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.form-group {
+html body .register-page .register-header h2 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 24px !important;
+  font-weight: 820 !important;
+  letter-spacing: -0.03em !important;
+  margin: 0 0 4px 0 !important;
+}
+html body .register-page .register-subtitle {
+  color: #94a3b8 !important;
+  font-size: 13px !important;
+  line-height: 1.4;
+  margin: 0 !important;
+}
+
+/* Alerts */
+html body .register-page .register-msg-alert {
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+html body .register-page .register-msg-alert.error-msg {
+  background: rgba(239, 68, 68, 0.14) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #fca5a5 !important;
+}
+html body .register-page .register-msg-alert.success-msg {
+  background: rgba(16, 185, 129, 0.14) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #6ee7b7 !important;
+}
+
+/* Form Layout - 2 Columns Grid for inputs */
+html body .register-page .register-form {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
+}
+
+html body .register-page .register-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 12px;
+}
+
+html body .register-page .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin-bottom: 0 !important;
 }
-.form-label-row {
+
+html body .register-page .form-group-full {
+  grid-column: span 2;
+}
+
+html body .register-page .form-label-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.form-group label {
-  color: #cbd5e1 !important;
-  font-size: 11px !important;
+html body .register-page .form-group label {
+  color: #a7f3d0 !important;
+  font-size: 10.5px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.07em !important;
   margin: 0 !important;
 }
-.field-error-text {
+html body .register-page .field-error-text {
   color: #f87171 !important;
-  font-size: 11px !important;
+  font-size: 10px !important;
   font-weight: 700 !important;
 }
-.strength-badge {
+html body .register-page .strength-badge {
   color: #64748b !important;
-  font-size: 10.5px !important;
+  font-size: 10px !important;
   text-transform: uppercase;
   font-weight: 700;
-  letter-spacing: 0.05em;
 }
 
 /* Input Fields & Select Wrap */
-.input-wrap,
-.select-wrap {
+html body .register-page .input-wrap,
+html body .register-page .select-wrap {
   position: relative;
   width: 100%;
 }
 
-.input-wrap input,
-.select-wrap select {
+html body .register-page .input-wrap input,
+html body .register-page .select-wrap select {
   width: 100% !important;
-  height: 46px !important;
-  padding: 0 14px 0 42px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 14px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 12px 0 38px !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 12px !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-  background: rgba(15, 23, 42, 0.6) !important;
-  font-size: 13.5px !important;
+  background: rgba(15, 23, 42, 0.7) !important;
+  font-size: 13px !important;
   font-weight: 600 !important;
   box-shadow: none !important;
-  transition: all 0.25s ease !important;
+  transition: all 0.2s ease !important;
 }
-.input-wrap input::placeholder {
+html body .register-page .input-wrap input::placeholder {
   color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
   opacity: 1 !important;
 }
-.input-wrap input:focus,
-.select-wrap select:focus {
+html body .register-page .input-wrap input:focus,
+html body .register-page .select-wrap select:focus {
   border-color: #10b981 !important;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
-  background: rgba(15, 23, 42, 0.85) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22) !important;
+  background: rgba(15, 23, 42, 0.9) !important;
   outline: none !important;
 }
-.form-group.has-error .input-wrap input,
-.form-group.has-error .select-wrap select {
-  border-color: rgba(239, 68, 68, 0.5) !important;
+html body .register-page .form-group.has-error .input-wrap input,
+html body .register-page .form-group.has-error .select-wrap select {
+  border-color: rgba(239, 68, 68, 0.55) !important;
 }
-.form-group.is-valid .input-wrap input {
-  border-color: rgba(16, 185, 129, 0.3) !important;
-}
-
-.input-wrap input[type="password"] {
-  padding-right: 46px !important;
+html body .register-page .form-group.is-valid .input-wrap input {
+  border-color: rgba(16, 185, 129, 0.4) !important;
 }
 
-.select-wrap select {
+html body .register-page .input-wrap input[type="password"] {
+  padding-right: 40px !important;
+}
+
+html body .register-page .select-wrap select {
   cursor: pointer;
   appearance: none;
 }
-.select-wrap select option {
-  background: #0f172a;
-  color: #ffffff;
+html body .register-page .select-wrap select option {
+  background: #0f172a !important;
+  color: #ffffff !important;
 }
-.select-wrap::after {
+html body .register-page .select-wrap::after {
   content: "";
   position: absolute;
-  right: 14px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   width: 8px;
@@ -451,75 +472,75 @@
 }
 
 /* Left Icon in Inputs */
-.input-field-icon {
+html body .register-page .input-field-icon {
   position: absolute;
-  left: 14px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   color: #64748b;
-  font-size: 16px;
+  font-size: 15px;
   pointer-events: none;
   transition: color 0.2s ease;
   z-index: 2;
 }
-.input-wrap:focus-within .input-field-icon,
-.select-wrap:focus-within .input-field-icon {
+html body .register-page .input-wrap:focus-within .input-field-icon,
+html body .register-page .select-wrap:focus-within .input-field-icon {
   color: #34d399;
 }
 
 /* Toggle eye button */
-.eye-toggle {
+html body .register-page .eye-toggle {
   position: absolute;
-  right: 6px;
+  right: 4px;
   top: 50%;
   transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #64748b;
   background: transparent;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.eye-toggle:hover {
+html body .register-page .eye-toggle:hover {
   color: #34d399;
   background: rgba(255, 255, 255, 0.06);
 }
 
 /* Submit Action Button */
-.register-submit-btn {
+html body .register-page .register-submit-btn {
   width: 100%;
-  height: 48px;
+  height: 44px;
   border: 1px solid rgba(16, 185, 129, 0.4);
-  border-radius: 14px;
-  font-size: 14.5px;
+  border-radius: 12px;
+  font-size: 14px;
   font-weight: 750;
   color: #ffffff !important;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 8px 22px rgba(16, 185, 129, 0.28);
   cursor: pointer;
-  margin-top: 6px;
+  margin-top: 4px;
   transition: all 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.register-submit-btn:hover:not(:disabled) {
+html body .register-page .register-submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(16, 185, 129, 0.38), 0 0 16px rgba(52, 211, 153, 0.15);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4), 0 0 16px rgba(52, 211, 153, 0.15);
 }
-.register-submit-btn:disabled {
+html body .register-page .register-submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* Spinner */
-.register-btn-spinner {
-  width: 20px;
-  height: 20px;
+html body .register-page .register-btn-spinner {
+  width: 18px;
+  height: 18px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #ffffff;
   border-radius: 50%;
@@ -530,57 +551,42 @@
 }
 
 /* Redirect Link */
-.register-signin-redirect {
-  font-size: 13.5px;
+html body .register-page .register-signin-redirect {
+  font-size: 13px;
   color: #94a3b8 !important;
   text-align: center;
-  margin: 4px 0 0 0;
+  margin: 2px 0 0 0 !important;
 }
-.register-signin-redirect .login-link {
+html body .register-page .register-signin-redirect .login-link {
   color: #34d399 !important;
   font-weight: 750 !important;
   margin-left: 4px;
   text-decoration: none;
   transition: color 0.2s ease;
 }
-.register-signin-redirect .login-link:hover {
+html body .register-page .register-signin-redirect .login-link:hover {
   text-decoration: underline !important;
   color: #6ee7b7 !important;
 }
 
-.register-terms {
-  color: #475569 !important;
-  font-size: 11.5px !important;
-  line-height: 1.5;
-  text-align: center;
-  margin: 0;
-}
-
 /* Responsive Media Queries */
-@media (max-width: 1024px) {
-  .register-wrapper {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    min-height: auto;
-    border-radius: 26px;
+@media (max-width: 960px) {
+  html body .register-page .register-wrapper {
+    grid-template-columns: 1fr !important;
+    max-width: 480px;
+    max-height: calc(100vh - 24px) !important;
   }
-  .register-left {
-    display: none;
+  html body .register-page .register-left {
+    display: none !important;
   }
-  .register-right {
+  html body .register-page .register-right {
     border-left: none;
-    padding: 36px 24px;
+    padding: 28px 20px;
   }
-}
-
-@media (max-width: 480px) {
-  .register-page {
-    padding: 16px 12px;
+  html body .register-page .register-form-grid {
+    grid-template-columns: 1fr;
   }
-  .register-right {
-    padding: 28px 18px;
-  }
-  .register-header h2 {
-    font-size: 22px !important;
+  html body .register-page .form-group-full {
+    grid-column: auto;
   }
 }
