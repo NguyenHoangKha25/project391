@@ -213,6 +213,7 @@ function RegisterPage() {
         <div className="register-right">
           <div className="register-premium-card-box">
             <div className="register-header">
+              <span className="register-top-chip">GET STARTED</span>
               <h2>Create account</h2>
               <p className="register-subtitle">Set up your account to start organizing your research trail.</p>
             </div>
