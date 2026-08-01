@@ -1119,15 +1119,16 @@ html body .donut-chart-wrapper {
   min-width: 0;
   width: 100%;
   display: grid !important;
-  grid-template-columns: minmax(5.5rem, 6.25rem) minmax(0, 1fr) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   align-items: center !important;
-  gap: var(--space-sm) !important;
+  gap: var(--space-md) !important;
 }
 
 html body .donut-svg-box {
-  width: min(100%, 6.25rem) !important;
+  width: min(100%, 5.25rem) !important;
   height: auto !important;
   aspect-ratio: 1;
+  justify-self: center;
 }
 
 html body .donut-legend,
@@ -1139,25 +1140,37 @@ html body .legend-texts {
 }
 
 html body .donut-legend {
-  overflow: hidden;
+  gap: var(--space-xs) !important;
+  overflow: visible;
   padding-inline-end: 0 !important;
 }
 
 html body .legend-item {
   display: flex !important;
+  align-items: flex-start !important;
+  gap: var(--space-xs) !important;
 }
 
 html body .legend-texts {
   flex: 1 1 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
-html body .legend-name,
+html body .legend-name {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  line-height: 1.25;
+}
+
 html body .legend-val {
   display: block;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
   white-space: nowrap;
 }
 
