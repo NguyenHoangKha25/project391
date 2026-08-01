@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.jsx";
 import "./styles/ProductTheme.css";
 import "./styles/ResearchDesk.css";
+import "./styles/ResearchCockpit.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

@@ -1,8 +1,8 @@
 {
   "date": "2026-08-01",
   "framework": "React 19 + Vite 8",
-  "font_stack": "Outfit + DM Sans",
-  "palette": "OKLCH technical-editorial, blue anchor",
+  "font_stack": "Space Grotesk + IBM Plex Sans + JetBrains Mono",
+  "palette": "Cobalt: cool paper, graphite shell, one cobalt signal",
   "motion": "motion-cut; no motion library",
   "spacing": "4-point named scale",
   "design_system": "design.md",
@@ -10,7 +10,7 @@
     "design.md",
     "package.json",
     "src/index.css",
-    "src/styles/ProductTheme.css",
+    "src/styles/ResearchCockpit.css",
     "src/components/layout/MainLayout.jsx"
   ]
 }

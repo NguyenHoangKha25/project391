@@ -1,6 +1,26 @@
 [
   {
     "date": "2026-08-01",
+    "scope": "home/login",
+    "macrostructure": "Split Studio / Split Diptych",
+    "theme": "Cobalt Soft",
+    "enrichment": "existing product proof surface",
+    "nav": "N5-like detached marketing bar",
+    "footer": "soft statement / inline links",
+    "brief": "Rounded, lighter Home and Login revision with behavior preserved"
+  },
+  {
+    "date": "2026-08-01",
+    "scope": "app",
+    "macrostructure": "Bento Grid / Ecosystem Index / Split Diptych",
+    "theme": "Cobalt",
+    "enrichment": "none",
+    "nav": "search-first workbar / three-section marketing nav",
+    "footer": "Ft2 inline rule",
+    "brief": "ScienceTrend Hub v2 research cockpit redesign with behavior preserved"
+  },
+  {
+    "date": "2026-08-01",
     "scope": "app",
     "macrostructure": "Marquee Hero / Workbench / Long Document",
     "theme": "Technical-Editorial",

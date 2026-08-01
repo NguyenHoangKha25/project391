@@ -128,7 +128,7 @@ function LoginPage() {
               <div className="auth-widget-trend-box">
                 <div className="auth-widget-trend-info">
                   <div className="auth-widget-trend-label">
-                    <FiTrendingUp className="trend-icon" />
+                    <FiTrendingUp className="trend-icon" aria-hidden="true" />
                     <span>From discovery to report</span>
                   </div>
                   <span className="trend-growth-badge">One workspace</span>
@@ -136,7 +136,7 @@ function LoginPage() {
                 
                 {/* SVG Glowing Curve Preview */}
                 <div className="auth-widget-svg-wrap">
-                  <svg viewBox="0 0 340 50" className="auth-widget-svg">
+                  <svg viewBox="0 0 340 50" className="auth-widget-svg" aria-hidden="true">
                     <defs>
                       <linearGradient id="loginSvgGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
@@ -192,7 +192,7 @@ function LoginPage() {
               <div className="auth-form-group">
                 <label htmlFor="username" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
                 <div className="auth-input-wrapper">
-                  <FiUser className="auth-input-icon" />
+                  <FiUser className="auth-input-icon" aria-hidden="true" />
                   <input
                     id="username"
                     name="username"
@@ -213,7 +213,7 @@ function LoginPage() {
               <div className="auth-form-group">
                 <label htmlFor="password" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
                 <div className="auth-input-wrapper">
-                  <FiLock className="auth-input-icon" />
+                  <FiLock className="auth-input-icon" aria-hidden="true" />
                   <input
                     id="password"
                     name="password"
@@ -234,7 +234,7 @@ function LoginPage() {
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     onClick={() => setShowPassword((c) => !c)}
                   >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                    {showPassword ? <FiEyeOff aria-hidden="true" /> : <FiEye aria-hidden="true" />}
                   </button>
                 </div>
               </div>
@@ -264,7 +264,7 @@ function LoginPage() {
               onClick={handleGmailLogin}
               style={{ fontSize: "15px", fontWeight: "750", height: "52px" }}
             >
-              <FcGoogle className="auth-google-icon" />
+              <FcGoogle className="auth-google-icon" aria-hidden="true" />
               <span>Continue with Google</span>
             </button>
 
