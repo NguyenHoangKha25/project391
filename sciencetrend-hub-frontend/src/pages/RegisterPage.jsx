@@ -9,7 +9,7 @@ import {
   FiUser,
   FiUsers,
 } from "react-icons/fi";
-import logoLogin from "../assets/images/logo-login.png";
+import logoLogin from "../assets/images/logo-login.svg";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { register } from "../services/authService";
 import "../styles/RegisterPage.css";

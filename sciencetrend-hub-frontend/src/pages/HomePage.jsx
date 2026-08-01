@@ -15,7 +15,7 @@ import {
   FiUsers,
   FiZap,
 } from "react-icons/fi";
-import logo from "../assets/images/logo-login.png";
+import logo from "../assets/images/logo-login.svg";
 import { useAuth } from "../context/useAuth";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/HomePage.css";
