@@ -829,38 +829,12 @@ html body .db-kpi-card::after {
   display: none !important;
 }
 
-html body .db-kpi-card:first-child {
-  color: var(--color-paper-3) !important;
-  -webkit-text-fill-color: var(--color-paper-3) !important;
-  background: var(--color-graphite) !important;
-  border-color: var(--color-graphite) !important;
-}
-
-html body .st-content .premium-dashboard .db-kpi-card .db-kpi-card-header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: var(--space-sm) !important;
-  padding: 0 !important;
-  background: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
 html body .db-kpi-label {
   color: var(--color-neutral) !important;
   font-size: var(--text-sm) !important;
   font-weight: 500 !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
-}
-
-html body .db-kpi-card:first-child .db-kpi-label,
-html body .db-kpi-card:first-child .db-kpi-comparison {
-  color: var(--color-rule-2) !important;
-  -webkit-text-fill-color: var(--color-rule-2) !important;
 }
 
 html body .db-kpi-icon {
@@ -876,11 +850,6 @@ html body .db-kpi-icon {
   box-shadow: none !important;
 }
 
-html body .db-kpi-card:first-child .db-kpi-icon {
-  color: var(--color-accent-ink) !important;
-  background: var(--color-accent) !important;
-}
-
 html body .db-kpi-value {
   color: var(--color-ink) !important;
   font-family: var(--font-display) !important;
@@ -889,18 +858,6 @@ html body .db-kpi-value {
   font-variant-numeric: tabular-nums;
   line-height: 1 !important;
   letter-spacing: var(--tracking-display);
-}
-
-html body .st-layout .st-content .premium-dashboard .db-metrics-grid > .db-kpi-card:first-child .db-kpi-value {
-  color: var(--color-paper) !important;
-  -webkit-text-fill-color: var(--color-paper) !important;
-  background: none !important;
-  background-image: none !important;
-  background-clip: border-box !important;
-  -webkit-background-clip: border-box !important;
-  text-shadow: none !important;
-  filter: none !important;
-  opacity: 1 !important;
 }
 
 html body .db-kpi-meta {
@@ -3543,57 +3500,50 @@ html body :is(.catalog-drawer, .admin-user-detail, .topics-drawer.open) {
 }
 
 /* --------------------------------------------------------------------------
-   KPI / Stat Cards: Normal = Dark/Black, Hover = White
+   KPI / Stat Cards: Clean White Cards (No dark/black background)
    -------------------------------------------------------------------------- */
 
 html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) {
-  background: #0b1320 !important;
+  background: #ffffff !important;
   background-image: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #f8fafc !important;
-  -webkit-text-fill-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03) !important;
   transition: background 220ms ease, border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease !important;
 }
 
 html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) :is(.db-kpi-label, .stat-card-label, .stat-label, .metric-label) {
-  color: #94a3b8 !important;
-  -webkit-text-fill-color: #94a3b8 !important;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
 }
 
 html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) :is(.db-kpi-value, .stat-card-value, .stat-num, .metric-value) {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  background: none !important;
-  text-shadow: none !important;
-}
-
-html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) :is(.db-kpi-comparison, .stat-card-trend-text, .sub, .card-trend-sub) {
-  color: #cbd5e1 !important;
-  -webkit-text-fill-color: #cbd5e1 !important;
-}
-
-/* Hover state (Khi rê chuột vào): Nền TRẮNG, Chữ ĐEN rõ nét */
-html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover {
-  background: #ffffff !important;
-  background-image: none !important;
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
-  transform: translateY(-3px) !important;
-}
-
-html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover :is(.db-kpi-label, .stat-card-label, .stat-label, .metric-label) {
-  color: #475569 !important;
-  -webkit-text-fill-color: #475569 !important;
-}
-
-html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover :is(.db-kpi-value, .stat-card-value, .stat-num, .metric-value) {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
   background: none !important;
   text-shadow: none !important;
 }
 
-html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover :is(.db-kpi-comparison, .stat-card-trend-text, .sub, .card-trend-sub) {
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) :is(.db-kpi-comparison, .stat-card-trend-text, .sub, .card-trend-sub) {
   color: #64748b !important;
   -webkit-text-fill-color: #64748b !important;
+}
+
+/* Hover state: Subtle lift & crisp border */
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+  transform: translateY(-2px) !important;
+}
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover :is(.db-kpi-label, .stat-card-label, .stat-label, .metric-label) {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+}
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover :is(.db-kpi-value, .stat-card-value, .stat-num, .metric-value) {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
 }
