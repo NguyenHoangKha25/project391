@@ -3953,20 +3953,21 @@ html body .st-layout .engine-status-badge {
   box-shadow: none !important;
 }
 
-/* Advanced Filters & Reset Buttons (Screenshot 2 Fix) */
+/* Advanced Filters Panel Fix (Sticky "đứng yên" & Always Visible Apply Button) */
 html body .st-layout .papers-filter-sidebar,
 html body .st-layout .filters-sidebar-panel {
   background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 20px !important;
-  padding: 20px 20px 24px 20px !important;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04) !important;
-  overflow: visible !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 18px !important;
+  padding: 14px 16px 16px 16px !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04) !important;
   position: sticky !important;
-  top: 24px !important;
+  top: 16px !important;
   align-self: flex-start !important;
-  height: auto !important;
-  max-height: none !important;
+  z-index: 10 !important;
+  max-height: calc(100vh - 95px) !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
 }
 
 html body .st-layout .filters-panel-header,
@@ -3975,16 +3976,16 @@ html body .st-layout .filters-sidebar-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  margin-bottom: 14px !important;
-  padding-bottom: 10px !important;
+  margin-bottom: 10px !important;
+  padding-bottom: 8px !important;
   border-bottom: 1px solid #f1f5f9 !important;
 }
 
 html body .st-layout .filter-reset-btn,
 html body .st-layout .filters-reset-btn,
 html body .st-layout .papers-reset-filter-btn {
-  height: 32px !important;
-  padding: 0 12px !important;
+  height: 30px !important;
+  padding: 0 10px !important;
   border: 1px solid #e2e8f0 !important;
   border-radius: 8px !important;
   background: #f8fafc !important;
@@ -4008,25 +4009,56 @@ html body .st-layout .papers-reset-filter-btn:hover {
 html body .st-layout .filters-form-element {
   display: flex !important;
   flex-direction: column !important;
-  gap: 10px !important;
+  gap: 7px !important;
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
 }
 
+html body .st-layout .filter-form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+html body .st-layout .filter-form-group label {
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  color: #64748b !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+html body .st-layout .filter-input-wrapper input,
+html body .st-layout .filter-select-wrapper select {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 9px !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+html body .st-layout .filter-select-wrapper select {
+  padding-right: 28px !important;
+}
+
 html body .st-layout .filters-submit-btn-premium {
-  height: 42px !important;
-  min-height: 42px !important;
+  height: 40px !important;
+  min-height: 40px !important;
   width: 100% !important;
-  margin-top: 14px !important;
+  margin-top: 10px !important;
   margin-bottom: 0 !important;
   border: 0 !important;
-  border-radius: 12px !important;
-  background: #0f172a !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
   color: #ffffff !important;
   font-size: 13.5px !important;
   font-weight: 700 !important;
   cursor: pointer !important;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28) !important;
   transition: all 180ms ease !important;
   display: flex !important;
   align-items: center !important;
@@ -4034,9 +4066,9 @@ html body .st-layout .filters-submit-btn-premium {
 }
 
 html body .st-layout .filters-submit-btn-premium:hover {
-  background: #1e293b !important;
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18) !important;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.38) !important;
 }
 
 /* --------------------------------------------------------------------------
