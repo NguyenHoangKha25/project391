@@ -871,17 +871,7 @@ table td {
    Marketing home · Marquee Hero + tabular feature stack
    -------------------------------------------------------------------------- */
 
-.home-page,
-.home-page-refresh {
-  color: var(--color-ink-2) !important;
-  background: var(--color-paper) !important;
-  background-image: none !important;
-}
-
-html body main.home-page-refresh {
-  background: var(--color-paper) !important;
-  background-image: none !important;
-}
+/* ResearchDesk home page overrides disabled to preserve HomePage.css dark SaaS design system */
 
 .home-navbar,
 .home-navbar-refresh {
