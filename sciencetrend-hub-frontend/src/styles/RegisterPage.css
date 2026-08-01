@@ -23,7 +23,7 @@ html body .register-page .register-wrapper {
   position: relative !important;
   z-index: 1 !important;
   width: min(1020px, 100%) !important;
-  height: min(620px, calc(100vh - 24px)) !important;
+  height: min(580px, calc(100vh - 24px)) !important;
   max-height: calc(100vh - 24px) !important;
   display: grid !important;
   grid-template-columns: 1.1fr 1fr !important;
@@ -293,11 +293,11 @@ html body .register-page .register-right {
 /* Form Container Card */
 html body .register-page .register-premium-card-box {
   width: 100% !important;
-  max-width: 380px !important;
+  max-width: 400px !important;
   margin: 0 auto !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
+  gap: 10px !important;
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
@@ -309,15 +309,16 @@ html body .register-page .register-header {
   border: none !important;
   border-top: none !important;
   padding: 0 !important;
-  margin: 0 0 4px 0 !important;
+  margin: 0 0 2px 0 !important;
 }
 html body .register-page .register-header h2 {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
-  font-size: 26px !important;
+  font-size: 22px !important;
   font-weight: 850 !important;
-  letter-spacing: -0.035em !important;
-  margin: 0 0 3px 0 !important;
+  letter-spacing: -0.03em !important;
+  white-space: nowrap !important;
+  margin: 0 0 2px 0 !important;
   line-height: 1.15 !important;
   border: none !important;
   background: none !important;
@@ -325,8 +326,8 @@ html body .register-page .register-header h2 {
 }
 html body .register-page .register-subtitle {
   color: #64748b !important;
-  font-size: 12.5px !important;
-  line-height: 1.4 !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
   margin: 0 !important;
 }
 
