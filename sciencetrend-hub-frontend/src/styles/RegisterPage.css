@@ -1,15 +1,15 @@
 /* ==========================================================================
-   ScienceTrend Hub - Register Page Single-Viewport Light Theme (No Clipping)
+   ScienceTrend Hub - Register Page Perfect 1-Page Light Theme
    ========================================================================== */
 
-/* Force page to fill exactly 1 viewport without any scrollbar */
+/* Force page to fill 1 viewport without scrollbar */
 html body .register-page {
   min-height: 100vh !important;
   height: 100vh !important;
   max-height: 100vh !important;
   position: relative !important;
   overflow: hidden !important;
-  padding: clamp(8px, 1.5vh, 16px) 16px !important;
+  padding: clamp(10px, 2vh, 20px) 16px !important;
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
   display: flex !important;
   align-items: center !important;
@@ -22,26 +22,37 @@ html body .register-page {
 html body .register-page .register-wrapper {
   position: relative !important;
   z-index: 1 !important;
-  width: min(1020px, 100%) !important;
-  height: min(600px, calc(100vh - 20px)) !important;
-  max-height: calc(100vh - 20px) !important;
+  width: min(1000px, 100%) !important;
+  height: auto !important;
+  max-height: calc(100vh - 24px) !important;
   display: grid !important;
-  grid-template-columns: 1.05fr 1fr !important;
+  grid-template-columns: 1fr 1fr !important;
   border: 1px solid #cbd5e1 !important;
-  border-radius: 22px !important;
+  border-radius: 20px !important;
   background: #ffffff !important;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1) !important;
   overflow: hidden !important;
 }
 
-/* Left Branding Column (Compact layout so text is never cut off) */
+/* Remove any unwanted lines or pseudo elements */
+html body .register-page .register-wrapper::before,
+html body .register-page .register-wrapper::after,
+html body .register-page .register-premium-card-box::before,
+html body .register-page .register-premium-card-box::after,
+html body .register-page .register-header::before,
+html body .register-page .register-header::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Left Branding Column */
 html body .register-page .register-left {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 14px;
-  padding: clamp(20px, 2.5vw, 28px);
+  gap: 16px;
+  padding: clamp(24px, 3vw, 32px);
   background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
   color: #ffffff !important;
   overflow: hidden;
@@ -73,42 +84,42 @@ html body .register-page .register-brand {
   width: fit-content;
 }
 html body .register-page .register-logo-box {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  flex: 0 0 42px;
+  flex: 0 0 44px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: #ffffff !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 html body .register-page .register-logo-img {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
 }
 html body .register-page .register-brand-text h1 {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-  font-size: 18px !important;
+  font-size: 19px !important;
   line-height: 1.1 !important;
   font-weight: 800 !important;
   letter-spacing: -0.03em !important;
   margin: 0 !important;
 }
 html body .register-page .register-brand-text p {
-  margin: 1px 0 0 0 !important;
+  margin: 2px 0 0 0 !important;
   color: #94a3b8 !important;
   font-size: 11px !important;
   font-weight: 500 !important;
 }
 
-/* Left Hero Text */
+/* Left Hero Content */
 html body .register-page .auth-left-premium-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 html body .register-page .auth-badge.reg-badge {
   width: fit-content;
@@ -131,7 +142,7 @@ html body .register-page .reg-title {
   margin: 4px 0 !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-  font-size: clamp(22px, 2.2vw, 26px) !important;
+  font-size: clamp(22px, 2.3vw, 26px) !important;
   line-height: 1.18 !important;
   font-weight: 830 !important;
   letter-spacing: -0.03em !important;
@@ -149,7 +160,7 @@ html body .register-page .reg-checklist-box {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-top: 10px;
+  padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 html body .register-page .reg-check-item {
@@ -172,13 +183,13 @@ html body .register-page .reg-check-icon {
   flex-shrink: 0;
 }
 
-/* Right Form Panel (Clean Pure White Background) */
+/* Right Form Panel (Clean White Panel) */
 html body .register-page .register-right {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: clamp(16px, 2vw, 24px);
+  padding: clamp(20px, 2.5vw, 32px);
   background: #ffffff !important;
   overflow: hidden;
 }
@@ -190,34 +201,34 @@ html body .register-page .register-premium-card-box {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
 }
 
-/* Top Chip Badge above Create account */
-html body .register-page .register-top-chip {
-  display: inline-block;
-  color: #2563eb !important;
-  font-size: 10px !important;
-  font-weight: 850 !important;
-  letter-spacing: 0.1em !important;
-  text-transform: uppercase !important;
-  margin-bottom: 2px !important;
+/* Create Account Title Styling */
+html body .register-page .register-header {
+  border: none !important;
+  border-top: none !important;
+  padding: 0 !important;
+  margin: 0 0 4px 0 !important;
 }
-
-/* Beautiful Create Account Title */
 html body .register-page .register-header h2 {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
-  font-size: 24px !important;
+  font-size: 26px !important;
   font-weight: 850 !important;
   letter-spacing: -0.035em !important;
   margin: 0 0 3px 0 !important;
   line-height: 1.15 !important;
+  border: none !important;
 }
 html body .register-page .register-subtitle {
   color: #64748b !important;
-  font-size: 12px !important;
-  line-height: 1.35;
+  font-size: 12.5px !important;
+  line-height: 1.4;
   margin: 0 !important;
 }
 
@@ -260,7 +271,7 @@ html body .register-page .form-label-row {
 }
 html body .register-page .form-group label {
   color: #334155 !important;
-  font-size: 10px !important;
+  font-size: 10.5px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.06em !important;
@@ -268,12 +279,12 @@ html body .register-page .form-group label {
 }
 html body .register-page .field-error-text {
   color: #ef4444 !important;
-  font-size: 9.5px !important;
+  font-size: 10px !important;
   font-weight: 700 !important;
 }
 html body .register-page .strength-badge {
   color: #94a3b8 !important;
-  font-size: 9.5px !important;
+  font-size: 10px !important;
   text-transform: uppercase;
   font-weight: 700;
 }
@@ -388,16 +399,16 @@ html body .register-page .eye-toggle:hover {
 /* Primary Blue Action Button */
 html body .register-page .register-submit-btn {
   width: 100%;
-  height: 40px;
+  height: 42px;
   border: 1px solid #2563eb;
   border-radius: 10px;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 750;
   color: #ffffff !important;
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
   cursor: pointer;
-  margin-top: 2px;
+  margin-top: 4px;
   transition: all 0.25s ease;
   display: flex;
   align-items: center;
@@ -425,12 +436,13 @@ html body .register-page .register-btn-spinner {
   to { transform: rotate(360deg); }
 }
 
-/* Redirect Link */
+/* Redirect Link - Always visible at bottom of form */
 html body .register-page .register-signin-redirect {
-  font-size: 12.5px;
+  font-size: 13px !important;
   color: #64748b !important;
-  text-align: center;
-  margin: 2px 0 0 0 !important;
+  text-align: center !important;
+  margin: 6px 0 0 0 !important;
+  display: block !important;
 }
 html body .register-page .register-signin-redirect .login-link {
   color: #2563eb !important;
@@ -456,6 +468,6 @@ html body .register-page .register-signin-redirect .login-link:hover {
     display: none !important;
   }
   html body .register-page .register-right {
-    padding: 20px 16px;
+    padding: 24px 20px;
   }
 }
