@@ -6,3 +6,5 @@ dist
 .hallmark/
 skills-lock.json
 tokens.css
+*.docx
+artifacts/
