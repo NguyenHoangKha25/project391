@@ -2,7 +2,7 @@
  * Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V5 · contrast: pass (40–41) · slop: pass (42–45)
  * Hallmark · honest: pass (46) · chrome: pass (47) · tokens: pass (48) · responsive/mobile: pass (34, 49–57) · icons: pass (30)
  */
-@import "../../tokens.css";
+
 
 /* --------------------------------------------------------------------------
    Foundation: preserve the app's existing token names while changing the
