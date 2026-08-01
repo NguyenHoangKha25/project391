@@ -4163,6 +4163,22 @@ html body .st-layout .st-avatar-role-tag {
   z-index: 3 !important;
 }
 
+html body .st-layout .st-avatar-role-tag.role-user {
+  display: none !important;
+}
+
+html body .st-layout .st-avatar-role-tag.role-admin {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+}
+
+html body .st-layout .st-avatar-role-tag.role-lecturer {
+  background: linear-gradient(135deg, #10b981, #047857) !important;
+}
+
+html body .st-layout .st-avatar-role-tag.role-researcher {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
+}
+
 /* User text copy */
 html body .st-layout .st-user-copy {
   display: flex !important;

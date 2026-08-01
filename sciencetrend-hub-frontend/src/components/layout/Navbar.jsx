@@ -23,8 +23,8 @@ import "../../styles/layout.css";
 function UserAvatar({ name, role, size = "sm" }) {
   const initial = String(name || "R").trim().charAt(0).toUpperCase();
 
-  let RoleIcon = FiUser;
-  let roleClass = "role-user";
+  let RoleIcon = null;
+  let roleClass = "";
   const r = String(role || "").toUpperCase();
   if (r.includes("ADMIN")) {
     RoleIcon = FiShield;
@@ -41,11 +41,12 @@ function UserAvatar({ name, role, size = "sm" }) {
     <div className={`st-avatar-wrap size-${size}`}>
       <div className="st-avatar-badge">
         <span className="st-avatar-letter">{initial}</span>
-        <FiUser className="st-avatar-icon-bg" />
       </div>
-      <span className={`st-avatar-role-tag ${roleClass}`} title={role}>
-        <RoleIcon />
-      </span>
+      {RoleIcon && (
+        <span className={`st-avatar-role-tag ${roleClass}`} title={role}>
+          <RoleIcon />
+        </span>
+      )}
     </div>
   );
 }
