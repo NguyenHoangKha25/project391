@@ -128,11 +128,11 @@ select,
 textarea {
   min-width: 0;
   min-height: 44px;
-  border: var(--rule-hair) solid var(--color-rule-2) !important;
-  border-radius: var(--radius-input) !important;
-  color: var(--color-ink) !important;
-  background: var(--color-paper) !important;
-  box-shadow: none !important;
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-input);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  box-shadow: none;
 }
 
 input::placeholder,

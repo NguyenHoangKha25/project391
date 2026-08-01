@@ -131,13 +131,12 @@ select,
 textarea {
   min-width: 0;
   min-height: 44px;
-  color: var(--color-ink) !important;
-  -webkit-text-fill-color: var(--color-ink) !important;
-  background: var(--color-surface) !important;
-  background-image: none !important;
-  border: var(--rule-hair) solid var(--color-rule-2) !important;
-  border-radius: var(--radius-input) !important;
-  box-shadow: none !important;
+  color: var(--color-ink);
+  background: var(--color-surface);
+  background-image: none;
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-input);
+  box-shadow: none;
 }
 
 input::placeholder,
