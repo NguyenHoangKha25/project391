@@ -470,7 +470,7 @@ html body .st-navbar-actions .st-guest-actions > * {
   white-space: nowrap;
 }
 
-html body .st-navbar .st-search-form {
+html body .st-layout .st-navbar .st-search-form {
   position: relative !important;
   min-width: 0;
   height: 46px !important;
@@ -487,12 +487,12 @@ html body .st-navbar .st-search-form {
   box-shadow: none !important;
 }
 
-html body .st-navbar .st-search-form > svg {
+html body .st-layout .st-navbar .st-search-form > svg {
   justify-self: center;
   color: var(--color-neutral) !important;
 }
 
-html body .st-navbar .st-search-form input[type="search"] {
+html body .st-layout .st-navbar .st-search-form input[type="search"] {
   width: 100% !important;
   height: 44px !important;
   min-height: 44px !important;
@@ -506,22 +506,22 @@ html body .st-navbar .st-search-form input[type="search"] {
   box-shadow: none !important;
 }
 
-html body .st-navbar .st-search-form input[type="search"]:focus,
-html body .st-navbar .st-search-form input[type="search"]:focus-visible {
+html body .st-layout .st-navbar .st-search-form input[type="search"]:focus,
+html body .st-layout .st-navbar .st-search-form input[type="search"]:focus-visible {
   background: transparent !important;
   border: 0 !important;
   outline: 0 !important;
   box-shadow: none !important;
 }
 
-html body .st-navbar .st-search-form:focus-within {
+html body .st-layout .st-navbar .st-search-form:focus-within {
   color: var(--color-ink-2) !important;
   background: var(--color-surface) !important;
   border-color: var(--color-rule-2) !important;
   box-shadow: none !important;
 }
 
-html body .st-navbar .st-search-form:has(input:focus-visible) {
+html body .st-layout .st-navbar .st-search-form:has(input:focus-visible) {
   outline-color: var(--color-focus-surface) !important;
 }
 
@@ -831,6 +831,7 @@ html body .db-kpi-card::after {
 
 html body .db-kpi-card:first-child {
   color: var(--color-paper-3) !important;
+  -webkit-text-fill-color: var(--color-paper-3) !important;
   background: var(--color-graphite) !important;
   border-color: var(--color-graphite) !important;
 }
@@ -859,6 +860,7 @@ html body .db-kpi-label {
 html body .db-kpi-card:first-child .db-kpi-label,
 html body .db-kpi-card:first-child .db-kpi-comparison {
   color: var(--color-rule-2) !important;
+  -webkit-text-fill-color: var(--color-rule-2) !important;
 }
 
 html body .db-kpi-icon {
@@ -889,9 +891,16 @@ html body .db-kpi-value {
   letter-spacing: var(--tracking-display);
 }
 
-html body .db-kpi-card:first-child .db-kpi-value {
+html body .st-layout .st-content .premium-dashboard .db-metrics-grid > .db-kpi-card:first-child .db-kpi-value {
   color: var(--color-paper) !important;
   -webkit-text-fill-color: var(--color-paper) !important;
+  background: none !important;
+  background-image: none !important;
+  background-clip: border-box !important;
+  -webkit-background-clip: border-box !important;
+  text-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 html body .db-kpi-meta {
@@ -913,6 +922,10 @@ html body .st-content .premium-dashboard .db-kpi-card .db-kpi-change {
   border-radius: 0 !important;
   font-size: var(--text-xs) !important;
   font-weight: 600 !important;
+}
+
+html body .st-content .premium-dashboard .db-kpi-card:first-child .db-kpi-change {
+  -webkit-text-fill-color: var(--color-accent) !important;
 }
 
 html body .db-kpi-comparison {
@@ -1102,6 +1115,52 @@ html body .donut-center-text span {
   text-transform: none !important;
 }
 
+html body .donut-chart-wrapper {
+  min-width: 0;
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: minmax(5.5rem, 6.25rem) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: var(--space-sm) !important;
+}
+
+html body .donut-svg-box {
+  width: min(100%, 6.25rem) !important;
+  height: auto !important;
+  aspect-ratio: 1;
+}
+
+html body .donut-legend,
+html body .legend-item,
+html body .legend-texts {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+html body .donut-legend {
+  overflow: hidden;
+  padding-inline-end: 0 !important;
+}
+
+html body .legend-item {
+  display: flex !important;
+}
+
+html body .legend-texts {
+  flex: 1 1 0;
+  overflow: hidden;
+}
+
+html body .legend-name,
+html body .legend-val {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 html body .panel-footer-row {
   margin-top: auto !important;
   padding-top: var(--space-sm) !important;
@@ -1113,6 +1172,50 @@ html body .footer-link {
   font-size: var(--text-sm) !important;
   font-weight: 600 !important;
   transform: none !important;
+}
+
+html body .lib-overview-mid-row,
+html body .lib-overview-bottom-row,
+html body .lib-overview-panel,
+html body .lib-horizontal-grid,
+html body .lib-horizontal-card,
+html body .lib-card-copy {
+  min-width: 0;
+}
+
+html body .lib-horizontal-grid {
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)) !important;
+  align-items: stretch !important;
+  gap: var(--space-sm) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-inline: 0 !important;
+}
+
+html body .lib-horizontal-card {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 8rem;
+  overflow: hidden;
+}
+
+html body .lib-card-copy {
+  width: 100%;
+  overflow: hidden;
+}
+
+html body .lib-card-copy h4 {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+html body .lib-card-untrack {
+  width: 100%;
+  height: auto !important;
+  min-height: 44px;
+  white-space: nowrap;
 }
 
 html body .db-bottom-grid {
@@ -3025,21 +3128,24 @@ html body main.home-page.home-page-refresh .home-final-cta a:focus-visible {
   }
 }
 
-/* Closed drawers must be inert; the open state restores the existing backdrop. */
-html body .topics-drawer-backdrop {
+/* Closed drawers leave no painted layer behind; the open state owns the dimmer. */
+html body .st-layout .st-main .topics-drawer-backdrop {
+  background: color-mix(in oklch, var(--color-graphite) 36%, transparent) !important;
+  backdrop-filter: none !important;
+}
+
+html body .st-layout .st-main .topics-drawer-backdrop:not(.show) {
+  display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-  transition:
-    opacity var(--dur-long) var(--ease-out),
-    visibility 0s linear var(--dur-long) !important;
 }
 
-html body .topics-drawer-backdrop.show {
+html body .st-layout .st-main .topics-drawer-backdrop.show {
+  display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
-  transition-delay: 0s !important;
 }
 
 /* --------------------------------------------------------------------------
