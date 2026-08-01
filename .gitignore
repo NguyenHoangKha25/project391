@@ -1,0 +1,10 @@
+.agents/
+.hallmark/
+skills-lock.json
+*.zip
+*.docx
+artifacts/
+node_modules/
+dist/
+.env
+.env.local
