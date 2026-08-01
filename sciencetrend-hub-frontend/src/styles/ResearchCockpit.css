@@ -3355,6 +3355,156 @@ html body :is(.catalog-drawer, .admin-user-detail, .topics-drawer.open) {
     .report-create-modal-card,
     .report-preview,
     .catalog-drawer,
+
+/* --------------------------------------------------------------------------
+   Motion layer
+   One entrance orchestration, one data reveal, and one surface entrance.
+   -------------------------------------------------------------------------- */
+
+@keyframes st-motion-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-xs));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes st-motion-data-reveal {
+  from {
+    opacity: 0.35;
+    transform: scaleX(var(--st-reveal-x, 0.04)) scaleY(var(--st-reveal-y, 1));
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes st-motion-surface-enter {
+  from {
+    opacity: 0;
+    transform:
+      translate(var(--st-enter-x, 0), var(--st-enter-y, calc(-1 * var(--space-2xs))))
+      scale(var(--st-enter-scale, 1));
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+html body .st-content > :is(
+  .premium-dashboard,
+  .workspace-page,
+  .search-papers-container,
+  .trends-page-container,
+  .account-page
+) {
+  animation: st-motion-page-enter var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body main.home-page.home-page-refresh :is(.home-hero-copy, .home-hero-visual),
+html body main.auth-page :is(.auth-left, .auth-right),
+html body :is(
+  .register-wrapper,
+  .forgot-card,
+  .reset-card,
+  .auth-status-card,
+  .app-error-card
+) {
+  animation: st-motion-page-enter var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body main.home-page.home-page-refresh .home-hero-visual,
+html body main.auth-page .auth-right {
+  animation-delay: calc(var(--dur-micro) / 2) !important;
+}
+
+html body :is(.bar-fill, .column-fill-bar) {
+  --st-reveal-x: 1;
+  --st-reveal-y: 0.04;
+  transform-origin: center bottom;
+  animation: st-motion-data-reveal var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body :is(.keyword-bar-fill, .db-topic-progress > span) {
+  --st-reveal-x: 0.04;
+  --st-reveal-y: 1;
+  transform-origin: left center;
+  animation: st-motion-data-reveal var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body :is(
+  .st-search-suggestions,
+  .st-account-menu,
+  .report-autocomplete-menu,
+  .papers-toast,
+  .st-toast
+) {
+  animation: st-motion-surface-enter var(--dur-short) var(--ease-out) backwards !important;
+}
+
+html body :is(.report-create-modal-card, .report-preview) {
+  --st-enter-y: var(--space-xs);
+  --st-enter-scale: 0.985;
+  animation: st-motion-surface-enter var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body :is(.catalog-drawer, .admin-user-detail, .topics-drawer.open) {
+  --st-enter-x: var(--space-lg);
+  --st-enter-y: 0;
+  animation: st-motion-surface-enter var(--dur-long) var(--ease-out) backwards !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 150ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 150ms !important;
+  }
+
+  html body .st-sidebar,
+  html body button,
+  html body a {
+    transform: none !important;
+  }
+
+  html body .st-content > :is(
+    .premium-dashboard,
+    .workspace-page,
+    .search-papers-container,
+    .trends-page-container,
+    .account-page
+  ),
+  html body main.home-page.home-page-refresh :is(.home-hero-copy, .home-hero-visual),
+  html body main.auth-page :is(.auth-left, .auth-right),
+  html body :is(
+    .register-wrapper,
+    .forgot-card,
+    .reset-card,
+    .auth-status-card,
+    .app-error-card,
+    .bar-fill,
+    .column-fill-bar,
+    .keyword-bar-fill,
+    .db-topic-progress > span,
+    .st-search-suggestions,
+    .st-account-menu,
+    .report-autocomplete-menu,
+    .papers-toast,
+    .st-toast,
+    .report-create-modal-card,
+    .report-preview,
+    .catalog-drawer,
     .admin-user-detail,
     .topics-drawer.open
   ) {
@@ -3372,4 +3522,78 @@ html body :is(.catalog-drawer, .admin-user-detail, .topics-drawer.open) {
     animation-duration: 1.2s !important;
     animation-iteration-count: infinite !important;
   }
+}
+    .admin-user-detail,
+    .topics-drawer.open
+  ) {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  html body :is(
+    .is-spinning,
+    .cm-spinner,
+    .workspace-loading-spinner,
+    .register-btn-spinner
+  ) {
+    animation-duration: 1.2s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   KPI / Stat Cards: Normal = Dark/Black, Hover = White
+   -------------------------------------------------------------------------- */
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) {
+  background: #0b1320 !important;
+  background-image: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  transition: background 220ms ease, border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease !important;
+}
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) :is(.db-kpi-label, .stat-card-label, .stat-label, .metric-label) {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) :is(.db-kpi-value, .stat-card-value, .stat-num, .metric-value) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card) :is(.db-kpi-comparison, .stat-card-trend-text, .sub, .card-trend-sub) {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+}
+
+/* Hover state (Khi rê chuột vào): Nền TRẮNG, Chữ ĐEN rõ nét */
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12) !important;
+  transform: translateY(-3px) !important;
+}
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover :is(.db-kpi-label, .stat-card-label, .stat-label, .metric-label) {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+}
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover :is(.db-kpi-value, .stat-card-value, .stat-num, .metric-value) {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html body .st-layout :is(.db-kpi-card, .trend-stat-card, .admin-stat-card-custom, .metric-card, .stat-card):hover :is(.db-kpi-comparison, .stat-card-trend-text, .sub, .card-trend-sub) {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
 }
