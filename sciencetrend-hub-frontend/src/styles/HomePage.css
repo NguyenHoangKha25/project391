@@ -2,14 +2,11 @@
   white-space: nowrap;
 }
 
-html body main.home-page,
-html body main.home-page-refresh,
 .home-page {
-  min-height: 100vh !important;
-  overflow-x: hidden !important;
+  min-height: 100vh;
+  overflow-x: hidden;
   color: #ffffff !important;
   background: #060d0b !important;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
 }
 
 .home-topbar {

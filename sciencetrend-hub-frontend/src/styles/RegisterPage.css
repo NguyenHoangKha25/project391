@@ -10,7 +10,7 @@ html body .register-page {
   position: relative !important;
   overflow: hidden !important;
   padding: clamp(10px, 2vh, 20px) 16px !important;
-  background: linear-gradient(135deg, #0b1728 0%, #07111e 100%) !important;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;

@@ -65,31 +65,31 @@ html {
   min-width: 320px;
   min-height: 100%;
   scroll-behavior: smooth;
-  background: var(--st-bg);
-  color: var(--st-text);
+  background: var(--st-bg) !important;
+  color: var(--st-text) !important;
   -webkit-text-size-adjust: 100%;
   overflow-x: clip;
 }
 
-body, #root { min-height: 100vh; background: var(--st-bg); color: var(--st-text); overflow-x: clip; }
+body, #root { min-height: 100vh; background: var(--st-bg) !important; color: var(--st-text) !important; overflow-x: clip; }
 
 body {
   margin: 0;
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.6;
-  color: var(--st-text);
-  background: var(--st-bg);
+  color: var(--st-text) !important;
+  background: var(--st-bg) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: var(--st-heading);
+  color: var(--st-heading) !important;
   line-height: 1.1;
   font-family: var(--font-display);
-  font-style: normal;
+  font-style: normal !important;
   overflow-wrap: anywhere;
   min-width: 0;
   letter-spacing: -.02em;
