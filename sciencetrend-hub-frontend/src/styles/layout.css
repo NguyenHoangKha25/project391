@@ -113,6 +113,7 @@ select option {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: -.01em;
+  text-decoration: none !important;
   transition: background var(--t-base) ease, color var(--t-base) ease, border-color var(--t-base) ease, transform var(--t-base) var(--ease-out);
 }
 
