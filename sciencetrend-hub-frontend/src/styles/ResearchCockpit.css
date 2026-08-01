@@ -3958,11 +3958,18 @@ html body .st-layout .papers-filter-sidebar,
 html body .st-layout .filters-sidebar-panel {
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
-  border-radius: 16px !important;
-  padding: 16px !important;
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03) !important;
+  border-radius: 20px !important;
+  padding: 20px 20px 24px 20px !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04) !important;
+  overflow: visible !important;
+  position: sticky !important;
+  top: 24px !important;
+  align-self: flex-start !important;
+  height: auto !important;
+  max-height: none !important;
 }
 
+html body .st-layout .filters-panel-header,
 html body .st-layout .papers-filter-header,
 html body .st-layout .filters-sidebar-header {
   display: flex !important;
@@ -3974,6 +3981,7 @@ html body .st-layout .filters-sidebar-header {
 }
 
 html body .st-layout .filter-reset-btn,
+html body .st-layout .filters-reset-btn,
 html body .st-layout .papers-reset-filter-btn {
   height: 32px !important;
   padding: 0 12px !important;
@@ -3990,8 +3998,43 @@ html body .st-layout .papers-reset-filter-btn {
 }
 
 html body .st-layout .filter-reset-btn:hover,
+html body .st-layout .filters-reset-btn:hover,
 html body .st-layout .papers-reset-filter-btn:hover {
   color: #dc2626 !important;
   background: #fef2f2 !important;
   border-color: rgba(220, 38, 38, 0.2) !important;
+}
+
+html body .st-layout .filters-form-element {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+html body .st-layout .filters-submit-btn-premium {
+  height: 42px !important;
+  min-height: 42px !important;
+  width: 100% !important;
+  margin-top: 14px !important;
+  margin-bottom: 0 !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
+  transition: all 180ms ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+html body .st-layout .filters-submit-btn-premium:hover {
+  background: #1e293b !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18) !important;
 }
