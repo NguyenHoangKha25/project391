@@ -926,31 +926,40 @@ textarea {
 }
 
 .st-navbar {
-  min-height: 76px !important;
+  min-height: auto !important;
   gap: 20px !important;
-  padding: 12px clamp(20px, 2.5vw, 34px) !important;
+  padding: 16px clamp(20px, 2.5vw, 34px) !important;
   border-bottom: 1px solid #e2e8f0 !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.02) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
   backdrop-filter: blur(14px) !important;
 }
 
 .st-navbar-heading {
   flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .st-navbar-heading h1 {
   color: #0f172a !important;
   background: none !important;
   -webkit-text-fill-color: #0f172a !important;
-  font-size: clamp(24px, 2vw, 30px) !important;
+  font-size: clamp(22px, 2vw, 28px) !important;
   font-weight: 700 !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .st-navbar-heading p {
   color: #64748b !important;
   font-size: 13px !important;
   font-weight: 450 !important;
+  line-height: 1.4 !important;
+  margin: 4px 0 0 0 !important;
+  padding: 0 !important;
 }
 
 .st-navbar-actions {

@@ -166,47 +166,52 @@ select option {
   position: sticky;
   top: 0;
   z-index: 40;
-  min-height: var(--navbar-h);
+  min-height: auto !important;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 12px clamp(18px, 3vw, 34px);
-  border-bottom: 1px solid rgba(16, 185, 129, 0.25) !important;
-  background: rgba(13, 27, 23, 0.95) !important;
+  padding: 16px clamp(18px, 3vw, 34px) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
   backdrop-filter: blur(18px) saturate(1.16);
   -webkit-backdrop-filter: blur(18px) saturate(1.16);
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
 }
 
 .st-navbar-heading {
   min-width: 0;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
 }
 .st-navbar-heading > div {
   min-width: 0;
-  display: grid;
-  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 .st-navbar-heading h1 {
   font-family: var(--font-display);
-  font-size: clamp(28px, 2.25vw, 34px);
-  font-weight: 850;
-  letter-spacing: -0.035em;
-  line-height: 1.1;
-  color: #ffffff !important;
+  font-size: clamp(22px, 2vw, 28px) !important;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2 !important;
+  color: #0f172a !important;
   background: none !important;
-  -webkit-text-fill-color: #ffffff !important;
-  display: inline-block;
+  -webkit-text-fill-color: #0f172a !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 .st-navbar-heading p {
-  color: #526071;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.45;
+  color: #64748b !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
   letter-spacing: -0.01em;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 .st-mobile-menu-btn { display: none; width: 40px; height: 40px; border-radius: 12px; color: var(--st-primary-dark); background: #fff; box-shadow: var(--sh-xs); flex-shrink: 0; cursor: pointer; transition: transform 0.2s ease; }
 .st-mobile-menu-btn:active { transform: scale(0.95); }
