@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ScienceTrend Hub - Register Page Perfect 1-Page Light Theme
+   ScienceTrend Hub - Register Page Completely Isolated Light Theme
    ========================================================================== */
 
 /* Force page to fill 1 viewport without scrollbar */
@@ -47,57 +47,58 @@ html body .register-page .register-header::after {
 
 /* Left Branding Column */
 html body .register-page .register-left {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 20px;
-  padding: clamp(24px, 3vw, 36px);
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  gap: 20px !important;
+  padding: clamp(24px, 3vw, 32px) !important;
   background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
   color: #ffffff !important;
-  overflow: hidden;
+  overflow: hidden !important;
   text-align: left !important;
 }
 html body .register-page .register-left::before {
-  content: "";
-  position: absolute;
-  inset: -40px;
-  pointer-events: none;
-  opacity: 0.08;
+  content: "" !important;
+  position: absolute !important;
+  inset: -40px !important;
+  pointer-events: none !important;
+  opacity: 0.08 !important;
   background-image:
     linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
-  background-size: 36px 36px;
-  transform: rotate(-4deg) scale(1.1);
+    linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px) !important;
+  background-size: 36px 36px !important;
+  transform: rotate(-4deg) scale(1.1) !important;
 }
 html body .register-page .register-left > * {
-  position: relative;
-  z-index: 2;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
 /* Brand Header */
 html body .register-page .register-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
   text-decoration: none !important;
-  width: fit-content;
+  width: fit-content !important;
+  margin-bottom: 0 !important;
 }
 html body .register-page .register-logo-box {
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 44px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 44px !important;
+  height: 44px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 44px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   background: #ffffff !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
 }
 html body .register-page .register-logo-img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
+  width: 30px !important;
+  height: 30px !important;
+  object-fit: contain !important;
 }
 html body .register-page .register-brand-text h1 {
   color: #ffffff !important;
@@ -107,6 +108,7 @@ html body .register-page .register-brand-text h1 {
   font-weight: 800 !important;
   letter-spacing: -0.03em !important;
   margin: 0 !important;
+  background: none !important;
 }
 html body .register-page .register-brand-text p {
   margin: 2px 0 0 0 !important;
@@ -115,40 +117,51 @@ html body .register-page .register-brand-text p {
   font-weight: 500 !important;
 }
 
-/* Left Hero Content */
-html body .register-page .auth-left-premium-content {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-html body .register-page .auth-badge.reg-badge {
-  width: fit-content;
-  min-height: 24px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 10px;
-  border: 1px solid rgba(56, 189, 248, 0.4) !important;
-  border-radius: 999px;
-  color: #38bdf8 !important;
-  background: rgba(56, 189, 248, 0.12) !important;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* Left Body Content (Isolated from LoginPage.css) */
+html body .register-page .reg-left-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  margin-top: 0 !important;
 }
 
-html body .register-page .reg-title {
-  margin: 4px 0 !important;
+html body .register-page .reg-hero-box {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+html body .register-page .reg-badge-tag {
+  width: fit-content !important;
+  min-height: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 0 10px !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  border-radius: 999px !important;
+  color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.12) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+html body .register-page .reg-main-title {
+  margin: 4px 0 2px 0 !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-  font-size: clamp(22px, 2.3vw, 26px) !important;
-  line-height: 1.18 !important;
+  font-size: 22px !important;
+  line-height: 1.2 !important;
   font-weight: 830 !important;
   letter-spacing: -0.03em !important;
+  background: none !important;
+  filter: none !important;
 }
-html body .register-page .reg-desc {
-  max-width: 400px;
+
+html body .register-page .reg-main-desc {
+  max-width: 400px !important;
   color: #94a3b8 !important;
   font-size: 12.5px !important;
   line-height: 1.5 !important;
@@ -156,52 +169,54 @@ html body .register-page .reg-desc {
 }
 
 /* Feature Checklist */
-html body .register-page .reg-checklist-box {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+html body .register-page .reg-checklist-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
-html body .register-page .reg-check-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+
+html body .register-page .reg-check-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
   color: #e2e8f0 !important;
-  font-size: 12px;
-  font-weight: 550;
+  font-size: 12px !important;
+  font-weight: 550 !important;
 }
-html body .register-page .reg-check-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  display: grid;
-  place-items: center;
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
-  font-size: 11px;
-  flex-shrink: 0;
+
+html body .register-page .reg-check-bullet {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 6px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
+  font-size: 11px !important;
+  flex-shrink: 0 !important;
 }
 
 /* Right Form Panel (Clean White Panel) */
 html body .register-page .register-right {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: clamp(20px, 2.5vw, 32px);
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: clamp(20px, 2.5vw, 32px) !important;
   background: #ffffff !important;
-  overflow: hidden;
+  overflow: hidden !important;
 }
 
 /* Form Container Card */
 html body .register-page .register-premium-card-box {
-  width: 100%;
-  max-width: 380px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  width: 100% !important;
+  max-width: 380px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
@@ -224,20 +239,22 @@ html body .register-page .register-header h2 {
   margin: 0 0 3px 0 !important;
   line-height: 1.15 !important;
   border: none !important;
+  background: none !important;
+  filter: none !important;
 }
 html body .register-page .register-subtitle {
   color: #64748b !important;
   font-size: 12.5px !important;
-  line-height: 1.4;
+  line-height: 1.4 !important;
   margin: 0 !important;
 }
 
 /* Alert messages */
 html body .register-page .register-msg-alert {
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 11.5px;
-  font-weight: 600;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
 }
 html body .register-page .register-msg-alert.error-msg {
   background: #fef2f2 !important;
@@ -252,22 +269,22 @@ html body .register-page .register-msg-alert.success-msg {
 
 /* Form Stack */
 html body .register-page .register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
 }
 
 html body .register-page .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
   margin-bottom: 0 !important;
 }
 
 html body .register-page .form-label-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
 }
 html body .register-page .form-group label {
   color: #334155 !important;
@@ -285,15 +302,15 @@ html body .register-page .field-error-text {
 html body .register-page .strength-badge {
   color: #94a3b8 !important;
   font-size: 10px !important;
-  text-transform: uppercase;
-  font-weight: 700;
+  text-transform: uppercase !important;
+  font-weight: 700 !important;
 }
 
 /* Input Fields & Select Wrap */
 html body .register-page .input-wrap,
 html body .register-page .select-wrap {
-  position: relative;
-  width: 100%;
+  position: relative !important;
+  width: 100% !important;
 }
 
 html body .register-page .input-wrap input,
@@ -337,100 +354,100 @@ html body .register-page .input-wrap input[type="password"] {
 }
 
 html body .register-page .select-wrap select {
-  cursor: pointer;
-  appearance: none;
+  cursor: pointer !important;
+  appearance: none !important;
 }
 html body .register-page .select-wrap select option {
   background: #ffffff !important;
   color: #0f172a !important;
 }
 html body .register-page .select-wrap::after {
-  content: "";
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 8px;
-  height: 5px;
-  background-color: #64748b;
-  clip-path: polygon(100% 0, 0 0, 50% 100%);
-  pointer-events: none;
+  content: "" !important;
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 8px !important;
+  height: 5px !important;
+  background-color: #64748b !important;
+  clip-path: polygon(100% 0, 0 0, 50% 100%) !important;
+  pointer-events: none !important;
 }
 
 /* Left Icon in Inputs */
 html body .register-page .input-field-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-  font-size: 14px;
-  pointer-events: none;
-  transition: color 0.2s ease;
-  z-index: 2;
+  position: absolute !important;
+  left: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+  pointer-events: none !important;
+  transition: color 0.2s ease !important;
+  z-index: 2 !important;
 }
 html body .register-page .input-wrap:focus-within .input-field-icon,
 html body .register-page .select-wrap:focus-within .input-field-icon {
-  color: #2563eb;
+  color: #2563eb !important;
 }
 
 /* Toggle eye button */
 html body .register-page .eye-toggle {
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  color: #94a3b8;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  position: absolute !important;
+  right: 4px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 6px !important;
+  color: #94a3b8 !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
 }
 html body .register-page .eye-toggle:hover {
-  color: #2563eb;
-  background: #f1f5f9;
+  color: #2563eb !important;
+  background: #f1f5f9 !important;
 }
 
 /* Primary Blue Action Button */
 html body .register-page .register-submit-btn {
-  width: 100%;
-  height: 42px;
-  border: 1px solid #2563eb;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 750;
+  width: 100% !important;
+  height: 42px !important;
+  border: 1px solid #2563eb !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
   color: #ffffff !important;
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
-  cursor: pointer;
-  margin-top: 4px;
-  transition: all 0.25s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
+  cursor: pointer !important;
+  margin-top: 4px !important;
+  transition: all 0.25s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 html body .register-page .register-submit-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35) !important;
 }
 html body .register-page .register-submit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
 }
 
 /* Spinner */
 html body .register-page .register-btn-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ffffff;
-  border-radius: 50%;
-  animation: register-spin 0.8s linear infinite;
+  width: 16px !important;
+  height: 16px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-top-color: #ffffff !important;
+  border-radius: 50% !important;
+  animation: register-spin 0.8s linear infinite !important;
 }
 @keyframes register-spin {
   to { transform: rotate(360deg); }
@@ -447,9 +464,9 @@ html body .register-page .register-signin-redirect {
 html body .register-page .register-signin-redirect .login-link {
   color: #2563eb !important;
   font-weight: 750 !important;
-  margin-left: 4px;
-  text-decoration: none;
-  transition: color 0.2s ease;
+  margin-left: 4px !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
 }
 html body .register-page .register-signin-redirect .login-link:hover {
   text-decoration: underline !important;
@@ -460,7 +477,7 @@ html body .register-page .register-signin-redirect .login-link:hover {
 @media (max-width: 960px) {
   html body .register-page .register-wrapper {
     grid-template-columns: 1fr !important;
-    max-width: 420px;
+    max-width: 420px !important;
     height: auto !important;
     max-height: calc(100vh - 20px) !important;
   }
@@ -468,6 +485,6 @@ html body .register-page .register-signin-redirect .login-link:hover {
     display: none !important;
   }
   html body .register-page .register-right {
-    padding: 24px 20px;
+    padding: 24px 20px !important;
   }
 }

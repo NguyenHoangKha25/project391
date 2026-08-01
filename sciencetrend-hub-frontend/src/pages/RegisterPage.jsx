@@ -182,27 +182,27 @@ function RegisterPage() {
             </div>
           </Link>
 
-          <div className="auth-left-premium-content">
-            <div className="auth-premium-hero">
-              <span className="auth-badge reg-badge">✦ MEMBER ONBOARDING</span>
-              <h2 className="reg-title">Unlock Full Academic Workspace</h2>
-              <p className="reg-desc">
+          <div className="reg-left-body">
+            <div className="reg-hero-box">
+              <span className="reg-badge-tag">✦ MEMBER ONBOARDING</span>
+              <h2 className="reg-main-title">Unlock Full Academic Workspace</h2>
+              <p className="reg-main-desc">
                 Join thousands of researchers tracking emerging topics, bookmarking top journals, and building custom analytics.
               </p>
             </div>
 
             {/* Feature Checklist Box */}
-            <div className="reg-checklist-box">
-              <div className="reg-check-item">
-                <span className="reg-check-icon"><FiCheck /></span>
+            <div className="reg-checklist-container">
+              <div className="reg-check-row">
+                <span className="reg-check-bullet"><FiCheck /></span>
                 <span>Unlimited paper bookmarks & reading lists</span>
               </div>
-              <div className="reg-check-item">
-                <span className="reg-check-icon"><FiCheck /></span>
+              <div className="reg-check-row">
+                <span className="reg-check-bullet"><FiCheck /></span>
                 <span>Follow journals & receive publication updates</span>
               </div>
-              <div className="reg-check-item">
-                <span className="reg-check-icon"><FiCheck /></span>
+              <div className="reg-check-row">
+                <span className="reg-check-bullet"><FiCheck /></span>
                 <span>Export structured summary & trend reports</span>
               </div>
             </div>
