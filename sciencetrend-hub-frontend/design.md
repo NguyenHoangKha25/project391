@@ -11,18 +11,19 @@ editorial / modern-minimal (Technical-Editorial)
 - Content pages (PaperDetail, Formatted Reports): Long Document (Macro 02)
 
 ## Theme
-- `--color-paper`: oklch(0.98 0.005 240) /* #f6f8fb */
-- `--color-paper-2`: oklch(0.96 0.01 240) /* #eef2f7 */
-- `--color-surface`: oklch(1 0 0) /* #ffffff */
-- `--color-surface-dark`: oklch(0.12 0.03 165) /* #091612 */
+- `--color-paper`: oklch(0.98 0.005 240)
+- `--color-paper-2`: oklch(0.955 0.01 240)
+- `--color-paper-3`: oklch(0.925 0.014 240)
+- `--color-surface`: oklch(0.99 0.004 240)
+- `--color-surface-dark`: oklch(0.16 0.028 240)
 - `--color-ink`: oklch(0.18 0.04 240) /* #0f172a */
 - `--color-ink-2`: oklch(0.35 0.03 240) /* #334155 */
 - `--color-muted`: oklch(0.50 0.03 240) /* #64748b */
-- `--color-rule`: oklch(0.91 0.01 240) /* #e2e8f0 */
-- `--color-accent-primary`: oklch(0.55 0.22 260) /* #2563eb */
-- `--color-accent-emerald`: oklch(0.68 0.19 160) /* #10b981 */
-- `--color-accent-violet`: oklch(0.52 0.24 290) /* #7c3aed */
-- `--color-focus`: oklch(0.60 0.20 250) /* rgba(37, 99, 235, 0.45) */
+- `--color-rule`: oklch(0.86 0.014 240)
+- `--color-rule-2`: oklch(0.70 0.018 240)
+- `--color-accent-primary`: oklch(0.52 0.19 260)
+- `--color-accent-ink`: oklch(0.98 0.005 240)
+- `--color-focus`: oklch(0.56 0.21 255)
 
 ## Typography
 - Display: "Outfit", sans-serif, weight 700/800, style normal (No italic headers)
@@ -33,7 +34,7 @@ editorial / modern-minimal (Technical-Editorial)
 
 ## Spacing & Geometry
 - Spacing Scale: 4-point scale (`--space-3xs`: 0.25rem to `--space-3xl`: 7rem)
-- Radius Scale: `--r-sm`: 10px, `--r-md`: 14px, `--r-lg`: 18px, `--r-xl`: 24px, `--r-full`: 999px
+- Radius Scale: `--radius-input`: 4px, `--radius-card`: 6px, `--radius-pill`: 999px. Pill is reserved for compact status only.
 - Container Bounds: Max width `1440px`
 
 ## Motion
@@ -44,11 +45,11 @@ editorial / modern-minimal (Technical-Editorial)
 ## Microinteractions & State Discipline
 - Every interactive element supports 8 states: default, hover, focus-visible, active, disabled, loading, error, success.
 - Link underline: Banned globally (`a { text-decoration: none !important; }`).
-- Interactive hover: Subtle scale/lift (`translateY(-2px)`), smooth border-color glow.
+- Interactive hover: one signal only: a 1px lift or a surface shift. No glow and no multi-effect hover.
 
 ## CTA Voice & Navigation
-- Primary CTA: Pill or rounded rectangle (`border-radius: 12px`), gradient fill, white text, subtle shadow, no underline.
-- Secondary CTA: Translucent soft fill with hairline border (`border: 1px solid var(--st-border)`).
+- Primary CTA: compact rectangular control, ink fill, paper text, no gradient and no shadow.
+- Secondary CTA: transparent surface with an ink or rule hairline.
 - Sidebar Nav: Clean icon + text rows, active pill state with accent indicator dot, no link underlines.
 
 ## Per-page Allowances
@@ -62,3 +63,110 @@ editorial / modern-minimal (Technical-Editorial)
 - Display ("Outfit") and body ("DM Sans") font pairing.
 - Zero link underlines across all menus and cards.
 - Consistent section heading rhythm.
+
+## Exports
+
+`tokens.css` at the project root is the runtime source of truth. The blocks below are portable mappings for other toolchains.
+
+### tokens.css
+
+```css
+:root {
+  --color-paper: oklch(0.98 0.005 240);
+  --color-paper-2: oklch(0.955 0.01 240);
+  --color-paper-3: oklch(0.925 0.014 240);
+  --color-rule: oklch(0.86 0.014 240);
+  --color-rule-2: oklch(0.70 0.018 240);
+  --color-muted: oklch(0.50 0.03 240);
+  --color-neutral: oklch(0.42 0.025 240);
+  --color-ink-2: oklch(0.34 0.03 240);
+  --color-ink: oklch(0.18 0.04 240);
+  --color-accent: oklch(0.52 0.19 260);
+  --color-accent-ink: oklch(0.98 0.005 240);
+  --color-focus: oklch(0.56 0.21 255);
+  --font-display: "Outfit", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: ui-monospace, "SFMono-Regular", "Cascadia Code", monospace;
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 7rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --radius-card: 6px;
+  --radius-input: 4px;
+  --radius-pill: 999px;
+}
+```
+
+### Tailwind v4 `@theme`
+
+```css
+@theme {
+  --color-paper: oklch(0.98 0.005 240);
+  --color-paper-2: oklch(0.955 0.01 240);
+  --color-paper-3: oklch(0.925 0.014 240);
+  --color-rule: oklch(0.86 0.014 240);
+  --color-ink: oklch(0.18 0.04 240);
+  --color-accent: oklch(0.52 0.19 260);
+  --font-display: "Outfit", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --radius-card: 6px;
+  --radius-input: 4px;
+}
+```
+
+### DTCG `tokens.json`
+
+```json
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "color": {
+    "paper": { "$value": "oklch(0.98 0.005 240)", "$type": "color" },
+    "paper-2": { "$value": "oklch(0.955 0.01 240)", "$type": "color" },
+    "ink": { "$value": "oklch(0.18 0.04 240)", "$type": "color" },
+    "accent": { "$value": "oklch(0.52 0.19 260)", "$type": "color" },
+    "focus": { "$value": "oklch(0.56 0.21 255)", "$type": "color" }
+  },
+  "font": {
+    "display": { "$value": "Outfit, DM Sans, ui-sans-serif, system-ui, sans-serif", "$type": "fontFamily" },
+    "body": { "$value": "DM Sans, ui-sans-serif, system-ui, sans-serif", "$type": "fontFamily" }
+  },
+  "space": {
+    "sm": { "$value": "1rem", "$type": "dimension" },
+    "md": { "$value": "1.5rem", "$type": "dimension" },
+    "lg": { "$value": "2rem", "$type": "dimension" }
+  }
+}
+```
+
+### shadcn/ui CSS variables
+
+```css
+:root {
+  --background: 98% 0.005 240;
+  --foreground: 18% 0.04 240;
+  --card: 95.5% 0.01 240;
+  --card-foreground: 18% 0.04 240;
+  --primary: 52% 0.19 260;
+  --primary-foreground: 98% 0.005 240;
+  --secondary: 92.5% 0.014 240;
+  --secondary-foreground: 34% 0.03 240;
+  --muted: 86% 0.014 240;
+  --muted-foreground: 50% 0.03 240;
+  --border: 86% 0.014 240;
+  --input: 70% 0.018 240;
+  --ring: 56% 0.21 255;
+  --radius: 6px;
+}
+```
