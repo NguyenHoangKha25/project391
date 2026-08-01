@@ -9,9 +9,7 @@
   position: relative;
   overflow: hidden;
   padding: clamp(10px, 1.8vh, 20px) 16px;
-  background:
-    radial-gradient(circle at 84% 4%, rgba(21, 127, 145, .08), transparent 24rem),
-    linear-gradient(180deg, #fbfaf7 0%, #f3eee6 100%) !important;
+  background: #060d0b !important;
   display: flex;
   align-items: center;
   justify-content: center;

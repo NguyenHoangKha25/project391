@@ -169,7 +169,12 @@ function RegisterPage() {
 
   return (
     <div className="register-page">
+      {/* Background ambient glow orbs */}
+      <div className="register-bg-orb orb-1" aria-hidden="true" />
+      <div className="register-bg-orb orb-2" aria-hidden="true" />
+
       <div className="register-wrapper">
+        {/* Left Branding & Value Panel */}
         <div className="register-left">
           <Link to={ROUTE_PATHS.HOME} className="register-brand" aria-label="ScienceTrend Hub home">
             <span className="register-logo-box">
@@ -183,10 +188,14 @@ function RegisterPage() {
 
           <div className="auth-left-premium-content">
             <div className="auth-premium-hero">
-              <span className="auth-badge reg-badge">✦ MEMBER ONBOARDING</span>
-              <h2 className="reg-title">Unlock Full Academic Workspace</h2>
-              <p>
-                Join thousands of researchers tracking emerging topics, bookmarking top journals, and exporting custom analytics.
+              <span className="auth-badge reg-badge">
+                <span className="badge-pulse-dot" /> MEMBER ONBOARDING
+              </span>
+              <h2 className="reg-title">
+                Unlock Your Full <span className="reg-title-highlight">Academic Workspace</span>
+              </h2>
+              <p className="reg-desc">
+                Join thousands of researchers tracking emerging topics, bookmarking top journals, and building custom analytics.
               </p>
             </div>
 
@@ -194,10 +203,10 @@ function RegisterPage() {
             <div className="auth-widget-preview-card reg-preview-card">
               <div className="auth-widget-header">
                 <div className="auth-widget-title-group">
-                  <span className="auth-widget-dot dot-amber"></span>
+                  <span className="auth-widget-dot dot-emerald" />
                   <span className="auth-widget-title">RESEARCHER MEMBERSHIP</span>
                 </div>
-                <span className="auth-widget-badge badge-amber">✨ Free Account</span>
+                <span className="auth-widget-badge badge-emerald">✨ Free Account</span>
               </div>
 
               {/* Stat Counters Row */}
@@ -216,7 +225,7 @@ function RegisterPage() {
                 </div>
               </div>
 
-              {/* Feature Checklist Box for Registration */}
+              {/* Feature Checklist Box */}
               <div className="reg-checklist-box">
                 <div className="reg-check-item">
                   <span className="reg-check-icon"><FiCheck /></span>
@@ -228,31 +237,33 @@ function RegisterPage() {
                 </div>
                 <div className="reg-check-item">
                   <span className="reg-check-icon"><FiCheck /></span>
-                  <span>Export structured summary & growth reports</span>
+                  <span>Export structured summary & trend reports</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Right Form Card Panel */}
         <div className="register-right">
           <div className="register-premium-card-box">
             <div className="register-header">
               <h2>Create account</h2>
+              <p className="register-subtitle">Set up your account to start organizing your research trail.</p>
             </div>
 
             {message && (
-              <div className={`${messageType}-msg`} role="alert">
+              <div className={`register-msg-alert ${messageType}-msg`} role="alert">
                 {message}
               </div>
             )}
 
             <form className="register-form" onSubmit={handleRegister} noValidate>
-
+              {/* Username Field */}
               <div className={`form-group ${fieldErrors.username ? "has-error" : touched.username && form.username && !fieldErrors.username ? "is-valid" : ""}`}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <label htmlFor="username" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Username</label>
-                  {fieldErrors.username && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.username}</span>}
+                <div className="form-label-row">
+                  <label htmlFor="username">Username</label>
+                  {fieldErrors.username && <span className="field-error-text">{fieldErrors.username}</span>}
                 </div>
                 <div className="input-wrap">
                   <FiUser className="input-field-icon" />
@@ -265,15 +276,15 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="username"
-                    style={{ fontWeight: "700", fontSize: "14px" }}
                   />
                 </div>
               </div>
 
+              {/* Email Field */}
               <div className={`form-group ${fieldErrors.email ? "has-error" : touched.email && form.email && !fieldErrors.email ? "is-valid" : ""}`}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <label htmlFor="email" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Email address</label>
-                  {fieldErrors.email && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.email}</span>}
+                <div className="form-label-row">
+                  <label htmlFor="email">Email address</label>
+                  {fieldErrors.email && <span className="field-error-text">{fieldErrors.email}</span>}
                 </div>
                 <div className="input-wrap">
                   <FiMail className="input-field-icon" />
@@ -286,20 +297,20 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="email"
-                    style={{ fontWeight: "700", fontSize: "14px" }}
                   />
                 </div>
               </div>
 
+              {/* Password Field */}
               <div className={`form-group ${fieldErrors.password ? "has-error" : touched.password && form.password && !fieldErrors.password ? "is-valid" : ""}`}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <label htmlFor="password" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Password</label>
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <div className="form-label-row">
+                  <label htmlFor="password">Password</label>
+                  <div className="password-strength-info">
                     {fieldErrors.password ? (
-                      <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.password}</span>
+                      <span className="field-error-text">{fieldErrors.password}</span>
                     ) : form.password ? (
-                      <span style={{ fontSize: "10.5px", fontWeight: "700", color: "var(--sp-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        Strength: <span style={{ color: passwordStrength.color }}>{passwordStrength.label}</span>
+                      <span className="strength-badge">
+                        Strength: <strong style={{ color: passwordStrength.color }}>{passwordStrength.label}</strong>
                       </span>
                     ) : null}
                   </div>
@@ -315,7 +326,6 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="new-password"
-                    style={{ fontWeight: "700", fontSize: "14px" }}
                   />
                   <button
                     type="button"
@@ -328,10 +338,11 @@ function RegisterPage() {
                 </div>
               </div>
 
+              {/* Confirm Password Field */}
               <div className={`form-group ${fieldErrors.confirmPassword ? "has-error" : touched.confirmPassword && form.confirmPassword && !fieldErrors.confirmPassword ? "is-valid" : ""}`}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <label htmlFor="confirmPassword" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Confirm password</label>
-                  {fieldErrors.confirmPassword && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.confirmPassword}</span>}
+                <div className="form-label-row">
+                  <label htmlFor="confirmPassword">Confirm password</label>
+                  {fieldErrors.confirmPassword && <span className="field-error-text">{fieldErrors.confirmPassword}</span>}
                 </div>
                 <div className="input-wrap">
                   <FiLock className="input-field-icon" />
@@ -344,7 +355,6 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="new-password"
-                    style={{ fontWeight: "700", fontSize: "14px" }}
                   />
                   <button
                     type="button"
@@ -357,10 +367,11 @@ function RegisterPage() {
                 </div>
               </div>
 
+              {/* Account Type Role Field */}
               <div className={`form-group ${fieldErrors.role ? "has-error" : touched.role && form.role && !fieldErrors.role ? "is-valid" : ""}`}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                  <label htmlFor="role" style={{ fontWeight: "900", fontSize: "11.5px", letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>Account type</label>
-                  {fieldErrors.role && <span style={{ color: "#ef4444", fontSize: "11px", fontWeight: "700" }}>{fieldErrors.role}</span>}
+                <div className="form-label-row">
+                  <label htmlFor="role">Account type</label>
+                  {fieldErrors.role && <span className="field-error-text">{fieldErrors.role}</span>}
                 </div>
                 <div className="select-wrap">
                   <FiUsers className="input-field-icon" />
@@ -371,7 +382,6 @@ function RegisterPage() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     required
-                    style={{ fontWeight: "700", fontSize: "14px" }}
                   >
                     <option value="">Select account type...</option>
                     {REGISTER_ROLES.map((r) => (
@@ -383,6 +393,7 @@ function RegisterPage() {
                 </div>
               </div>
 
+              {/* Submit Button */}
               <button type="submit" className="register-submit-btn" disabled={loading}>
                 {loading ? (
                   <span className="register-btn-spinner" />
@@ -391,13 +402,14 @@ function RegisterPage() {
                 )}
               </button>
 
-              <p className="register-signin-redirect" style={{ fontWeight: "600" }}>
-                Already have one? <Link to={ROUTE_PATHS.LOGIN} className="login-link" style={{ fontWeight: "800" }}>Sign in</Link>
+              {/* Sign In Redirect */}
+              <p className="register-signin-redirect">
+                Already have an account? <Link to={ROUTE_PATHS.LOGIN} className="login-link">Sign in</Link>
               </p>
             </form>
 
             <p className="register-terms">
-              By creating an account, you agree to use the workspace responsibly and protect your account credentials.
+              By creating an account, you agree to use the workspace responsibly.
             </p>
           </div>
         </div>
