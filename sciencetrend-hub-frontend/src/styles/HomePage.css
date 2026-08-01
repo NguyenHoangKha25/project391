@@ -1447,15 +1447,17 @@ html body .home-footer-logo-box {
   display: grid !important;
   place-items: center !important;
   border-radius: 12px !important;
-  background: #ffffff !important;
+  background: transparent !important;
   border: 1px solid rgba(16, 185, 129, 0.3) !important;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+  overflow: hidden !important;
 }
 
 html body .home-footer-logo-box img {
-  width: 30px !important;
-  height: 30px !important;
-  object-fit: contain !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 12px !important;
 }
 
 html body .home-footer-brand-name strong {

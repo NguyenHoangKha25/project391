@@ -91,14 +91,16 @@ html body .register-page .register-logo-box {
   place-items: center !important;
   flex: 0 0 44px !important;
   border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background: transparent !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden !important;
 }
 html body .register-page .register-logo-img {
-  width: 30px !important;
-  height: 30px !important;
-  object-fit: contain !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 12px !important;
 }
 html body .register-page .register-brand-text h1 {
   color: #ffffff !important;

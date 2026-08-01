@@ -92,13 +92,15 @@
   flex: 0 0 58px;
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,.24);
-  background: #fff;
+  background: transparent;
   box-shadow: 0 16px 34px rgba(0,0,0,.20);
+  overflow: hidden;
 }
 .auth-logo-img {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 18px;
 }
 .auth-brand-text h1 {
   color: #fff;
