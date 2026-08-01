@@ -377,27 +377,84 @@ function HomePage() {
         </div>
       </section>
 
-      <footer className="home-footer home-footer-refresh">
-        <div className="home-footer-main">
-          <div className="home-footer-identity">
-            <Link to={ROUTE_PATHS.HOME} className="home-footer-wordmark" aria-label="ScienceTrend Hub home">
-              <i aria-hidden="true" />
-              <strong>ScienceTrend</strong><span>Hub</span>
+      <footer className="home-footer home-footer-modern" aria-label="Site footer">
+        <div className="home-footer-grid">
+          {/* Brand & Bio Column */}
+          <div className="home-footer-col home-footer-col-brand">
+            <Link to={ROUTE_PATHS.HOME} className="home-footer-brand-logo" aria-label="ScienceTrend Hub home">
+              <span className="home-footer-logo-box">
+                <img src={logo} alt="ScienceTrend Hub logo" />
+              </span>
+              <div className="home-footer-brand-name">
+                <strong>ScienceTrend</strong>
+                <small>Research Hub</small>
+              </div>
             </Link>
-            <p>Research intelligence workspace.</p>
+            <p className="home-footer-bio">
+              Empowering academic researchers, lecturers, and students with publication analytics, topic trends, and organized evidence trails.
+            </p>
+            <div className="home-footer-status">
+              <span className="footer-status-dot" />
+              <span>All Systems Operational</span>
+            </div>
           </div>
 
-          <nav className="home-footer-nav" aria-label="Footer navigation">
-            <a href="#features">Product</a>
-            <a href="#workflow">Workflow</a>
-            <a href="#audience">For researchers</a>
-            <a href="#catalog">Catalog</a>
-          </nav>
+          {/* Platform Links */}
+          <div className="home-footer-col">
+            <h4 className="home-footer-heading">Platform</h4>
+            <ul className="home-footer-links">
+              <li><Link to={ROUTE_PATHS.PAPERS}>Publications</Link></li>
+              <li><Link to={ROUTE_PATHS.JOURNALS}>Journals Catalog</Link></li>
+              <li><Link to={ROUTE_PATHS.TOPICS}>Research Topics</Link></li>
+              <li><Link to={ROUTE_PATHS.TRENDS}>Analytics & Trends</Link></li>
+            </ul>
+          </div>
+
+          {/* Resources Links */}
+          <div className="home-footer-col">
+            <h4 className="home-footer-heading">Resources</h4>
+            <ul className="home-footer-links">
+              <li><a href="#features">Key Features</a></li>
+              <li><a href="#workflow">Research Workflow</a></li>
+              <li><a href="#audience">For Researchers</a></li>
+              <li><a href="#catalog">Collection Index</a></li>
+            </ul>
+          </div>
+
+          {/* Account & Quick Access */}
+          <div className="home-footer-col">
+            <h4 className="home-footer-heading">Workspace</h4>
+            <ul className="home-footer-links">
+              {isLoggedIn ? (
+                <>
+                  <li><Link to={defaultPath}>My Workspace</Link></li>
+                  <li><Link to={ROUTE_PATHS.BOOKMARKS}>Saved Papers</Link></li>
+                  <li><Link to={ROUTE_PATHS.FOLLOWING}>Followed Items</Link></li>
+                </>
+              ) : (
+                <>
+                  <li><Link to={ROUTE_PATHS.LOGIN}>Sign In</Link></li>
+                  <li><Link to={ROUTE_PATHS.REGISTER}>Create Account</Link></li>
+                </>
+              )}
+            </ul>
+          </div>
         </div>
 
-        <div className="home-footer-bottom">
-          <small>&copy; {new Date().getFullYear()} ScienceTrend Hub</small>
-          <span>Research, organized.</span>
+        {/* Footer Bottom Bar */}
+        <div className="home-footer-bar">
+          <div className="home-footer-copy">
+            <small>&copy; {new Date().getFullYear()} ScienceTrend Hub. All rights reserved.</small>
+            <span className="footer-badge">Research, organized.</span>
+          </div>
+          <button 
+            type="button" 
+            className="home-footer-top-btn"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            aria-label="Scroll back to top"
+          >
+            Back to top ↑
+          </button>
         </div>
       </footer>
     </main>
