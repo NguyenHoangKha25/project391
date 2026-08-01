@@ -4053,3 +4053,119 @@ html body .st-layout :is(.trends-sparkline-list, .trends-bottom-panel, .trends-c
   height: 0 !important;
   width: 0 !important;
 }
+
+/* --------------------------------------------------------------------------
+   Navbar Account User Menu Trigger Redesign
+   -------------------------------------------------------------------------- */
+
+html body .st-layout .st-account-trigger {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  height: 44px !important;
+  padding: 6px 14px 6px 8px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  cursor: pointer !important;
+  transition: all 180ms ease !important;
+  min-width: 0 !important;
+}
+
+html body .st-layout .st-account-trigger:hover {
+  border-color: #2563eb !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Avatar container inside trigger */
+html body .st-layout .st-avatar-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+html body .st-layout .st-avatar-wrap.size-sm {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+html body .st-layout .st-avatar-badge {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+}
+
+html body .st-layout .st-avatar-letter {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  z-index: 2 !important;
+}
+
+/* Floating role badge tag - positioned neatly to avoid text overlap */
+html body .st-layout .st-avatar-role-tag {
+  position: absolute !important;
+  bottom: -2px !important;
+  right: -2px !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 9px !important;
+  color: #ffffff !important;
+  border: 1.5px solid #ffffff !important;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.2) !important;
+  z-index: 3 !important;
+}
+
+/* User text copy */
+html body .st-layout .st-user-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  text-align: left !important;
+  gap: 1px !important;
+  min-width: 0 !important;
+}
+
+html body .st-layout .st-user-copy strong {
+  color: #0f172a !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+html body .st-layout .st-user-copy small {
+  color: #2563eb !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.2 !important;
+  text-transform: capitalize !important;
+}
+
+html body .st-layout .st-account-chevron {
+  width: 15px !important;
+  height: 15px !important;
+  color: #64748b !important;
+  margin-left: 2px !important;
+  flex-shrink: 0 !important;
+  transition: transform 180ms ease !important;
+}
