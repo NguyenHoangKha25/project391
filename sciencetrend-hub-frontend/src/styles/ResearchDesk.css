@@ -1,7 +1,7 @@
 /* Hallmark · genre: editorial · tone: restrained technical research desk · anchor hue: blue · structural fingerprint: Marquee Hero / Workbench / Long Document · design-system: design.md · nav: N9 / N3 · footer: Ft1
  * Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V5 · contrast: pass (40–41) · slop: pass (42–45)
  * Hallmark · honest: pass (46) · chrome: pass (47) · tokens: pass (48) · responsive/mobile: pass (34, 49–57) · icons: pass (30)
- */
+@import "./tokens.css";
 
 
 /* --------------------------------------------------------------------------
