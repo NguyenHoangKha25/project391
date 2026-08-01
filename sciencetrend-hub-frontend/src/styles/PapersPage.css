@@ -53,7 +53,7 @@
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
 }
 .filters-reset-btn:hover {
   color: var(--st-danger);

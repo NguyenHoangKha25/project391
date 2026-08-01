@@ -1348,6 +1348,51 @@ html body .filters-sidebar-panel {
   padding: var(--space-lg) !important;
 }
 
+/* Keep the filter heading and its secondary action visually balanced. */
+html body .search-papers-grid .filters-sidebar-panel .filters-panel-header {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: var(--space-sm) !important;
+  min-width: 0;
+  margin: 0 0 var(--space-md) !important;
+  padding: 0 0 var(--space-sm) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: var(--rule-hair) solid var(--color-rule-2) !important;
+  border-radius: 0 !important;
+}
+
+html body .search-papers-grid .filters-sidebar-panel .filters-panel-header h3 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--space-xs) !important;
+  min-width: 0;
+  margin: 0 !important;
+  font-size: var(--text-base) !important;
+  line-height: 1.25 !important;
+}
+
+html body .search-papers-grid .filters-sidebar-panel .filters-panel-header h3 svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: 0 0 auto;
+}
+
+html body .search-papers-grid .filters-sidebar-panel .filters-reset-btn {
+  width: auto !important;
+  min-width: max-content;
+  min-height: 44px !important;
+  height: 44px;
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0 !important;
+  padding: 0 var(--space-sm) !important;
+  font-size: var(--text-sm) !important;
+  line-height: 1 !important;
+}
+
 html body :is(
   .rich-paper-card,
   .topic-card,
