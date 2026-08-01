@@ -470,7 +470,7 @@ html body .st-navbar-actions .st-guest-actions > * {
   white-space: nowrap;
 }
 
-html body .st-search-form {
+html body .st-navbar .st-search-form {
   position: relative !important;
   min-width: 0;
   height: 46px !important;
@@ -482,25 +482,47 @@ html body .st-search-form {
   background-image: none !important;
   border: var(--rule-hair) solid var(--color-rule-2) !important;
   border-radius: var(--radius-input) !important;
+  outline: var(--rule-fine) solid transparent !important;
+  outline-offset: var(--rule-hair) !important;
   box-shadow: none !important;
 }
 
-html body .st-search-form > svg {
+html body .st-navbar .st-search-form > svg {
   justify-self: center;
   color: var(--color-neutral) !important;
 }
 
-html body .st-search-form input {
+html body .st-navbar .st-search-form input[type="search"] {
   width: 100% !important;
   height: 44px !important;
   min-height: 44px !important;
   padding: 0 var(--space-sm) 0 0 !important;
   color: var(--color-ink) !important;
+  -webkit-text-fill-color: var(--color-ink) !important;
   background: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;
   outline: 0 !important;
   box-shadow: none !important;
+}
+
+html body .st-navbar .st-search-form input[type="search"]:focus,
+html body .st-navbar .st-search-form input[type="search"]:focus-visible {
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+html body .st-navbar .st-search-form:focus-within {
+  color: var(--color-ink-2) !important;
+  background: var(--color-surface) !important;
+  border-color: var(--color-rule-2) !important;
+  box-shadow: none !important;
+}
+
+html body .st-navbar .st-search-form:has(input:focus-visible) {
+  outline-color: var(--color-focus-surface) !important;
 }
 
 html body .st-search-suggestions,
@@ -869,6 +891,7 @@ html body .db-kpi-value {
 
 html body .db-kpi-card:first-child .db-kpi-value {
   color: var(--color-paper) !important;
+  -webkit-text-fill-color: var(--color-paper) !important;
 }
 
 html body .db-kpi-meta {
@@ -1738,7 +1761,9 @@ html body .home-login-link:active {
   }
 
   html body .st-account-trigger {
-    min-width: 12rem !important;
+    width: 15.5rem !important;
+    min-width: 15.5rem !important;
+    max-width: 15.5rem !important;
     padding-inline: var(--space-xs) !important;
   }
 
@@ -2998,6 +3023,23 @@ html body main.home-page.home-page-refresh .home-final-cta a:focus-visible {
     flex-direction: column !important;
     gap: var(--space-xs) !important;
   }
+}
+
+/* Closed drawers must be inert; the open state restores the existing backdrop. */
+html body .topics-drawer-backdrop {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition:
+    opacity var(--dur-long) var(--ease-out),
+    visibility 0s linear var(--dur-long) !important;
+}
+
+html body .topics-drawer-backdrop.show {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transition-delay: 0s !important;
 }
 
 /* --------------------------------------------------------------------------
