@@ -52,9 +52,12 @@ Modern-minimal research software with an analytical, technical voice. The interf
 
 - Named easing only: `--ease-out`, `--ease-in`, `--ease-in-out`.
 - Micro/short/long durations: `120ms / 220ms / 420ms`.
+- The motion vocabulary is capped at three primitives per page: `page-enter` for one-shot route/hero arrival, `data-reveal` for bars and progress values, and `surface-enter` for menus, drawers, toasts, and modals.
+- `page-enter` moves a single page root by 8px; Home and Login may split the same entrance across their two primary columns with a 60ms offset. No section-by-section scroll reveal is allowed.
+- `data-reveal` scales only the visual fill from its baseline and never animates layout dimensions. `surface-enter` changes direction through scoped variables while retaining one shared keyframe.
 - Hover uses one signal: either a surface shift or a 1px lift.
 - Every control supports default, hover, focus-visible, active, disabled, loading, error, and success.
-- Reduced-motion caps transitions and animation at 150ms and removes translation.
+- Reduced-motion renders every decorative entrance in its final static state; functional loading indicators remain visible at a slower rate.
 
 ## Navigation & Components
 

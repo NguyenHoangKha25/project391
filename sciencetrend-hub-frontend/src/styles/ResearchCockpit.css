@@ -1,6 +1,7 @@
 /* Hallmark · genre: modern-minimal · macrostructure: Bento Grid / Split Studio / Split Diptych · theme: Cobalt / Cobalt Soft · tone: precise research cockpit with refined marketing/auth surfaces · anchor hue: electric blue · design-system: design.md · designed-as-app
  * Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V4 · knobs: 6/6 proof split · detached rounded nav · focused auth diptych · border=hairline
  * Hallmark · contrast: pass (40–41) · nav: N1b app / N5-like marketing · footer: soft statement · slop: pass (1–58) · honest: pass (46) · chrome: pass (47) · tokens: pass (48) · responsive: pass (49) · icons: pass (30) · mobile: pass (34, 49, 50–57)
+ * Hallmark · motion: page-enter / data-reveal / surface-enter · reduced-motion: static final state · motion slop: pass (10–19, 27, 34, 49)
  */
 @import "../../tokens.css";
 
@@ -2999,6 +3000,112 @@ html body main.home-page.home-page-refresh .home-final-cta a:focus-visible {
   }
 }
 
+/* --------------------------------------------------------------------------
+   Motion layer
+   One entrance orchestration, one data reveal, and one surface entrance.
+   -------------------------------------------------------------------------- */
+
+@keyframes st-motion-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-xs));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes st-motion-data-reveal {
+  from {
+    opacity: 0.35;
+    transform: scaleX(var(--st-reveal-x, 0.04)) scaleY(var(--st-reveal-y, 1));
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes st-motion-surface-enter {
+  from {
+    opacity: 0;
+    transform:
+      translate(var(--st-enter-x, 0), var(--st-enter-y, calc(-1 * var(--space-2xs))))
+      scale(var(--st-enter-scale, 1));
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+html body .st-content > :is(
+  .premium-dashboard,
+  .workspace-page,
+  .search-papers-container,
+  .trends-page-container,
+  .account-page
+) {
+  animation: st-motion-page-enter var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body main.home-page.home-page-refresh :is(.home-hero-copy, .home-hero-visual),
+html body main.auth-page :is(.auth-left, .auth-right),
+html body :is(
+  .register-wrapper,
+  .forgot-card,
+  .reset-card,
+  .auth-status-card,
+  .app-error-card
+) {
+  animation: st-motion-page-enter var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body main.home-page.home-page-refresh .home-hero-visual,
+html body main.auth-page .auth-right {
+  animation-delay: calc(var(--dur-micro) / 2) !important;
+}
+
+html body :is(.bar-fill, .column-fill-bar) {
+  --st-reveal-x: 1;
+  --st-reveal-y: 0.04;
+  transform-origin: center bottom;
+  animation: st-motion-data-reveal var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body :is(.keyword-bar-fill, .db-topic-progress > span) {
+  --st-reveal-x: 0.04;
+  --st-reveal-y: 1;
+  transform-origin: left center;
+  animation: st-motion-data-reveal var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body :is(
+  .st-search-suggestions,
+  .st-account-menu,
+  .report-autocomplete-menu,
+  .papers-toast,
+  .st-toast
+) {
+  animation: st-motion-surface-enter var(--dur-short) var(--ease-out) backwards !important;
+}
+
+html body :is(.report-create-modal-card, .report-preview) {
+  --st-enter-y: var(--space-xs);
+  --st-enter-scale: 0.985;
+  animation: st-motion-surface-enter var(--dur-long) var(--ease-out) backwards !important;
+}
+
+html body :is(.catalog-drawer, .admin-user-detail, .topics-drawer.open) {
+  --st-enter-x: var(--space-lg);
+  --st-enter-y: 0;
+  animation: st-motion-surface-enter var(--dur-long) var(--ease-out) backwards !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -3013,5 +3120,50 @@ html body main.home-page.home-page-refresh .home-final-cta a:focus-visible {
   html body button,
   html body a {
     transform: none !important;
+  }
+
+  html body .st-content > :is(
+    .premium-dashboard,
+    .workspace-page,
+    .search-papers-container,
+    .trends-page-container,
+    .account-page
+  ),
+  html body main.home-page.home-page-refresh :is(.home-hero-copy, .home-hero-visual),
+  html body main.auth-page :is(.auth-left, .auth-right),
+  html body :is(
+    .register-wrapper,
+    .forgot-card,
+    .reset-card,
+    .auth-status-card,
+    .app-error-card,
+    .bar-fill,
+    .column-fill-bar,
+    .keyword-bar-fill,
+    .db-topic-progress > span,
+    .st-search-suggestions,
+    .st-account-menu,
+    .report-autocomplete-menu,
+    .papers-toast,
+    .st-toast,
+    .report-create-modal-card,
+    .report-preview,
+    .catalog-drawer,
+    .admin-user-detail,
+    .topics-drawer.open
+  ) {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  html body :is(
+    .is-spinning,
+    .cm-spinner,
+    .workspace-loading-spinner,
+    .register-btn-spinner
+  ) {
+    animation-duration: 1.2s !important;
+    animation-iteration-count: infinite !important;
   }
 }

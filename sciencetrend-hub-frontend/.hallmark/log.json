@@ -1,6 +1,17 @@
 [
   {
     "date": "2026-08-01",
+    "scope": "app motion",
+    "macrostructure": "Bento Grid / Split Studio / Split Diptych",
+    "theme": "Cobalt / Cobalt Soft",
+    "enrichment": "purposeful motion layer",
+    "nav": "unchanged",
+    "footer": "unchanged",
+    "motion": "page-enter / data-reveal / surface-enter",
+    "brief": "Purposeful animation pass across application pages with behavior preserved"
+  },
+  {
+    "date": "2026-08-01",
     "scope": "home/login",
     "macrostructure": "Split Studio / Split Diptych",
     "theme": "Cobalt Soft",
