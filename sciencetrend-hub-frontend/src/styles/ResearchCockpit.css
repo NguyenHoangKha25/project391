@@ -4038,3 +4038,18 @@ html body .st-layout .filters-submit-btn-premium:hover {
   transform: translateY(-1px) !important;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18) !important;
 }
+
+/* --------------------------------------------------------------------------
+   Remove Horizontal Scrollbar on Trends Sparklines & Bottom Panels
+   -------------------------------------------------------------------------- */
+
+html body .st-layout :is(.trends-sparkline-list, .trends-bottom-panel, .trends-compact-table-wrap, .trends-bottom-grid, .trends-middle-grid, .trends-sparkline-row) {
+  overflow-x: hidden !important;
+  scrollbar-width: none !important;
+}
+
+html body .st-layout :is(.trends-sparkline-list, .trends-bottom-panel, .trends-compact-table-wrap, .trends-bottom-grid, .trends-middle-grid, .trends-sparkline-row)::-webkit-scrollbar {
+  display: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
