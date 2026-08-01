@@ -50,9 +50,9 @@ html body .register-page .register-left {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 16px;
-  padding: clamp(24px, 3vw, 32px);
+  justify-content: flex-start;
+  gap: 20px;
+  padding: clamp(24px, 3vw, 36px);
   background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
   color: #ffffff !important;
   overflow: hidden;
