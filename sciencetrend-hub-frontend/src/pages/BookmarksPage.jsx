@@ -38,6 +38,7 @@ import {
 } from "../utils/apiData";
 import { getCachedData, setCachedData } from "../utils/apiCache";
 import { useAuth } from "../context/useAuth";
+import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
 import "../styles/BookmarksPage.css";
 
@@ -56,6 +57,22 @@ function useToast() {
   }, []);
 
   return { toast, showToast };
+}
+
+function hasNumericId(value) {
+  return Number.isInteger(Number(value)) && Number(value) > 0;
+}
+
+function getJournalShortcut(journal) {
+  return hasNumericId(journal.id)
+    ? ROUTE_PATHS.journalDetail(journal.id, journal.name)
+    : ROUTE_PATHS.journalPapers(journal.name);
+}
+
+function getTopicShortcut(topic) {
+  return hasNumericId(topic.id)
+    ? ROUTE_PATHS.topicDetail(topic.id, topic.name)
+    : ROUTE_PATHS.topicPapers(topic.name);
 }
 
 function BookmarksPage() {
@@ -359,11 +376,18 @@ function BookmarksPage() {
                     <div className="lib-scroll-list">
                       {savedPapers.slice(0, 4).map((paper) => (
                         <div key={paper.id} className="lib-item-row-compact">
-                          <FiBookmark className="lib-item-icon-saved" />
-                          <div className="lib-item-details">
-                            <h4>{paper.title}</h4>
-                            <p>{paper.authors} · {paper.year} · {paper.source}</p>
-                          </div>
+                          <Link
+                            className="lib-item-shortcut"
+                            to={ROUTE_PATHS.paperDetail(paper.id)}
+                            title={`Open ${paper.title}`}
+                          >
+                            <FiBookmark className="lib-item-icon-saved" />
+                            <div className="lib-item-details">
+                              <h4>{paper.title}</h4>
+                              <p>{paper.authors} · {paper.year} · {paper.source}</p>
+                            </div>
+                            <FiArrowRight className="lib-shortcut-arrow" />
+                          </Link>
                           <button
                             type="button"
                             className="lib-item-delete"
@@ -443,13 +467,16 @@ function BookmarksPage() {
                     <div className="lib-horizontal-grid">
                       {followedJournals.slice(0, 4).map((journal) => (
                         <div key={journal.id} className="lib-horizontal-card">
-                          <div className="lib-card-icon-box bg-teal">
-                            <FiBookOpen />
-                          </div>
-                          <div className="lib-card-copy">
-                            <h4>{journal.name}</h4>
-                            <p>{journal.publisher}</p>
-                          </div>
+                          <Link className="lib-card-shortcut" to={getJournalShortcut(journal)} title={`Open ${journal.name}`}>
+                            <div className="lib-card-icon-box bg-teal">
+                              <FiBookOpen />
+                            </div>
+                            <FiArrowRight className="lib-card-shortcut-arrow" />
+                            <div className="lib-card-copy">
+                              <h4>{journal.name}</h4>
+                              <p>{journal.publisher}</p>
+                            </div>
+                          </Link>
                           <button
                             type="button"
                             className="lib-card-untrack"
@@ -483,13 +510,16 @@ function BookmarksPage() {
                     <div className="lib-horizontal-grid">
                       {followedTopics.slice(0, 4).map((topic) => (
                         <div key={topic.id} className="lib-horizontal-card">
-                          <div className="lib-card-icon-box bg-purple">
-                            <FiTag />
-                          </div>
-                          <div className="lib-card-copy">
-                            <h4>{topic.name}</h4>
-                            <p>{topic.paperCount}</p>
-                          </div>
+                          <Link className="lib-card-shortcut" to={getTopicShortcut(topic)} title={`Open ${topic.name}`}>
+                            <div className="lib-card-icon-box bg-purple">
+                              <FiTag />
+                            </div>
+                            <FiArrowRight className="lib-card-shortcut-arrow" />
+                            <div className="lib-card-copy">
+                              <h4>{topic.name}</h4>
+                              <p>{topic.paperCount}</p>
+                            </div>
+                          </Link>
                           <button
                             type="button"
                             className="lib-card-untrack"
@@ -532,6 +562,7 @@ function BookmarksPage() {
                       key={paper.id}
                       {...paper}
                       variant="rich"
+                      detailPath={ROUTE_PATHS.paperDetail(paper.id)}
                       saved
                       onBookmark={() => handleRemoveSavedPaper(paper.id)}
                     />
@@ -554,8 +585,15 @@ function BookmarksPage() {
                 <div className="lib-keywords-badge-grid">
                   {savedKeywords.map((kw) => (
                     <div key={kw.id} className="lib-keyword-badge-card">
-                      <FiTag />
-                      <span>{typeof kw.name === "string" ? kw.name : (kw.name?.name || kw.name?.keyword || String(kw.name || "Keyword"))}</span>
+                      <Link
+                        className="lib-keyword-shortcut"
+                        to={ROUTE_PATHS.keywordPapers(typeof kw.name === "string" ? kw.name : (kw.name?.name || kw.name?.keyword || String(kw.name || "Keyword")))}
+                        title="Open matching papers"
+                      >
+                        <FiTag />
+                        <span>{typeof kw.name === "string" ? kw.name : (kw.name?.name || kw.name?.keyword || String(kw.name || "Keyword"))}</span>
+                        <FiArrowRight />
+                      </Link>
                       <button
                         type="button"
                         disabled={untrackProcessing.has(`keyword-${kw.id}`)}
@@ -586,6 +624,7 @@ function BookmarksPage() {
                     <JournalCard
                       key={journal.id}
                       {...journal}
+                      detailPath={getJournalShortcut(journal)}
                       onUnfollow={() => handleUnfollowJournal(journal.id)}
                     />
                   ))}
@@ -609,6 +648,7 @@ function BookmarksPage() {
                     <TopicCard
                       key={topic.id}
                       {...topic}
+                      detailPath={getTopicShortcut(topic)}
                       onUnfollow={() => handleUnfollowTopic(topic.id)}
                     />
                   ))}

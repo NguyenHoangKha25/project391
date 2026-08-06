@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   FiArrowRight,
   FiBarChart2,
@@ -74,6 +74,7 @@ function normalizeJournalList(response) {
 
 function JournalsPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isLoggedIn } = useAuth();
   const [initialData] = useState(getCachedJournalsData);
   const [query, setQuery] = useState("");
@@ -90,6 +91,9 @@ function JournalsPage() {
   const loadRequestIdRef = useRef(0);
   const detailRequestIdRef = useRef(0);
   const followActionVersionRef = useRef(0);
+  const shortcutHandledRef = useRef("");
+  const requestedJournalId = searchParams.get("journal") || "";
+  const requestedJournalName = searchParams.get("name") || "";
 
   const loadJournals = useCallback(async (search = "") => {
     const requestId = loadRequestIdRef.current + 1;
@@ -227,7 +231,17 @@ function JournalsPage() {
     return () => clearTimeout(timer);
   }, [followNotice]);
 
-  async function openJournal(journal) {
+  const openJournal = useCallback(async (journal, { syncUrl = true } = {}) => {
+    if (syncUrl) {
+      shortcutHandledRef.current = String(journal.id);
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
+        next.set("journal", String(journal.id));
+        if (journal.name) next.set("name", journal.name); else next.delete("name");
+        return next;
+      }, { replace: true });
+    }
+
     const detailRequestId = detailRequestIdRef.current + 1;
     detailRequestIdRef.current = detailRequestId;
     const cacheKey = `journal_detail_${journal.id}`;
@@ -270,14 +284,40 @@ function JournalsPage() {
     } finally {
       if (detailRequestId === detailRequestIdRef.current) setDetailLoading(false);
     }
-  }
+  }, [setSearchParams]);
 
   function closeJournal() {
     detailRequestIdRef.current += 1;
+    shortcutHandledRef.current = "";
     setSelected(null);
     setPapers([]);
     setDetailLoading(false);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.delete("journal");
+      next.delete("name");
+      return next;
+    }, { replace: true });
   }
+
+  useEffect(() => {
+    if (!requestedJournalId || shortcutHandledRef.current === requestedJournalId) return;
+
+    const matchingJournal = journals.find((journal) => String(journal.id) === requestedJournalId);
+    if (!matchingJournal && loading) return;
+
+    const numericId = Number(requestedJournalId);
+    if (!matchingJournal && (!Number.isInteger(numericId) || numericId <= 0)) return;
+
+    shortcutHandledRef.current = requestedJournalId;
+    openJournal(
+      matchingJournal ?? normalizeJournal({
+        journalId: numericId,
+        name: requestedJournalName || "Saved journal",
+      }),
+      { syncUrl: false },
+    );
+  }, [journals, loading, openJournal, requestedJournalId, requestedJournalName]);
 
   async function toggleFollow(journalId) {
     if (!isLoggedIn) {

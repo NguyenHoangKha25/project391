@@ -154,6 +154,35 @@
 .lib-item-row-compact:hover {
   background: rgba(230, 222, 211, 0.2);
 }
+.lib-item-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 7px;
+}
+.lib-item-shortcut:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.2);
+  outline-offset: 3px;
+}
+.lib-shortcut-arrow {
+  flex: 0 0 auto;
+  color: var(--st-primary);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.lib-item-shortcut:hover .lib-shortcut-arrow,
+.lib-item-shortcut:focus-visible .lib-shortcut-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+.lib-item-shortcut:hover h4 {
+  color: var(--st-primary);
+}
 .lib-item-icon-saved {
   color: var(--st-primary);
   font-size: 14px;
@@ -229,6 +258,37 @@
 .lib-horizontal-card:hover {
   border-color: rgba(21, 127, 145, 0.25);
   box-shadow: var(--sh-sm);
+}
+.lib-card-shortcut {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 9px;
+}
+.lib-card-shortcut:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.2);
+  outline-offset: 3px;
+}
+.lib-card-shortcut-arrow {
+  position: absolute;
+  top: 7px;
+  right: 3px;
+  color: var(--st-primary);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.lib-card-shortcut:hover .lib-card-shortcut-arrow,
+.lib-card-shortcut:focus-visible .lib-card-shortcut-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+.lib-card-shortcut:hover h4 {
+  color: var(--st-primary);
 }
 .lib-card-icon-box {
   width: 28px;
@@ -397,6 +457,32 @@
   color: var(--st-primary);
   font-size: 12px;
 }
+.lib-keyword-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 7px;
+}
+.lib-keyword-shortcut > svg:last-child {
+  opacity: 0;
+  transform: translateX(-3px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.lib-keyword-shortcut:hover,
+.lib-keyword-shortcut:focus-visible {
+  color: var(--st-primary);
+}
+.lib-keyword-shortcut:hover > svg:last-child,
+.lib-keyword-shortcut:focus-visible > svg:last-child {
+  opacity: 1;
+  transform: translateX(0);
+}
+.lib-keyword-shortcut:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.2);
+  outline-offset: 3px;
+}
 .lib-keyword-badge-card button {
   background: none;
   border: none;
@@ -410,6 +496,34 @@
 .lib-keyword-badge-card button:hover {
   color: var(--st-danger);
   background: var(--st-danger-soft);
+}
+
+.bookmarks-page .db-saved-entity-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 12px;
+}
+.bookmarks-page .db-saved-entity-link:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.2);
+  outline-offset: 4px;
+}
+.bookmarks-page .db-saved-entity-open-icon {
+  position: absolute;
+  right: 54px;
+  color: #4f46e5;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.bookmarks-page .db-saved-entity-link:hover .db-saved-entity-open-icon,
+.bookmarks-page .db-saved-entity-link:focus-visible .db-saved-entity-open-icon {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* Notification Detailed Row card */

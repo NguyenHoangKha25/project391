@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   FiSearch,
   FiPlus,
@@ -121,6 +121,7 @@ function useToast() {
 
 function TopicsPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isLoggedIn } = useAuth();
   const [initialData] = useState(getCachedTopicsData);
   const [topics, setTopics] = useState(() => initialData?.topics ?? []);
@@ -137,6 +138,9 @@ function TopicsPage() {
   const [topicPapers, setTopicPapers] = useState([]);
   const [topicPapersSource, setTopicPapersSource] = useState("topic");
   const [loadingPapers, setLoadingPapers] = useState(false);
+  const shortcutHandledRef = useRef("");
+  const requestedTopicId = searchParams.get("topic") || "";
+  const requestedTopicName = searchParams.get("name") || "";
 
   const { toast, showToast } = useToast();
 
@@ -288,8 +292,18 @@ function TopicsPage() {
   }
 
   // Open Recent Papers Drawer
-  async function handleOpenTopicDetails(topic) {
+  const handleOpenTopicDetails = useCallback(async (topic, { syncUrl = true } = {}) => {
     const targetTopicId = topic.researchTopicId || topic.id;
+    if (syncUrl) {
+      shortcutHandledRef.current = String(targetTopicId);
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
+        next.set("topic", String(targetTopicId));
+        if (topic.name) next.set("name", topic.name); else next.delete("name");
+        return next;
+      }, { replace: true });
+    }
+
     const hasNumericTopicId = typeof targetTopicId === "number" || /^\d+$/.test(String(targetTopicId));
     const cacheKey = `topic_papers_v2_${targetTopicId}`;
     const storedResult = getPersistentCachedData(cacheKey);
@@ -343,7 +357,40 @@ function TopicsPage() {
     } finally {
       setLoadingPapers(false);
     }
+  }, [setSearchParams, showToast]);
+
+  function closeTopicDetails() {
+    shortcutHandledRef.current = "";
+    setDrawerOpen(false);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.delete("topic");
+      next.delete("name");
+      return next;
+    }, { replace: true });
   }
+
+  useEffect(() => {
+    if (!requestedTopicId || shortcutHandledRef.current === requestedTopicId) return;
+
+    const allTopics = [...topics, ...trending];
+    const matchingTopic = allTopics.find((topic) => (
+      String(topic.researchTopicId ?? topic.id) === requestedTopicId
+    ));
+    if (!matchingTopic && loading) return;
+
+    const numericId = Number(requestedTopicId);
+    if (!matchingTopic && (!Number.isInteger(numericId) || numericId <= 0)) return;
+
+    shortcutHandledRef.current = requestedTopicId;
+    handleOpenTopicDetails(
+      matchingTopic ?? normalizeTopic({
+        researchTopicId: numericId,
+        name: requestedTopicName || "Saved topic",
+      }),
+      { syncUrl: false },
+    );
+  }, [handleOpenTopicDetails, loading, requestedTopicId, requestedTopicName, topics, trending]);
 
   return (
     <MainLayout
@@ -506,7 +553,7 @@ function TopicsPage() {
       </div>
 
       {/* ── Sliding Side Drawer for Topic Details & Papers ── */}
-      <div className={`topics-drawer-backdrop ${drawerOpen ? "show" : ""}`} onClick={() => setDrawerOpen(false)}>
+      <div className={`topics-drawer-backdrop ${drawerOpen ? "show" : ""}`} onClick={closeTopicDetails}>
         <aside className={`topics-drawer ${drawerOpen ? "open" : ""}`} onClick={(e) => e.stopPropagation()}>
           <header className="drawer-header">
             <div>
@@ -516,7 +563,7 @@ function TopicsPage() {
             <button
               type="button"
               className="drawer-close-btn"
-              onClick={() => setDrawerOpen(false)}
+              onClick={closeTopicDetails}
             >
               <FiX />
             </button>

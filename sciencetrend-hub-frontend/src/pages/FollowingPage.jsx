@@ -34,6 +34,22 @@ function useToast() {
   return { toast, showToast };
 }
 
+function hasNumericId(value) {
+  return Number.isInteger(Number(value)) && Number(value) > 0;
+}
+
+function getTopicShortcut(topic) {
+  return hasNumericId(topic.id)
+    ? ROUTE_PATHS.topicDetail(topic.id, topic.name)
+    : ROUTE_PATHS.topicPapers(topic.name);
+}
+
+function getJournalShortcut(journal) {
+  return hasNumericId(journal.id)
+    ? ROUTE_PATHS.journalDetail(journal.id, journal.name)
+    : ROUTE_PATHS.journalPapers(journal.name);
+}
+
 function FollowingPage() {
   const { user } = useAuth();
   const cacheOwner = user?.userId ?? user?.id ?? user?.email ?? user?.username ?? "current";
@@ -243,7 +259,7 @@ function FollowingPage() {
 
                 return (
                   <article key={`topic-${topic.id}`} className="followed-item-card topic-card">
-                    <div className="card-left">
+                    <Link className="card-left followed-item-shortcut" to={getTopicShortcut(topic)} title={`Open ${topic.name}`}>
                       <div className="card-icon topic-icon">
                         <FiTag />
                       </div>
@@ -251,10 +267,11 @@ function FollowingPage() {
                         <h3>{topic.name}</h3>
                         <p>{topic.paperCount}</p>
                       </div>
-                    </div>
+                      <FiExternalLink className="followed-shortcut-icon" />
+                    </Link>
 
                     <div className="card-right">
-                      <Link to={`${ROUTE_PATHS.TOPICS}`} className="action-link-btn" title="View details">
+                      <Link to={getTopicShortcut(topic)} className="action-link-btn" title="View details">
                         View <FiExternalLink />
                       </Link>
                       <button
@@ -296,7 +313,7 @@ function FollowingPage() {
 
                 return (
                   <article key={`journal-${journal.id}`} className="followed-item-card journal-card">
-                    <div className="card-left">
+                    <Link className="card-left followed-item-shortcut" to={getJournalShortcut(journal)} title={`Open ${journal.name}`}>
                       <div className="card-icon journal-icon">
                         <FiBookOpen />
                       </div>
@@ -308,9 +325,13 @@ function FollowingPage() {
                           {journal.quartile && <span className="q-tag">{journal.quartile}</span>}
                         </div>
                       </div>
-                    </div>
+                      <FiExternalLink className="followed-shortcut-icon" />
+                    </Link>
 
                     <div className="card-right">
+                      <Link to={getJournalShortcut(journal)} className="action-link-btn" title="View details">
+                        View <FiExternalLink />
+                      </Link>
                       <button
                         type="button"
                         className="unfollow-action-btn"
