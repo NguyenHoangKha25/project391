@@ -605,7 +605,7 @@
 }
 
 .trend-line-series {
-  opacity: 0.82;
+  opacity: 0.95;
   transition: opacity 180ms ease;
 }
 
@@ -614,7 +614,7 @@
 }
 
 .trend-line-series.is-muted {
-  opacity: 0.1;
+  opacity: 0.42;
 }
 
 .trend-line-area {

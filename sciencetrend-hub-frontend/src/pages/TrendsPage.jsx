@@ -499,7 +499,7 @@ function TrendsPage() {
   }, [chartData, timeRange]);
 
   const comparisonLines = useMemo(() => {
-    const colors = ["#4f6ef7", "#08a77d", "#8b5cf6", "#f27b35", "#0ea5c6"];
+    const colors = ["#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#06b6d4"];
     if (comparisonSeries.length === 0) return [];
 
     const maxYears = timeRange === "3y" ? 3 : timeRange === "5y" ? 5 : 8;
@@ -833,8 +833,7 @@ function TrendsPage() {
                             d={series.linePath}
                             fill="none"
                             stroke="#ffffff"
-                            strokeWidth={isFocused ? "6" : "3"}
-                            strokeDasharray={isMuted ? "5 4" : "none"}
+                            strokeWidth={isFocused ? "7.5" : "5.5"}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             vectorEffect="non-scaling-stroke"
@@ -844,8 +843,7 @@ function TrendsPage() {
                             d={series.linePath}
                             fill="none"
                             stroke={`url(#${series.strokeGradientId})`}
-                            strokeWidth={isFocused ? "4" : "1.8"}
-                            strokeDasharray={isMuted ? "5 4" : "none"}
+                            strokeWidth={isFocused ? "5.2" : "3.8"}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             vectorEffect="non-scaling-stroke"
@@ -856,10 +854,10 @@ function TrendsPage() {
                               <circle
                                 cx={point.x}
                                 cy={point.y}
-                                r={isFocused ? "4.5" : "2.6"}
+                                r={isFocused ? "6" : "4.8"}
                                 fill="#ffffff"
                                 stroke={series.color}
-                                strokeWidth={isFocused ? "2.8" : "1.6"}
+                                strokeWidth={isFocused ? "3.2" : "2.4"}
                                 vectorEffect="non-scaling-stroke"
                               >
                                 <title>{`${series.label} (${point.label}): ${formatNumber(point.value)} papers`}</title>
@@ -867,7 +865,7 @@ function TrendsPage() {
                               {isFocused && activeFocusedSeries !== "ALL" && (
                                 <text
                                   x={point.x}
-                                  y={Math.max(COMPARISON_PLOT_TOP + 10, point.y - 10)}
+                                  y={Math.max(COMPARISON_PLOT_TOP + 10, point.y - 12)}
                                   textAnchor="middle"
                                   className="trend-line-value"
                                 >
