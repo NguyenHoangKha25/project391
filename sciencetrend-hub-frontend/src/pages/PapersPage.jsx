@@ -108,11 +108,13 @@ function PapersPage() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const searchQuery = searchParams.get("q") || "";
+  const searchQuery = searchParams.get("q") || searchParams.get("search") || "";
   const initialKeyword = searchParams.get("keyword") || "";
   const initialAuthor = searchParams.get("author") || "";
   const initialJournal = searchParams.get("journal") || "";
   const initialTopic = searchParams.get("topic") || "all";
+  const initialYearFrom = searchParams.get("yearFrom") || searchParams.get("year") || "";
+  const initialYearTo = searchParams.get("yearTo") || searchParams.get("year") || "";
   const urlParamsKey = searchParams.toString();
   const initialParams = buildPapersParams({
     search: searchQuery,
@@ -120,6 +122,8 @@ function PapersPage() {
     author: initialAuthor,
     journal: initialJournal,
     topic: initialTopic,
+    yearFrom: initialYearFrom,
+    yearTo: initialYearTo,
   });
   const [initialMetadata] = useState(getCachedPapersMetadata);
   const [initialResult] = useState(() => getCachedPapersResult(initialParams));
@@ -130,8 +134,8 @@ function PapersPage() {
   const [authorInput, setAuthorInput] = useState(initialAuthor);
   const [journalInput, setJournalInput] = useState(initialJournal);
   const [topicInput, setTopicInput] = useState(initialTopic);
-  const [yearFrom, setYearFrom] = useState("");
-  const [yearTo, setYearTo] = useState("");
+  const [yearFrom, setYearFrom] = useState(initialYearFrom);
+  const [yearTo, setYearTo] = useState(initialYearTo);
   const [sortBy, setSortBy] = useState("");
   const [resultsPerPage, setResultsPerPage] = useState(10);
 

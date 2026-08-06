@@ -694,7 +694,13 @@ function DashboardPage() {
                   papersByYear.map((p, idx) => {
                     const heightPercent = Math.min(100, Math.max(8, (p.value / yAxisScale.maxScale) * 100));
                     return (
-                      <div key={idx} className="chart-bar-col">
+                      <Link
+                        key={idx}
+                        to={`/papers?yearFrom=${p.label}&yearTo=${p.label}`}
+                        className="chart-bar-col clickable-bar"
+                        title={`Click to view papers from ${p.label}`}
+                        style={{ textDecoration: "none" }}
+                      >
                         <div className="bar-wrapper">
                           <div 
                             className={`bar-fill bar-fill-gradient-${idx % 7}`} 
@@ -702,12 +708,12 @@ function DashboardPage() {
                           >
                             <span className="bar-value-label">{formatNumber(p.value)}</span>
                             <span className="bar-tooltip">
-                              {formatNumber(p.value)} papers
+                              View {formatNumber(p.value)} papers ({p.label}) →
                             </span>
                           </div>
                         </div>
                         <span className="bar-label">{p.label}</span>
-                      </div>
+                      </Link>
                     );
                   })
                 ) : (

@@ -2750,3 +2750,18 @@ html body .st-layout .premium-dashboard .db-v4-topics-card .topic-mini-rank {
   padding: 4px 10px !important;
 }
 
+/* CLICKABLE CHART BARS */
+html body .st-layout .clickable-bar {
+  cursor: pointer !important;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+html body .st-layout .clickable-bar:hover {
+  transform: translateY(-4px) scale(1.04) !important;
+}
+
+html body .st-layout .clickable-bar:hover .bar-label {
+  color: #4f46e5 !important;
+  font-weight: 900 !important;
+}
+
