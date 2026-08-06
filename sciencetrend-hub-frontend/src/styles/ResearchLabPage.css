@@ -4275,6 +4275,88 @@ html body .st-layout .research-lab-v2 .research-map-explorer.is-focus-mode .rese
   height: 8px;
 }
 
+/* Keep map controls inside the actual center panel, independent of viewport width. */
+html body .st-layout .research-lab-v2 .research-map-explorer {
+  container-name: opportunity-map;
+  container-type: inline-size;
+}
+
+html body .st-layout .research-lab-v2 .research-map-toolbar {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+html body .st-layout .research-lab-v2 .research-map-toolbar > *,
+html body .st-layout .research-lab-v2 .research-map-toolbar > div:first-child > div,
+html body .st-layout .research-lab-v2 .research-map-view-switch {
+  min-width: 0;
+}
+
+html body .st-layout .research-lab-v2 .research-map-view-switch button {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+@container opportunity-map (max-width: 820px) {
+  html body .st-layout .research-lab-v2 .research-map-toolbar {
+    min-height: 96px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "identity zoom"
+      "meta view";
+    gap: 8px 12px;
+    padding: 10px 12px;
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-toolbar > div:first-child {
+    grid-area: identity;
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-toolbar-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-view-switch {
+    grid-area: view;
+    justify-self: end;
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-zoom {
+    grid-area: zoom;
+    justify-self: end;
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-toolbar-meta span {
+    min-height: 26px;
+    padding-inline: 8px;
+    font-size: 8.5px;
+  }
+}
+
+@container opportunity-map (max-width: 560px) {
+  html body .st-layout .research-lab-v2 .research-map-toolbar {
+    grid-template-areas:
+      "identity zoom"
+      "view view";
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-toolbar-meta {
+    display: none;
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-view-switch {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-view-switch button {
+    flex: 1 1 50%;
+    justify-content: center;
+  }
+}
+
 html body .st-layout .research-lab-v2 .research-map-explorer.is-focus-mode .research-map-canvas::-webkit-scrollbar-thumb {
   border-radius: 99px;
   background: rgba(83, 97, 145, 0.32);
