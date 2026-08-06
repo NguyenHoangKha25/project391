@@ -2148,11 +2148,32 @@ html body .st-layout .db-featured-spotlight-card .spotlight-btn:hover {
   pointer-events: none;
 }
 
+.db-ops-premium .panel-header-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin-bottom: 16px !important;
+}
+
 .db-ops-premium .panel-header-row h3 {
-  font-size: 16px !important;
-  font-weight: 800 !important;
-  color: #1e293b !important;
-  letter-spacing: -0.01em !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 17px !important;
+  font-weight: 850 !important;
+  color: #0f172a !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 !important;
+}
+
+.db-ops-premium .panel-header-row h3 .ops-header-icon {
+  display: inline-block !important;
+  font-size: 22px !important;
+  color: #4f46e5 !important;
+  flex-shrink: 0 !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
 }
 
 /* --- Health progress bar --- */

@@ -939,7 +939,10 @@ function DashboardPage() {
             </div>
             <section className="db-operations-panel db-ops-premium" aria-label="OpenAlex operations">
               <div className="panel-header-row">
-                <h3><FiDatabase style={{ marginRight: 8, verticalAlign: "-2px" }} />Operations status</h3>
+                <h3>
+                  <FiDatabase className="ops-header-icon" />
+                  <span>Operations status</span>
+                </h3>
                 <span className={`db-operation-status ${String(operationsData?.latestSyncLog?.status || "unknown").toLowerCase()}`}>
                   {String(operationsData?.latestSyncLog?.status || "unknown").toLowerCase() === "failed" ? "⚠ " : ""}
                   {operationsData?.latestSyncLog?.status || "No sync recorded"}
