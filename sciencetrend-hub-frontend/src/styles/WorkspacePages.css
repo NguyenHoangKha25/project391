@@ -18,7 +18,7 @@
   box-shadow: var(--sh-sm);
   overflow: hidden;
 }
-.workspace-toolbar::after { content:""; position:absolute; left:30px; right:30px; bottom:0; height:3px; border-radius:999px; background:linear-gradient(90deg,var(--st-primary),var(--st-accent),transparent); opacity:.9; }
+.workspace-toolbar::after { display: none !important; }
 .workspace-toolbar-copy { position: relative; z-index: 1; min-width: 0; }
 .workspace-toolbar-copy h2 { color: var(--st-heading); font-size: clamp(26px, 3vw, 38px); font-weight: 840; letter-spacing: -.06em; line-height: 1.04; }
 .workspace-toolbar-copy p { margin-top: 8px; color: var(--st-muted-strong); font-size: 14px; line-height: 1.55; }

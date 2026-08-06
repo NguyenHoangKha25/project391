@@ -675,20 +675,10 @@ html body .catalog-toolbar {
 }
 
 html body .workspace-toolbar::before,
-html body .catalog-toolbar::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 28px;
-  width: 92px;
-  height: 3px;
-  border-radius: 0 0 999px 999px;
-  background: linear-gradient(90deg, var(--st-primary), var(--st-cyan));
-}
-
-html body .workspace-toolbar::after {
-  opacity: 0.5;
-  background: linear-gradient(90deg, var(--st-primary), var(--st-cyan), transparent) !important;
+html body .catalog-toolbar::before,
+html body .workspace-toolbar::after,
+html body .catalog-toolbar::after {
+  display: none !important;
 }
 
 html body .workspace-empty,
