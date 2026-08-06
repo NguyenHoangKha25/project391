@@ -36,6 +36,8 @@ async function requestRefreshedAccessToken() {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
       method: "POST",
+      credentials: "include",
+      mode: "cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
     });
@@ -142,7 +144,15 @@ export async function apiRequest(endpoint, options = {}) {
 
   let res;
   try {
-    res = await fetch(url, { ...fetchOptions, method, headers, body: requestBody, signal: controller.signal });
+    res = await fetch(url, {
+      credentials: "include",
+      mode: "cors",
+      ...fetchOptions,
+      method,
+      headers,
+      body: requestBody,
+      signal: controller.signal,
+    });
     clearTimeout(timeoutId);
   } catch (error) {
     clearTimeout(timeoutId);
@@ -162,6 +172,8 @@ export async function apiRequest(endpoint, options = {}) {
       const retryTimeoutId = setTimeout(() => retryController.abort(), timeout);
       try {
         res = await fetch(url, {
+          credentials: "include",
+          mode: "cors",
           ...fetchOptions,
           method,
           headers,
