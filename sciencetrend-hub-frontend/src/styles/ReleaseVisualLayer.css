@@ -591,12 +591,7 @@ html body .st-layout :is(.lib-overview-panel, .admin-panel, .admin-panel-detaile
 }
 
 html body .st-layout :is(.lib-overview-panel, .admin-panel, .admin-panel-detailed, .workspace-panel, .account-panel)::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-  background: linear-gradient(90deg, var(--release-indigo), var(--release-cyan), transparent 72%);
-  opacity: 0.62;
+  display: none !important;
 }
 
 html body .st-layout .lib-item-row-compact,
