@@ -179,6 +179,17 @@ export async function apiRequest(endpoint, options = {}) {
     }
   }
 
+  // Rate limit — read Retry-After header for a user-friendly wait message
+  if (res.status === 429) {
+    const retryAfter = res.headers.get("Retry-After");
+    const seconds = retryAfter ? parseInt(retryAfter, 10) : null;
+    const waitMsg = seconds && seconds > 0
+      ? `Bạn đã thao tác quá nhiều lần. Vui lòng thử lại sau ${seconds} giây.`
+      : "Bạn đã thao tác quá nhiều lần. Vui lòng thử lại sau ít phút.";
+    console.warn(`[API Rate Limit] 429 on ${method} ${url} — retry after ${seconds ?? "unknown"}s`);
+    throw new Error(waitMsg);
+  }
+
   if (res.status === 204) {
     if (method !== "GET") {
       clearCache();

@@ -215,7 +215,7 @@ function FollowingPage() {
 
         {/* Dynamic List */}
         {loading ? (
-          <div className="following-loading-state">Loading your followed items...</div>
+          <div className="following-loading-state page-loading-state"><span className="workspace-loading-spinner" />Loading your followed items...</div>
         ) : activeTab === "topics" ? (
           /* TOPICS TAB */
           filteredTopics.length > 0 ? (

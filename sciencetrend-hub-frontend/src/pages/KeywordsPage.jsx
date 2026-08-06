@@ -115,7 +115,7 @@ function KeywordsPage() {
         </div>
         {error && <div className="workspace-notice warning">{error}</div>}
         {loading ? (
-          <div className="workspace-empty"><span className="workspace-loading-spinner" />Loading keywords…</div>
+          <div className="workspace-empty page-loading-state"><span className="workspace-loading-spinner" />Loading keywords…</div>
         ) : filtered.length > 0 ? (
           <div className="keyword-grid">
             {filtered.map((keyword) => {

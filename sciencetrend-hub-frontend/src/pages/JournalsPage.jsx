@@ -1,6 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiBookOpen, FiCheck, FiExternalLink, FiLoader, FiSearch, FiX } from "react-icons/fi";
+import {
+  FiArrowRight,
+  FiBarChart2,
+  FiBookOpen,
+  FiCalendar,
+  FiCheck,
+  FiExternalLink,
+  FiFileText,
+  FiGlobe,
+  FiHash,
+  FiLoader,
+  FiSearch,
+  FiX,
+} from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import {
@@ -14,7 +27,7 @@ import {
   unfollowJournal,
 } from "../services/journalService";
 import { getDashboardOverview } from "../services/dashboardService";
-import { normalizeJournal, normalizePaper, toArray } from "../utils/apiData";
+import { formatNumber, normalizeJournal, normalizePaper, toArray } from "../utils/apiData";
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import "../styles/WorkspacePages.css";
@@ -75,6 +88,7 @@ function JournalsPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState("");
   const loadRequestIdRef = useRef(0);
+  const detailRequestIdRef = useRef(0);
   const followActionVersionRef = useRef(0);
 
   const loadJournals = useCallback(async (search = "") => {
@@ -214,6 +228,8 @@ function JournalsPage() {
   }, [followNotice]);
 
   async function openJournal(journal) {
+    const detailRequestId = detailRequestIdRef.current + 1;
+    detailRequestIdRef.current = detailRequestId;
     const cacheKey = `journal_detail_${journal.id}`;
     const cachedDetail = getPersistentCachedData(cacheKey);
     const hasCachedDetail = cachedDetail
@@ -229,6 +245,7 @@ function JournalsPage() {
         getJournalById(journal.id),
         getPapersByJournal(journal.id, 0, 8),
       ]);
+      if (detailRequestId !== detailRequestIdRef.current) return;
 
       const normalizedJournal = detailResult.status === "fulfilled"
         ? normalizeJournal(detailResult.value)
@@ -251,8 +268,15 @@ function JournalsPage() {
         setPersistentCachedData(cacheKey, nextDetail);
       }
     } finally {
-      setDetailLoading(false);
+      if (detailRequestId === detailRequestIdRef.current) setDetailLoading(false);
     }
+  }
+
+  function closeJournal() {
+    detailRequestIdRef.current += 1;
+    setSelected(null);
+    setPapers([]);
+    setDetailLoading(false);
   }
 
   async function toggleFollow(journalId) {
@@ -323,6 +347,34 @@ function JournalsPage() {
   }
 
   const resultLabel = useMemo(() => `${journals.length} journal${journals.length === 1 ? "" : "s"}`, [journals.length]);
+  const journalInsights = useMemo(() => {
+    const keywordCounts = new Map();
+    let totalCitations = 0;
+    let latestYear = 0;
+
+    papers.forEach((paper) => {
+      totalCitations += Number(paper.citationCount) || 0;
+      const year = Number(paper.year);
+      if (Number.isInteger(year) && year > latestYear) latestYear = year;
+      (Array.isArray(paper.keywords) ? paper.keywords : []).forEach((keyword) => {
+        const name = String(keyword || "").trim();
+        if (name) keywordCounts.set(name, (keywordCounts.get(name) || 0) + 1);
+      });
+    });
+
+    return {
+      latestYear,
+      totalCitations,
+      keywords: [...keywordCounts.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 8)
+        .map(([name]) => name),
+    };
+  }, [papers]);
+  const selectedJournalKey = selected ? String(selected.id) : "";
+  const selectedFollowed = selectedJournalKey ? followedIds.has(selectedJournalKey) : false;
+  const selectedFollowProcessing = selectedJournalKey ? followProcessing.has(selectedJournalKey) : false;
+  const selectedPaperCount = selected?.paperCount > 0 ? selected.paperCount : papers.length;
 
   return (
     <MainLayout title="Journals" subtitle="Browse publication venues and the papers they publish">
@@ -347,7 +399,7 @@ function JournalsPage() {
 
         {error && <div className="workspace-notice warning">{error}</div>}
         {loading ? (
-          <div className="workspace-empty"><span className="workspace-loading-spinner" />Loading journals…</div>
+          <div className="workspace-empty page-loading-state"><span className="workspace-loading-spinner" />Loading journals…</div>
         ) : journals.length === 0 ? (
           <div className="workspace-empty">No journals match this search.</div>
         ) : (
@@ -406,28 +458,137 @@ function JournalsPage() {
         )}
 
         {selected && (
-          <div className="catalog-drawer-backdrop" onClick={() => setSelected(null)}>
-            <aside className="catalog-drawer" onClick={(event) => event.stopPropagation()}>
-              <button className="catalog-drawer-close" type="button" aria-label="Close journal details" onClick={() => setSelected(null)}><FiX /></button>
-              <span className="catalog-kicker">Journal profile</span>
-              <h2>{selected.name}</h2>
-              <p>{selected.description || `${selected.publisher} · ${selected.subject}`}</p>
-              <div className="catalog-detail-facts">
-                {selected.issn && <span><strong>ISSN</strong>{selected.issn}</span>}
-                {selected.impactFactor && <span><strong>Impact factor</strong>{selected.impactFactor}</span>}
-                {selected.quartile && <span><strong>Quartile</strong>{selected.quartile}</span>}
+          <div className="catalog-drawer-backdrop" onClick={closeJournal}>
+            <aside className="catalog-drawer journal-profile-drawer" onClick={(event) => event.stopPropagation()}>
+              <div className="journal-profile-topline">
+                <span className="catalog-kicker">Journal profile</span>
+                <button className="catalog-drawer-close" type="button" aria-label="Close journal details" onClick={closeJournal}><FiX /></button>
               </div>
-              {selected.homepage && <a className="catalog-external" href={selected.homepage} target="_blank" rel="noreferrer">Journal website <FiExternalLink /></a>}
-              <h3 className="catalog-section-title">Recent papers</h3>
-              {detailLoading ? <div className="catalog-inline-empty">Loading journal papers…</div> : papers.length > 0 ? (
-                <div className="catalog-paper-list">
-                  {papers.map((paper) => (
-                    <Link key={paper.id} to={ROUTE_PATHS.paperDetail(paper.id)}>
-                      <strong>{paper.title}</strong><span>{paper.authors} · {paper.year || "Year unavailable"}</span>
-                    </Link>
-                  ))}
+
+              <header className="journal-profile-hero">
+                <div className="journal-profile-icon"><FiBookOpen /></div>
+                <div className="journal-profile-heading">
+                  <div className="journal-profile-tags">
+                    {selected.subject && <span>{selected.subject}</span>}
+                    {topIds.has(selectedJournalKey) && <span className="is-highlighted">Top journal</span>}
+                    {selected.openAccess && <span className="is-access">Open access</span>}
+                  </div>
+                  <h2>{selected.name}</h2>
+                  <p>{selected.publisher || "Publisher unavailable"}</p>
                 </div>
-              ) : <div className="catalog-inline-empty">No papers are available for this journal.</div>}
+              </header>
+
+              <div className="journal-profile-actions">
+                <button
+                  type="button"
+                  className={`workspace-button journal-follow-button ${selectedFollowed ? "is-active" : ""}`}
+                  onClick={() => toggleFollow(selected.id)}
+                  disabled={selectedFollowProcessing}
+                >
+                  {selectedFollowProcessing
+                    ? <><FiLoader className="is-spinning" /> Updating…</>
+                    : selectedFollowed
+                      ? <><FiCheck /> Following</>
+                      : "Follow journal"}
+                </button>
+                <Link className="workspace-button primary journal-browse-button" to={`${ROUTE_PATHS.PAPERS}?journal=${encodeURIComponent(selected.name)}`}>
+                  Browse papers <FiArrowRight />
+                </Link>
+                {selected.homepage && (
+                  <a className="journal-website-button" href={selected.homepage} target="_blank" rel="noreferrer" aria-label={`Open ${selected.name} website`}>
+                    <FiGlobe /> <FiExternalLink />
+                  </a>
+                )}
+              </div>
+
+              <section className="journal-profile-summary">
+                <div>
+                  <span>About this journal</span>
+                  <h3>Publication overview</h3>
+                </div>
+                <p>
+                  {selected.description || `This profile combines the catalog metadata available for ${selected.name} with its latest indexed publication records.`}
+                </p>
+              </section>
+
+              <div className="journal-profile-stats" aria-label="Journal statistics">
+                <article>
+                  <FiFileText />
+                  <span>Indexed papers</span>
+                  <strong>{selectedPaperCount > 0 ? formatNumber(selectedPaperCount) : "—"}</strong>
+                </article>
+                <article>
+                  <FiBarChart2 />
+                  <span>Citations in preview</span>
+                  <strong>{papers.length > 0 ? formatNumber(journalInsights.totalCitations) : "—"}</strong>
+                </article>
+                <article>
+                  <FiCalendar />
+                  <span>Latest indexed year</span>
+                  <strong>{journalInsights.latestYear || "—"}</strong>
+                </article>
+                <article>
+                  <FiHash />
+                  <span>ISSN</span>
+                  <strong>{selected.issn || "Not listed"}</strong>
+                </article>
+              </div>
+
+              {(selected.quartile || selected.impactFactor) && (
+                <div className="journal-profile-facts">
+                  {selected.quartile && <span><strong>Quartile</strong>{selected.quartile}</span>}
+                  {selected.impactFactor && <span><strong>Impact factor</strong>{selected.impactFactor}</span>}
+                </div>
+              )}
+
+              {journalInsights.keywords.length > 0 && (
+                <section className="journal-profile-section journal-theme-section">
+                  <div className="journal-section-heading">
+                    <div><span>Research coverage</span><h3>Themes in recent papers</h3></div>
+                    <small>{journalInsights.keywords.length} themes</small>
+                  </div>
+                  <div className="journal-theme-list">
+                    {journalInsights.keywords.map((keyword) => (
+                      <Link key={keyword} to={`${ROUTE_PATHS.PAPERS}?keyword=${encodeURIComponent(keyword)}`}>{keyword}</Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <section className="journal-profile-section">
+                <div className="journal-section-heading">
+                  <div><span>Latest from the index</span><h3>Recent papers</h3></div>
+                  {!detailLoading && <small>{papers.length} loaded</small>}
+                </div>
+                {detailLoading ? (
+                  <div className="journal-detail-loading"><span className="workspace-loading-spinner" />Loading journal papers…</div>
+                ) : papers.length > 0 ? (
+                  <div className="catalog-paper-list journal-paper-list">
+                    {papers.map((paper, index) => (
+                      <Link key={paper.id} to={ROUTE_PATHS.paperDetail(paper.id)}>
+                        <span className="journal-paper-rank">{String(index + 1).padStart(2, "0")}</span>
+                        <div className="journal-paper-copy">
+                          <strong>{paper.title}</strong>
+                          <p>{paper.authors}</p>
+                          <div className="journal-paper-meta">
+                            <span><FiCalendar />{paper.year || "Year unavailable"}</span>
+                            <span><FiBarChart2 />{formatNumber(paper.citationCount)} citations</span>
+                            {paper.keywords?.[0] && <span>{paper.keywords[0]}</span>}
+                          </div>
+                        </div>
+                        <FiArrowRight className="journal-paper-arrow" />
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="journal-empty-state">
+                    <FiFileText />
+                    <h4>No recent papers indexed yet</h4>
+                    <p>Search the publication catalog to discover papers associated with this journal.</p>
+                    <Link to={`${ROUTE_PATHS.PAPERS}?journal=${encodeURIComponent(selected.name)}`}>Search this journal <FiArrowRight /></Link>
+                  </div>
+                )}
+              </section>
             </aside>
           </div>
         )}

@@ -17,3 +17,11 @@ export function searchPapers(searchTerm, extraParams = {}) {
 export function getPaperById(id) {
   return apiRequest(`/papers/${id}`, { auth: false });
 }
+
+// Backend accepts between two and four distinct research paper IDs.
+export function comparePapers(ids = []) {
+  return apiRequest("/papers/compare", {
+    params: { ids },
+    auth: false,
+  });
+}

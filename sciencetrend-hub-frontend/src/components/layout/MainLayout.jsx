@@ -39,12 +39,16 @@ function MainLayout({
       )}
 
       <div className="st-main">
+        <div className="st-workspace-glow st-workspace-glow-one" aria-hidden="true" />
+        <div className="st-workspace-glow st-workspace-glow-two" aria-hidden="true" />
         <Navbar
           title={title}
           subtitle={subtitle}
           onMenuClick={() => setSidebarOpen((current) => !current)}
         />
-        <main className="st-content" id="main-content">{children}</main>
+        <main className="st-content" id="main-content">
+          <div className="st-content-frame">{children}</div>
+        </main>
       </div>
     </div>
   );

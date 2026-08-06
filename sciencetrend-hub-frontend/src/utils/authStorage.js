@@ -1,4 +1,5 @@
 import { unwrapResponse } from "./apiData";
+import { clearPersistentCache } from "./apiCache";
 
 // Backend trả về field "token" (không phải accessToken)
 // AuthResponse: { token, refreshToken, user: { userId, username, email, role } }
@@ -165,6 +166,7 @@ export function clearAuthSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  clearPersistentCache();
 }
 
 export function formatRoleForDisplay(roleValue) {

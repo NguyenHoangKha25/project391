@@ -11,6 +11,7 @@ import NotificationsPage from "../pages/NotificationsPage";
 import OAuth2CallbackPage from "../pages/OAuth2CallbackPage";
 import PapersPage from "../pages/PapersPage";
 import RegisterPage from "../pages/RegisterPage";
+import ResearchLabPage from "../pages/ResearchLabPage";
 import ReportsPage from "../pages/ReportsPage";
 import ResetPassWord from "../pages/ResetPassWord";
 import TrendsPage from "../pages/TrendsPage";
@@ -78,6 +79,7 @@ function RoleRoute({ children, allowedRoles }) {
   return children;
 }
 
+
 function AppRoutes() {
   const { isLoggedIn, defaultPath } = useAuth();
 
@@ -110,7 +112,11 @@ function AppRoutes() {
 
       <Route
         path={ROUTE_PATHS.DASHBOARD}
-        element={<DashboardPage />}
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
       />
 
       <Route
@@ -131,7 +137,11 @@ function AppRoutes() {
 
       <Route
         path={ROUTE_PATHS.TRENDS}
-        element={<TrendsPage />}
+        element={
+          <RoleRoute allowedRoles={["LECTURER", "RESEARCHER", "ADMIN"]}>
+            <TrendsPage />
+          </RoleRoute>
+        }
       />
 
       <Route
@@ -174,6 +184,15 @@ function AppRoutes() {
         element={
           <RoleRoute allowedRoles={["LECTURER", "RESEARCHER", "ADMIN"]}>
             <ReportsPage />
+          </RoleRoute>
+        }
+      />
+
+      <Route
+        path={ROUTE_PATHS.RESEARCH_LAB}
+        element={
+          <RoleRoute allowedRoles={["RESEARCHER", "ADMIN"]}>
+            <ResearchLabPage />
           </RoleRoute>
         }
       />

@@ -6,6 +6,7 @@ import {
   FiFileText,
   FiBookOpen,
   FiKey,
+  FiTag,
   FiDatabase,
   FiArrowUpRight,
   FiCheckCircle,
@@ -13,19 +14,35 @@ import {
   FiArrowRight,
   FiTrendingUp,
   FiTrendingDown,
-  FiMinus
+  FiMinus,
+  FiGitBranch,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
-import { getDashboardOverview } from "../services/dashboardService";
+import {
+  getDashboardHome,
+} from "../services/dashboardService";
 import { getTrendingTopics } from "../services/trendService";
-import { normalizeDashboard, formatNumber, normalizeTopic, toArray } from "../utils/apiData";
+import {
+  formatDateTime,
+  formatNumber,
+  normalizeDashboardHome,
+  normalizeTopic,
+  toArray,
+} from "../utils/apiData";
+
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import "../styles/DashboardPage.css";
 
 const DONUT_COLORS = ["#3b82f6", "#10b981", "#8b5cf6", "#f43f5e", "#f59e0b", "#06b6d4"];
-const DASHBOARD_OVERVIEW_CACHE_KEY = "dashboard_overview_v3";
-const DASHBOARD_TOPICS_CACHE_KEY = "dashboard_trending_topics_v2";
+
+function getDashboardCacheKeys(user = {}) {
+  const userId = user.id ?? user.userId ?? user.username ?? "anon";
+  return {
+    overview: `dashboard_overview_v4_${userId}`,
+    topics: `dashboard_trending_topics_v3_${userId}`,
+  };
+}
 
 function hasDashboardData(data) {
   return Boolean(data)
@@ -33,6 +50,7 @@ function hasDashboardData(data) {
       data.totalPapers > 0
       || data.totalJournals > 0
       || data.totalKeywords > 0
+      || data.totalTopics > 0
       || (
         Array.isArray(data.papersByYear)
         && data.papersByYear.some((point) => Number(point?.value) > 0)
@@ -40,9 +58,9 @@ function hasDashboardData(data) {
     );
 }
 
-function getInitialDashboardData() {
-  const overview = getPersistentCachedData(DASHBOARD_OVERVIEW_CACHE_KEY);
-  const topics = getPersistentCachedData(DASHBOARD_TOPICS_CACHE_KEY);
+function getInitialDashboardData(cacheKeys) {
+  const overview = getPersistentCachedData(cacheKeys.overview);
+  const topics = getPersistentCachedData(cacheKeys.topics);
 
   return {
     overview: hasDashboardData(overview) ? overview : null,
@@ -50,18 +68,37 @@ function getInitialDashboardData() {
   };
 }
 
+function formatDecimal(value) {
+  return Number(value || 0).toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+  });
+}
+
+function formatAxisValue(value) {
+  const numericValue = Number(value) || 0;
+  if (numericValue >= 1_000_000) return `${(numericValue / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (numericValue >= 1_000) return `${(numericValue / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+  return formatNumber(Math.round(numericValue));
+}
+
 function DashboardPage() {
-  const { user } = useAuth();
-  const [initialData] = useState(getInitialDashboardData);
+  const { user, role } = useAuth();
+  const normalizedRole = String(role || user?.role || "STUDENT").toUpperCase();
+  const canUseAnalytics = ["LECTURER", "RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const isAdmin = normalizedRole === "ADMIN";
+  const cacheKeys = useMemo(() => getDashboardCacheKeys(user), [user]);
+  const [initialData] = useState(() => getInitialDashboardData(cacheKeys));
   const [data, setData] = useState(initialData.overview);
   const [trendingTopics, setTrendingTopics] = useState(initialData.topics);
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [operationsData, setOperationsData] = useState(null);
   const [loading, setLoading] = useState(!initialData.overview && initialData.topics.length === 0);
   const [spinning, setSpinning] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const loadDashboard = useCallback(async (isRefresh = false) => {
-    const storedOverview = getPersistentCachedData(DASHBOARD_OVERVIEW_CACHE_KEY);
-    const storedTopics = getPersistentCachedData(DASHBOARD_TOPICS_CACHE_KEY);
+    const storedOverview = getPersistentCachedData(cacheKeys.overview);
+    const storedTopics = getPersistentCachedData(cacheKeys.topics);
     const cachedOverview = hasDashboardData(storedOverview) ? storedOverview : null;
     const cachedTopics = Array.isArray(storedTopics) && storedTopics.length > 0 ? storedTopics : [];
     const hasCachedData = Boolean(cachedOverview) || cachedTopics.length > 0;
@@ -70,6 +107,9 @@ function DashboardPage() {
       if (cachedOverview) setData(cachedOverview);
       if (cachedTopics.length > 0) setTrendingTopics(cachedTopics);
       setLoading(false);
+    } else if (!isRefresh) {
+      setData(null);
+      setTrendingTopics([]);
     }
 
     try {
@@ -77,40 +117,61 @@ function DashboardPage() {
       else if (!hasCachedData) setLoading(true);
       setErrorMessage("");
 
-      const [overviewRes, topicsRes] = await Promise.allSettled([
-        getDashboardOverview(),
-        getTrendingTopics({ limit: 3 })
-      ]);
+      // Single unified dashboard request + optional trending topics
+      const requests = [getDashboardHome()];
+      // Only fetch trending topics for roles that have access
+      if (canUseAnalytics) {
+        requests.push(getTrendingTopics({ limit: 3 }));
+      }
 
-      if (overviewRes.status === "fulfilled") {
-        const normOverview = normalizeDashboard(overviewRes.value);
-        if (hasDashboardData(normOverview)) {
+      const results = await Promise.allSettled(requests);
+      const homeRes = results[0];
+      const topicsRes = canUseAnalytics ? results[1] : null;
+
+      if (homeRes.status === "fulfilled") {
+        const home = normalizeDashboardHome(homeRes.value);
+        const normOverview = home.overview;
+
+        if (normOverview && hasDashboardData(normOverview)) {
           setData(normOverview);
-          setPersistentCachedData(DASHBOARD_OVERVIEW_CACHE_KEY, normOverview);
+          setPersistentCachedData(cacheKeys.overview, normOverview);
         } else if (!cachedOverview) {
           setData(normOverview);
           setErrorMessage("No dashboard statistics are available in the catalog yet.");
+        }
+
+        // Analytics from unified response
+        if (home.analytics) {
+          setAnalyticsData(home.analytics);
+        } else {
+          setAnalyticsData(null);
+        }
+
+        // Operations from unified response (only Admin gets this)
+        if (home.operations) {
+          setOperationsData(home.operations);
+        } else {
+          setOperationsData(null);
         }
       } else if (!cachedOverview) {
         setErrorMessage("Couldn't load dashboard statistics. Please try again in a moment.");
       }
 
-      if (topicsRes.status === "fulfilled") {
+      if (topicsRes?.status === "fulfilled") {
         const normTopics = toArray(topicsRes.value)
           .map(normalizeTopic)
           .filter((topic) => topic.name !== "Untitled topic");
         if (normTopics.length > 0) {
           setTrendingTopics(normTopics);
-          setPersistentCachedData(DASHBOARD_TOPICS_CACHE_KEY, normTopics);
+          setPersistentCachedData(cacheKeys.topics, normTopics);
         }
       }
 
-      if (
-        overviewRes.status === "rejected"
-        && topicsRes.status === "rejected"
-        && !hasCachedData
-      ) {
+      const failedRequests = results.filter((result) => result.status === "rejected").length;
+      if (failedRequests === results.length && !hasCachedData) {
         setErrorMessage("Couldn't reach the server. Please try again in a moment.");
+      } else if (failedRequests > 0 && homeRes.status === "fulfilled") {
+        setErrorMessage(`${failedRequests} dashboard data source${failedRequests > 1 ? "s are" : " is"} temporarily unavailable.`);
       }
     } catch (error) {
       console.error("Cannot load dashboard", error);
@@ -121,7 +182,7 @@ function DashboardPage() {
       setLoading(false);
       setSpinning(false);
     }
-  }, []);
+  }, [cacheKeys, canUseAnalytics, isAdmin]);
 
   useEffect(() => {
     loadDashboard();
@@ -136,11 +197,7 @@ function DashboardPage() {
     const totalPapers = data?.totalPapers ?? 0;
     const totalJournals = data?.totalJournals ?? 0;
     const totalKeywords = data?.totalKeywords ?? 0;
-    const openAlexPapers = data?.openAlexPapers ?? 0;
-    const successfulSyncs = data?.successfulSyncs ?? 0;
-    const failedSyncs = data?.failedSyncs ?? 0;
-
-    const isAdmin = user?.role === "ADMIN";
+    const totalTopics = data?.totalTopics ?? 0;
 
     const stats = [
       {
@@ -171,41 +228,63 @@ function DashboardPage() {
         themeClass: "kpi-theme-purple"
       },
       {
-        title: "OpenAlex Papers",
-        value: formatNumber(openAlexPapers),
-        icon: FiDatabase,
+        title: "Topics",
+        value: formatNumber(totalTopics),
+        icon: FiTag,
         change: "Current",
-        trendText: "OpenAlex records",
+        trendText: "catalog total",
         trendType: "neutral",
         themeClass: "kpi-theme-amber"
       }
     ];
 
-    if (isAdmin) {
+    if (canUseAnalytics) {
+      const growthRate = Number(analyticsData?.publicationGrowthRate ?? 0);
+      const growthPercent = growthRate * 100;
+      const latestYear = analyticsData?.latestCompleteYear || "latest year";
+      const previousYear = analyticsData?.previousCompleteYear || "previous year";
       stats.push(
         {
-          title: "Successful Syncs",
-          value: formatNumber(successfulSyncs),
-          icon: FiCheckCircle,
-          change: "Recorded",
-          trendText: "completed runs",
+          title: "Total Citations",
+          value: formatNumber(analyticsData?.totalCitations ?? 0),
+          icon: FiActivity,
+          change: "Impact",
+          trendText: "catalog citations",
           trendType: "neutral",
-          themeClass: "kpi-theme-emerald"
+          themeClass: "kpi-theme-indigo"
         },
         {
-          title: "Failed Syncs",
-          value: formatNumber(failedSyncs),
-          icon: FiAlertTriangle,
-          change: failedSyncs > 0 ? "Alert" : "0",
-          trendText: failedSyncs > 0 ? "failed runs" : "Clean status",
-          trendType: failedSyncs > 0 ? "negative" : "neutral",
-          themeClass: "kpi-theme-rose"
-        }
+          title: "Avg Citations / Paper",
+          value: formatDecimal(analyticsData?.averageCitationsPerPaper),
+          icon: FiArrowUpRight,
+          change: "Average",
+          trendText: "per publication",
+          trendType: "neutral",
+          themeClass: "kpi-theme-purple"
+        },
+        {
+          title: "Publication Growth",
+          value: `${growthPercent > 0 ? "+" : ""}${formatDecimal(growthPercent)}%`,
+          icon: growthRate < 0 ? FiTrendingDown : FiTrendingUp,
+          change: growthRate > 0 ? "Growing" : growthRate < 0 ? "Declining" : "Stable",
+          trendText: `${previousYear} to ${latestYear}`,
+          trendType: growthRate > 0 ? "positive" : growthRate < 0 ? "negative" : "neutral",
+          themeClass: growthRate < 0 ? "kpi-theme-rose" : "kpi-theme-emerald"
+        },
+        {
+          title: "High-Impact Papers",
+          value: formatNumber(analyticsData?.highImpactPaperCount ?? 0),
+          icon: FiCheckCircle,
+          change: "Cited",
+          trendText: "high-impact records",
+          trendType: "neutral",
+          themeClass: "kpi-theme-amber"
+        },
       );
     }
 
     return stats;
-  }, [data, user]);
+  }, [analyticsData, canUseAnalytics, data]);
 
   const papersByYear = useMemo(() => {
     const raw = data?.papersByYear || [];
@@ -226,7 +305,7 @@ function DashboardPage() {
 
   const topCitedPapers = useMemo(() => {
     let raw = data?.topCitedPapers || [];
-    return raw.slice(0, 3);
+    return raw.slice(0, 10);
   }, [data]);
 
   const donutSegments = useMemo(() => {
@@ -259,30 +338,96 @@ function DashboardPage() {
 
   const yAxisScale = useMemo(() => {
     const values = papersByYear.map(p => Number(p.value) || 0);
-    const rawMax = Math.max(...values, 10);
-    
-    // Guarantee minimum 20K (20,000 papers) target scale ceiling
-    const maxScale = Math.max(20000, Math.ceil((rawMax * 1.15) / 5000) * 5000);
+    const rawMax = Math.max(...values, 1);
+    const roughStep = rawMax / 4;
+    const magnitude = 10 ** Math.floor(Math.log10(Math.max(roughStep, 1)));
+    const normalizedStep = roughStep / magnitude;
+    const stepMultiplier = normalizedStep <= 1 ? 1 : normalizedStep <= 2 ? 2 : normalizedStep <= 5 ? 5 : 10;
+    const step = Math.max(1, stepMultiplier * magnitude);
+    const maxScale = Math.max(step, Math.ceil((rawMax * 1.2) / step) * step);
 
-    if (maxScale === 20000) {
-      return {
-        maxScale: 20000,
-        labels: ["20K", "13.3K", "6.6K", "0"]
-      };
-    }
-
-    const label4 = `${(maxScale / 1000).toFixed(0)}K`;
-    const label3 = `${((maxScale * 0.66) / 1000).toFixed(1).replace(/\.0$/, "")}K`;
-    const label2 = `${((maxScale * 0.33) / 1000).toFixed(1).replace(/\.0$/, "")}K`;
-    const label1 = "0";
-
-    return { maxScale, labels: [label4, label3, label2, label1] };
+    return {
+      maxScale,
+      labels: [
+        formatAxisValue(maxScale),
+        formatAxisValue(maxScale * 0.66),
+        formatAxisValue(maxScale * 0.33),
+        "0",
+      ],
+    };
   }, [papersByYear]);
+
+  const quickActions = useMemo(() => {
+    if (normalizedRole === "LECTURER") {
+      return [
+        { label: "Generate Report", to: "/reports", icon: FiFileText },
+        { label: "Browse Papers", to: "/papers", icon: FiBookOpen },
+        { label: "Compare Trends", to: "/trends", icon: FiTrendingUp },
+      ];
+    }
+    if (normalizedRole === "RESEARCHER") {
+      return [
+        { label: "Research Lab", to: "/research-lab", icon: FiGitBranch },
+        { label: "Advanced Report", to: "/reports", icon: FiFileText },
+        { label: "Compare Trends", to: "/trends", icon: FiTrendingUp },
+      ];
+    }
+    if (normalizedRole === "ADMIN") {
+      return [
+        { label: "Admin Panel", to: "/admin", icon: FiDatabase },
+        { label: "Research Lab", to: "/research-lab", icon: FiGitBranch },
+        { label: "Browse Papers", to: "/papers", icon: FiBookOpen },
+      ];
+    }
+    return [
+      { label: "Browse Papers", to: "/papers", icon: FiFileText },
+      { label: "Explore Topics", to: "/topics", icon: FiTag },
+      { label: "View Journals", to: "/journals", icon: FiBookOpen },
+    ];
+  }, [normalizedRole]);
+
+  const primaryStats = dashboardStats.slice(0, 4);
+  const supportingStats = dashboardStats.slice(4);
+  const latestPublication = papersByYear.at(-1) ?? null;
+  const leadingJournal = topJournals[0] ?? null;
+  const leadingTopic = trendingTopics[0] ?? null;
+
+  function renderMetricCard(stat, variant = "primary") {
+    const Icon = stat.icon;
+    const TrendIcon = stat.change === "—" || stat.trendType === "neutral"
+      ? FiMinus
+      : stat.trendType === "negative"
+        ? FiTrendingDown
+        : FiTrendingUp;
+
+    return (
+      <article
+        key={stat.title}
+        className={`db-kpi-card db-kpi-card--${variant} ${stat.themeClass || ""}`}
+        aria-label={`${stat.title}: ${stat.value}`}
+      >
+        <div className="db-kpi-card-header">
+          <span className="db-kpi-label">{stat.title}</span>
+          <div className="db-kpi-icon" aria-hidden="true">
+            <Icon />
+          </div>
+        </div>
+        <strong className="db-kpi-value">{stat.value}</strong>
+        <div className="db-kpi-meta">
+          <span className={`db-kpi-change ${stat.trendType}`}>
+            <TrendIcon aria-hidden="true" />
+            {stat.change}
+          </span>
+          <span className="db-kpi-comparison">{stat.trendText}</span>
+        </div>
+      </article>
+    );
+  }
 
   if (loading) {
     return (
       <MainLayout title="Dashboard" subtitle={dashboardSubtitle}>
-        <div className="cm-loading" style={{ minHeight: "60vh" }}>
+        <div className="cm-loading page-loading-state" style={{ minHeight: "60vh" }}>
           <div className="cm-spinner" />
           <p style={{ fontWeight: "750", color: "#60a5fa", fontSize: "16px" }}>Loading dashboard overview statistics...</p>
         </div>
@@ -294,27 +439,55 @@ function DashboardPage() {
     <MainLayout title="Dashboard" subtitle={dashboardSubtitle}>
       <div className="premium-dashboard">
 
-        <section className="db-control-center" aria-labelledby="dashboard-control-title">
-          <div className="db-control-identity">
-            <span className="db-control-icon" aria-hidden="true">
-              <FiActivity />
-            </span>
-            <div>
-              <span className="db-control-eyebrow">Analytics overview</span>
-              <h2 id="dashboard-control-title">Research catalog pulse</h2>
-              <p>Current signals from the indexed publication data.</p>
+        <section className="db-v4-hero" aria-labelledby="dashboard-control-title">
+          <div className="db-v4-hero-copy">
+            <span className="db-v4-eyebrow"><FiActivity /> Research command center</span>
+            <h2 id="dashboard-control-title">See what matters in your research catalog.</h2>
+            <p>Move from catalog coverage to publication momentum, impact, and the next workspace action without digging through separate pages.</p>
+            <div className="db-v4-hero-actions" aria-label="Workspace shortcuts">
+              {quickActions.map(({ label, to, icon: Icon }, index) => (
+                <Link key={label} to={to} className={index === 0 ? "is-primary" : ""}>
+                  <Icon aria-hidden="true" />
+                  <span>{label}</span>
+                  {index === 0 && <FiArrowUpRight aria-hidden="true" />}
+                </Link>
+              ))}
             </div>
           </div>
 
-          <button
-            type="button"
-            className="db-refresh-btn-premium db-control-refresh"
-            onClick={() => loadDashboard(true)}
-            disabled={spinning}
-          >
-            <FiRefreshCw className={spinning ? "is-spinning" : ""} />
-            <span>{spinning ? "Refreshing..." : "Refresh data"}</span>
-          </button>
+          <aside className="db-v4-snapshot" aria-label="Current catalog snapshot">
+            <div className="db-v4-snapshot-status">
+              <span className={hasDashboardData(data) ? "is-ready" : ""}><i />{hasDashboardData(data) ? "Live catalog" : "Awaiting data"}</span>
+              <small>Current snapshot</small>
+            </div>
+            <div className="db-v4-snapshot-total">
+              <span>Indexed papers</span>
+              <strong>{formatNumber(data?.totalPapers ?? 0)}</strong>
+            </div>
+            <dl className="db-v4-snapshot-list">
+              <div>
+                <dt>Latest output</dt>
+                <dd>{latestPublication ? `${latestPublication.label} · ${formatNumber(latestPublication.value)} papers` : "Not available"}</dd>
+              </div>
+              <div>
+                <dt>Leading journal</dt>
+                <dd title={leadingJournal?.label}>{leadingJournal?.label || "Not available"}</dd>
+              </div>
+              <div>
+                <dt>Topic to watch</dt>
+                <dd title={leadingTopic?.name}>{leadingTopic?.name || "Not available"}</dd>
+              </div>
+            </dl>
+            <button
+              type="button"
+              className="db-v4-refresh"
+              onClick={() => loadDashboard(true)}
+              disabled={spinning}
+            >
+              <FiRefreshCw className={spinning ? "is-spinning" : ""} />
+              <span>{spinning ? "Refreshing data..." : "Refresh catalog data"}</span>
+            </button>
+          </aside>
         </section>
 
         {errorMessage && (
@@ -326,55 +499,44 @@ function DashboardPage() {
 
         <div className="db-section-intro">
           <div>
-            <span>Catalog snapshot</span>
-            <h2>Key research metrics</h2>
+            <span>Index composition</span>
+            <h2>The shape of your research catalog</h2>
           </div>
-          <p>Coverage totals from the current index.</p>
+          <p>Four live coverage signals show how much material is ready to explore.</p>
         </div>
 
-        {/* Dynamic Metrics Grid */}
-        <section className="db-metrics-grid" aria-label="Dashboard overview">
-          {dashboardStats.map((stat, i) => {
-            const Icon = stat.icon;
-            const TrendIcon = stat.change === "—" || stat.trendType === "neutral"
-              ? FiMinus
-              : stat.trendType === "negative"
-                ? FiTrendingDown
-                : FiTrendingUp;
-            return (
-              <article key={i} className={`db-kpi-card ${stat.themeClass || ""}`} aria-label={`${stat.title}: ${stat.value}`}>
-                <div className="db-kpi-card-header">
-                  <span className="db-kpi-label">{stat.title}</span>
-                  <div className="db-kpi-icon" aria-hidden="true">
-                    <Icon />
-                  </div>
-                </div>
-                <strong className="db-kpi-value">{stat.value}</strong>
-                <div className="db-kpi-meta">
-                  <span className={`db-kpi-change ${stat.trendType}`}>
-                    <TrendIcon aria-hidden="true" />
-                    {stat.change}
-                  </span>
-                  <span className="db-kpi-comparison">{stat.trendText}</span>
-                </div>
-              </article>
-            );
-          })}
+        <section className="db-metrics-grid db-metrics-grid-primary" aria-label="Core catalog metrics">
+          {primaryStats.map((stat, index) => renderMetricCard(stat, index === 0 ? "featured" : "summary"))}
         </section>
+
+        {supportingStats.length > 0 && (
+          <section className="db-impact-strip" aria-labelledby="dashboard-impact-title">
+            <div className="db-impact-heading">
+              <span><FiTrendingUp aria-hidden="true" /></span>
+              <div>
+                <small>Research impact</small>
+                <h3 id="dashboard-impact-title">Citation and growth signals</h3>
+              </div>
+            </div>
+            <div className="db-metrics-grid db-metrics-grid-secondary">
+              {supportingStats.map((stat) => renderMetricCard(stat, "compact"))}
+            </div>
+          </section>
+        )}
 
         <div className="db-section-intro db-section-intro-compact">
           <div>
-            <span>Research activity</span>
-            <h2>Where the catalog is moving</h2>
+            <span>Research signals</span>
+            <h2>What deserves attention now</h2>
           </div>
-          <p>Annual output, high-volume keywords, and leading journals.</p>
+          <p>Publication volume, recurring concepts, and the journals shaping this index.</p>
         </div>
 
         {/* Middle Charts & Stats Panel */}
         <section className="db-charts-grid">
           
           {/* Card 1: Papers by Year */}
-          <article className="chart-card glassmorphic-panel">
+          <article className="chart-card glassmorphic-panel db-v4-activity-card">
             <div className="panel-header-row">
               <h3>Papers by Year</h3>
               <span className="badge-chip">Yearly</span>
@@ -397,6 +559,7 @@ function DashboardPage() {
                             className={`bar-fill bar-fill-gradient-${idx % 7}`} 
                             style={{ height: `${heightPercent}%` }}
                           >
+                            <span className="bar-value-label">{formatNumber(p.value)}</span>
                             <span className="bar-tooltip">
                               {formatNumber(p.value)} papers
                             </span>
@@ -416,13 +579,13 @@ function DashboardPage() {
             
             <p className="chart-subtext">
               {papersByYear.length > 0 
-                ? `The number of papers ranges across the catalog in dynamic annual trends.`
+                ? `${latestPublication?.label || "Latest year"} contains ${formatNumber(latestPublication?.value || 0)} indexed papers in this catalog.`
                 : "No publication statistics recorded in the database yet."}
             </p>
           </article>
 
           {/* Card 2: Top Keywords */}
-          <article className="chart-card glassmorphic-panel">
+          <article className="chart-card glassmorphic-panel db-v4-keywords-card">
             <div className="panel-header-row">
               <h3>Top Keywords</h3>
               <span className="badge-chip">Top 10</span>
@@ -430,7 +593,7 @@ function DashboardPage() {
             
             <div className="keywords-ranking-list">
               {topKeywords.length > 0 ? (
-                topKeywords.map((k, idx) => {
+                topKeywords.slice(0, 7).map((k, idx) => {
                   const widthPercent = (k.value / maxKeywordVal) * 100;
                   return (
                     <div key={idx} className="keyword-row">
@@ -453,14 +616,14 @@ function DashboardPage() {
             </div>
             
             <div className="panel-footer-row">
-              <Link to="/papers" className="footer-link">
+              <Link to="/keywords" className="footer-link">
                 View all keywords <FiArrowRight />
               </Link>
             </div>
           </article>
 
           {/* Card 3: Top Journals */}
-          <article className="chart-card glassmorphic-panel">
+          <article className="chart-card glassmorphic-panel db-v4-journals-card">
             <div className="panel-header-row">
               <h3>Top Journals</h3>
               <span className="badge-chip">Top 5</span>
@@ -525,7 +688,7 @@ function DashboardPage() {
             </div>
 
             <div className="panel-footer-row">
-              <Link to="/papers" className="footer-link">
+              <Link to="/journals" className="footer-link">
                 View all journals <FiArrowRight />
               </Link>
             </div>
@@ -537,7 +700,7 @@ function DashboardPage() {
         <section className="db-bottom-grid">
           
           {/* Card 1: Top Cited Papers */}
-          <article className="table-card glassmorphic-panel">
+          <article className="table-card glassmorphic-panel db-v4-papers-card">
             <div className="panel-header-row">
               <h3>Top Cited Papers</h3>
               <Link to="/papers" className="footer-link">
@@ -557,7 +720,7 @@ function DashboardPage() {
                 </thead>
                 <tbody>
                   {topCitedPapers.length > 0 ? (
-                    topCitedPapers.map((paper, idx) => {
+                    topCitedPapers.slice(0, 6).map((paper, idx) => {
                       const cleanTitle = (paper.title || "").replace(/<[^>]*>?/gm, "");
                       return (
                         <tr key={paper.id || idx}>
@@ -595,7 +758,7 @@ function DashboardPage() {
           </article>
 
           {/* Card 2: Trending Research Topics */}
-          <article className="table-card glassmorphic-panel">
+          <article className="table-card glassmorphic-panel db-v4-topics-card">
             <div className="panel-header-row">
               <h3>Trending Topics</h3>
               <Link to="/topics" className="footer-link">
@@ -605,13 +768,15 @@ function DashboardPage() {
 
             <div className="trending-topics-mini-list">
               {trendingTopics.length > 0 ? (
-                trendingTopics.map((topic) => {
+                trendingTopics.map((topic, index) => {
                   const hasPapers = Boolean(topic.paperCount && topic.paperCount > 0);
                   const hasFollowers = Boolean(topic.followerCount && topic.followerCount > 0);
                   const badgeText = topic.growth || "Trending";
 
                   return (
                     <div key={topic.id} className="trending-topic-mini-card">
+                      <span className="topic-mini-rank">0{index + 1}</span>
+                      <div className="topic-mini-content">
                       <div className="topic-mini-header">
                         <strong>{topic.name}</strong>
                         <span className="topic-badge">{badgeText}</span>
@@ -633,6 +798,7 @@ function DashboardPage() {
                           <span>Active Topic</span>
                         )}
                       </div>
+                      </div>
                     </div>
                   );
                 })
@@ -645,6 +811,51 @@ function DashboardPage() {
           </article>
 
         </section>
+
+        {isAdmin && (
+          <>
+            <div className="db-section-intro db-section-intro-compact">
+              <div>
+                <span>System operations</span>
+                <h2>OpenAlex synchronization health</h2>
+              </div>
+              <p>Admin-only ingestion totals and the latest synchronization run.</p>
+            </div>
+            <section className="db-operations-panel" aria-label="OpenAlex operations">
+              <div className="panel-header-row">
+                <h3>Operations status</h3>
+                <span className={`db-operation-status ${String(operationsData?.latestSyncLog?.status || "unknown").toLowerCase()}`}>
+                  {operationsData?.latestSyncLog?.status || "No sync recorded"}
+                </span>
+              </div>
+              <div className="db-operations-grid">
+                <div>
+                  <span>OpenAlex records</span>
+                  <strong>{formatNumber(operationsData?.openAlexPaperCount ?? 0)}</strong>
+                </div>
+                <div>
+                  <span>Successful syncs</span>
+                  <strong>{formatNumber(operationsData?.successfulSyncCount ?? 0)}</strong>
+                </div>
+                <div>
+                  <span>Failed syncs</span>
+                  <strong>{formatNumber(operationsData?.failedSyncCount ?? 0)}</strong>
+                </div>
+                <div>
+                  <span>Latest sync</span>
+                  <strong>
+                    {operationsData?.latestSyncLog?.startedAt
+                      ? formatDateTime(operationsData.latestSyncLog.startedAt)
+                      : "Not available"}
+                  </strong>
+                  {operationsData?.latestSyncLog?.paperSynced !== undefined && (
+                    <small>{formatNumber(operationsData.latestSyncLog.paperSynced)} papers processed</small>
+                  )}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
 
       </div>
     </MainLayout>

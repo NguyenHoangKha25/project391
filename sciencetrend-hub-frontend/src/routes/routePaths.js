@@ -18,5 +18,6 @@ export const ROUTE_PATHS = {
   FOLLOWING: "/following",
   NOTIFICATIONS: "/notifications",
   REPORTS: "/reports",
+  RESEARCH_LAB: "/research-lab",
   ADMIN: "/admin",
 };

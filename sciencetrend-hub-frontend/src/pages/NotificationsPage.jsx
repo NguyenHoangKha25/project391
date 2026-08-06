@@ -117,7 +117,7 @@ function NotificationsPage() {
 
         <article className="workspace-panel">
           {loading ? (
-            <div className="workspace-empty">Loading notifications…</div>
+            <div className="workspace-empty page-loading-state"><span className="workspace-loading-spinner" />Loading notifications…</div>
           ) : notifications.length > 0 ? (
             <div className="workspace-list">
               {notifications.map((item) => {

@@ -360,71 +360,247 @@
   padding-top: 6px;
   margin: 6px 0 0 0;
 }
-/* Multi-Line Comparison Chart Panel Styles (Matching User Image) */
+/* Multi-Line Comparison Chart */
 .multi-line-comp-panel {
   position: relative;
   display: flex;
   flex-direction: column;
 }
-.multi-line-legend-container {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 8px;
-  margin-bottom: 8px;
-}
-.multi-line-legend-item {
+
+.trend-chart-guide {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  font-weight: 780;
-  color: #334155;
-  line-height: 1.3;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 11px 0 10px;
 }
-.legend-dot-pill {
-  width: 18px;
-  height: 5px;
-  border-radius: 99px;
-  flex: 0 0 18px;
+
+.trend-chart-guide p {
+  margin: 0;
+  color: #7b879d;
+  font-size: 10.5px;
+  font-weight: 650;
+  line-height: 1.45;
 }
-.multi-line-svg {
-  height: 280px !important;
-  overflow: visible !important;
-}
-.trend-chart-grid-line {
-  stroke: rgba(148, 163, 184, 0.2);
-  stroke-width: 1;
-  stroke-dasharray: 3 5;
-}
-.trend-chart-grid-label {
-  fill: #94a3b8;
-  font-family: var(--font-display);
+
+.trend-chart-guide button {
+  min-height: 30px;
+  flex: 0 0 auto;
+  padding: 0 10px;
+  border: 1px solid rgba(79, 92, 247, 0.16);
+  border-radius: 9px;
+  color: #4f5cf2;
+  background: #f0f2ff;
   font-size: 9.5px;
-  font-weight: 700;
+  font-weight: 820;
+  cursor: pointer;
 }
-.trend-chart-axis-line {
-  stroke: rgba(148, 163, 184, 0.38);
-  stroke-width: 1;
-  stroke-dasharray: 4 5;
+
+.trend-chart-guide button:hover {
+  border-color: rgba(79, 92, 247, 0.3);
+  background: #e8ebff;
 }
-.trend-chart-axis-label {
-  fill: var(--st-muted);
-  font-family: var(--font-display);
-  font-size: 11.5px;
-  font-weight: 800;
+
+.multi-line-legend-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
 }
-.multi-line-end-label {
-  font-family: var(--font-display);
-  font-size: 12px;
+
+.multi-line-legend-item {
+  min-width: 0;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(198, 209, 229, 0.72);
+  border-radius: 13px;
+  color: #334155;
+  background: linear-gradient(145deg, #fff, #f8faff);
+  box-shadow: 0 5px 14px rgba(37, 50, 91, 0.035);
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.multi-line-legend-item:hover,
+.multi-line-legend-item.is-active {
+  border-color: color-mix(in srgb, var(--series-color) 38%, transparent);
+  background: color-mix(in srgb, var(--series-color) 6%, #fff);
+  box-shadow: 0 9px 20px color-mix(in srgb, var(--series-color) 10%, transparent);
+  transform: translateY(-1px);
+}
+
+.multi-line-legend-item.is-muted {
+  opacity: 0.43;
+}
+
+.legend-line-swatch {
+  position: relative;
+  width: 26px;
+  height: 14px;
+  display: block;
+}
+
+.legend-line-swatch::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--series-color);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--series-color) 24%, transparent);
+}
+
+.legend-line-swatch i {
+  position: absolute;
+  top: 3px;
+  left: 10px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--series-color);
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.legend-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.legend-text strong {
+  overflow: hidden;
+  color: #26334d;
+  font-size: 10.5px;
+  font-weight: 830;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legend-text small {
+  color: #8390a6;
+  font-size: 8.8px;
+  font-weight: 720;
+}
+
+.legend-latest-value {
+  min-width: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 7px;
+  border-radius: 8px;
+  color: var(--series-color);
+  background: color-mix(in srgb, var(--series-color) 8%, #fff);
+  font-size: 10px;
   font-weight: 850;
-  letter-spacing: -0.02em;
+  text-align: center;
 }
-.multi-line-label-connector {
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  opacity: 0.55;
+
+.legend-latest-value small {
+  color: #8b96aa;
+  font-size: 7.5px;
+  font-weight: 750;
+}
+
+.legend-latest-value strong {
+  color: var(--series-color);
+  font-size: 10.5px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.multi-line-svg {
+  height: 310px !important;
+  overflow: hidden !important;
+}
+
+.trend-chart-plot-background {
+  fill: rgba(249, 251, 255, 0.88);
+  stroke: rgba(202, 213, 233, 0.58);
+  stroke-width: 1;
+}
+
+.trend-chart-grid-line {
+  stroke: rgba(138, 151, 179, 0.16);
+  stroke-width: 1;
+  stroke-dasharray: 4 7;
+}
+
+.trend-chart-grid-label {
+  fill: #9aa6ba;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.trend-chart-axis-line {
+  stroke: rgba(129, 143, 171, 0.24);
+  stroke-width: 1;
+}
+
+.trend-chart-axis-label {
+  fill: #8290a8;
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  font-weight: 780;
+}
+
+.trend-line-series {
+  opacity: 0.82;
+  transition: opacity 180ms ease;
+}
+
+.trend-line-series.is-focused {
+  opacity: 1;
+}
+
+.trend-line-series.is-muted {
+  opacity: 0.1;
+}
+
+.trend-line-area {
+  pointer-events: none;
+}
+
+.trend-line-halo {
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.trend-smooth-line {
+  filter: drop-shadow(0 4px 5px rgba(44, 57, 94, 0.16));
+  transition: filter 160ms ease;
+}
+
+.trend-line-series.is-focused .trend-smooth-line {
+  filter: drop-shadow(0 7px 8px rgba(44, 57, 94, 0.22));
+}
+
+.trend-line-point circle {
+  filter: drop-shadow(0 2px 3px rgba(44, 57, 94, 0.13));
+  transition: r 160ms ease, stroke-width 160ms ease;
+}
+
+.trend-line-point:hover circle {
+  r: 5px;
+  stroke-width: 3px;
+}
+
+.trend-line-value {
+  fill: #4a5873;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 850;
+  pointer-events: none;
 }
 .trend-comparison-empty {
   min-height: 330px;
@@ -609,6 +785,13 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.growth-source-label {
+  color: #8a97ad;
+  font-size: 8.5px;
+  font-weight: 720;
+  white-space: nowrap;
 }
 .sparkline-stats .growth-pill-vivid {
   font-size: 11px;

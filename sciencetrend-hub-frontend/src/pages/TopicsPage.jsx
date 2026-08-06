@@ -433,7 +433,7 @@ function TopicsPage() {
           </h2>
 
           {loading ? (
-            <div className="cm-loading" style={{ minHeight: "180px", margin: "20px 0" }}>
+            <div className="cm-loading page-loading-state" style={{ minHeight: "180px", margin: "20px 0" }}>
               <div className="cm-spinner" />
               <p style={{ fontWeight: "700", color: "#666666" }}>Loading scientific topics...</p>
             </div>

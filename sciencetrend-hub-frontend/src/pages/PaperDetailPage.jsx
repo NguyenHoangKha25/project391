@@ -94,7 +94,7 @@ function PaperDetailPage() {
       <section className="workspace-page paper-detail-page">
         <Link className="paper-back-link" to={ROUTE_PATHS.PAPERS}><FiArrowLeft /> Back to search</Link>
         {loading ? (
-          <div className="workspace-empty"><span className="workspace-loading-spinner" />Loading paper…</div>
+          <div className="workspace-empty page-loading-state"><span className="workspace-loading-spinner" />Loading paper…</div>
         ) : error || !paper ? (
           <div className="workspace-empty">{error || "Paper not found."}</div>
         ) : (

@@ -21,12 +21,13 @@ import {
   getAdminSystemConfig,
   getAdminUser,
   getAdminUsers,
+  searchAdminUsers,
   triggerAdminBackfill,
   triggerAdminSync,
   updateAdminUserRole,
 } from "../services/adminService";
-import { getDashboardOverview } from "../services/dashboardService";
-import { formatDateTime, formatNumber, normalizeDashboard, normalizeReport, toArray, toObject } from "../utils/apiData";
+import { getDashboardOperations } from "../services/dashboardService";
+import { formatDateTime, formatNumber, normalizeOperations, normalizeReport, toArray, toObject } from "../utils/apiData";
 import "../styles/WorkspacePages.css";
 import "../styles/AdminPage.css";
 
@@ -47,7 +48,7 @@ function statusClass(value) {
 
 function AdminPage() {
   const [tab, setTab] = useState("overview");
-  const [dashboard, setDashboard] = useState(null);
+  const [operations, setOperations] = useState(null);
   const [users, setUsers] = useState([]);
   const [syncLogs, setSyncLogs] = useState([]);
   const [reports, setReports] = useState([]);
@@ -56,6 +57,7 @@ function AdminPage() {
   const [userSearch, setUserSearch] = useState("");
   const [fromYear, setFromYear] = useState(String(DEFAULT_BACKFILL_FROM_YEAR));
   const [toYear, setToYear] = useState(String(CURRENT_YEAR));
+  const [maxResults, setMaxResults] = useState("500");
   const [backfillError, setBackfillError] = useState("");
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState("");
@@ -64,22 +66,27 @@ function AdminPage() {
   const loadAdminData = useCallback(async () => {
     setLoading(true);
     setMessage("");
-    const results = await Promise.allSettled([
-      getDashboardOverview(),
-      getAdminUsers({ page: 0, size: 200 }),
-      getAdminSyncLogs({ page: 0, size: 100 }),
-      getAdminReports({ page: 0, size: 100 }),
-      getAdminSystemConfig(),
-    ]);
-    const [dashboardResult, usersResult, logsResult, reportsResult, configResult] = results;
-    if (dashboardResult.status === "fulfilled") setDashboard(normalizeDashboard(dashboardResult.value));
-    if (usersResult.status === "fulfilled") setUsers(toArray(usersResult.value, ["users"]));
-    if (logsResult.status === "fulfilled") setSyncLogs(toArray(logsResult.value, ["logs", "syncLogs"]));
-    if (reportsResult.status === "fulfilled") setReports(toArray(reportsResult.value, ["reports"]).map(normalizeReport));
-    if (configResult.status === "fulfilled") setConfig(toObject(configResult.value));
-    const failed = results.filter((result) => result.status === "rejected").length;
-    if (failed > 0) setMessage(`${failed} admin data source${failed > 1 ? "s" : ""} could not be loaded.`);
-    setLoading(false);
+    try {
+      const results = await Promise.allSettled([
+        getDashboardOperations(),
+        getAdminUsers({ page: 0, size: 200 }),
+        getAdminSyncLogs({ page: 0, size: 100 }),
+        getAdminReports({ page: 0, size: 100 }),
+        getAdminSystemConfig(),
+      ]);
+      const [operationsResult, usersResult, logsResult, reportsResult, configResult] = results;
+      if (operationsResult.status === "fulfilled") setOperations(normalizeOperations(operationsResult.value));
+      if (usersResult.status === "fulfilled") setUsers(toArray(usersResult.value, ["users"]));
+      if (logsResult.status === "fulfilled") setSyncLogs(toArray(logsResult.value, ["logs", "syncLogs"]));
+      if (reportsResult.status === "fulfilled") setReports(toArray(reportsResult.value, ["reports"]).map(normalizeReport));
+      if (configResult.status === "fulfilled") setConfig(toObject(configResult.value));
+      const failed = results.filter((result) => result.status === "rejected").length;
+      if (failed > 0) setMessage(`${failed} admin data source${failed > 1 ? "s" : ""} could not be loaded.`);
+    } catch (error) {
+      setMessage(error.message || "Could not load admin data.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -90,7 +97,10 @@ function AdminPage() {
     event.preventDefault();
     setWorking("search");
     try {
-      const response = await getAdminUsers({ search: userSearch.trim(), page: 0, size: 200 });
+      const searchTerm = userSearch.trim();
+      const response = searchTerm
+        ? await searchAdminUsers(searchTerm)
+        : await getAdminUsers({ page: 0, size: 200 });
       setUsers(toArray(response, ["users"]));
     } catch (error) {
       setMessage(error.message || "Could not search users.");
@@ -122,6 +132,7 @@ function AdminPage() {
   }
 
   async function removeUser(user) {
+    if (String(user.role).toUpperCase() === "ADMIN") return;
     const userId = user.userId ?? user.id;
     if (!window.confirm(`Delete ${user.username || user.email}?`)) return;
     const previous = users;
@@ -152,6 +163,7 @@ function AdminPage() {
     event.preventDefault();
     const parsedFromYear = Number(fromYear);
     const parsedToYear = Number(toYear);
+    const parsedMaxResults = Number(maxResults);
 
     if (!Number.isInteger(parsedFromYear) || !Number.isInteger(parsedToYear)) {
       setBackfillError("Enter a valid start and end year.");
@@ -165,14 +177,18 @@ function AdminPage() {
       setBackfillError("The start year cannot be later than the end year.");
       return;
     }
+    if (!Number.isInteger(parsedMaxResults) || parsedMaxResults < 1 || parsedMaxResults > 5000) {
+      setBackfillError("Maximum papers must be between 1 and 5,000.");
+      return;
+    }
 
     setWorking("backfill");
     setMessage("");
     setBackfillError("");
     try {
-      await triggerAdminBackfill({ fromYear: parsedFromYear, toYear: parsedToYear });
+      await triggerAdminBackfill({ fromYear: parsedFromYear, toYear: parsedToYear, maxResults: parsedMaxResults });
       await loadAdminData();
-      setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} completed successfully.`);
+      setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} (max ${formatNumber(parsedMaxResults)} papers) completed successfully.`);
     } catch (error) {
       setMessage(error.message || "Could not start backfill.");
     } finally {
@@ -187,8 +203,8 @@ function AdminPage() {
   const stats = [
     { label: "Total users", value: users.length, icon: FiUsers },
     { label: "Active users", value: activeUsers, icon: FiCheckCircle },
-    { label: "Successful syncs", value: dashboard?.successfulSyncs ?? 0, icon: FiDatabase },
-    { label: "Failed syncs", value: dashboard?.failedSyncs ?? 0, icon: FiAlertTriangle },
+    { label: "Successful syncs", value: operations?.successfulSyncCount ?? 0, icon: FiDatabase },
+    { label: "Failed syncs", value: operations?.failedSyncCount ?? 0, icon: FiAlertTriangle },
     { label: "All reports", value: reports.length, icon: FiFileText },
     { label: "Config entries", value: Object.keys(config).length, icon: FiSettings },
   ];
@@ -201,7 +217,7 @@ function AdminPage() {
         </nav>
         {message && <div className="workspace-notice info admin-message">{message}<button type="button" onClick={() => setMessage("")} aria-label="Dismiss"><FiX /></button></div>}
 
-        {loading ? <div className="workspace-empty"><span className="workspace-loading-spinner" />Loading admin data…</div> : (
+        {loading ? <div className="workspace-empty page-loading-state"><span className="workspace-loading-spinner" />Loading admin data…</div> : (
           <>
             {tab === "overview" && (
               <div className="admin-overview-layout">
@@ -244,6 +260,8 @@ function AdminPage() {
                       <label htmlFor="backfill-from-year">From year<input id="backfill-from-year" type="number" min="1900" max={CURRENT_YEAR} value={fromYear} onChange={(event) => { setFromYear(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                       <span className="admin-year-separator" aria-hidden="true">to</span>
                       <label htmlFor="backfill-to-year">To year<input id="backfill-to-year" type="number" min="1900" max={CURRENT_YEAR} value={toYear} onChange={(event) => { setToYear(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
+                      <span className="admin-year-separator" aria-hidden="true">·</span>
+                      <label htmlFor="backfill-max-results">Max papers<input id="backfill-max-results" type="number" min="1" max="5000" value={maxResults} onChange={(event) => { setMaxResults(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                     </div>
                     <button className="workspace-button primary admin-backfill-submit" type="submit" disabled={working === "backfill"}>{working === "backfill" ? <><FiRefreshCw className="is-spinning" /> Starting backfill…</> : <><FiDownload /> Start backfill</>}</button>
                     {backfillError && <p className="admin-backfill-error" role="alert"><FiAlertTriangle /> {backfillError}</p>}
@@ -270,7 +288,64 @@ function AdminPage() {
 }
 
 function AdminUsersTable({ users, onView, onRole, onDelete, working, compact = false }) {
-  return <div className="admin-detailed-table-wrap"><table className={compact ? "admin-compact-table" : "admin-detailed-table"}><thead><tr><th>User</th><th>Email</th><th>Role</th>{!compact && <th>Status</th>}<th>Actions</th></tr></thead><tbody>{users.map((user) => { const id = user.userId ?? user.id; return <tr key={id}><td><strong>{user.username || user.fullName || "Unnamed user"}</strong></td><td>{user.email || "—"}</td><td><select value={user.role || "STUDENT"} onChange={(event) => onRole(id, event.target.value)}><option>STUDENT</option><option>LECTURER</option><option>RESEARCHER</option><option>ADMIN</option></select></td>{!compact && <td><span className={`status-label ${statusClass(user.status || "ACTIVE")}`}>{user.status || "ACTIVE"}</span></td>}<td><div className="admin-row-actions"><button type="button" onClick={() => onView(id)} disabled={working === `user-${id}`} aria-label="View user"><FiEye /></button><button type="button" className="danger" onClick={() => onDelete(user)} aria-label="Delete user"><FiTrash2 /></button></div></td></tr>; })}{users.length === 0 && <tr><td colSpan="5">No users found.</td></tr>}</tbody></table></div>;
+  return (
+    <div className="admin-detailed-table-wrap">
+      <table className={compact ? "admin-compact-table" : "admin-detailed-table"}>
+        <thead>
+          <tr><th>User</th><th>Email</th><th>Role</th>{!compact && <th>Status</th>}<th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {users.map((user) => {
+            const id = user.userId ?? user.id;
+            const isSystemAdmin = String(user.role).toUpperCase() === "ADMIN";
+            return (
+              <tr key={id}>
+                <td><strong>{user.username || user.fullName || "Unnamed user"}</strong></td>
+                <td>{user.email || "—"}</td>
+                <td>
+                  {isSystemAdmin ? (
+                    <span
+                      className="admin-badge-system-admin"
+                      title="The system admin role is permanent"
+                    >
+                      🛡️ System Admin
+                    </span>
+                  ) : (
+                    <select
+                      value={user.role || "STUDENT"}
+                      onChange={(event) => onRole(id, event.target.value)}
+                      aria-label={`Change role for ${user.username || user.email || "user"}`}
+                    >
+                      <option>STUDENT</option>
+                      <option>LECTURER</option>
+                      <option>RESEARCHER</option>
+                    </select>
+                  )}
+                </td>
+                {!compact && <td><span className={`status-label ${statusClass(user.status || "ACTIVE")}`}>{user.status || "ACTIVE"}</span></td>}
+                <td>
+                  <div className="admin-row-actions">
+                    <button type="button" onClick={() => onView(id)} disabled={working === `user-${id}`} aria-label="View user"><FiEye /></button>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() => onDelete(user)}
+                      aria-label={isSystemAdmin ? "System admin cannot be deleted" : "Delete user"}
+                      title={isSystemAdmin ? "The system admin account cannot be deleted" : "Delete user"}
+                      disabled={isSystemAdmin}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+          {users.length === 0 && <tr><td colSpan={compact ? 4 : 5}>No users found.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function SyncTable({ logs, compact = false }) {

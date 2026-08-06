@@ -575,3 +575,305 @@ html body .register-page .register-signin-redirect .login-link:hover {
     padding: 24px 20px !important;
   }
 }
+
+/* ==========================================================================
+   Refined single-column registration form
+   ========================================================================== */
+
+html body .register-page {
+  background:
+    radial-gradient(circle at 88% 8%, rgba(87, 100, 245, 0.18), transparent 28rem),
+    radial-gradient(circle at 8% 92%, rgba(26, 184, 214, 0.12), transparent 26rem),
+    linear-gradient(145deg, #edf2fa 0%, #f7f9fd 48%, #e9eef8 100%) !important;
+}
+
+html body .register-page .register-wrapper {
+  width: min(1080px, 100%) !important;
+  height: min(720px, calc(100vh - 24px)) !important;
+  border-color: rgba(180, 194, 220, 0.72) !important;
+  border-radius: 28px !important;
+  box-shadow:
+    0 30px 80px rgba(30, 45, 83, 0.16),
+    0 3px 10px rgba(30, 45, 83, 0.06) !important;
+}
+
+html body .register-page .register-right {
+  position: relative !important;
+  isolation: isolate !important;
+  padding: clamp(20px, 3vw, 34px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background:
+    linear-gradient(rgba(106, 120, 164, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(106, 120, 164, 0.04) 1px, transparent 1px),
+    radial-gradient(circle at 100% 0%, rgba(79, 92, 247, 0.12), transparent 22rem),
+    #f7f9fd !important;
+  background-size: 30px 30px, 30px 30px, auto, auto !important;
+  scrollbar-width: thin !important;
+}
+
+html body .register-page .register-right::before,
+html body .register-page .register-right::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: -1 !important;
+  width: 190px !important;
+  height: 190px !important;
+  border-radius: 50% !important;
+  filter: blur(4px) !important;
+  pointer-events: none !important;
+}
+
+html body .register-page .register-right::before {
+  top: -96px !important;
+  right: -72px !important;
+  background: rgba(92, 103, 246, 0.12) !important;
+}
+
+html body .register-page .register-right::after {
+  bottom: -112px !important;
+  left: -90px !important;
+  background: rgba(25, 181, 211, 0.09) !important;
+}
+
+html body .register-page .register-premium-card-box {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  max-width: 430px !important;
+  gap: 16px !important;
+  padding: clamp(22px, 2.4vw, 28px) !important;
+  border: 1px solid rgba(207, 217, 236, 0.92) !important;
+  border-radius: 24px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow:
+    0 24px 55px rgba(44, 58, 102, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+html body .register-page .register-header {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 7px !important;
+  margin: 0 !important;
+}
+
+html body .register-page .register-kicker {
+  min-height: 27px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 0 10px !important;
+  border: 1px solid rgba(79, 92, 247, 0.16) !important;
+  border-radius: 999px !important;
+  color: #4f5cf7 !important;
+  background: linear-gradient(135deg, rgba(79, 92, 247, 0.09), rgba(24, 183, 215, 0.06)) !important;
+  font-size: 9.5px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+}
+
+html body .register-page .register-kicker svg {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+html body .register-page .register-header h2 {
+  margin: 2px 0 0 !important;
+  font-size: clamp(31px, 3.2vw, 39px) !important;
+  font-weight: 880 !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.055em !important;
+  white-space: normal !important;
+}
+
+html body .register-page .register-subtitle {
+  max-width: 360px !important;
+  color: #68758d !important;
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
+}
+
+html body .register-page .register-benefit-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  margin-top: 3px !important;
+}
+
+html body .register-page .register-benefit-row span {
+  min-height: 29px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 0 9px !important;
+  border: 1px solid #dde4f1 !important;
+  border-radius: 9px !important;
+  color: #526078 !important;
+  background: rgba(249, 251, 255, 0.94) !important;
+  box-shadow: 0 3px 10px rgba(44, 58, 102, 0.04) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+html body .register-page .register-benefit-row svg {
+  color: #5361f5 !important;
+}
+
+html body .register-page .register-form {
+  gap: 10px !important;
+}
+
+html body .register-page .form-group {
+  gap: 5px !important;
+}
+
+html body .register-page .form-group label {
+  color: #25324a !important;
+  font-size: 10.25px !important;
+  letter-spacing: 0.075em !important;
+}
+
+html body .register-page .input-wrap input,
+html body .register-page .select-wrap select {
+  height: 44px !important;
+  min-height: 44px !important;
+  padding-left: 40px !important;
+  border-color: #d8e0ee !important;
+  border-radius: 12px !important;
+  background: #f9faff !important;
+  box-shadow:
+    0 1px 2px rgba(25, 39, 78, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
+  font-size: 12.75px !important;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease !important;
+}
+
+html body .register-page :is(.input-wrap, .select-wrap):hover :is(input, select):not(:focus) {
+  border-color: #bdc9dc !important;
+}
+
+html body .register-page .input-wrap input:focus,
+html body .register-page .select-wrap select:focus {
+  border-color: rgba(79, 92, 247, 0.58) !important;
+  background: #ffffff !important;
+  box-shadow:
+    0 0 0 4px rgba(79, 92, 247, 0.1),
+    0 8px 18px rgba(52, 66, 126, 0.06) !important;
+}
+
+html body .register-page .input-field-icon {
+  left: 13px !important;
+  color: #7c89a2 !important;
+  font-size: 15px !important;
+}
+
+html body .register-page .eye-toggle {
+  right: 6px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+}
+
+html body .register-page .eye-toggle:hover {
+  color: #4f5cf7 !important;
+  background: #eef1ff !important;
+}
+
+html body .register-page .register-submit-btn {
+  height: 48px !important;
+  min-height: 48px !important;
+  gap: 10px !important;
+  margin-top: 4px !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: linear-gradient(115deg, #5966f7 0%, #4350dc 56%, #2579c7 118%) !important;
+  box-shadow:
+    0 13px 26px rgba(66, 78, 208, 0.27),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  font-size: 13.5px !important;
+  letter-spacing: -0.01em !important;
+}
+
+html body .register-page .register-submit-arrow {
+  width: 16px !important;
+  height: 16px !important;
+  transition: transform 180ms ease !important;
+}
+
+html body .register-page .register-submit-btn:hover:not(:disabled) .register-submit-arrow {
+  transform: translateX(3px) !important;
+}
+
+html body .register-page .register-trust-note {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  margin: -1px 0 0 !important;
+  color: #8793a8 !important;
+  font-size: 9.75px !important;
+  font-weight: 650 !important;
+  text-align: center !important;
+}
+
+html body .register-page .register-trust-note svg {
+  color: #18a9a4 !important;
+}
+
+html body .register-page .register-signin-redirect {
+  margin-top: 0 !important;
+  color: #66738b !important;
+  font-size: 11.5px !important;
+}
+
+@media (max-width: 960px) {
+  html body .register-page {
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  html body .register-page .register-wrapper {
+    width: min(520px, 100%) !important;
+    max-width: 520px !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  html body .register-page .register-right {
+    min-height: calc(100vh - 24px) !important;
+    padding: 22px !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 560px) {
+  html body .register-page {
+    padding: 0 !important;
+  }
+
+  html body .register-page .register-wrapper {
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  html body .register-page .register-right {
+    min-height: 100vh !important;
+    padding: 18px 14px !important;
+  }
+
+  html body .register-page .register-premium-card-box {
+    padding: 21px 18px !important;
+    border-radius: 20px !important;
+  }
+
+  html body .register-page .register-header h2 {
+    font-size: 31px !important;
+  }
+}

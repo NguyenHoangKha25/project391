@@ -334,7 +334,7 @@ function BookmarksPage() {
         )}
 
         {loading ? (
-          <div className="workspace-empty" style={{ minHeight: 380 }}>
+          <div className="workspace-empty page-loading-state" style={{ minHeight: 380 }}>
             <span className="workspace-loading-spinner" />
             Loading Library Workspace…
           </div>

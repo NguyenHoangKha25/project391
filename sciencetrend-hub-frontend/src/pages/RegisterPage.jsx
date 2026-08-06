@@ -1,13 +1,17 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  FiArrowRight,
   FiCheck,
+  FiClock,
   FiEye,
   FiEyeOff,
   FiLock,
   FiMail,
+  FiShield,
   FiUser,
   FiUsers,
+  FiZap,
 } from "react-icons/fi";
 import logoLogin from "../assets/images/logo-login.svg";
 import { ROUTE_PATHS } from "../routes/routePaths";
@@ -184,7 +188,7 @@ function RegisterPage() {
 
           <div className="reg-left-body">
             <div className="reg-hero-box">
-              <span className="reg-badge-tag">✦ MEMBER ONBOARDING</span>
+              <span className="reg-badge-tag"><FiZap /> MEMBER ONBOARDING</span>
               <h2 className="reg-main-title">Unlock Full Academic Workspace</h2>
               <p className="reg-main-desc">
                 Join thousands of researchers tracking emerging topics, bookmarking top journals, and building custom analytics.
@@ -240,8 +244,13 @@ function RegisterPage() {
         <div className="register-right">
           <div className="register-premium-card-box">
             <div className="register-header">
+              <span className="register-kicker"><FiZap /> Free research workspace</span>
               <h2>Create account</h2>
               <p className="register-subtitle">Set up your account to start organizing your research trail.</p>
+              <div className="register-benefit-row" aria-label="Registration benefits">
+                <span><FiShield /> Secure by design</span>
+                <span><FiClock /> About one minute</span>
+              </div>
             </div>
 
             {message && (
@@ -390,9 +399,11 @@ function RegisterPage() {
                 {loading ? (
                   <span className="register-btn-spinner" />
                 ) : (
-                  "Create account"
+                  <><span>Create account</span><FiArrowRight className="register-submit-arrow" /></>
                 )}
               </button>
+
+              <p className="register-trust-note"><FiShield /> Free to join · No payment details required</p>
 
               {/* Sign In Redirect */}
               <p className="register-signin-redirect">

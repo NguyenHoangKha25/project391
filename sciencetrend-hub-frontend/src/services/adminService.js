@@ -4,6 +4,12 @@ export function getAdminUsers(params = {}) {
   return apiRequest("/admin/users", { params });
 }
 
+export function searchAdminUsers(searchTerm) {
+  return apiRequest("/admin/users/search", {
+    params: { keyword: searchTerm },
+  });
+}
+
 export function getAdminUser(userId) {
   return apiRequest(`/admin/users/${userId}`);
 }

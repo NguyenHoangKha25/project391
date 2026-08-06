@@ -13,6 +13,7 @@ import {
   FiShield,
   FiAward,
   FiBookOpen,
+  FiActivity,
 } from "react-icons/fi";
 import { useAuth } from "../../context/useAuth";
 import { ROUTE_PATHS } from "../../routes/routePaths";
@@ -248,7 +249,11 @@ function Navbar({
           <FiMenu />
         </button>
 
-        <div>
+        <div className="st-navbar-title-copy">
+          <span className="st-navbar-kicker">
+            <FiActivity aria-hidden="true" />
+            Scientific research
+          </span>
           <h1>{title}</h1>
           <p>{subtitle}</p>
         </div>
@@ -311,6 +316,7 @@ function Navbar({
               onClick={() => navigate(ROUTE_PATHS.NOTIFICATIONS)}
             >
               <FiBell />
+              <span className="st-icon-btn-label">Notifications</span>
             </button>
 
             <div className="st-account" ref={accountRef}>

@@ -263,14 +263,46 @@ export function normalizeDashboard(data = {}) {
     totalPapers: toNumber(data.totalPapers),
     totalJournals: toNumber(data.totalJournals),
     totalKeywords: toNumber(data.totalKeywords),
-    openAlexPapers: toNumber(data.openAlexPapers),
-    successfulSyncs: toNumber(data.successfulSyncs),
-    failedSyncs: toNumber(data.failedSyncs),
+    totalTopics: toNumber(data.totalTopics),
     papersByYear: Array.isArray(data.papersByYear) ? data.papersByYear.map(normalizeChartPoint) : [],
     topKeywords: Array.isArray(data.topKeywords) ? data.topKeywords.map(normalizeChartPoint) : [],
     topJournals: Array.isArray(data.topJournals) ? data.topJournals.map(normalizeChartPoint) : [],
     topCitedPapers: Array.isArray(data.topCitedPapers) ? data.topCitedPapers.map(normalizePaper) : [],
+  };
+}
+
+export function normalizeAnalytics(data = {}) {
+  return {
+    totalCitations: toNumber(data.totalCitations),
+    averageCitationsPerPaper: toNumber(data.averageCitationsPerPaper),
+    highImpactPaperCount: toNumber(data.highImpactPaperCount),
+    latestCompleteYear: toNumber(data.latestCompleteYear),
+    latestCompleteYearPaperCount: toNumber(data.latestCompleteYearPaperCount),
+    previousCompleteYear: toNumber(data.previousCompleteYear),
+    previousCompleteYearPaperCount: toNumber(data.previousCompleteYearPaperCount),
+    publicationGrowthRate: toNumber(data.publicationGrowthRate),
+    topTrendingKeywords: Array.isArray(data.topTrendingKeywords) ? data.topTrendingKeywords : [],
+    topTrendingTopics: Array.isArray(data.topTrendingTopics) ? data.topTrendingTopics : [],
+  };
+}
+
+export function normalizeOperations(data = {}) {
+  return {
+    openAlexPaperCount: toNumber(data.openAlexPaperCount),
+    successfulSyncCount: toNumber(data.successfulSyncCount),
+    failedSyncCount: toNumber(data.failedSyncCount),
     latestSyncLog: data.latestSyncLog ?? null,
+  };
+}
+
+// DashboardHomeResponse: { role, overview, analytics, operations, capabilities }
+export function normalizeDashboardHome(data = {}) {
+  return {
+    role: String(data.role || "").toUpperCase(),
+    overview: data.overview ? normalizeDashboard(data.overview) : null,
+    analytics: data.analytics ? normalizeAnalytics(data.analytics) : null,
+    operations: data.operations ? normalizeOperations(data.operations) : null,
+    capabilities: data.capabilities || {},
   };
 }
 

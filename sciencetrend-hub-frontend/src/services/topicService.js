@@ -12,7 +12,7 @@ export function searchTopics(keyword) {
 
 // Connect to GET /api/topics/trending?limit=...
 export function getTrendingTopics(limit = 10) {
-  return apiRequest("/topics/trending", { params: { limit }, auth: false });
+  return apiRequest("/topics/trending", { params: { limit } });
 }
 
 // Connect to GET /api/topics/{topicId}

@@ -443,9 +443,9 @@ function PapersPage() {
             </div>
 
             <form onSubmit={handleFilterSubmit} className="filters-form-element">
-              
-              {/* Keyword Filter */}
-              <div className="filter-form-group">
+              <div className="filters-form-fields">
+                {/* Keyword Filter */}
+                <div className="filter-form-group">
                 <label htmlFor="keyword-filter">Keyword</label>
                 <div className="filter-input-wrapper">
                   <input
@@ -463,10 +463,10 @@ function PapersPage() {
                   </datalist>
                   <FiSearch />
                 </div>
-              </div>
+                </div>
 
-              {/* Author Filter */}
-              <div className="filter-form-group">
+                {/* Author Filter */}
+                <div className="filter-form-group">
                 <label htmlFor="author-filter">Author</label>
                 <div className="filter-input-wrapper">
                   <input
@@ -478,10 +478,10 @@ function PapersPage() {
                   />
                   <FiSearch />
                 </div>
-              </div>
+                </div>
 
-              {/* Journal Filter */}
-              <div className="filter-form-group">
+                {/* Journal Filter */}
+                <div className="filter-form-group">
                 <label htmlFor="journal-filter">Journal</label>
                 <div className="filter-input-wrapper">
                   <input
@@ -493,10 +493,10 @@ function PapersPage() {
                   />
                   <FiSearch />
                 </div>
-              </div>
+                </div>
 
-              {/* Topic Select */}
-              <div className="filter-form-group">
+                {/* Topic Select */}
+                <div className="filter-form-group">
                 <label htmlFor="topic-filter">Topic</label>
                 <div className="filter-select-wrapper">
                   <select
@@ -520,10 +520,10 @@ function PapersPage() {
                   </select>
                   <FiChevronDown />
                 </div>
-              </div>
+                </div>
 
-              {/* Year Range */}
-              <div className="filter-form-group">
+                {/* Year Range */}
+                <div className="filter-form-group">
                 <label>Year Range</label>
                 <div className="filter-year-range-row">
                   <div className="filter-select-wrapper">
@@ -550,10 +550,10 @@ function PapersPage() {
                     <FiChevronDown />
                   </div>
                 </div>
-              </div>
+                </div>
 
-              {/* Sort By Option */}
-              <div className="filter-form-group">
+                {/* Sort By Option */}
+                <div className="filter-form-group">
                 <label htmlFor="sort-filter">Sort By</label>
                 <div className="filter-select-wrapper">
                   <select
@@ -567,6 +567,7 @@ function PapersPage() {
                     <option value="title">Alphabetical Title</option>
                   </select>
                   <FiChevronDown />
+                </div>
                 </div>
               </div>
 
@@ -633,29 +634,9 @@ function PapersPage() {
 
             {/* Results block */}
             {loading ? (
-              <div className="search-papers-list">
-                {[1, 2, 3].map((n) => (
-                  <div key={n} className="rich-paper-card skeleton-card" style={{ pointerEvents: "none", opacity: 0.7 }}>
-                    <div className="rich-paper-rank-section">
-                      <div className="skeleton-line" style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#f0eae1" }} />
-                      <div className="skeleton-line" style={{ width: "40px", height: "40px", borderRadius: "12px", background: "#e1d8cb", marginTop: "12px" }} />
-                    </div>
-                    <div className="rich-paper-details" style={{ flex: 1 }}>
-                      <div className="skeleton-line" style={{ width: "80%", height: "20px", background: "#e1d8cb", borderRadius: "4px", marginBottom: "12px" }} />
-                      <div className="skeleton-line" style={{ width: "50%", height: "14px", background: "#f0eae1", borderRadius: "4px", marginBottom: "16px" }} />
-                      <div className="skeleton-line" style={{ width: "95%", height: "40px", background: "#f5f1ea", borderRadius: "4px", marginBottom: "16px" }} />
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <div className="skeleton-line" style={{ width: "60px", height: "22px", background: "#f0eae1", borderRadius: "12px" }} />
-                        <div className="skeleton-line" style={{ width: "70px", height: "22px", background: "#f0eae1", borderRadius: "12px" }} />
-                      </div>
-                    </div>
-                    <div className="rich-paper-stats-section" style={{ width: "120px", borderLeft: "1px solid rgba(230, 222, 211, 0.8)", paddingLeft: "16px" }}>
-                      <div className="skeleton-line" style={{ width: "50px", height: "12px", background: "#f0eae1", borderRadius: "3px", marginBottom: "8px" }} />
-                      <div className="skeleton-line" style={{ width: "45px", height: "28px", background: "#e1d8cb", borderRadius: "4px", marginBottom: "12px" }} />
-                      <div className="skeleton-line" style={{ width: "80px", height: "28px", background: "#e1d8cb", borderRadius: "6px" }} />
-                    </div>
-                  </div>
-                ))}
+              <div className="page-loading-state">
+                <span className="workspace-loading-spinner" />
+                Loading research papers…
               </div>
             ) : papers.length === 0 ? (
               <div className="workspace-empty" style={{ minHeight: 340 }}>

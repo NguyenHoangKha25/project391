@@ -12,6 +12,7 @@ import {
   FiLayers,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
+import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
 import { deleteReport, generateReport, getReports, searchReports } from "../services/reportService";
 import { getAllTopics } from "../services/topicService";
@@ -24,6 +25,31 @@ import {
 } from "../utils/apiData";
 import "../styles/WorkspacePages.css";
 import "../styles/ReportsPage.css";
+
+const BASIC_SECTIONS = [
+  "OVERALL_STATISTICS",
+  "PAPERS_BY_YEAR",
+  "TOP_KEYWORDS",
+  "TOP_JOURNALS",
+  "TOP_CITED_PAPERS",
+];
+
+const ADVANCED_SECTIONS = [
+  "KEYWORD_TREND",
+  "TOPIC_TREND",
+  "TOP_TRENDING_TOPICS",
+];
+
+const SECTION_LABELS = {
+  OVERALL_STATISTICS: "Overall Statistics",
+  PAPERS_BY_YEAR: "Papers by Year",
+  TOP_KEYWORDS: "Top Keywords",
+  TOP_JOURNALS: "Top Journals",
+  TOP_CITED_PAPERS: "Top Cited Papers",
+  KEYWORD_TREND: "Keyword Trend",
+  TOPIC_TREND: "Topic Trend",
+  TOP_TRENDING_TOPICS: "Top Trending Topics",
+};
 
 function uniqueSuggestionNames(items = []) {
   const seen = new Set();
@@ -48,6 +74,7 @@ function ReportAutocomplete({
   placeholder,
   loading,
   optionType,
+  error,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -132,6 +159,8 @@ function ReportAutocomplete({
             : undefined
         }
         aria-busy={loading}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${inputId}-error` : undefined}
         value={value}
         onChange={(event) => {
           onChange(event.target.value);
@@ -177,6 +206,7 @@ function ReportAutocomplete({
           )}
         </div>
       )}
+      {error && <p id={`${inputId}-error`} className="report-inline-error" role="alert">{error}</p>}
     </div>
   );
 }
@@ -513,6 +543,9 @@ function ReportFormattedNarrative({ content }) {
 }
 
 function ReportsPage() {
+  const { role } = useAuth();
+  const normalizedRole = String(role || "").toUpperCase();
+  const isResearcherOrAdmin = normalizedRole === "RESEARCHER" || normalizedRole === "ADMIN";
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -527,6 +560,9 @@ function ReportsPage() {
   const [topicSuggestions, setTopicSuggestions] = useState([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
+  const [selectedSections, setSelectedSections] = useState(() => [...BASIC_SECTIONS]);
+  const [advancedSections, setAdvancedSections] = useState([]);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const loadReports = useCallback(async (searchQuery = "") => {
     try {
@@ -545,6 +581,10 @@ function ReportsPage() {
   useEffect(() => {
     loadReports();
   }, [loadReports]);
+
+  useEffect(() => {
+    if (!isResearcherOrAdmin) setAdvancedSections([]);
+  }, [isResearcherOrAdmin]);
 
   useEffect(() => {
     if (!showCreateModal || suggestionsLoaded) return undefined;
@@ -579,17 +619,53 @@ function ReportsPage() {
     };
   }, [showCreateModal, suggestionsLoaded]);
 
+  function toggleSection(section, advanced = false) {
+    const setter = advanced ? setAdvancedSections : setSelectedSections;
+    setter((current) => (
+      current.includes(section)
+        ? current.filter((item) => item !== section)
+        : [...current, section]
+    ));
+    setValidationErrors((current) => ({
+      ...current,
+      sections: "",
+      ...(section === "KEYWORD_TREND" ? { keyword: "" } : {}),
+      ...(section === "TOPIC_TREND" ? { topic: "" } : {}),
+    }));
+  }
+
   async function handleCreateReport(event) {
     event.preventDefault();
     if (!reportTitle.trim()) return;
 
+    const sections = [
+      ...selectedSections,
+      ...(isResearcherOrAdmin ? advancedSections : []),
+    ];
+    const nextErrors = {};
+    if (sections.length === 0) {
+      nextErrors.sections = "Select at least one report section.";
+    }
+    if (sections.includes("KEYWORD_TREND") && !reportKeyword.trim()) {
+      nextErrors.keyword = "A keyword is required for Keyword Trend analysis.";
+    }
+    if (sections.includes("TOPIC_TREND") && !reportTopic.trim()) {
+      nextErrors.topic = "A topic is required for Topic Trend analysis.";
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setValidationErrors(nextErrors);
+      return;
+    }
+
     try {
       setCreating(true);
       setErrorMessage("");
+      setValidationErrors({});
       const payload = {
         title: reportTitle.trim(),
         keyword: reportKeyword.trim() || undefined,
         topic: reportTopic.trim() || undefined,
+        sections,
       };
       
       await generateReport(payload);
@@ -597,6 +673,8 @@ function ReportsPage() {
       setReportTitle("");
       setReportKeyword("");
       setReportTopic("");
+      setSelectedSections([...BASIC_SECTIONS]);
+      setAdvancedSections([]);
       setShowCreateModal(false);
       await loadReports();
     } catch (err) {
@@ -681,7 +759,7 @@ function ReportsPage() {
         {errorMessage && <div className="workspace-notice warning">{errorMessage}</div>}
 
         {loading ? (
-          <div className="workspace-empty"><span className="workspace-loading-spinner" />Loading reports…</div>
+          <div className="workspace-empty page-loading-state"><span className="workspace-loading-spinner" />Loading reports…</div>
         ) : reports.length > 0 ? (
           <div className="reports-list">
             {reports.map((report) => (
@@ -747,29 +825,80 @@ function ReportsPage() {
                     <ReportAutocomplete
                       inputId="report-keyword"
                       icon={<FiTag />}
-                      label="Filter Keyword (Optional)"
+                      label={advancedSections.includes("KEYWORD_TREND") ? "Filter Keyword *" : "Filter Keyword (Optional)"}
                       value={reportKeyword}
-                      onChange={setReportKeyword}
+                      onChange={(value) => {
+                        setReportKeyword(value);
+                        setValidationErrors((current) => ({ ...current, keyword: "" }));
+                      }}
                       options={keywordSuggestions}
                       placeholder="Type to search keywords…"
                       loading={suggestionsLoading}
                       optionType="Keyword"
+                      error={validationErrors.keyword}
                     />
                     <ReportAutocomplete
                       inputId="report-topic"
                       icon={<FiLayers />}
-                      label="Filter Topic (Optional)"
+                      label={advancedSections.includes("TOPIC_TREND") ? "Filter Topic *" : "Filter Topic (Optional)"}
                       value={reportTopic}
-                      onChange={setReportTopic}
+                      onChange={(value) => {
+                        setReportTopic(value);
+                        setValidationErrors((current) => ({ ...current, topic: "" }));
+                      }}
                       options={topicSuggestions}
                       placeholder="Type to search topics…"
                       loading={suggestionsLoading}
                       optionType="Topic"
+                      error={validationErrors.topic}
                     />
                   </div>
 
+                  <fieldset className="report-sections-fieldset">
+                    <legend>Report Sections</legend>
+                    <p>Choose the catalog insights to include in this report.</p>
+                    <div className="report-section-grid">
+                      {BASIC_SECTIONS.map((section) => (
+                        <label key={section} className="report-section-option">
+                          <input
+                            type="checkbox"
+                            checked={selectedSections.includes(section)}
+                            onChange={() => toggleSection(section)}
+                          />
+                          <span>{SECTION_LABELS[section]}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  {isResearcherOrAdmin && (
+                    <fieldset className="report-sections-fieldset report-advanced-section">
+                      <legend>
+                        🔬 Advanced Research Analysis
+                        <span className="report-researcher-badge">Researcher</span>
+                      </legend>
+                      <p>Advanced trend sections are available to Researcher and Admin roles.</p>
+                      <div className="report-section-grid report-section-grid-advanced">
+                        {ADVANCED_SECTIONS.map((section) => (
+                          <label key={section} className="report-section-option report-section-option-advanced">
+                            <input
+                              type="checkbox"
+                              checked={advancedSections.includes(section)}
+                              onChange={() => toggleSection(section, true)}
+                            />
+                            <span>{SECTION_LABELS[section]}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                  )}
+
+                  {validationErrors.sections && (
+                    <p className="report-inline-error" role="alert">{validationErrors.sections}</p>
+                  )}
+
                   <p className="modal-form-help">
-                    The report period and available download format are determined by the generated report.
+                    Only the selected sections will be included in the generated report.
                   </p>
 
                   <div className="modal-footer-actions">

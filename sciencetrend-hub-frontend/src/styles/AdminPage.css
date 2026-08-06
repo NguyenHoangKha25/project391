@@ -35,17 +35,6 @@
 .admin-tab-item.active {
   color: var(--st-primary);
 }
-.admin-tab-item.active::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--st-primary), var(--st-primary-dark));
-  border-radius: 9px;
-  box-shadow: 0 1px 6px rgba(21, 127, 145, 0.4);
-}
 
 /* 6 Column Stats Grid */
 .admin-stats-strip {
@@ -467,9 +456,25 @@
 .admin-secondary-action-btn { min-height: 36px; display: inline-flex; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid var(--st-border); border-radius: 10px; color: var(--st-heading); background: #fff; font-size: 11px; font-weight: 800; }
 .admin-secondary-action-btn:hover { border-color: var(--st-primary); color: var(--st-primary); }
 .admin-detailed-table select,.admin-compact-table select { min-height: 34px; padding: 0 8px; border: 1px solid var(--st-border); border-radius: 9px; color: var(--st-heading); background: #fff; font-size: 11px; }
+.admin-badge-system-admin {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  box-shadow: 0 5px 14px rgba(99, 102, 241, 0.2);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .admin-row-actions { display: flex; gap: 6px; }
 .admin-row-actions button { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; color: var(--st-primary); background: var(--st-primary-soft); }
 .admin-row-actions button.danger { color: var(--st-danger); background: var(--st-danger-soft); }
+.admin-row-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
 .admin-sync-layout { display: grid; gap: 16px; }
 .panel-header-row p { margin-top: 4px; color: var(--st-muted-strong); font-size: 12px; }
 .admin-backfill-form { display: grid; grid-template-columns: minmax(220px,1fr) auto auto; align-items: end; gap: 16px; margin-top: 22px; padding: 20px; border: 1px solid var(--st-border); border-radius: 16px; background: #f6f7f8; }
