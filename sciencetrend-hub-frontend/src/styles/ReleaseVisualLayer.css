@@ -750,6 +750,57 @@ html body .st-layout .research-lab-tabs button.active :is(h3, strong, span, svg,
   -webkit-text-fill-color: #ffffff !important;
 }
 
+/* Keep the Lab tool symbols crisp and optically centered in every state. */
+html body .st-layout .research-lab-v2 .research-lab-tabs button .research-lab-tab-icon {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  justify-self: center !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 19px !important;
+  line-height: 0;
+  box-shadow: 0 13px 28px rgba(45, 58, 160, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.46) !important;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button:first-child .research-lab-tab-icon {
+  color: #ffffff !important;
+  background: linear-gradient(145deg, #6957f7 0%, #455fe8 52%, #168fd2 100%) !important;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button:nth-child(2) .research-lab-tab-icon {
+  color: #ffffff !important;
+  background: linear-gradient(145deg, #08b8cc 0%, #1689cf 48%, #4651df 100%) !important;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button.active .research-lab-tab-icon {
+  color: #243889 !important;
+  border-color: rgba(255, 255, 255, 0.94) !important;
+  background: linear-gradient(145deg, #ffffff 0%, #dcf7ff 100%) !important;
+  box-shadow: 0 14px 30px rgba(7, 18, 67, 0.3), 0 0 0 5px rgba(113, 231, 245, 0.12), inset 0 1px 0 #ffffff !important;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button .research-lab-tab-icon svg {
+  width: 29px !important;
+  height: 29px !important;
+  margin: 0 !important;
+  color: currentColor !important;
+  stroke: currentColor !important;
+  stroke-width: 2.65 !important;
+  filter: drop-shadow(0 2px 4px rgba(13, 25, 82, 0.24));
+  transform: none !important;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button.active .research-lab-tab-icon svg {
+  color: #243889 !important;
+  stroke: #243889 !important;
+  filter: drop-shadow(0 2px 3px rgba(36, 56, 137, 0.16));
+}
+
 /* Workflow Strip Overhaul - High Contrast Vibrant Styling */
 html body .st-layout .research-workflow-strip {
   position: relative;

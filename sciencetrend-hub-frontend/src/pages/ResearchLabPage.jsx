@@ -8,6 +8,7 @@ import {
   FiCheck,
   FiChevronLeft,
   FiChevronRight,
+  FiColumns,
   FiCompass,
   FiGitBranch,
   FiHash,
@@ -19,6 +20,7 @@ import {
   FiPlus,
   FiRefreshCw,
   FiSearch,
+  FiShare2,
   FiTag,
   FiTrash2,
   FiTrendingDown,
@@ -1792,7 +1794,7 @@ function ResearchLabPage() {
         <nav className="research-lab-tabs" aria-label="Research Lab tools">
           <button type="button" className={activeTool === "compare" ? "active" : ""} onClick={() => setActiveTool("compare")}>
             <span className="research-lab-tab-index">01</span>
-            <span className="research-lab-tab-icon"><FiBarChart2 /></span>
+            <span className="research-lab-tab-icon"><FiColumns /></span>
             <span className="research-lab-tab-copy">
               <small>Evidence synthesis</small>
               <strong>Compare selected papers</strong>
@@ -1802,7 +1804,7 @@ function ResearchLabPage() {
           </button>
           <button type="button" className={activeTool === "mind-map" ? "active" : ""} onClick={() => setActiveTool("mind-map")}>
             <span className="research-lab-tab-index">02</span>
-            <span className="research-lab-tab-icon"><FiLayers /></span>
+            <span className="research-lab-tab-icon"><FiShare2 /></span>
             <span className="research-lab-tab-copy">
               <small>Landscape discovery</small>
               <strong>Map a research concept</strong>
