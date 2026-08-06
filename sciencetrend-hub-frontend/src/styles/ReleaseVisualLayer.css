@@ -2004,58 +2004,77 @@ html body .st-layout .vn-clock-badge {
 
 html body .st-layout .db-featured-spotlight-card {
   margin: 18px 0 28px !important;
-  padding: 22px 26px !important;
+  padding: 24px 28px !important;
   border-radius: 24px !important;
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%) !important;
-  border: 1px solid rgba(129, 140, 248, 0.35) !important;
-  box-shadow: 0 12px 36px rgba(49, 46, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%) !important;
+  border: 1px solid rgba(165, 180, 252, 0.4) !important;
+  box-shadow:
+    0 16px 40px rgba(30, 27, 75, 0.45),
+    0 1px 2px rgba(255, 255, 255, 0.25) inset !important;
   color: #ffffff !important;
   position: relative !important;
   overflow: hidden !important;
   transition: transform 0.25s ease, box-shadow 0.25s ease !important;
 }
 
+html body .st-layout .db-featured-spotlight-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100%;
+  background: radial-gradient(circle at 90% 20%, rgba(99, 102, 241, 0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
 html body .st-layout .db-featured-spotlight-card:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 16px 44px rgba(49, 46, 129, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 20px 48px rgba(30, 27, 75, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
 }
 
 html body .st-layout .db-featured-spotlight-card .spotlight-badge {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 7px !important;
-  padding: 4px 12px !important;
+  gap: 8px !important;
+  padding: 5px 14px !important;
   border-radius: 999px !important;
-  font-size: 11.5px !important;
-  font-weight: 850 !important;
-  letter-spacing: 0.04em !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
-  color: #a7f3d0 !important;
-  background: rgba(16, 185, 129, 0.18) !important;
-  border: 1px solid rgba(16, 185, 129, 0.35) !important;
-  margin-bottom: 12px !important;
+  color: #6ee7b7 !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.28), rgba(52, 211, 153, 0.18)) !important;
+  border: 1px solid rgba(110, 231, 183, 0.5) !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25) !important;
+  margin-bottom: 14px !important;
 }
 
 html body .st-layout .db-featured-spotlight-card .spotlight-body {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 20px !important;
+  gap: 24px !important;
 }
 
+html body .st-layout .db-featured-spotlight-card h3.spotlight-title,
 html body .st-layout .db-featured-spotlight-card .spotlight-title {
   color: #ffffff !important;
-  font-size: 17.5px !important;
-  font-weight: 850 !important;
-  line-height: 1.35 !important;
-  margin: 0 0 6px 0 !important;
+  font-size: clamp(18px, 1.6vw, 22px) !important;
+  font-weight: 900 !important;
+  line-height: 1.3 !important;
+  margin: 0 0 8px 0 !important;
+  letter-spacing: -0.01em !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6) !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
 html body .st-layout .db-featured-spotlight-card .spotlight-authors {
-  color: #c7d2fe !important;
-  font-size: 13.5px !important;
-  font-weight: 600 !important;
+  color: #e0e7ff !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
   margin: 0 !important;
+  opacity: 0.95 !important;
 }
 
 html body .st-layout .db-featured-spotlight-card .spotlight-metrics {
@@ -2066,36 +2085,38 @@ html body .st-layout .db-featured-spotlight-card .spotlight-metrics {
 }
 
 html body .st-layout .db-featured-spotlight-card .cit-badge {
-  padding: 6px 14px !important;
-  border-radius: 12px !important;
-  font-size: 13px !important;
-  font-weight: 850 !important;
+  padding: 8px 16px !important;
+  border-radius: 14px !important;
+  font-size: 13.5px !important;
+  font-weight: 900 !important;
   color: #fef08a !important;
-  background: rgba(245, 158, 11, 0.22) !important;
-  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(251, 191, 36, 0.2)) !important;
+  border: 1px solid rgba(253, 224, 71, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25) !important;
   white-space: nowrap !important;
 }
 
 html body .st-layout .db-featured-spotlight-card .spotlight-btn {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
-  padding: 9px 18px !important;
-  border-radius: 12px !important;
-  font-size: 13px !important;
-  font-weight: 800 !important;
+  gap: 8px !important;
+  padding: 10px 22px !important;
+  border-radius: 14px !important;
+  font-size: 13.5px !important;
+  font-weight: 900 !important;
   color: #ffffff !important;
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
   text-decoration: none !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.25s ease !important;
   white-space: nowrap !important;
 }
 
 html body .st-layout .db-featured-spotlight-card .spotlight-btn:hover {
   background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
-  transform: translateY(-1px) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.65) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════
