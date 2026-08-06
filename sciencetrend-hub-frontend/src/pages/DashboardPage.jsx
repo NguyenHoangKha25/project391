@@ -901,7 +901,10 @@ function DashboardPage() {
                       : "Not available"}
                   </strong>
                   {operationsData?.latestSyncLog?.paperSynced !== undefined && (
-                    <small>{formatNumber(operationsData.latestSyncLog.paperSynced)} papers processed</small>
+                    <small>
+                      {formatNumber(operationsData.latestSyncLog.paperSynced)} papers processed
+                      {operationsData?.latestSyncLog?.startedAt ? ` • ${formatRelativeTime(operationsData.latestSyncLog.startedAt)}` : ""}
+                    </small>
                   )}
                 </div>
               </div>

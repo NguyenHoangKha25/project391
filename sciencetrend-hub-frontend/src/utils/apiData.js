@@ -52,8 +52,12 @@ export function formatDateTime(value) {
 
 export function formatRelativeTime(value) {
   if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
+  const rawStr = String(value);
+  const isoStr = typeof value === "string" && !value.endsWith("Z") && !/[+-]\d{2}:\d{2}$/.test(value)
+    ? `${value}Z`
+    : value;
+  const date = new Date(isoStr);
+  if (Number.isNaN(date.getTime())) return rawStr;
   const diffMs = date.getTime() - Date.now();
   const diffMinutes = Math.round(diffMs / 60000);
   const absMinutes = Math.abs(diffMinutes);
