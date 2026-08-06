@@ -500,19 +500,22 @@ html body .st-layout .detailed-section-title::before {
 }
 
 html body .st-layout .search-papers-grid .filters-sidebar-panel {
-  position: static !important;
-  top: auto !important;
+  position: sticky !important;
+  top: 80px !important;
+  align-self: flex-start !important;
   display: flex !important;
   flex-direction: column !important;
-  max-height: none !important;
+  max-height: calc(100vh - 96px) !important;
+  max-height: calc(100dvh - 96px) !important;
   padding: 0 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   border: 1px solid rgba(197, 209, 231, 0.9) !important;
   border-radius: 22px !important;
   background:
     radial-gradient(circle at 100% 0%, rgba(85, 99, 247, 0.09), transparent 14rem),
     rgba(255, 255, 255, 0.93) !important;
   box-shadow: var(--release-shadow) !important;
+  z-index: 10 !important;
 }
 
 html body .st-layout .search-papers-grid .filters-panel-header {
@@ -525,18 +528,26 @@ html body .st-layout .search-papers-grid .filters-panel-header {
 
 html body .st-layout .search-papers-grid .filters-form-element {
   display: flex !important;
+  flex: 1 1 auto !important;
   flex-direction: column !important;
+  min-height: 0 !important;
   gap: 0 !important;
-  padding: 10px 14px 14px !important;
-  overflow: visible !important;
+  padding: 10px 14px 12px !important;
+  overflow: hidden !important;
 }
 
 html body .st-layout .search-papers-grid .filters-form-fields {
   display: flex !important;
+  flex: 1 1 auto !important;
   flex-direction: column !important;
-  gap: 7px !important;
-  padding-right: 0 !important;
-  overflow: visible !important;
+  min-height: 0 !important;
+  gap: 6px !important;
+  padding-right: 4px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  scrollbar-gutter: stable !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(85, 99, 247, 0.36) transparent !important;
 }
 
 html body .st-layout .search-papers-grid .filters-form-fields::-webkit-scrollbar {
