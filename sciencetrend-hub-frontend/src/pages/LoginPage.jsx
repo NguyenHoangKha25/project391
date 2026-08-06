@@ -1,7 +1,18 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { FiEye, FiEyeOff, FiLock, FiTrendingUp, FiUser } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiArrowRight,
+  FiBookmark,
+  FiCheck,
+  FiEye,
+  FiEyeOff,
+  FiGitBranch,
+  FiLock,
+  FiSearch,
+  FiUser,
+} from "react-icons/fi";
 import logo from "../assets/images/logo-login.svg";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { useAuth } from "../context/useAuth";
@@ -10,6 +21,27 @@ import { getCurrentUser } from "../services/userService";
 import { getDefaultAuthenticatedPath } from "../utils/authStorage";
 import { getSafeInternalPath, storePostLoginRedirect } from "../utils/postLoginRedirect";
 import "../styles/LoginPage.css";
+
+const WORKSPACE_STEPS = [
+  {
+    icon: FiSearch,
+    step: "01",
+    title: "Discover",
+    description: "Search indexed papers and follow the strongest evidence.",
+  },
+  {
+    icon: FiBookmark,
+    step: "02",
+    title: "Organize",
+    description: "Keep papers, keywords, topics and journals within reach.",
+  },
+  {
+    icon: FiGitBranch,
+    step: "03",
+    title: "Analyze",
+    description: "Move into comparison, mind maps and research reports.",
+  },
+];
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -33,7 +65,7 @@ function LoginPage() {
     event.preventDefault();
 
     if (!username.trim() || !password.trim()) {
-      setErrorMessage("Vui lòng nhập đầy đủ tài khoản và mật khẩu.");
+      setErrorMessage("Please enter both your username and password.");
       return;
     }
 
@@ -79,129 +111,91 @@ function LoginPage() {
   };
 
   return (
-    <main className="auth-page">
-      <div className="auth-bg-blur auth-bg-blur-left"></div>
-      <div className="auth-bg-blur auth-bg-blur-right"></div>
+    <main className="login-page-v2">
+      <section className="login-shell" aria-label="ScienceTrend Hub sign in">
+        <div className="login-story-panel">
+          <div className="login-story-orbit login-story-orbit-one" aria-hidden="true" />
+          <div className="login-story-orbit login-story-orbit-two" aria-hidden="true" />
 
-      <section className="auth-layout">
-        <div className="auth-left">
-          <Link to={ROUTE_PATHS.HOME} className="auth-brand" aria-label="ScienceTrend Hub home">
-            <span className="auth-logo-box">
-              <img src={logo} alt="ScienceTrend Hub logo" className="auth-logo-img" />
+          <Link to={ROUTE_PATHS.HOME} className="login-brand" aria-label="ScienceTrend Hub home">
+            <span className="login-brand-logo">
+              <img src={logo} alt="" />
             </span>
-            <div className="auth-brand-text">
-              <h1>ScienceTrend Hub</h1>
-              <p>Scientific Journal & Publication Analytics</p>
-            </div>
+            <span className="login-brand-copy">
+              <strong>ScienceTrend Hub</strong>
+              <small>Research intelligence workspace</small>
+            </span>
           </Link>
 
-          <div className="auth-left-premium-content">
-            <div className="auth-premium-hero">
-              <span className="auth-badge">RESEARCH INTELLIGENCE PLATFORM</span>
-              <h2>Accelerate Your Research Discovery</h2>
-              <p>
-                Streamlined journal analytics, citation tracking, and trend forecasting for modern academic researchers.
-              </p>
+          <div className="login-story-copy">
+            <span className="login-eyebrow">
+              <span className="login-live-dot" aria-hidden="true" />
+              Built for the next research decision
+            </span>
+            <h1>Return to the evidence, not the noise.</h1>
+            <p>
+              Pick up your reading trail, monitor the fields that matter and turn
+              catalog signals into a defensible next move.
+            </p>
+          </div>
+
+          <div className="login-workflow" aria-label="Research workspace capabilities">
+            <div className="login-workflow-heading">
+              <span>Your research flow</span>
+              <span className="login-workflow-status"><FiCheck /> Ready</span>
             </div>
-
-            {/* Product workflow preview — no fabricated analytics */}
-            <div className="auth-widget-preview-card">
-              <div className="auth-widget-header">
-                <div className="auth-widget-title-group">
-                  <span className="auth-widget-dot"></span>
-                  <span className="auth-widget-title">RESEARCH WORKFLOW</span>
+            <div className="login-workflow-list">
+              {WORKSPACE_STEPS.map(({ icon: Icon, step, title, description }) => (
+                <div className="login-workflow-item" key={title}>
+                  <span className="login-workflow-icon"><Icon aria-hidden="true" /></span>
+                  <span className="login-workflow-text">
+                    <span><small>{step}</small>{title}</span>
+                    <p>{description}</p>
+                  </span>
                 </div>
-                <span className="auth-widget-badge">Connected workspace</span>
-              </div>
-
-              <div className="auth-widget-stats-grid">
-                <div className="auth-widget-stat-card">
-                  <span className="stat-num">Search</span>
-                  <span className="stat-label">Find relevant publications</span>
-                </div>
-                <div className="auth-widget-stat-card">
-                  <span className="stat-num">Organize</span>
-                  <span className="stat-label">Save papers and sources</span>
-                </div>
-                <div className="auth-widget-stat-card">
-                  <span className="stat-num">Monitor</span>
-                  <span className="stat-label">Follow topics and journals</span>
-                </div>
-              </div>
-
-              <div className="auth-widget-trend-box">
-                <div className="auth-widget-trend-info">
-                  <div className="auth-widget-trend-label">
-                    <FiTrendingUp className="trend-icon" aria-hidden="true" />
-                    <span>From discovery to report</span>
-                  </div>
-                  <span className="trend-growth-badge">One workspace</span>
-                </div>
-                
-                {/* SVG Glowing Curve Preview */}
-                <div className="auth-widget-svg-wrap">
-                  <svg viewBox="0 0 340 50" className="auth-widget-svg" aria-hidden="true">
-                    <defs>
-                      <linearGradient id="loginSvgGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M 0,45 C 50,40 80,35 120,25 C 160,15 200,30 250,12 C 290,2 320,10 340,4"
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="2.5"
-                    />
-                    <path
-                      d="M 0,45 C 50,40 80,35 120,25 C 160,15 200,30 250,12 C 290,2 320,10 340,4 L 340,50 L 0,50 Z"
-                      fill="url(#loginSvgGrad)"
-                    />
-                    <circle cx="250" cy="12" r="3.5" fill="#10b981" />
-                    <circle cx="340" cy="4" r="4.5" fill="#34d399" />
-                  </svg>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
+
+          <p className="login-story-footnote">
+            Your saved library and followed research signals are waiting in one workspace.
+          </p>
         </div>
 
-        <div className="auth-right">
-          <div className="auth-premium-card-box" style={{ position: "relative" }}>
-            <div className="auth-card-header">
-              <h2 style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "38px",
-                fontWeight: "950",
-                letterSpacing: "-0.04em",
-                margin: 0,
-                display: "block"
-              }}>Sign in</h2>
-              <p style={{ fontSize: "15px", fontWeight: "600", marginTop: "6px", lineHeight: "1.5" }}>
-                Enter your username and password to continue.
-              </p>
-              {successMessage && (
-                <p className="auth-success-message" role="status">
-                  {successMessage}
-                </p>
-              )}
-              {accessMessage && (
-                <p className="auth-access-message" role="status">
-                  <FiLock aria-hidden="true" /> {accessMessage}
-                </p>
-              )}
-              {errorMessage && (
-                <p className="auth-error-message" role="alert">
-                  {errorMessage}
-                </p>
-              )}
-            </div>
+        <div className="login-form-panel">
+          <Link to={ROUTE_PATHS.HOME} className="login-mobile-brand" aria-label="ScienceTrend Hub home">
+            <img src={logo} alt="" />
+            <strong>ScienceTrend Hub</strong>
+          </Link>
 
-            <form className="auth-form" onSubmit={handleLogin} noValidate>
-              <div className="auth-form-group">
-                <label htmlFor="username" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Username</label>
-                <div className="auth-input-wrapper">
-                  <FiUser className="auth-input-icon" aria-hidden="true" />
+          <div className="login-form-wrap">
+            <div className="login-form-kicker">Welcome back</div>
+            <header className="login-form-header">
+              <h2>Continue your research</h2>
+              <p>Sign in to reopen your saved evidence and personalized workspace.</p>
+            </header>
+
+            {successMessage && (
+              <p className="login-feedback login-feedback-success" role="status">
+                <FiCheck aria-hidden="true" /> {successMessage}
+              </p>
+            )}
+            {accessMessage && (
+              <p className="login-feedback login-feedback-access" role="status">
+                <FiLock aria-hidden="true" /> {accessMessage}
+              </p>
+            )}
+            {errorMessage && (
+              <p className="login-feedback login-feedback-error" role="alert">
+                {errorMessage}
+              </p>
+            )}
+
+            <form className="login-form" onSubmit={handleLogin} noValidate>
+              <div className="login-field">
+                <label htmlFor="username">Username</label>
+                <div className="login-input-wrap">
+                  <FiUser aria-hidden="true" />
                   <input
                     id="username"
                     name="username"
@@ -209,20 +203,22 @@ function LoginPage() {
                     placeholder="Enter your username"
                     autoComplete="username"
                     value={username}
-                    onChange={(e) => {
-                      setUsername(e.target.value);
+                    onChange={(event) => {
+                      setUsername(event.target.value);
                       setErrorMessage("");
                       setSuccessMessage("");
                     }}
-                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                 </div>
               </div>
 
-              <div className="auth-form-group">
-                <label htmlFor="password" style={{ fontWeight: "900", fontSize: "12.5px", letterSpacing: "0.08em", textTransform: "uppercase" }}>Password</label>
-                <div className="auth-input-wrapper">
-                  <FiLock className="auth-input-icon" aria-hidden="true" />
+              <div className="login-field">
+                <div className="login-field-label-row">
+                  <label htmlFor="password">Password</label>
+                  <Link to={ROUTE_PATHS.FORGOT_PASSWORD}>Forgot password?</Link>
+                </div>
+                <div className="login-input-wrap">
+                  <FiLock aria-hidden="true" />
                   <input
                     id="password"
                     name="password"
@@ -230,57 +226,47 @@ function LoginPage() {
                     placeholder="Enter your password"
                     autoComplete="current-password"
                     value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
+                    onChange={(event) => {
+                      setPassword(event.target.value);
                       setErrorMessage("");
                       setSuccessMessage("");
                     }}
-                    style={{ fontWeight: "700", fontSize: "15px" }}
                   />
                   <button
                     type="button"
-                    className="auth-password-toggle"
+                    className="login-password-toggle"
                     aria-label={showPassword ? "Hide password" : "Show password"}
-                    onClick={() => setShowPassword((c) => !c)}
+                    onClick={() => setShowPassword((current) => !current)}
                   >
                     {showPassword ? <FiEyeOff aria-hidden="true" /> : <FiEye aria-hidden="true" />}
                   </button>
                 </div>
               </div>
 
-              <div className="auth-options">
-                <span className="auth-remember" style={{ fontWeight: "600" }}>Secure account access</span>
-                <Link to={ROUTE_PATHS.FORGOT_PASSWORD} style={{ fontWeight: "750" }}>Forgot password?</Link>
-              </div>
-
-              <button
-                type="submit"
-                className="auth-login-btn"
-                disabled={isSubmitting}
-                style={{ fontSize: "15px", fontWeight: "850", height: "52px" }}
-              >
-                {isSubmitting ? "Logging in..." : "Login"}
+              <button type="submit" className="login-primary-action" disabled={isSubmitting}>
+                <span>{isSubmitting ? "Signing in..." : "Enter workspace"}</span>
+                {!isSubmitting && <FiArrowRight aria-hidden="true" />}
               </button>
             </form>
 
-            <div className="auth-divider">
-              <span>or</span>
-            </div>
+            <div className="login-divider"><span>or continue with</span></div>
 
-            <button
-              type="button"
-              className="auth-google-btn"
-              onClick={handleGmailLogin}
-              style={{ fontSize: "15px", fontWeight: "750", height: "52px" }}
-            >
-              <FcGoogle className="auth-google-icon" aria-hidden="true" />
-              <span>Continue with Google</span>
+            <button type="button" className="login-google-action" onClick={handleGmailLogin}>
+              <FcGoogle aria-hidden="true" />
+              <span>Google</span>
             </button>
 
-            <p className="auth-register-text" style={{ fontWeight: "600" }}>
-              Do not have an account?{" "}
-              <Link to={ROUTE_PATHS.REGISTER} style={{ fontWeight: "800" }}>Create account</Link>
-            </p>
+            <div className="login-register-callout">
+              <span>
+                <small>New to ScienceTrend?</small>
+                Create a workspace for your research.
+              </span>
+              <Link to={ROUTE_PATHS.REGISTER}>Create account <FiArrowRight aria-hidden="true" /></Link>
+            </div>
+
+            <Link to={ROUTE_PATHS.HOME} className="login-back-link">
+              <FiArrowLeft aria-hidden="true" /> Browse the public catalog
+            </Link>
           </div>
         </div>
       </section>
