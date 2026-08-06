@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   FiAlertTriangle,
   FiCheckCircle,
@@ -42,12 +43,32 @@ const tabs = [
 const CURRENT_YEAR = new Date().getFullYear();
 const DEFAULT_BACKFILL_FROM_YEAR = 2015;
 
+function resolveAdminTab(value) {
+  return tabs.some(([tabValue]) => tabValue === value) ? value : "overview";
+}
+
 function statusClass(value) {
-  return ["SUCCESS", "COMPLETED", "ACTIVE", "CONNECTED"].includes(String(value).toUpperCase()) ? "connected" : "error";
+  const status = String(value).toUpperCase();
+  if (["SUCCESS", "COMPLETED", "ACTIVE", "CONNECTED"].includes(status)) return "connected";
+  if (["RUNNING", "PENDING", "IN_PROGRESS"].includes(status)) return "pending";
+  return "error";
+}
+
+function syncLogDetails(log) {
+  return log.errorMessage || log.message || "";
+}
+
+function syncLogType(log) {
+  return String(log.sourceApi || "").toLowerCase().includes("backfill") ? "Backfill" : "Sync";
 }
 
 function AdminPage() {
-  const [tab, setTab] = useState("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = resolveAdminTab(searchParams.get("tab"));
+  const setTab = useCallback((nextTab) => {
+    const safeTab = resolveAdminTab(nextTab);
+    setSearchParams(safeTab === "overview" ? {} : { tab: safeTab }, { replace: true });
+  }, [setSearchParams]);
   const [operations, setOperations] = useState(null);
   const [users, setUsers] = useState([]);
   const [syncLogs, setSyncLogs] = useState([]);
@@ -186,11 +207,18 @@ function AdminPage() {
     setMessage("");
     setBackfillError("");
     try {
-      await triggerAdminBackfill({ fromYear: parsedFromYear, toYear: parsedToYear, maxResults: parsedMaxResults });
+      const result = await triggerAdminBackfill({ fromYear: parsedFromYear, toYear: parsedToYear, maxResults: parsedMaxResults });
       await loadAdminData();
-      setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} (max ${formatNumber(parsedMaxResults)} papers) completed successfully.`);
+      const resultStatus = String(result?.status || "").toUpperCase();
+      if (["FAILED", "ERROR"].includes(resultStatus)) {
+        setBackfillError(syncLogDetails(result) || "The backend could not complete this backfill. Check Sync history for details.");
+        return;
+      }
+      const importedPapers = result?.paperSynced ?? result?.newRecords ?? result?.recordsIndexed;
+      const importedSummary = importedPapers == null ? "" : ` ${formatNumber(importedPapers)} new papers were indexed.`;
+      setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} (max ${formatNumber(parsedMaxResults)} papers) completed successfully.${importedSummary}`);
     } catch (error) {
-      setMessage(error.message || "Could not start backfill.");
+      setBackfillError(error.message || "Could not start backfill.");
     } finally {
       setWorking("");
     }
@@ -349,7 +377,43 @@ function AdminUsersTable({ users, onView, onRole, onDelete, working, compact = f
 }
 
 function SyncTable({ logs, compact = false }) {
-  return <div className="admin-detailed-table-wrap"><table className={compact ? "admin-compact-table" : "admin-detailed-table"}><thead><tr><th>Status</th><th>Records</th><th>Started</th>{!compact && <th>Details</th>}</tr></thead><tbody>{logs.map((log, index) => <tr key={log.id ?? index}><td><span className={`status-label ${statusClass(log.status)}`}>{log.status || "UNKNOWN"}</span></td><td>{formatNumber(log.paperSynced ?? log.newRecords ?? log.recordsIndexed ?? 0)}</td><td>{log.startedAt ? formatDateTime(log.startedAt) : "—"}</td>{!compact && <td>{log.message || "—"}</td>}</tr>)}{logs.length === 0 && <tr><td colSpan="4">No sync logs available.</td></tr>}</tbody></table></div>;
+  const latestFailure = compact
+    ? logs.find((log) => ["FAILED", "ERROR"].includes(String(log.status).toUpperCase()))
+    : null;
+  const latestFailureDetails = latestFailure ? syncLogDetails(latestFailure) : "";
+
+  return (
+    <div className="admin-sync-table-block">
+      <div className="admin-detailed-table-wrap">
+        <table className={compact ? "admin-compact-table" : "admin-detailed-table"}>
+          <thead><tr><th>Status</th><th>Records</th><th>Started</th>{!compact && <th>Details</th>}</tr></thead>
+          <tbody>
+            {logs.map((log, index) => {
+              const details = syncLogDetails(log);
+              return (
+                <tr key={log.syncLogId ?? log.id ?? index} title={compact && details ? details : undefined}>
+                  <td><div className="admin-sync-status-cell"><span className={`status-label ${statusClass(log.status)}`}>{log.status || "UNKNOWN"}</span><small>{syncLogType(log)}</small></div></td>
+                  <td>{formatNumber(log.paperSynced ?? log.newRecords ?? log.recordsIndexed ?? 0)}</td>
+                  <td>{log.startedAt ? formatDateTime(log.startedAt) : "—"}</td>
+                  {!compact && <td className={statusClass(log.status) === "error" ? "admin-sync-error-detail" : ""}>{details || "—"}</td>}
+                </tr>
+              );
+            })}
+            {logs.length === 0 && <tr><td colSpan={compact ? 3 : 4}>No sync logs available.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      {latestFailure && (
+        <div className="admin-sync-failure-summary" role="status">
+          <FiAlertTriangle />
+          <div>
+            <strong>Latest {syncLogType(latestFailure).toLowerCase()} failed</strong>
+            <span>{latestFailureDetails || "The backend did not return an error reason. Open Sync & backfill and try again."}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function ReportsTable({ reports }) {

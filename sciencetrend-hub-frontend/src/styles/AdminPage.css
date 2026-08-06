@@ -208,6 +208,56 @@
 .admin-compact-table td strong {
   color: var(--st-heading);
 }
+.admin-sync-table-block {
+  display: grid;
+  gap: 10px;
+}
+.admin-sync-status-cell {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.admin-sync-status-cell small {
+  color: var(--st-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.admin-sync-failure-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 12px;
+  border: 1px solid rgba(220, 38, 38, 0.18);
+  border-radius: 12px;
+  color: #991b1b;
+  background: #fff7f7;
+}
+.admin-sync-failure-summary > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+.admin-sync-failure-summary div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.admin-sync-failure-summary strong {
+  color: #991b1b;
+  font-size: 11px;
+}
+.admin-sync-failure-summary span {
+  color: #7f1d1d;
+  font-size: 10px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.admin-sync-error-detail {
+  max-width: 360px;
+  color: #991b1b !important;
+  overflow-wrap: anywhere;
+}
 
 /* Badge role labels */
 .role-badge {
@@ -239,6 +289,7 @@
   border-radius: 20px;
 }
 .status-label.connected { background: #ecfdf5; color: #047857; }
+.status-label.pending { background: #eff6ff; color: #1d4ed8; }
 .status-label.error { background: #fef2f2; color: #b91c1c; }
 
 /* View all panel link footer */
