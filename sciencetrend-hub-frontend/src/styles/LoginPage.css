@@ -442,6 +442,17 @@
   font-weight: 650;
 }
 
+/* The input lives inside a focus-aware shell. Keep the accessible focus cue on
+   that rounded shell instead of drawing a second square outline on the input. */
+html body main.login-page-v2 .login-input-wrap input:focus,
+html body main.login-page-v2 .login-input-wrap input:focus-visible {
+  border: 0 !important;
+  outline: 0 !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 .login-input-wrap input::placeholder {
   color: #9aa6bc;
   -webkit-text-fill-color: #9aa6bc;
