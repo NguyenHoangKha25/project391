@@ -1940,3 +1940,28 @@ html body .st-layout .research-map-canvas svg {
 html body .st-layout .research-map-root {
   outline: none !important;
 }
+
+/* --------------------------------------------------------------------------
+   High-Contrast Stat Badges & Catalog Subtext Fix
+   -------------------------------------------------------------------------- */
+
+html body .st-layout .trend-stat-card .stat-card-trend-text,
+html body .st-layout .trend-stat-card .stat-card-trend-text .sub {
+  color: #334155 !important;
+  -webkit-text-fill-color: #334155 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+
+html body .st-layout .trends-status-badge {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+html body .st-layout .trends-status-badge span {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
