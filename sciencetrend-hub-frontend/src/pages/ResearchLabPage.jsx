@@ -131,7 +131,16 @@ function normalizeMapType(type) {
   return MAP_TYPE_META[normalizedType] ? normalizedType : "UNKNOWN";
 }
 
-function getMapLayout(nodes = [], rootId, edges = []) {
+function getMapNodeIdentity(node) {
+  if (!node || node.id === null || node.id === undefined) return "";
+  const type = normalizeMapType(node.type);
+  const rawId = String(node.id);
+  return rawId.toUpperCase().startsWith(`${type}:`) ? rawId : `${type}:${rawId}`;
+}
+
+function getMapLayout(nodes = [], root, edges = []) {
+  const rootId = root?.id;
+  const rootNodeKey = getMapNodeIdentity(root);
   const relationByTarget = new Map(
     edges.map((edge) => [String(edge.targetId), String(edge.relation || "RELATED")]),
   );
@@ -142,7 +151,7 @@ function getMapLayout(nodes = [], rootId, edges = []) {
       .map((edge) => [String(edge.targetId), String(edge.sourceId)]),
   );
 
-  const nonRootNodes = nodes.filter((node) => String(node.id) !== String(rootId));
+  const nonRootNodes = nodes.filter((node) => getMapNodeIdentity(node) !== rootNodeKey);
 
   const groupedNodes = nonRootNodes.reduce((groups, node) => {
     const type = normalizeMapType(node.type);
@@ -698,11 +707,13 @@ function PaperComparator() {
   );
 }
 
-function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
+function MindMapGraph({ data, selectedNode, onSelectNode }) {
   const rootId = data?.root?.id;
+  const rootNodeKey = getMapNodeIdentity(data?.root);
+  const selectedNodeKey = getMapNodeIdentity(selectedNode);
   const nodes = useMemo(() => (Array.isArray(data?.nodes) ? data.nodes : []), [data?.nodes]);
   const edges = useMemo(() => (Array.isArray(data?.edges) ? data.edges : []), [data?.edges]);
-  const layout = useMemo(() => getMapLayout(nodes, rootId, edges), [nodes, rootId, edges]);
+  const layout = useMemo(() => getMapLayout(nodes, data?.root, edges), [nodes, data?.root, edges]);
   const [zoom, setZoom] = useState(100);
   const canvasRef = useRef(null);
   const scrollSnapshotRef = useRef(null);
@@ -716,15 +727,25 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
 
   const captureScrollSnapshot = useCallback(() => {
     const canvas = canvasRef.current;
-    const workspaceScroller = canvas?.closest(".st-main");
+    const scrollContainers = [];
+    let currentElement = canvas;
+
+    while (currentElement) {
+      const canScroll = currentElement === canvas
+        || currentElement.scrollHeight > currentElement.clientHeight
+        || currentElement.scrollWidth > currentElement.clientWidth;
+      if (canScroll) {
+        scrollContainers.push({
+          element: currentElement,
+          left: currentElement.scrollLeft,
+          top: currentElement.scrollTop,
+        });
+      }
+      currentElement = currentElement.parentElement;
+    }
 
     return {
-      canvas,
-      canvasLeft: canvas?.scrollLeft ?? 0,
-      canvasTop: canvas?.scrollTop ?? 0,
-      workspaceScroller,
-      workspaceLeft: workspaceScroller?.scrollLeft ?? 0,
-      workspaceTop: workspaceScroller?.scrollTop ?? 0,
+      scrollContainers,
       windowLeft: window.scrollX || window.pageXOffset || 0,
       windowTop: window.scrollY || window.pageYOffset || 0,
     };
@@ -733,14 +754,11 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
   const restoreScrollSnapshot = useCallback((snapshot) => {
     if (!snapshot) return;
 
-    if (snapshot.canvas?.isConnected) {
-      snapshot.canvas.scrollLeft = snapshot.canvasLeft;
-      snapshot.canvas.scrollTop = snapshot.canvasTop;
-    }
-    if (snapshot.workspaceScroller?.isConnected) {
-      snapshot.workspaceScroller.scrollLeft = snapshot.workspaceLeft;
-      snapshot.workspaceScroller.scrollTop = snapshot.workspaceTop;
-    }
+    snapshot.scrollContainers.forEach(({ element, left, top }) => {
+      if (!element?.isConnected) return;
+      element.scrollLeft = left;
+      element.scrollTop = top;
+    });
     window.scrollTo(snapshot.windowLeft, snapshot.windowTop);
   }, []);
 
@@ -765,7 +783,7 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
     if (scrollSnapshotRef.current) {
       scheduleScrollRestore(scrollSnapshotRef.current);
     }
-  }, [selectedNodeId, scheduleScrollRestore]);
+  }, [selectedNodeKey, scheduleScrollRestore]);
 
   useEffect(() => () => {
     restoreFrameRef.current.forEach((frameId) => window.cancelAnimationFrame(frameId));
@@ -948,15 +966,16 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
 
           <g
             ref={bindNoFocusRef}
-            className={`research-map-root type-${rootType.toLowerCase()} trend-${String(data?.root?.trendStatus || "no_data").toLowerCase()} ${String(selectedNodeId) === String(rootId) ? "is-selected" : ""}`}
+            className={`research-map-root type-${rootType.toLowerCase()} trend-${String(data?.root?.trendStatus || "no_data").toLowerCase()} ${selectedNodeKey === rootNodeKey ? "is-selected" : ""}`}
             transform={`translate(${layout.root.x} ${layout.root.y})`}
+            data-node-key={rootNodeKey}
             onPointerDown={preventPointerFocus}
             onMouseDown={preventPointerFocus}
             onClick={(event) => selectMapNode(event, data?.root)}
             onKeyDown={(event) => selectNodeFromKeyboard(event, data?.root)}
             role="button"
             tabIndex="0"
-            aria-pressed={String(selectedNodeId) === String(rootId)}
+            aria-pressed={selectedNodeKey === rootNodeKey}
           >
             <circle className="research-map-root-orbit" r="76" />
             <rect x="-116" y="-54" width="232" height="108" rx="27" fill="url(#research-root-gradient)" filter="url(#research-map-node-shadow)" />
@@ -975,16 +994,18 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
               const typeClass = type.toLowerCase();
               const statusClass = String(node.trendStatus || "no_data").toLowerCase();
               const lines = splitMapLabel(node.label, 26);
-              const isSelected = String(selectedNodeId) === String(node.id);
+              const nodeKey = getMapNodeIdentity(node);
+              const isSelected = selectedNodeKey === nodeKey;
               const labelStartX = -MAP_NODE_WIDTH / 2 + 58;
               const badgeCX = -MAP_NODE_WIDTH / 2 + 30;
 
               return (
                 <g
-                  key={node.id}
+                  key={nodeKey}
                   ref={bindNoFocusRef}
                   className={`research-map-node type-${typeClass} trend-${statusClass} ${isSelected ? "is-selected" : ""}`}
                   transform={`translate(${item.x} ${item.y})`}
+                  data-node-key={nodeKey}
                   onPointerDown={preventPointerFocus}
                   onMouseDown={preventPointerFocus}
                   onClick={(event) => selectMapNode(event, node)}
@@ -1280,7 +1301,7 @@ function MindMapWorkspace() {
         {mapLoading ? (
           <div className="research-tool-empty"><span className="workspace-loading-spinner" /><h3>Mapping research relationships…</h3></div>
         ) : mapData ? (
-          <MindMapGraph data={mapData} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode} />
+          <MindMapGraph data={mapData} selectedNode={selectedNode} onSelectNode={setSelectedNode} />
         ) : (
           <div className="research-tool-empty research-map-empty-state">
             <div className="research-map-empty-visual" aria-hidden="true">
