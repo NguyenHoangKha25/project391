@@ -4612,15 +4612,12 @@ html body .st-layout .research-lab-v2 .research-map-insights {
   overflow: visible !important;
 }
 
-/* Keep the release accent clear of rounded corners when these panels allow
-   visible overflow for the page-owned scrolling layout. */
+/* These side panels intentionally allow visible overflow so the page owns
+   vertical scrolling. Remove the global top accent here because it otherwise
+   paints outside the rounded silhouette. */
 html body .st-layout .research-lab-v2 .research-map-builder::before,
 html body .st-layout .research-lab-v2 .research-map-insights::before {
-  left: 18px !important;
-  right: 18px !important;
-  width: auto !important;
-  border-radius: 999px;
-  pointer-events: none;
+  display: none !important;
 }
 
 html body .st-layout .research-lab-v2 .research-map-canvas {
