@@ -529,8 +529,7 @@ function TrendsPage() {
       return years.map((year) => yearlyValues.get(year) || 0);
     });
     const maxVal = Math.max(1, ...valuesBySeries.flat());
-    const axisStep = Math.max(1, Math.ceil(maxVal / 4));
-    const axisMax = axisStep * 4;
+    const axisMax = Math.max(2, maxVal);
     const plotWidth = width - paddingLeft - paddingRight;
     const plotHeight = height - paddingTop - paddingBottom;
     const plotBaseY = height - paddingBottom;
@@ -865,7 +864,7 @@ function TrendsPage() {
                               >
                                 <title>{`${series.label} (${point.label}): ${formatNumber(point.value)} papers`}</title>
                               </circle>
-                              {(isFocused || activeFocusedSeries === "ALL") && (
+                              {isFocused && activeFocusedSeries !== "ALL" && (
                                 <text
                                   x={point.x}
                                   y={Math.max(COMPARISON_PLOT_TOP + 10, point.y - 10)}
