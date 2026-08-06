@@ -105,6 +105,31 @@ function DashboardPage() {
   const [spinning, setSpinning] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [vietnamClock, setVietnamClock] = useState(() => {
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Ho_Chi_Minh",
+    }).format(new Date());
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setVietnamClock(
+        new Intl.DateTimeFormat("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+          timeZone: "Asia/Ho_Chi_Minh",
+        }).format(new Date())
+      );
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const loadDashboard = useCallback(async (isRefresh = false) => {
     const storedOverview = getPersistentCachedData(cacheKeys.overview);
     const storedTopics = getPersistentCachedData(cacheKeys.topics);
@@ -494,7 +519,7 @@ function DashboardPage() {
           <aside className="db-v4-snapshot" aria-label="Current catalog snapshot">
             <div className="db-v4-snapshot-status">
               <span className={hasDashboardData(data) ? "is-ready" : ""}><i />{hasDashboardData(data) ? "Live catalog" : "Awaiting data"}</span>
-              <small>Current snapshot</small>
+              <small className="vn-clock-badge" title="Live Vietnam Time (ICT UTC+7)">🇻🇳 ICT: {vietnamClock}</small>
             </div>
             <div className="db-v4-snapshot-total">
               <span>Indexed papers</span>
@@ -531,6 +556,26 @@ function DashboardPage() {
             <FiAlertTriangle />
             <span>{errorMessage}</span>
           </div>
+        )}
+
+        {topCitedPapers.length > 0 && (
+          <article className="db-featured-spotlight-card">
+            <div className="spotlight-badge">
+              <FiCheckCircle /> <span>Featured High-Impact Research</span>
+            </div>
+            <div className="spotlight-body">
+              <div className="spotlight-main">
+                <h3 className="spotlight-title">{(topCitedPapers[0].title || "").replace(/<[^>]*>?/gm, "")}</h3>
+                <p className="spotlight-authors">{topCitedPapers[0].authors || "Unknown author"} {topCitedPapers[0].year ? `(${topCitedPapers[0].year})` : ""}</p>
+              </div>
+              <div className="spotlight-metrics">
+                <span className="cit-badge">🔥 {formatNumber(topCitedPapers[0].citationCount)} Citations</span>
+                <Link to="/papers" className="spotlight-btn">
+                  Explore Papers <FiArrowUpRight />
+                </Link>
+              </div>
+            </div>
+          </article>
         )}
 
         <div className="db-section-intro">

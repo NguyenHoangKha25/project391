@@ -1983,3 +1983,117 @@ html body .st-layout .trends-status-badge span {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
+
+/* --------------------------------------------------------------------------
+   Premium Dashboard Visual Excellence & Live Clock Badge
+   -------------------------------------------------------------------------- */
+
+html body .st-layout .vn-clock-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  color: #2563eb !important;
+  background: rgba(37, 99, 235, 0.09) !important;
+  border: 1px solid rgba(37, 99, 235, 0.25) !important;
+  letter-spacing: 0.02em !important;
+}
+
+html body .st-layout .db-featured-spotlight-card {
+  margin: 18px 0 28px !important;
+  padding: 22px 26px !important;
+  border-radius: 24px !important;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%) !important;
+  border: 1px solid rgba(129, 140, 248, 0.35) !important;
+  box-shadow: 0 12px 36px rgba(49, 46, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+html body .st-layout .db-featured-spotlight-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 16px 44px rgba(49, 46, 129, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+html body .st-layout .db-featured-spotlight-card .spotlight-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 4px 12px !important;
+  border-radius: 999px !important;
+  font-size: 11.5px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: #a7f3d0 !important;
+  background: rgba(16, 185, 129, 0.18) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  margin-bottom: 12px !important;
+}
+
+html body .st-layout .db-featured-spotlight-card .spotlight-body {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+}
+
+html body .st-layout .db-featured-spotlight-card .spotlight-title {
+  color: #ffffff !important;
+  font-size: 17.5px !important;
+  font-weight: 850 !important;
+  line-height: 1.35 !important;
+  margin: 0 0 6px 0 !important;
+}
+
+html body .st-layout .db-featured-spotlight-card .spotlight-authors {
+  color: #c7d2fe !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+html body .st-layout .db-featured-spotlight-card .spotlight-metrics {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex-shrink: 0 !important;
+}
+
+html body .st-layout .db-featured-spotlight-card .cit-badge {
+  padding: 6px 14px !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  color: #fef08a !important;
+  background: rgba(245, 158, 11, 0.22) !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+  white-space: nowrap !important;
+}
+
+html body .st-layout .db-featured-spotlight-card .spotlight-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 9px 18px !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4) !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+}
+
+html body .st-layout .db-featured-spotlight-card .spotlight-btn:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+  transform: translateY(-1px) !important;
+}
