@@ -1042,13 +1042,21 @@ function MindMapWorkspace() {
   }
 
   const mapInsights = useMemo(() => {
-    const nodes = mapData?.nodes || [];
+    const nodes = Array.isArray(mapData?.nodes) ? mapData.nodes : [];
+    const rootId = mapData?.root?.id;
+
+    const relatedNodes = nodes.filter(
+      (node) => String(node.id) !== String(rootId),
+    );
+
     return {
-      relatedNodes: Math.max(0, nodes.length - 1),
-      growingNodes: nodes.filter((node) => ["GROWING", "EMERGING"].includes(node.trendStatus)).length,
-      journals: nodes.filter((node) => node.type === "JOURNAL").length,
-      topics: nodes.filter((node) => node.type === "TOPIC").length,
-      keywords: nodes.filter((node) => node.type === "KEYWORD").length,
+      relatedNodes: relatedNodes.length,
+      growingNodes: relatedNodes.filter((node) =>
+        ["GROWING", "EMERGING"].includes(node.trendStatus),
+      ).length,
+      topics: relatedNodes.filter((node) => node.type === "TOPIC").length,
+      keywords: relatedNodes.filter((node) => node.type === "KEYWORD").length,
+      journals: relatedNodes.filter((node) => node.type === "JOURNAL").length,
     };
   }, [mapData]);
 

@@ -22,6 +22,5 @@ export function getPaperById(id) {
 export function comparePapers(ids = []) {
   return apiRequest("/papers/compare", {
     params: { ids },
-    auth: false,
   });
 }
