@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FiActivity,
@@ -705,12 +705,71 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
   const layout = useMemo(() => getMapLayout(nodes, rootId, edges), [nodes, rootId, edges]);
   const [zoom, setZoom] = useState(100);
   const canvasRef = useRef(null);
+  const scrollSnapshotRef = useRef(null);
+  const restoreFrameRef = useRef([]);
   const rootType = normalizeMapType(data?.root?.type);
   const rootLines = splitMapLabel(data?.root?.label, 24);
 
   useEffect(() => {
     setZoom(100);
   }, [rootId]);
+
+  const captureScrollSnapshot = useCallback(() => {
+    const canvas = canvasRef.current;
+    const workspaceScroller = canvas?.closest(".st-main");
+
+    return {
+      canvas,
+      canvasLeft: canvas?.scrollLeft ?? 0,
+      canvasTop: canvas?.scrollTop ?? 0,
+      workspaceScroller,
+      workspaceLeft: workspaceScroller?.scrollLeft ?? 0,
+      workspaceTop: workspaceScroller?.scrollTop ?? 0,
+      windowLeft: window.scrollX || window.pageXOffset || 0,
+      windowTop: window.scrollY || window.pageYOffset || 0,
+    };
+  }, []);
+
+  const restoreScrollSnapshot = useCallback((snapshot) => {
+    if (!snapshot) return;
+
+    if (snapshot.canvas?.isConnected) {
+      snapshot.canvas.scrollLeft = snapshot.canvasLeft;
+      snapshot.canvas.scrollTop = snapshot.canvasTop;
+    }
+    if (snapshot.workspaceScroller?.isConnected) {
+      snapshot.workspaceScroller.scrollLeft = snapshot.workspaceLeft;
+      snapshot.workspaceScroller.scrollTop = snapshot.workspaceTop;
+    }
+    window.scrollTo(snapshot.windowLeft, snapshot.windowTop);
+  }, []);
+
+  const scheduleScrollRestore = useCallback((snapshot) => {
+    restoreFrameRef.current.forEach((frameId) => window.cancelAnimationFrame(frameId));
+    restoreFrameRef.current = [];
+    restoreScrollSnapshot(snapshot);
+
+    const firstFrame = window.requestAnimationFrame(() => {
+      restoreScrollSnapshot(snapshot);
+      const secondFrame = window.requestAnimationFrame(() => {
+        restoreScrollSnapshot(snapshot);
+        if (scrollSnapshotRef.current === snapshot) scrollSnapshotRef.current = null;
+        restoreFrameRef.current = [];
+      });
+      restoreFrameRef.current = [secondFrame];
+    });
+    restoreFrameRef.current = [firstFrame];
+  }, [restoreScrollSnapshot]);
+
+  useLayoutEffect(() => {
+    if (scrollSnapshotRef.current) {
+      scheduleScrollRestore(scrollSnapshotRef.current);
+    }
+  }, [selectedNodeId, scheduleScrollRestore]);
+
+  useEffect(() => () => {
+    restoreFrameRef.current.forEach((frameId) => window.cancelAnimationFrame(frameId));
+  }, []);
 
   function curvePath(sourceX, sourceY, targetX, targetY) {
     const bendX = sourceX + (targetX - sourceX) * 0.52;
@@ -734,6 +793,7 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
   function selectNodeFromKeyboard(event, node) {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
+    scrollSnapshotRef.current = captureScrollSnapshot();
     selectMapNode(event, node);
   }
 
@@ -746,35 +806,22 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
       }
     }
 
-    if (document.activeElement && typeof document.activeElement.blur === "function") {
+    const snapshot = scrollSnapshotRef.current || captureScrollSnapshot();
+    scrollSnapshotRef.current = snapshot;
+
+    if (event?.currentTarget && typeof event.currentTarget.blur === "function") {
+      event.currentTarget.blur();
+    } else if (document.activeElement && typeof document.activeElement.blur === "function") {
       document.activeElement.blur();
     }
 
-    const currentWinX = window.scrollX || window.pageXOffset || 0;
-    const currentWinY = window.scrollY || window.pageYOffset || 0;
-    const canvas = canvasRef.current;
-    const scrollLeft = canvas ? canvas.scrollLeft : 0;
-    const scrollTop = canvas ? canvas.scrollTop : 0;
-
     onSelectNode(node);
-
-    if (canvas) {
-      canvas.scrollLeft = scrollLeft;
-      canvas.scrollTop = scrollTop;
-    }
-    window.scrollTo(currentWinX, currentWinY);
-
-    window.requestAnimationFrame(() => {
-      if (canvas) {
-        canvas.scrollLeft = scrollLeft;
-        canvas.scrollTop = scrollTop;
-      }
-      window.scrollTo(currentWinX, currentWinY);
-    });
+    scheduleScrollRestore(snapshot);
   }
 
   function preventPointerFocus(event) {
     if (event) {
+      scrollSnapshotRef.current = captureScrollSnapshot();
       if (typeof event.preventDefault === "function") event.preventDefault();
       if (typeof event.stopPropagation === "function") event.stopPropagation();
     }

@@ -1597,6 +1597,7 @@
   overflow: auto;
   overflow-anchor: none;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
   padding: 16px;
   background:
     radial-gradient(circle at 20% 50%, rgba(86, 101, 238, 0.07), transparent 27rem),
