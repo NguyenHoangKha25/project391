@@ -501,19 +501,19 @@ html body .st-layout .detailed-section-title::before {
 
 html body .st-layout .search-papers-grid .filters-sidebar-panel {
   position: sticky !important;
-  top: 80px !important;
+  top: 20px !important;
   align-self: flex-start !important;
   display: flex !important;
   flex-direction: column !important;
-  max-height: calc(100vh - 96px) !important;
-  max-height: calc(100dvh - 96px) !important;
+  max-height: calc(100vh - 40px) !important;
+  max-height: calc(100dvh - 40px) !important;
   padding: 0 !important;
   overflow: hidden !important;
   border: 1px solid rgba(197, 209, 231, 0.9) !important;
-  border-radius: 22px !important;
+  border-radius: 20px !important;
   background:
     radial-gradient(circle at 100% 0%, rgba(85, 99, 247, 0.09), transparent 14rem),
-    rgba(255, 255, 255, 0.93) !important;
+    rgba(255, 255, 255, 0.95) !important;
   box-shadow: var(--release-shadow) !important;
   z-index: 10 !important;
 }
@@ -521,7 +521,7 @@ html body .st-layout .search-papers-grid .filters-sidebar-panel {
 html body .st-layout .search-papers-grid .filters-panel-header {
   flex: 0 0 auto !important;
   margin: 0 !important;
-  padding: 14px 16px !important;
+  padding: 10px 14px !important;
   border-bottom: 1px solid rgba(200, 212, 233, 0.84) !important;
   background: linear-gradient(120deg, #edf0ff, #f6fbff) !important;
 }
@@ -532,7 +532,7 @@ html body .st-layout .search-papers-grid .filters-form-element {
   flex-direction: column !important;
   min-height: 0 !important;
   gap: 0 !important;
-  padding: 10px 14px 12px !important;
+  padding: 8px 12px 10px !important;
   overflow: hidden !important;
 }
 
@@ -541,13 +541,34 @@ html body .st-layout .search-papers-grid .filters-form-fields {
   flex: 1 1 auto !important;
   flex-direction: column !important;
   min-height: 0 !important;
-  gap: 6px !important;
-  padding-right: 4px !important;
+  gap: 4px !important;
+  padding-right: 2px !important;
   overflow-y: auto !important;
   overscroll-behavior: contain !important;
   scrollbar-gutter: stable !important;
   scrollbar-width: thin !important;
   scrollbar-color: rgba(85, 99, 247, 0.36) transparent !important;
+}
+
+html body .st-layout .search-papers-grid .filters-form-fields .filter-field-group label {
+  font-size: 10px !important;
+  margin-bottom: 2px !important;
+  font-weight: 700 !important;
+}
+
+html body .st-layout .search-papers-grid .filters-form-fields .filter-field-group input,
+html body .st-layout .search-papers-grid .filters-form-fields .filter-field-group select {
+  height: 34px !important;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+}
+
+html body .st-layout .search-papers-grid .filters-submit-btn-premium {
+  flex: 0 0 auto !important;
+  height: 38px !important;
+  padding: 6px 12px !important;
+  margin-top: 6px !important;
+  font-size: 12.5px !important;
 }
 
 html body .st-layout .search-papers-grid .filters-form-fields::-webkit-scrollbar {
