@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FiActivity,
+  FiArrowRight,
   FiBarChart2,
   FiBookOpen,
   FiCheck,
   FiGitBranch,
   FiHash,
   FiLayers,
+  FiMap,
   FiMaximize2,
   FiMinus,
   FiPlus,
@@ -20,7 +22,6 @@ import {
   FiZap,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
-import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
 import { comparePapers, getPapers } from "../services/paperService";
 import { getResearchMindMap } from "../services/researchService";
@@ -1054,6 +1055,10 @@ function MindMapWorkspace() {
       .filter((item) => !normalizedQuery || item.name.toLocaleLowerCase().includes(normalizedQuery))
       .slice(0, 100);
   }, [rootOptions, rootQuery]);
+  const selectedRoot = useMemo(
+    () => rootOptions.find((item) => String(item.id) === String(selectedRootId)) ?? null,
+    [rootOptions, selectedRootId],
+  );
 
   // Auto-select top search match when filtering options
   useEffect(() => {
@@ -1138,7 +1143,22 @@ function MindMapWorkspace() {
   }, [mapData]);
 
   return (
-    <div className="research-mind-layout">
+    <div className="research-mind-shell">
+      <section className="research-mind-brief" aria-label="Knowledge map workflow">
+        <div className="research-mind-brief-icon"><FiMap /></div>
+        <div>
+          <span className="research-section-kicker">Relationship explorer</span>
+          <h3>Turn a research concept into an evidence landscape</h3>
+          <p>Start from one catalog keyword or topic. The lab traces its strongest connections and shows where activity is growing, stable or declining.</p>
+        </div>
+        <ol>
+          <li><b>01</b><span><strong>Choose a root</strong><small>Anchor the research question</small></span></li>
+          <li><b>02</b><span><strong>Generate links</strong><small>Map catalog relationships</small></span></li>
+          <li><b>03</b><span><strong>Inspect evidence</strong><small>Read momentum by node</small></span></li>
+        </ol>
+      </section>
+
+      <div className="research-mind-layout">
       <form className="research-map-builder" onSubmit={buildMindMap}>
         <div className="research-panel-heading">
           <div>
@@ -1170,6 +1190,17 @@ function MindMapWorkspace() {
           </select>
         </label>
 
+        <div className={`research-root-preview ${selectedRoot ? "has-selection" : ""}`}>
+          <span>{selectedRoot ? (rootType === "KEYWORD" ? <FiHash /> : <FiTag />) : <FiSearch />}</span>
+          <div>
+            <small>{selectedRoot ? "Research root selected" : "Waiting for a research root"}</small>
+            <strong>{selectedRoot?.name || "Choose a catalog concept above"}</strong>
+            <p>{selectedRoot
+              ? `${formatNumber(selectedRoot.paperCount ?? 0)} linked papers in the current catalog`
+              : "Search by keyword or topic to anchor the graph in real evidence."}</p>
+          </div>
+        </div>
+
         <label className="research-map-field">
           <span>Connections per branch</span>
           <select value={limit} onChange={(event) => setLimit(Number(event.target.value))}>
@@ -1196,10 +1227,27 @@ function MindMapWorkspace() {
         ) : mapData ? (
           <MindMapGraph data={mapData} selectedNodeId={selectedNode?.id} onSelectNode={setSelectedNode} />
         ) : (
-          <div className="research-tool-empty">
-            <FiGitBranch />
-            <h3>Your research graph will appear here</h3>
-            <p>Select a catalog keyword or topic to discover connected topics, keywords and journals.</p>
+          <div className="research-tool-empty research-map-empty-state">
+            <div className="research-map-empty-visual" aria-hidden="true">
+              <span className="is-root"><FiGitBranch /></span>
+              <span className="is-node node-one"><FiHash /></span>
+              <span className="is-node node-two"><FiTag /></span>
+              <span className="is-node node-three"><FiBookOpen /></span>
+              <i className="line-one" /><i className="line-two" /><i className="line-three" />
+            </div>
+            <span className="research-section-kicker">Evidence landscape preview</span>
+            <h3>{selectedRoot ? `Ready to map “${selectedRoot.name}”` : "Reveal the structure around a research idea"}</h3>
+            <p>{selectedRoot
+              ? "Generate the map to surface related concepts, publication venues and momentum signals."
+              : "Choose a catalog keyword or topic to turn a broad question into an explorable network."}</p>
+            <div className="research-map-empty-outcomes">
+              <span><FiLayers />Related concepts</span>
+              <span><FiTrendingUp />Momentum signals</span>
+              <span><FiBookOpen />Journal context</span>
+            </div>
+            <button type="button" onClick={() => selectedRootId ? rootSelectRef.current?.form?.requestSubmit() : rootSelectRef.current?.focus()}>
+              {selectedRootId ? <><FiGitBranch />Build this evidence map</> : <><FiSearch />Choose a research root</>}
+            </button>
           </div>
         )}
       </section>
@@ -1227,7 +1275,16 @@ function MindMapWorkspace() {
             </dl>
           </>
         ) : (
-          <div className="research-empty-inline">Generate a map and select a node to inspect its evidence.</div>
+          <div className="research-inspector-empty">
+            <FiActivity />
+            <strong>Evidence details appear here</strong>
+            <p>After generating a map, select any node to review:</p>
+            <ul>
+              <li>total catalog papers</li>
+              <li>recent vs previous activity</li>
+              <li>growth or decline status</li>
+            </ul>
+          </div>
         )}
 
         {mapData && (
@@ -1241,6 +1298,7 @@ function MindMapWorkspace() {
           </div>
         )}
       </aside>
+      </div>
     </div>
   );
 }
@@ -1252,27 +1310,47 @@ function ResearchLabPage() {
     <MainLayout title="Research Lab" subtitle="Advanced evidence tools for researchers">
       <section className="research-lab-page">
         <header className="research-lab-hero">
-          <div className="research-lab-hero-icon"><FiGitBranch /></div>
-          <div>
-            <span>Researcher workspace</span>
-            <h2>Move from catalog discovery to evidence analysis</h2>
-            <p>Compare publications side by side or map the live relationships between keywords, topics and journals.</p>
+          <div className="research-lab-hero-copy">
+            <span className="research-lab-hero-icon"><FiGitBranch /></span>
+            <div>
+              <span>Research intelligence workspace</span>
+              <h2>Interrogate the evidence, not just the search results.</h2>
+              <p>Build a focused paper set or trace the relationships around a concept—then inspect the real catalog signals behind your next research decision.</p>
+            </div>
           </div>
-          <div className="research-lab-capability-list">
-            <span><FiCheck />Live catalog data</span>
-            <span><FiCheck />No generated metrics</span>
-            <span><FiCheck />Researcher access</span>
-          </div>
+          <aside className="research-lab-brief-card">
+            <span>Designed for the question</span>
+            <strong>“What should I examine next?”</strong>
+            <p>Every result is grounded in indexed papers, keywords, topics and journals.</p>
+            <div className="research-lab-capability-list">
+              <span><FiCheck />Live evidence</span>
+              <span><FiCheck />Comparable signals</span>
+              <span><FiCheck />No invented metrics</span>
+            </div>
+          </aside>
+          <div className="research-lab-hero-orbit" aria-hidden="true"><i /><i /><i /><span /></div>
         </header>
 
         <nav className="research-lab-tabs" aria-label="Research Lab tools">
           <button type="button" className={activeTool === "compare" ? "active" : ""} onClick={() => setActiveTool("compare")}>
-            <FiBarChart2 />
-            <span><strong>Paper Comparator</strong><small>Review 2–4 publications</small></span>
+            <span className="research-lab-tab-index">01</span>
+            <span className="research-lab-tab-icon"><FiBarChart2 /></span>
+            <span className="research-lab-tab-copy">
+              <small>Evidence synthesis</small>
+              <strong>Compare selected papers</strong>
+              <p>Contrast citations, shared vocabulary and pair similarity across 2–4 publications.</p>
+            </span>
+            <span className="research-lab-tab-action">Open comparator <FiArrowRight /></span>
           </button>
           <button type="button" className={activeTool === "mind-map" ? "active" : ""} onClick={() => setActiveTool("mind-map")}>
-            <FiLayers />
-            <span><strong>Knowledge Mind Map</strong><small>Explore connected evidence</small></span>
+            <span className="research-lab-tab-index">02</span>
+            <span className="research-lab-tab-icon"><FiLayers /></span>
+            <span className="research-lab-tab-copy">
+              <small>Landscape discovery</small>
+              <strong>Map a research concept</strong>
+              <p>Reveal connected topics, keywords, journals and their publication momentum.</p>
+            </span>
+            <span className="research-lab-tab-action">Open mind map <FiArrowRight /></span>
           </button>
         </nav>
 
