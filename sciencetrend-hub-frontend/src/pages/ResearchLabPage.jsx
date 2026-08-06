@@ -6,6 +6,7 @@ import {
   FiBarChart2,
   FiBookOpen,
   FiCheck,
+  FiCompass,
   FiGitBranch,
   FiHash,
   FiLayers,
@@ -1308,24 +1309,30 @@ function ResearchLabPage() {
 
   return (
     <MainLayout title="Research Lab" subtitle="Advanced evidence tools for researchers">
-      <section className="research-lab-page">
+      <section className="research-lab-page research-lab-v2">
         <header className="research-lab-hero">
           <div className="research-lab-hero-copy">
             <span className="research-lab-hero-icon"><FiGitBranch /></span>
             <div>
               <span>Research intelligence workspace</span>
-              <h2>Interrogate the evidence, not just the search results.</h2>
-              <p>Build a focused paper set or trace the relationships around a concept—then inspect the real catalog signals behind your next research decision.</p>
+              <h2>Turn evidence into a clearer research direction.</h2>
+              <p>Compare a focused paper set or map the relationships around a concept, then move from catalog signals to your next defensible research decision.</p>
             </div>
           </div>
           <aside className="research-lab-hero-briefing">
-            <span>Designed for the question</span>
-            <strong>“What should I examine next?”</strong>
-            <p>Every result is grounded in indexed papers, keywords, topics and journals.</p>
-            <div className="research-lab-capability-list">
-              <span><FiCheck />Live evidence</span>
-              <span><FiCheck />Comparable signals</span>
-              <span><FiCheck />No invented metrics</span>
+            <div className="research-lab-briefing-label">
+              <span><FiCompass /></span>
+              <div>
+                <small>Research direction</small>
+                <b>Plan the next evidence move</b>
+              </div>
+            </div>
+            <h3>What should I examine next?</h3>
+            <p>Use live catalog evidence to narrow a question, compare influential work and expose adjacent concepts.</p>
+            <div className="research-lab-briefing-outcomes">
+              <div><FiBarChart2 /><span><b>Compare evidence</b><small>Review 2–4 papers side by side</small></span></div>
+              <div><FiMap /><span><b>Trace relationships</b><small>Connect topics, keywords and journals</small></span></div>
+              <div><FiCheck /><span><b>Stay catalog-grounded</b><small>No generated or invented metrics</small></span></div>
             </div>
           </aside>
           <div className="research-lab-hero-orbit" aria-hidden="true"><i /><i /><i /><span /></div>

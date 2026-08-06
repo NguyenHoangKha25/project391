@@ -680,13 +680,13 @@ html body .st-layout .research-lab-hero {
   backdrop-filter: blur(20px);
 }
 
-html body .st-layout .research-lab-hero :is(h1, h2, h3, strong) {
+html body .st-layout .research-lab-hero-copy :is(h1, h2, h3, strong) {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-html body .st-layout .research-lab-hero p {
+html body .st-layout .research-lab-hero-copy p {
   color: #dbeafe !important;
   -webkit-text-fill-color: #dbeafe !important;
 }

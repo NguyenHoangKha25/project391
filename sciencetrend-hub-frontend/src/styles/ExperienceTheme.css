@@ -1099,11 +1099,11 @@ html body .st-layout .research-lab-hero {
   box-shadow: 0 24px 56px rgba(20, 31, 68, 0.2) !important;
 }
 
-html body .st-layout .research-lab-hero :is(h2, p, span) {
+html body .st-layout .research-lab-hero-copy :is(h2, p, span) {
   color: #fff !important;
 }
 
-html body .st-layout .research-lab-hero p {
+html body .st-layout .research-lab-hero-copy p {
   color: #afbdd9 !important;
 }
 
