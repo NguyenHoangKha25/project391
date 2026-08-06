@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   FiArrowRight,
@@ -286,7 +287,7 @@ function JournalsPage() {
     }
   }, [setSearchParams]);
 
-  function closeJournal() {
+  const closeJournal = useCallback(() => {
     detailRequestIdRef.current += 1;
     shortcutHandledRef.current = "";
     setSelected(null);
@@ -298,7 +299,7 @@ function JournalsPage() {
       next.delete("name");
       return next;
     }, { replace: true });
-  }
+  }, [setSearchParams]);
 
   useEffect(() => {
     if (!requestedJournalId || shortcutHandledRef.current === requestedJournalId) return;
@@ -416,6 +417,23 @@ function JournalsPage() {
   const selectedFollowProcessing = selectedJournalKey ? followProcessing.has(selectedJournalKey) : false;
   const selectedPaperCount = selected?.paperCount > 0 ? selected.paperCount : papers.length;
 
+  useEffect(() => {
+    if (!selected) return undefined;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") closeJournal();
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [selected, closeJournal]);
+
   return (
     <MainLayout title="Journals" subtitle="Browse publication venues and the papers they publish">
       {followNotice && (
@@ -497,9 +515,15 @@ function JournalsPage() {
           </div>
         )}
 
-        {selected && (
+        {selected && createPortal(
           <div className="catalog-drawer-backdrop" onClick={closeJournal}>
-            <aside className="catalog-drawer journal-profile-drawer" onClick={(event) => event.stopPropagation()}>
+            <aside
+              className="catalog-drawer journal-profile-drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${selected.name} journal profile`}
+              onClick={(event) => event.stopPropagation()}
+            >
               <div className="journal-profile-topline">
                 <span className="catalog-kicker">Journal profile</span>
                 <button className="catalog-drawer-close" type="button" aria-label="Close journal details" onClick={closeJournal}><FiX /></button>
@@ -630,7 +654,8 @@ function JournalsPage() {
                 )}
               </section>
             </aside>
-          </div>
+          </div>,
+          document.body,
         )}
       </section>
     </MainLayout>
