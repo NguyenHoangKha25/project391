@@ -695,46 +695,12 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
   const layout = useMemo(() => getMapLayout(nodes, rootId, edges), [nodes, rootId, edges]);
   const [zoom, setZoom] = useState(100);
   const canvasRef = useRef(null);
-  const scrollSnapshotRef = useRef(null);
   const rootType = normalizeMapType(data.root?.type);
   const rootLines = splitMapLabel(data.root?.label, 24);
 
   useEffect(() => {
     setZoom(100);
   }, [rootId]);
-
-  useLayoutEffect(() => {
-    const snapshot = scrollSnapshotRef.current;
-    if (!snapshot || String(snapshot.nodeId) !== String(selectedNodeId)) return undefined;
-
-    const restoreScrollPosition = () => {
-      snapshot.elements.forEach(({ element, left, top }) => {
-        if (!element?.isConnected) return;
-        element.scrollLeft = left;
-        element.scrollTop = top;
-      });
-      if (window.scrollX !== snapshot.windowLeft || window.scrollY !== snapshot.windowTop) {
-        window.scrollTo(snapshot.windowLeft, snapshot.windowTop);
-      }
-    };
-
-    let secondFrame;
-    restoreScrollPosition();
-    const firstFrame = window.requestAnimationFrame(() => {
-      restoreScrollPosition();
-      secondFrame = window.requestAnimationFrame(restoreScrollPosition);
-    });
-    const settleTimer = window.setTimeout(() => {
-      restoreScrollPosition();
-      if (scrollSnapshotRef.current === snapshot) scrollSnapshotRef.current = null;
-    }, 160);
-
-    return () => {
-      window.cancelAnimationFrame(firstFrame);
-      if (secondFrame) window.cancelAnimationFrame(secondFrame);
-      window.clearTimeout(settleTimer);
-    };
-  }, [selectedNodeId]);
 
   function curvePath(sourceX, sourceY, targetX, targetY) {
     const bendX = sourceX + (targetX - sourceX) * 0.52;
@@ -744,34 +710,20 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
   function selectNodeFromKeyboard(event, node) {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
-    selectMapNode(node);
+    selectMapNode(event, node);
   }
 
-  function selectMapNode(node) {
-    const canvas = canvasRef.current;
-    const contentScroller = canvas?.closest(".st-content");
-    const mainScroller = canvas?.closest(".st-main");
-    const scrollElements = [canvas, contentScroller, mainScroller]
-      .filter(Boolean)
-      .filter((element, index, items) => items.indexOf(element) === index)
-      .map((element) => ({
-        element,
-        left: element.scrollLeft,
-        top: element.scrollTop,
-      }));
-
-    scrollSnapshotRef.current = {
-      nodeId: node.id,
-      elements: scrollElements,
-      windowLeft: window.scrollX,
-      windowTop: window.scrollY,
-    };
-
+  function selectMapNode(event, node) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     onSelectNode(node);
   }
 
   function preventPointerFocus(event) {
     event.preventDefault();
+    event.stopPropagation();
   }
 
   return (
@@ -898,7 +850,7 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
             transform={`translate(${layout.root.x} ${layout.root.y})`}
             onPointerDown={preventPointerFocus}
             onMouseDown={preventPointerFocus}
-            onClick={() => selectMapNode(data.root)}
+            onClick={(event) => selectMapNode(event, data.root)}
             onKeyDown={(event) => selectNodeFromKeyboard(event, data.root)}
             role="button"
             tabIndex="0"
@@ -932,7 +884,7 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
                   transform={`translate(${item.x} ${item.y})`}
                   onPointerDown={preventPointerFocus}
                   onMouseDown={preventPointerFocus}
-                  onClick={() => selectMapNode(node)}
+                  onClick={(event) => selectMapNode(event, node)}
                   onKeyDown={(event) => selectNodeFromKeyboard(event, node)}
                   role="button"
                   tabIndex="0"
