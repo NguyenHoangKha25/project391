@@ -178,26 +178,34 @@ function FollowingPage() {
         
         {/* Toolbar with tab switcher and search */}
         <div className="following-toolbar">
-          <div className="following-tabs">
+          <div className="following-tabs" role="tablist" aria-label="Following categories">
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "topics"}
               className={`following-tab-btn ${activeTab === "topics" ? "active" : ""}`}
               onClick={() => {
                 setActiveTab("topics");
                 setSearchVal("");
               }}
             >
-              <FiTag /> Topics <span>({followedTopics.length})</span>
+              <FiTag />
+              <span>Topics</span>
+              <span className="tab-badge">{followedTopics.length}</span>
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={activeTab === "journals"}
               className={`following-tab-btn ${activeTab === "journals" ? "active" : ""}`}
               onClick={() => {
                 setActiveTab("journals");
                 setSearchVal("");
               }}
             >
-              <FiBookOpen /> Journals <span>({followedJournals.length})</span>
+              <FiBookOpen />
+              <span>Journals</span>
+              <span className="tab-badge">{followedJournals.length}</span>
             </button>
           </div>
 
@@ -210,6 +218,16 @@ function FollowingPage() {
               onChange={(e) => setSearchVal(e.target.value)}
               className="following-search-input"
             />
+            {searchVal && (
+              <button
+                type="button"
+                className="clear-search-btn"
+                onClick={() => setSearchVal("")}
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
           </div>
         </div>
 
