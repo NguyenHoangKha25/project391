@@ -239,8 +239,6 @@
   border-radius: 20px;
 }
 .status-label.connected { background: #ecfdf5; color: #047857; }
-.status-label.running { background: #fff7ed; color: #c2410c; }
-.status-label.cancelled { background: #f1f5f9; color: #475569; }
 .status-label.error { background: #fef2f2; color: #b91c1c; }
 
 /* View all panel link footer */
@@ -477,9 +475,6 @@
   cursor: not-allowed;
   opacity: 0.4;
 }
-.admin-stop-sync-btn { min-height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 11px; border: 1px solid #fecaca; border-radius: 9px; color: #b91c1c; background: #fff7f7; font-size: 10.5px; font-weight: 850; }
-.admin-stop-sync-btn:hover:not(:disabled) { border-color: #ef4444; background: #fef2f2; }
-.admin-stop-sync-btn:disabled { cursor: wait; opacity: .65; }
 .admin-sync-layout { display: grid; gap: 16px; }
 .panel-header-row p { margin-top: 4px; color: var(--st-muted-strong); font-size: 12px; }
 .admin-backfill-form { display: grid; grid-template-columns: minmax(220px,1fr) auto auto; align-items: end; gap: 16px; margin-top: 22px; padding: 20px; border: 1px solid var(--st-border); border-radius: 16px; background: #f6f7f8; }

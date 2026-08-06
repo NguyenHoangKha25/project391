@@ -26,10 +26,6 @@ export function getAdminSyncLogs(params = {}) {
   return apiRequest("/admin/sync/logs", { params });
 }
 
-export function cancelAdminSync(syncLogId) {
-  return apiRequest(`/admin/sync/logs/${syncLogId}/cancel`, { method: "POST" });
-}
-
 export function triggerAdminSync() {
   return apiRequest("/admin/sync", { method: "POST" });
 }
