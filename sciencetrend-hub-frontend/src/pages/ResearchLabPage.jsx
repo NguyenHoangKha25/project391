@@ -1318,7 +1318,7 @@ function ResearchLabPage() {
               <p>Build a focused paper set or trace the relationships around a concept—then inspect the real catalog signals behind your next research decision.</p>
             </div>
           </div>
-          <aside className="research-lab-brief-card">
+          <aside className="research-lab-hero-briefing">
             <span>Designed for the question</span>
             <strong>“What should I examine next?”</strong>
             <p>Every result is grounded in indexed papers, keywords, topics and journals.</p>
