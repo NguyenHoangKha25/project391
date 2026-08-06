@@ -4612,11 +4612,21 @@ html body .st-layout .research-lab-v2 .research-map-insights {
   overflow: visible !important;
 }
 
-/* These side panels intentionally allow visible overflow so the page owns
-   vertical scrolling. Remove the global top accent here because it otherwise
-   paints outside the rounded silhouette. */
+/* Keep the Mind Map workspace visually contained. The shared release layer
+   adds a top accent to research panels; together with the translucent top
+   border it reads as a line protruding beyond these rounded cards. */
+html body .st-layout .research-lab-v2 :is(
+  .research-map-builder,
+  .research-map-panel,
+  .research-map-insights
+) {
+  border-top: 0 !important;
+}
+
 html body .st-layout .research-lab-v2 .research-map-builder::before,
+html body .st-layout .research-lab-v2 .research-map-panel::before,
 html body .st-layout .research-lab-v2 .research-map-insights::before {
+  content: none !important;
   display: none !important;
 }
 
