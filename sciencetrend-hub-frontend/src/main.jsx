@@ -7,6 +7,7 @@ import "./styles/ResearchDesk.css";
 import "./styles/ResearchCockpit.css";
 import "./styles/ExperienceTheme.css";
 import "./styles/ReleaseVisualLayer.css";
+import "./styles/HomeMotion.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

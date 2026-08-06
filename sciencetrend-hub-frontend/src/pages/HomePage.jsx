@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FiArrowRight,
@@ -52,10 +52,38 @@ const featureItems = [
 ];
 
 const workspaceModules = [
-  { icon: FiSearch, label: "Search", detail: "Papers and journals", tone: "blue" },
-  { icon: FiBookmark, label: "Library", detail: "Saved evidence", tone: "violet" },
-  { icon: FiTrendingUp, label: "Trends", detail: "Topics over time", tone: "cyan" },
-  { icon: FiBarChart2, label: "Reports", detail: "Clear summaries", tone: "amber" },
+  {
+    icon: FiSearch,
+    label: "Search",
+    detail: "Papers and journals",
+    query: "Search papers, journals, topics...",
+    activity: "Discover relevant evidence",
+    tone: "blue",
+  },
+  {
+    icon: FiBookmark,
+    label: "Library",
+    detail: "Saved evidence",
+    query: "Return to your strongest sources...",
+    activity: "Organize the evidence trail",
+    tone: "violet",
+  },
+  {
+    icon: FiTrendingUp,
+    label: "Trends",
+    detail: "Topics over time",
+    query: "Inspect momentum across a field...",
+    activity: "Monitor research signals",
+    tone: "cyan",
+  },
+  {
+    icon: FiBarChart2,
+    label: "Reports",
+    detail: "Clear summaries",
+    query: "Turn selected evidence into a report...",
+    activity: "Communicate the outcome",
+    tone: "amber",
+  },
 ];
 
 const workflowItems = [
@@ -126,6 +154,8 @@ const audienceItems = [
 
 function HomePage() {
   const { isLoggedIn, defaultPath } = useAuth();
+  const [activeModule, setActiveModule] = useState(0);
+  const [isDemoPaused, setIsDemoPaused] = useState(false);
   const primaryPath = isLoggedIn ? defaultPath : ROUTE_PATHS.REGISTER;
   const primaryLabel = isLoggedIn ? "Open workspace" : "Start researching";
 
@@ -133,9 +163,51 @@ function HomePage() {
     document.title = "ScienceTrend Hub | Research, organized";
   }, []);
 
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduceMotion.matches || isDemoPaused) return undefined;
+
+    const cycle = window.setInterval(() => {
+      setActiveModule((current) => (current + 1) % workspaceModules.length);
+    }, 2600);
+
+    return () => window.clearInterval(cycle);
+  }, [isDemoPaused]);
+
+  const selectWorkspaceModule = (index) => {
+    setActiveModule(index);
+    setIsDemoPaused(true);
+  };
+
+  useEffect(() => {
+    const revealItems = document.querySelectorAll(
+      ".home-motion-v3 [data-home-reveal]",
+    );
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    if (reduceMotion.matches || !("IntersectionObserver" in window)) {
+      revealItems.forEach((item) => item.classList.add("is-visible"));
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+    );
+
+    revealItems.forEach((item) => observer.observe(item));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <main className="home-page home-page-refresh">
-      <header className="home-navbar home-navbar-refresh">
+    <main className="home-page home-page-refresh home-motion-v3">
+      <header className="home-navbar home-navbar-refresh home-motion-navbar">
         <Link to={ROUTE_PATHS.HOME} className="home-brand" aria-label="ScienceTrend Hub home">
           <span className="home-brand-logo">
             <img src={logo} alt="ScienceTrend Hub logo" />
@@ -172,7 +244,7 @@ function HomePage() {
           <span className="home-grid-lines" />
         </div>
 
-        <div className="home-hero-copy">
+        <div className="home-hero-copy home-motion-hero-copy">
           <span className="home-eyebrow">
             <FiZap aria-hidden="true" /> A WORKSPACE FOR ACADEMIC RESEARCH
           </span>
@@ -200,8 +272,8 @@ function HomePage() {
           </ul>
         </div>
 
-        <div className="home-hero-visual" aria-label="ScienceTrend workspace overview">
-          <div className="home-workspace-demo">
+        <div className="home-hero-visual home-motion-hero-visual" aria-label="Interactive ScienceTrend workspace overview">
+          <div className="home-workspace-demo home-workspace-demo-live">
             <div className="home-demo-header">
               <div className="home-demo-brand">
                 <span><img src={logo} alt="" /></span>
@@ -210,12 +282,14 @@ function HomePage() {
                   <small>Your research, in one place</small>
                 </div>
               </div>
-              <span className="home-demo-status"><i /> Ready</span>
+              <span className="home-demo-status"><i /> Workspace active</span>
             </div>
 
             <div className="home-demo-search">
               <FiSearch aria-hidden="true" />
-              <span>Search papers, journals, topics...</span>
+              <span className="home-demo-query" key={workspaceModules[activeModule].label}>
+                {workspaceModules[activeModule].query}
+              </span>
               <kbd>⌘ K</kbd>
             </div>
 
@@ -225,15 +299,41 @@ function HomePage() {
             </div>
 
             <div className="home-demo-modules">
-              {workspaceModules.map(({ icon: Icon, label, detail, tone }) => (
-                <div className={`home-demo-module tone-${tone}`} key={label}>
+              {workspaceModules.map(({ icon: Icon, label, detail, tone }, index) => (
+                <button
+                  type="button"
+                  className={`home-demo-module tone-${tone}${activeModule === index ? " is-active" : ""}`}
+                  key={label}
+                  onClick={() => selectWorkspaceModule(index)}
+                  onFocus={() => selectWorkspaceModule(index)}
+                  aria-pressed={activeModule === index}
+                  aria-label={`Preview ${label} workspace`}
+                >
                   <span><Icon aria-hidden="true" /></span>
                   <div>
                     <strong>{label}</strong>
                     <small>{detail}</small>
                   </div>
-                </div>
+                  <i className="home-demo-module-state" aria-hidden="true" />
+                </button>
               ))}
+            </div>
+
+            <div className="home-demo-route" aria-hidden="true">
+              <div className="home-demo-route-copy">
+                <small>Research route</small>
+                <strong key={`activity-${activeModule}`}>
+                  {workspaceModules[activeModule].activity}
+                </strong>
+              </div>
+              <div className="home-demo-route-track">
+                {workspaceModules.map((module, index) => (
+                  <span
+                    className={index <= activeModule ? "is-complete" : ""}
+                    key={module.label}
+                  />
+                ))}
+              </div>
             </div>
 
             <div className="home-demo-footer">
@@ -244,14 +344,14 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="home-value-rail" aria-label="Core research workflow">
+      <section className="home-value-rail" aria-label="Core research workflow" data-home-reveal>
         <div><span>01</span><strong>Discover</strong><small>Find relevant publications</small></div>
         <div><span>02</span><strong>Organize</strong><small>Keep evidence together</small></div>
         <div><span>03</span><strong>Monitor</strong><small>Follow topics and journals</small></div>
         <div><span>04</span><strong>Report</strong><small>Communicate what matters</small></div>
       </section>
 
-      <section className="home-section home-catalog" id="catalog" aria-labelledby="catalog-title">
+      <section className="home-section home-catalog" id="catalog" aria-labelledby="catalog-title" data-home-reveal>
         <div className="home-catalog-shell">
           <div className="home-catalog-intro">
             <span className="home-eyebrow">
@@ -281,7 +381,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="home-section home-features-refresh" id="features">
+      <section className="home-section home-features-refresh" id="features" data-home-reveal>
         <div className="home-section-heading home-section-heading-split">
           <div>
             <span className="home-eyebrow">
@@ -312,7 +412,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="home-section home-workflow home-workflow-refresh" id="workflow">
+      <section className="home-section home-workflow home-workflow-refresh" id="workflow" data-home-reveal>
         <div className="home-workflow-copy">
           <span className="home-eyebrow">
             <FiBookOpen aria-hidden="true" /> A SIMPLE WORKFLOW
@@ -336,7 +436,7 @@ function HomePage() {
         </ol>
       </section>
 
-      <section className="home-section home-audience" id="audience">
+      <section className="home-section home-audience" id="audience" data-home-reveal>
         <div className="home-section-heading home-section-heading-split">
           <div>
             <span className="home-eyebrow"><FiUsers aria-hidden="true" /> WHO IT IS FOR</span>
@@ -359,7 +459,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="home-final-cta" aria-labelledby="home-cta-title">
+      <section className="home-final-cta" aria-labelledby="home-cta-title" data-home-reveal>
         <div className="home-final-cta-copy">
           <span>READY FOR YOUR NEXT RESEARCH QUESTION?</span>
           <h2 id="home-cta-title">Keep the whole trail—from discovery to report—in one workspace.</h2>
@@ -377,7 +477,7 @@ function HomePage() {
         </div>
       </section>
 
-      <footer className="home-footer home-footer-modern" aria-label="Site footer">
+      <footer className="home-footer home-footer-modern" aria-label="Site footer" data-home-reveal>
         <div className="home-footer-grid">
           {/* Brand & Bio Column */}
           <div className="home-footer-col home-footer-col-brand">
