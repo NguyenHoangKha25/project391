@@ -695,55 +695,118 @@ html body .st-layout .research-lab-tabs button.active :is(h3, strong, span, svg,
   -webkit-text-fill-color: #ffffff !important;
 }
 
-/* Workflow Strip Overhaul */
+/* Workflow Strip Overhaul - High Contrast Vibrant Styling */
 html body .st-layout .research-workflow-strip {
   position: relative;
   overflow: hidden;
-  border-radius: 20px !important;
+  border-radius: 24px !important;
   border: 1px solid rgba(226, 232, 240, 0.9) !important;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 255, 0.92) 100%) !important;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04) !important;
-  padding: 20px 24px !important;
-  margin-bottom: 20px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.08), transparent 16rem),
+    linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04) !important;
+  padding: 22px 28px !important;
+  margin-bottom: 22px !important;
+}
+
+html body .st-layout .research-workflow-strip > div > span {
+  color: #4f46e5 !important;
+  -webkit-text-fill-color: #4f46e5 !important;
+  font-weight: 850 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
 }
 
 html body .st-layout .research-workflow-strip h3 {
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
-  font-size: 20px !important;
+  font-size: 22px !important;
   font-weight: 850 !important;
+  margin-top: 4px !important;
 }
 
 html body .st-layout .research-workflow-strip p {
-  color: #64748b !important;
-  -webkit-text-fill-color: #64748b !important;
-  font-size: 13.5px !important;
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+  font-size: 14px !important;
+  margin-top: 6px !important;
 }
 
-html body .st-layout .research-workflow-strip span {
-  color: #4f46e5 !important;
-  -webkit-text-fill-color: #4f46e5 !important;
-  font-weight: 850 !important;
-}
-
+/* Workflow Step Items */
 html body .st-layout .research-workflow-strip ol li {
-  border-radius: 14px !important;
-  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  border-radius: 16px !important;
+  border: 1.5px solid #cbd5e1 !important;
   background: #ffffff !important;
-  padding: 10px 16px !important;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03) !important;
+  padding: 12px 18px !important;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04) !important;
   transition: all 0.2s ease !important;
 }
 
+html body .st-layout .research-workflow-strip ol li > span {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, #4f46e5, #06b6d4) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 850 !important;
+  font-size: 14px !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
+}
+
+html body .st-layout .research-workflow-strip ol li strong {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  font-size: 14.5px !important;
+  font-weight: 850 !important;
+  display: block !important;
+}
+
+html body .st-layout .research-workflow-strip ol li small {
+  color: #475569 !important;
+  -webkit-text-fill-color: #475569 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  display: block !important;
+  margin-top: 2px !important;
+}
+
+/* Step States */
 html body .st-layout .research-workflow-strip ol li.is-active {
-  border-color: rgba(79, 70, 229, 0.4) !important;
-  background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%) !important;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.12) !important;
+  border-color: #818cf8 !important;
+  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 100%) !important;
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.15) !important;
+}
+
+html body .st-layout .research-workflow-strip ol li.is-active strong {
+  color: #3730a3 !important;
+  -webkit-text-fill-color: #3730a3 !important;
+}
+
+html body .st-layout .research-workflow-strip ol li.is-active small {
+  color: #4f46e5 !important;
+  -webkit-text-fill-color: #4f46e5 !important;
 }
 
 html body .st-layout .research-workflow-strip ol li.is-complete {
-  border-color: rgba(16, 185, 129, 0.3) !important;
-  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%) !important;
+  border-color: #34d399 !important;
+  background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%) !important;
+}
+
+html body .st-layout .research-workflow-strip ol li.is-complete > span {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+html body .st-layout .research-workflow-strip ol li.is-complete strong {
+  color: #065f46 !important;
+  -webkit-text-fill-color: #065f46 !important;
+}
+
+html body .st-layout .research-workflow-strip ol li.is-complete small {
+  color: #047857 !important;
+  -webkit-text-fill-color: #047857 !important;
 }
 
 html body .st-layout :is(
