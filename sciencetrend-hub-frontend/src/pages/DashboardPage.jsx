@@ -28,6 +28,7 @@ import {
 import { getTrendingTopics } from "../services/trendService";
 import {
   formatDateTime,
+  formatRelativeTime,
   formatNumber,
   normalizeDashboardHome,
   normalizeTopic,
@@ -68,13 +69,21 @@ function hasDashboardData(data) {
 }
 
 function getInitialDashboardData(cacheKeys) {
-  const overview = getPersistentCachedData(cacheKeys.overview);
-  const topics = getPersistentCachedData(cacheKeys.topics);
+  try {
+    const overview = getPersistentCachedData(cacheKeys.overview);
+    const topics = getPersistentCachedData(cacheKeys.topics);
 
-  return {
-    overview: hasDashboardData(overview) ? overview : null,
-    topics: Array.isArray(topics) && topics.length > 0 ? topics : [],
-  };
+    return {
+      overview: hasDashboardData(overview) ? overview : null,
+      topics: Array.isArray(topics) && topics.length > 0 ? topics : [],
+    };
+  } catch (err) {
+    console.warn("Dashboard cache corrupted, clearing:", err);
+    try {
+      window.localStorage.removeItem("sciencetrend_api_cache_v1");
+    } catch {}
+    return { overview: null, topics: [] };
+  }
 }
 
 function formatDecimal(value) {
