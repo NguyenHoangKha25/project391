@@ -1169,24 +1169,41 @@ html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured::afte
   box-shadow: none !important;
 }
 
+html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured .db-kpi-card-header {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-radius: 12px;
+  padding: 6px 12px;
+}
+
 html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured :is(.db-kpi-label, .db-kpi-value, .db-kpi-comparison) {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured .db-kpi-label {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
 }
 
 html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured .db-kpi-comparison {
-  opacity: 0.72;
+  color: rgba(255, 255, 255, 0.9) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.9) !important;
+  opacity: 0.95 !important;
 }
 
 html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured .db-kpi-icon {
   color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
 }
 
 html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured .db-kpi-change {
-  color: #d8f9ff !important;
-  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.22) !important;
 }
 
 html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--summary {

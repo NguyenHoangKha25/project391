@@ -130,24 +130,18 @@ function DashboardPage() {
 
       if (homeRes.status === "fulfilled") {
         const home = normalizeDashboardHome(homeRes.value);
-        const normOverview = home.overview;
+        const normOverview = home.overview || {};
 
-        if (normOverview && hasDashboardData(normOverview)) {
-          setData(normOverview);
-          setPersistentCachedData(cacheKeys.overview, normOverview);
-        } else if (!cachedOverview) {
-          setData(normOverview);
-          setErrorMessage("No dashboard statistics are available in the catalog yet.");
-        }
+        setData(normOverview);
+        setPersistentCachedData(cacheKeys.overview, normOverview);
+        setErrorMessage("");
 
-        // Analytics from unified response
         if (home.analytics) {
           setAnalyticsData(home.analytics);
         } else {
           setAnalyticsData(null);
         }
 
-        // Operations from unified response (only Admin gets this)
         if (home.operations) {
           setOperationsData(home.operations);
         } else {
@@ -166,13 +160,6 @@ function DashboardPage() {
           setTrendingTopics(normTopics);
           setPersistentCachedData(cacheKeys.topics, normTopics);
         }
-      }
-
-      const failedRequests = results.filter((result) => result.status === "rejected").length;
-      if (failedRequests === results.length && !hasCachedData) {
-        setErrorMessage("Couldn't reach the server. Please try again in a moment.");
-      } else if (failedRequests > 0 && homeRes.status === "fulfilled") {
-        setErrorMessage(`${failedRequests} dashboard data source${failedRequests > 1 ? "s are" : " is"} temporarily unavailable.`);
       }
     } catch (error) {
       console.error("Cannot load dashboard", error);
