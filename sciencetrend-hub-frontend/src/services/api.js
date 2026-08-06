@@ -161,7 +161,29 @@ export async function apiRequest(endpoint, options = {}) {
       throw new Error("Request timed out. Please check your network connection.", { cause: error });
     }
     console.error(`[API Network Error] ${method} ${url} failed:`, error);
-    throw new Error("Unable to connect to the service. Please check your connection or try again in a moment.", { cause: error });
+
+    // Dynamic Fallback: If absolute http://localhost:8080/api failed, retry via relative /api proxy
+    if (url.startsWith("http://localhost:8080") || url.startsWith("http://127.0.0.1:8080")) {
+      const relativeUrl = url.replace(/^http:\/\/(localhost|127\.0\.0\.1):8080/, "");
+      try {
+        const fallbackController = new AbortController();
+        const fallbackTimeoutId = setTimeout(() => fallbackController.abort(), timeout);
+        res = await fetch(relativeUrl, {
+          credentials: "include",
+          mode: "cors",
+          ...fetchOptions,
+          method,
+          headers,
+          body: requestBody,
+          signal: fallbackController.signal,
+        });
+        clearTimeout(fallbackTimeoutId);
+      } catch {
+        throw new Error("Unable to connect to the service. Please check your connection or try again in a moment.", { cause: error });
+      }
+    } else {
+      throw new Error("Unable to connect to the service. Please check your connection or try again in a moment.", { cause: error });
+    }
   }
 
   if (res.status === 401 && auth && !normalizeEndpoint(endpoint).startsWith("/auth/")) {
