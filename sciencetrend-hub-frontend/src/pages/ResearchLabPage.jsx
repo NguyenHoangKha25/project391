@@ -559,9 +559,13 @@ function PaperComparator() {
           <span>{selectedPapers.length}/4 selected</span>
         </div>
 
-        <div className="research-panel-intro">
-          <FiSearch />
-          <p>Search the indexed catalog and add the strongest candidates to your comparison set.</p>
+        <div className="research-panel-intro research-catalog-brief">
+          <div>
+            <FiSearch />
+            <span>Live indexed catalog</span>
+          </div>
+          <p>Search the catalog and shortlist the strongest evidence for your research question.</p>
+          <strong>{paperOptions.length}<small>papers scanned</small></strong>
         </div>
 
         <form
@@ -591,15 +595,19 @@ function PaperComparator() {
         <div className="research-paper-options">
           {searching ? (
             <div className="research-mini-loading"><span className="workspace-loading-spinner" />Loading papers…</div>
-          ) : availablePapers.length > 0 ? availablePapers.map((paper) => (
+          ) : availablePapers.length > 0 ? availablePapers.map((paper, index) => (
             <article key={paper.id}>
-              <div>
+              <span className="research-paper-rank">{String(index + 1).padStart(2, "0")}</span>
+              <div className="research-paper-copy">
                 <h4>{paper.title}</h4>
                 <p>{paper.authors} · {paper.year || "Year unavailable"}</p>
-                <span>{formatNumber(paper.citationCount)} citations</span>
+                <div className="research-paper-signals">
+                  <span><FiTrendingUp />{formatNumber(paper.citationCount)} citations</span>
+                  <span><FiBookOpen />{paper.journal || "Indexed publication"}</span>
+                </div>
               </div>
               <button type="button" onClick={() => addPaper(paper)} disabled={selectedPapers.length >= MAX_COMPARISON_PAPERS} aria-label={`Add ${paper.title} to comparison`}>
-                <FiPlus /> Add
+                <FiPlus /> Shortlist
               </button>
             </article>
           )) : (
@@ -629,6 +637,12 @@ function PaperComparator() {
           <span><i style={{ width: `${selectionProgress}%` }} /></span>
         </div>
 
+        <div className="research-analysis-lenses" aria-label="Comparison analysis lenses">
+          <span><FiCompass /><small>01</small><strong>Objective</strong></span>
+          <span><FiGitBranch /><small>02</small><strong>Methodology</strong></span>
+          <span><FiTrendingUp /><small>03</small><strong>Results</strong></span>
+        </div>
+
         <div className="research-selected-list">
           {selectedPapers.length > 0 ? selectedPapers.map((paper, index) => (
             <article key={paper.id}>
@@ -643,8 +657,12 @@ function PaperComparator() {
             </article>
           )) : (
             <div className="research-selection-empty">
+              <div className="research-empty-slots" aria-hidden="true">
+                {[1, 2, 3, 4].map((slot) => <span key={slot}>{slot}</span>)}
+              </div>
               <FiBookOpen />
-              <p>Add two to four papers to build a comparison set.</p>
+              <strong>Your evidence tray is empty</strong>
+              <p>Shortlist at least two papers to compare their objective, methodology and contribution.</p>
             </div>
           )}
           {selectedPapers.length > 0 && selectedPapers.length < MIN_COMPARISON_PAPERS && (
