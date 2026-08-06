@@ -135,7 +135,6 @@ html body .st-layout :is(
   .workspace-toolbar,
   .topics-search-toolbar,
   .reports-summary-banner,
-  .research-lab-hero,
   .account-hero-card
 )::after {
   content: "";

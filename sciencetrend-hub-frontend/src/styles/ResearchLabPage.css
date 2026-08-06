@@ -2428,13 +2428,20 @@ html body .st-layout .research-lab-v2 .research-lab-hero {
   gap: clamp(32px, 5vw, 72px) !important;
   margin-bottom: 18px !important;
   padding: clamp(32px, 4vw, 48px) !important;
-  border: 1px solid rgba(103, 232, 249, .2) !important;
+  border: 0 !important;
+  outline: 0 !important;
   border-radius: 28px !important;
   background:
     radial-gradient(circle at 8% 110%, rgba(14, 165, 233, .28), transparent 25rem),
     radial-gradient(circle at 96% -10%, rgba(99, 102, 241, .32), transparent 25rem),
     linear-gradient(120deg, #0a1734 0%, #111d3d 56%, #073e45 135%) !important;
+  background-clip: padding-box !important;
   box-shadow: 0 26px 64px rgba(17, 32, 74, .22) !important;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-hero::after {
+  content: none !important;
+  display: none !important;
 }
 
 html body .st-layout .research-lab-v2 .research-lab-hero-copy {
@@ -4182,7 +4189,7 @@ html body .st-layout .research-lab-v2 .research-map-canvas {
 /* One-scroll flow: the page owns vertical movement; workspace panels never trap it. */
 html body .st-layout .research-lab-v2 .research-map-builder,
 html body .st-layout .research-lab-v2 .research-map-insights {
-  position: static;
+  position: relative;
   top: auto;
   max-height: none;
   overflow: visible;
@@ -4459,7 +4466,7 @@ html body .st-layout .research-lab-v2 .research-comparator-shell .research-tool-
 
 html body .st-layout .research-lab-v2 .research-comparator-shell .research-builder-panel,
 html body .st-layout .research-lab-v2 .research-comparator-shell .research-selection-panel {
-  position: static;
+  position: relative;
   top: auto;
   min-height: 0;
 }
@@ -4574,4 +4581,73 @@ html body .st-layout .research-lab-v2 .research-comparator-shell .research-run-b
 @media (max-width: 620px) {
   .research-candidate-pagination { gap: 5px; }
   .research-candidate-pagination button { padding: 0 7px; }
+}
+
+/* Component-width responsive layout: sidebars and browser tools must not hide the decision brief. */
+html body .st-layout .research-lab-v2 {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  container-name: research-lab-workspace;
+  container-type: inline-size;
+}
+
+html body .st-layout .research-lab-v2 .research-mind-shell,
+html body .st-layout .research-lab-v2 .research-mind-layout,
+html body .st-layout .research-lab-v2 .research-mind-layout > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+html body .st-layout .research-lab-v2 .research-mind-layout {
+  grid-template-columns: minmax(240px, .8fr) minmax(0, 1.75fr) minmax(260px, .85fr);
+}
+
+html body .st-layout .research-lab-v2 .research-map-builder,
+html body .st-layout .research-lab-v2 .research-map-insights {
+  position: relative !important;
+  top: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html body .st-layout .research-lab-v2 .research-map-canvas {
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+@container research-lab-workspace (max-width: 1240px) {
+  html body .st-layout .research-lab-v2 .research-mind-layout {
+    grid-template-columns: minmax(250px, 290px) minmax(0, 1fr);
+    grid-template-areas:
+      "builder map"
+      "inspector map";
+  }
+}
+
+@container research-lab-workspace (max-width: 900px) {
+  html body .st-layout .research-lab-v2 .research-mind-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "builder"
+      "map"
+      "inspector";
+  }
+
+  html body .st-layout .research-lab-v2 .research-map-builder,
+  html body .st-layout .research-lab-v2 .research-map-insights {
+    width: 100%;
+  }
+}
+
+@container research-lab-workspace (max-width: 560px) {
+  html body .st-layout .research-lab-v2 .research-mind-progress {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  html body .st-layout .research-lab-v2 .research-mind-progress > i {
+    display: none;
+  }
 }

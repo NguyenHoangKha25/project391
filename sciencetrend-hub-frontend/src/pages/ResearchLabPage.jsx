@@ -426,6 +426,7 @@ function PaperComparisonResults({ comparison }) {
 
 function PaperComparator() {
   const [query, setQuery] = useState("");
+  const [appliedQuery, setAppliedQuery] = useState("");
   const [paperOptions, setPaperOptions] = useState([]);
   const [selectedPapers, setSelectedPapers] = useState([]);
   const [searching, setSearching] = useState(true);
@@ -438,11 +439,12 @@ function PaperComparator() {
   const resultsRef = useRef(null);
 
   const loadPaperOptions = useCallback(async (searchTerm = "") => {
+    const normalizedSearchTerm = searchTerm.trim();
     try {
       setSearching(true);
       setErrorMessage("");
       const response = await getPapers({
-        ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
+        ...(normalizedSearchTerm ? { search: normalizedSearchTerm } : {}),
         page: 0,
         size: 12,
         sortBy: "citationCount",
@@ -453,6 +455,7 @@ function PaperComparator() {
           .map(normalizePaper)
           .filter((paper) => paper.id && paper.title !== "Untitled paper"),
       );
+      setAppliedQuery(normalizedSearchTerm);
       setCandidatePage(0);
     } catch (error) {
       setPaperOptions([]);
@@ -601,12 +604,18 @@ function PaperComparator() {
         </form>
 
         <div className="research-catalog-status" aria-live="polite">
-          <span>{searching ? "Scanning catalog" : `${availablePapers.length} candidate${availablePapers.length === 1 ? "" : "s"}`}</span>
+          <span>{searching
+            ? "Scanning catalog"
+            : appliedQuery
+              ? `${availablePapers.length} matching paper${availablePapers.length === 1 ? "" : "s"}`
+              : `${availablePapers.length} catalog candidate${availablePapers.length === 1 ? "" : "s"}`}</span>
           <small>{searching
             ? "Reading indexed evidence"
             : availablePapers.length > 0
-              ? `Showing ${candidateStart + 1}–${Math.min(candidateStart + COMPARATOR_PAGE_SIZE, availablePapers.length)} · ${query.trim() ? `“${query.trim()}”` : "citation impact"}`
-              : "No candidate page"}</small>
+              ? appliedQuery
+                ? `Showing ${candidateStart + 1}–${Math.min(candidateStart + COMPARATOR_PAGE_SIZE, availablePapers.length)} · results for “${appliedQuery}”`
+                : `Showing ${candidateStart + 1}–${Math.min(candidateStart + COMPARATOR_PAGE_SIZE, availablePapers.length)} · default citation ranking`
+              : appliedQuery ? `No matches for “${appliedQuery}”` : "No catalog candidates"}</small>
         </div>
 
         <div className="research-paper-options">
