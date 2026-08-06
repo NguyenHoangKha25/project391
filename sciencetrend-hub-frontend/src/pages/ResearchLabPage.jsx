@@ -715,15 +715,28 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
 
   function selectMapNode(event, node) {
     if (event) {
-      event.preventDefault();
-      event.stopPropagation();
+      if (typeof event.preventDefault === "function") event.preventDefault();
+      if (typeof event.stopPropagation === "function") event.stopPropagation();
     }
+    const canvas = canvasRef.current;
+    const scrollLeft = canvas ? canvas.scrollLeft : 0;
+    const scrollTop = canvas ? canvas.scrollTop : 0;
+
     onSelectNode(node);
+
+    if (canvas) {
+      window.requestAnimationFrame(() => {
+        canvas.scrollLeft = scrollLeft;
+        canvas.scrollTop = scrollTop;
+      });
+    }
   }
 
   function preventPointerFocus(event) {
-    event.preventDefault();
-    event.stopPropagation();
+    if (event) {
+      if (typeof event.preventDefault === "function") event.preventDefault();
+      if (typeof event.stopPropagation === "function") event.stopPropagation();
+    }
   }
 
   return (
