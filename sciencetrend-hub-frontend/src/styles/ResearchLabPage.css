@@ -4114,3 +4114,37 @@ html body .st-layout .research-lab-v2 .research-map-canvas {
   .research-map-decision-bar { grid-template-columns: 32px minmax(0, 1fr); }
   .research-map-decision-bar > span { grid-column: 1 / -1; justify-self: start; }
 }
+
+/* One-scroll flow: the page owns vertical movement; workspace panels never trap it. */
+html body .st-layout .research-lab-v2 .research-map-builder,
+html body .st-layout .research-lab-v2 .research-map-insights {
+  position: static;
+  top: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+html body .st-layout .research-lab-v2 .research-map-canvas {
+  height: auto;
+  min-height: 590px;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  scrollbar-gutter: auto;
+  scrollbar-width: none;
+}
+
+html body .st-layout .research-lab-v2 .research-map-canvas::-webkit-scrollbar {
+  display: none;
+}
+
+html body .st-layout .research-lab-v2 .research-map-canvas svg {
+  align-self: flex-start;
+}
+
+@media (max-width: 980px) {
+  html body .st-layout .research-lab-v2 .research-map-canvas {
+    min-height: 520px;
+  }
+}
