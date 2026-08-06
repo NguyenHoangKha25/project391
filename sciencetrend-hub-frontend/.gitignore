@@ -8,3 +8,4 @@ skills-lock.json
 tokens.css
 *.docx
 artifacts/
+.vercel/
