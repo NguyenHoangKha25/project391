@@ -36,10 +36,10 @@ import "../styles/ResearchLabPage.css";
 
 const MAX_COMPARISON_PAPERS = 4;
 const MIN_COMPARISON_PAPERS = 2;
-const MAP_WIDTH = 1080;
+const MAP_WIDTH = 1180;
 const MAP_MIN_HEIGHT = 640;
-const MAP_NODE_WIDTH = 210;
-const MAP_NODE_HEIGHT = 62;
+const MAP_NODE_WIDTH = 240;
+const MAP_NODE_HEIGHT = 68;
 const MAP_TYPE_ORDER = ["TOPIC", "KEYWORD", "JOURNAL", "UNKNOWN"];
 const MAP_TYPE_META = {
   TOPIC: { label: "Topics", shortLabel: "T", relation: "Related topics" },
@@ -100,7 +100,7 @@ function shortTitle(title, length = 82) {
   return value.length > length ? `${value.slice(0, length - 1)}…` : value;
 }
 
-function splitMapLabel(label, maxLength = 20) {
+function splitMapLabel(label, maxLength = 26) {
   const value = String(label || "Unknown").trim();
   if (value.length <= maxLength) return [value];
   const words = value.split(/\s+/);
@@ -132,31 +132,96 @@ function getMapLayout(nodes = [], rootId, edges = []) {
   const relationByTarget = new Map(
     edges.map((edge) => [String(edge.targetId), String(edge.relation || "RELATED")]),
   );
-  const groupedNodes = nodes
-    .filter((node) => String(node.id) !== String(rootId))
-    .reduce((groups, node) => {
-      const type = normalizeMapType(node.type);
-      if (!groups.has(type)) groups.set(type, []);
-      groups.get(type).push(node);
-      return groups;
-    }, new Map());
+
+  const parentByChild = new Map(
+    edges
+      .filter((edge) => String(edge.sourceId) !== String(rootId))
+      .map((edge) => [String(edge.targetId), String(edge.sourceId)]),
+  );
+
+  const nonRootNodes = nodes.filter((node) => String(node.id) !== String(rootId));
+
+  const groupedNodes = nonRootNodes.reduce((groups, node) => {
+    const type = normalizeMapType(node.type);
+    if (!groups.has(type)) groups.set(type, []);
+    groups.get(type).push(node);
+    return groups;
+  }, new Map());
 
   let cursorY = 42;
+
   const groups = MAP_TYPE_ORDER
     .filter((type) => groupedNodes.has(type))
     .map((type) => {
       const groupNodes = groupedNodes.get(type);
-      const rowCount = Math.ceil(groupNodes.length / 2);
-      const laneHeight = Math.max(166, 62 + rowCount * 76);
+
+      const level1 = [];
+      const level2ByParent = new Map();
+
+      groupNodes.forEach((node) => {
+        const parentId = parentByChild.get(String(node.id));
+        const parentExistsInGroup = parentId && groupNodes.some((p) => String(p.id) === String(parentId));
+        if (parentExistsInGroup) {
+          if (!level2ByParent.has(String(parentId))) level2ByParent.set(String(parentId), []);
+          level2ByParent.get(String(parentId)).push(node);
+        } else {
+          level1.push(node);
+        }
+      });
+
+      const laidOutNodes = [];
+      let currentY = cursorY + 58;
+
+      level1.forEach((node) => {
+        const children = level2ByParent.get(String(node.id)) || [];
+        const parentY = currentY;
+
+        laidOutNodes.push({
+          node,
+          relation: relationByTarget.get(String(node.id)) || MAP_TYPE_META[type].relation,
+          x: 650,
+          y: parentY,
+          isLevel2: false,
+          parentId: null,
+        });
+
+        children.forEach((childNode, childIdx) => {
+          const childY = parentY + childIdx * 78;
+          laidOutNodes.push({
+            node: childNode,
+            relation: relationByTarget.get(String(childNode.id)) || "SUB_TOPIC",
+            x: 955,
+            y: childY,
+            isLevel2: true,
+            parentId: String(node.id),
+          });
+        });
+
+        const numRows = Math.max(1, children.length);
+        currentY += numRows * 78;
+      });
+
+      const placedIds = new Set(laidOutNodes.map((item) => String(item.node.id)));
+      groupNodes.forEach((node) => {
+        if (!placedIds.has(String(node.id))) {
+          laidOutNodes.push({
+            node,
+            relation: relationByTarget.get(String(node.id)) || MAP_TYPE_META[type].relation,
+            x: 650,
+            y: currentY,
+            isLevel2: false,
+            parentId: null,
+          });
+          currentY += 78;
+        }
+      });
+
+      const laneHeight = Math.max(166, currentY - cursorY + 16);
       const laneTop = cursorY;
       const hubY = laneTop + laneHeight / 2;
-      const laidOutNodes = groupNodes.map((node, index) => ({
-        node,
-        relation: relationByTarget.get(String(node.id)) || MAP_TYPE_META[type].relation,
-        x: index % 2 === 0 ? 665 : 925,
-        y: laneTop + 58 + Math.floor(index / 2) * 76,
-      }));
-      cursorY += laneHeight + 18;
+
+      cursorY += laneHeight + 20;
+
       return {
         type,
         meta: MAP_TYPE_META[type],
@@ -790,14 +855,29 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
                     className="research-map-primary-branch"
                     d={curvePath(layout.root.x + 116, layout.root.y, group.hub.x - 66, group.hub.y)}
                   />
-                  {group.nodes.map((item) => (
-                    <path
-                      key={item.node.id}
-                      className="research-map-secondary-branch"
-                      d={curvePath(group.hub.x + 66, group.hub.y, item.x - MAP_NODE_WIDTH / 2 - 6, item.y)}
-                      markerEnd={`url(#research-arrow-${typeClass})`}
-                    />
-                  ))}
+                  {group.nodes.map((item) => {
+                    if (item.isLevel2 && item.parentId) {
+                      const parentNode = group.nodes.find((n) => String(n.node.id) === String(item.parentId));
+                      if (parentNode) {
+                        return (
+                          <path
+                            key={item.node.id}
+                            className="research-map-secondary-branch level-2"
+                            d={curvePath(parentNode.x + MAP_NODE_WIDTH / 2, parentNode.y, item.x - MAP_NODE_WIDTH / 2 - 6, item.y)}
+                            markerEnd={`url(#research-arrow-${typeClass})`}
+                          />
+                        );
+                      }
+                    }
+                    return (
+                      <path
+                        key={item.node.id}
+                        className="research-map-secondary-branch"
+                        d={curvePath(group.hub.x + 66, group.hub.y, item.x - MAP_NODE_WIDTH / 2 - 6, item.y)}
+                        markerEnd={`url(#research-arrow-${typeClass})`}
+                      />
+                    );
+                  })}
                 </g>
               );
             })}
@@ -840,8 +920,11 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
               const type = normalizeMapType(node.type);
               const typeClass = type.toLowerCase();
               const statusClass = String(node.trendStatus || "no_data").toLowerCase();
-              const lines = splitMapLabel(node.label, 23);
+              const lines = splitMapLabel(node.label, 26);
               const isSelected = String(selectedNodeId) === String(node.id);
+              const labelStartX = -MAP_NODE_WIDTH / 2 + 58;
+              const badgeCX = -MAP_NODE_WIDTH / 2 + 30;
+
               return (
                 <g
                   key={node.id}
@@ -856,14 +939,14 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
                   aria-pressed={isSelected}
                 >
                   <rect className="research-map-node-card" x={-MAP_NODE_WIDTH / 2} y={-MAP_NODE_HEIGHT / 2} width={MAP_NODE_WIDTH} height={MAP_NODE_HEIGHT} rx="17" filter="url(#research-map-node-shadow)" />
-                  <rect className="research-map-node-accent" x={-MAP_NODE_WIDTH / 2} y="-20" width="5" height="40" rx="3" />
-                  <circle className="research-map-node-badge" cx="-77" cy="0" r="17" />
-                  <text className="research-map-node-code" textAnchor="middle" x="-77" y="4">{MAP_TYPE_META[type].shortLabel}</text>
-                  <text className="research-map-node-label" textAnchor="start" x="-52" y={lines.length > 1 ? -11 : -5}>
-                    {lines.map((line, index) => <tspan key={`${line}-${index}`} x="-52" dy={index === 0 ? 0 : 14}>{line}</tspan>)}
+                  <rect className="research-map-node-accent" x={-MAP_NODE_WIDTH / 2} y="-22" width="5" height="44" rx="3" />
+                  <circle className="research-map-node-badge" cx={badgeCX} cy="0" r="16" />
+                  <text className="research-map-node-code" textAnchor="middle" x={badgeCX} y="4">{MAP_TYPE_META[type].shortLabel}</text>
+                  <text className="research-map-node-label" textAnchor="start" x={labelStartX} y={lines.length > 1 ? -12 : -3}>
+                    {lines.map((line, index) => <tspan key={`${line}-${index}`} x={labelStartX} dy={index === 0 ? 0 : 15}>{line}</tspan>)}
                   </text>
-                  <text className="research-map-node-count" textAnchor="start" x="-52" y={lines.length > 1 ? 22 : 15}>{formatNumber(node.paperCount)} papers</text>
-                  <circle className="research-map-node-status" cx="91" cy="-18" r="5" />
+                  <text className="research-map-node-count" textAnchor="start" x={labelStartX} y={lines.length > 1 ? 21 : 16}>{formatNumber(node.paperCount)} papers</text>
+                  <circle className="research-map-node-status" cx={MAP_NODE_WIDTH / 2 - 14} cy="-18" r="5" />
                   <title>{node.label} · {MAP_TYPE_META[type].label} · {String(node.trendStatus || "NO_DATA").replaceAll("_", " ")} · {formatNumber(node.paperCount)} papers</title>
                 </g>
               );

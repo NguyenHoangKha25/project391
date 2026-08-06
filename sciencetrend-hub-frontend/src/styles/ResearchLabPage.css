@@ -1793,22 +1793,22 @@
 
 .research-map-node-code {
   fill: var(--map-solid);
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 900;
 }
 
 .research-map-node-label {
   pointer-events: none;
-  fill: #17213b;
-  font-size: 9.2px;
-  font-weight: 850;
+  fill: #1e293b;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .research-map-node-count {
   pointer-events: none;
-  fill: #7a879f;
-  font-size: 7.7px;
-  font-weight: 750;
+  fill: #64748b;
+  font-size: 9.5px;
+  font-weight: 650;
 }
 
 .research-map-node-status {
