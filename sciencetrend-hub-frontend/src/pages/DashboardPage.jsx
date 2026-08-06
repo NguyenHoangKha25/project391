@@ -352,13 +352,13 @@ function DashboardPage() {
   }, [papersByYear]);
 
   const topKeywords = useMemo(() => {
-    let raw = data?.topKeywords || [];
-    return raw.filter(item => item.value > 0);
+    let raw = Array.isArray(data?.topKeywords) ? data.topKeywords : [];
+    return raw.filter((item) => item && typeof item === "object" && Number(item.value) > 0);
   }, [data]);
 
   const topJournals = useMemo(() => {
-    let raw = data?.topJournals || [];
-    return raw.filter(item => item.value > 0);
+    let raw = Array.isArray(data?.topJournals) ? data.topJournals : [];
+    return raw.filter((item) => item && typeof item === "object" && Number(item.value) > 0);
   }, [data]);
 
   const topCitedPapers = useMemo(() => {
@@ -374,22 +374,23 @@ function DashboardPage() {
   }, [topCitedPapers]);
 
   const donutSegments = useMemo(() => {
-    const sliceJournals = topJournals.slice(0, 5);
-    const sum = sliceJournals.reduce((acc, curr) => acc + curr.value, 0);
+    const sliceJournals = (Array.isArray(topJournals) ? topJournals : []).slice(0, 5);
+    const sum = sliceJournals.reduce((acc, curr) => acc + (Number(curr?.value) || 0), 0);
     const radius = 38;
     const circumference = 2 * Math.PI * radius; // ~238.76
     return sliceJournals.map((j, i) => {
-      const percent = sum > 0 ? j.value / sum : 0;
+      const val = Number(j?.value) || 0;
+      const percent = sum > 0 ? val / sum : 0;
       const cumulativePercent = sliceJournals
         .slice(0, i)
-        .reduce((total, item) => total + (sum > 0 ? item.value / sum : 0), 0);
+        .reduce((total, item) => total + (sum > 0 ? (Number(item?.value) || 0) / sum : 0), 0);
       const strokeLength = percent * circumference;
       const strokeOffset = circumference - (cumulativePercent * circumference);
 
       const theme = DONUT_THEMES[i % DONUT_THEMES.length];
       return {
-        label: j.label,
-        value: j.value,
+        label: j?.label || "Journal",
+        value: val,
         percent: (percent * 100).toFixed(1),
         strokeLength,
         strokeOffset,
@@ -401,11 +402,13 @@ function DashboardPage() {
   }, [topJournals]);
 
   const maxKeywordVal = useMemo(() => {
-    return Math.max(...topKeywords.map(k => k.value), 1);
+    if (!Array.isArray(topKeywords) || topKeywords.length === 0) return 1;
+    const vals = topKeywords.map((k) => Number(k?.value) || 0);
+    return Math.max(...vals, 1);
   }, [topKeywords]);
 
   const yAxisScale = useMemo(() => {
-    const values = papersByYear.map(p => Number(p.value) || 0);
+    const values = (Array.isArray(papersByYear) ? papersByYear : []).map((p) => Number(p?.value) || 0);
     const rawMax = Math.max(...values, 1);
     const roughStep = rawMax / 4;
     const magnitude = 10 ** Math.floor(Math.log10(Math.max(roughStep, 1)));

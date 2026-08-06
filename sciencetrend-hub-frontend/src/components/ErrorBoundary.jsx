@@ -15,6 +15,14 @@ class ErrorBoundary extends Component {
     console.error("Uncaught application render error", error, errorInfo);
   }
 
+  handleReset = () => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch {}
+    window.location.href = "/dashboard";
+  };
+
   render() {
     if (!this.state.hasError) return this.props.children;
 
@@ -25,10 +33,12 @@ class ErrorBoundary extends Component {
           <h1>This page could not be displayed.</h1>
           <p>Your account and saved data are unchanged. Reload the page to try again.</p>
           <div>
-            <button type="button" onClick={() => window.location.reload()}>
+            <button type="button" onClick={this.handleReset}>
               Reload page
             </button>
-            <a href="/dashboard">Return to dashboard</a>
+            <button type="button" onClick={this.handleReset}>
+              Return to dashboard
+            </button>
           </div>
         </section>
       </main>
