@@ -135,29 +135,35 @@ function PaperCard({
 
   // Fallback to normal/compact layout for Dashboard/Bookmarks
   return (
-    <article className="db-paper-card">
-      <div className="db-paper-main">
-        <div className="db-paper-heading">
-          {tag && <span className="db-paper-tag">{tag}</span>}
-          <span className="db-paper-source">{source}</span>
-        </div>
-        <h3>{title}</h3>
-        {metadata && <p>{metadata}</p>}
+    <article className="db-paper-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderRadius: "14px", border: "1px solid #e2e8f0", backgroundColor: "#ffffff", gap: "16px" }}>
+      <div className="db-paper-main" style={{ flex: 1, minWidth: 0 }}>
+        {(tag || source) && (
+          <div className="db-paper-heading" style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "6px" }}>
+            {tag && <span className="db-paper-tag" style={{ display: "inline-block", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", backgroundColor: "#eff6ff", color: "#2563eb" }}>{tag}</span>}
+            {source && <span className="db-paper-source" style={{ fontSize: "12px", color: "#64748b", fontWeight: "500" }}>{source}</span>}
+          </div>
+        )}
+        <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: "0 0 4px 0", lineHeight: "1.35" }}>{title}</h3>
+        {metadata && <p style={{ fontSize: "13px", color: "#64748b", margin: 0, fontWeight: "500" }}>{metadata}</p>}
       </div>
 
-      <div className="db-paper-actions">
+      <div className="db-paper-actions" style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
         <button
           type="button"
-          className={saved ? "is-saved" : ""}
+          className={`action-btn ${saved ? "is-saved" : ""}`}
           aria-label={saved ? "Remove from bookmarks" : "Save to bookmarks"}
           onClick={handleBookmark}
           disabled={bookmarking}
           title={saved ? "Saved to bookmarks" : "Save to bookmarks"}
+          style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "8px", border: "1px solid #e2e8f0", backgroundColor: saved ? "#eff6ff" : "#ffffff", color: saved ? "#2563eb" : "#64748b", cursor: "pointer", fontSize: "13px", fontWeight: "700" }}
         >
           {bookmarking ? (
             <FiLoader className="is-spinning" />
           ) : (
-            <FiBookmark />
+            <>
+              <FiBookmark />
+              <span>{saved ? "Saved" : "Save"}</span>
+            </>
           )}
         </button>
 
@@ -167,7 +173,9 @@ function PaperCard({
               to={detailPath}
               aria-label="View paper details"
               title="View paper details"
+              style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "8px 14px", borderRadius: "8px", border: "1px solid #e2e8f0", backgroundColor: "#ffffff", color: "#4f46e5", textDecoration: "none", fontSize: "13px", fontWeight: "700" }}
             >
+              <span>View</span>
               <FiExternalLink />
             </Link>
           ) : (
@@ -175,11 +183,13 @@ function PaperCard({
               href={href}
               target="_blank"
               rel="noreferrer"
-            aria-label="Open paper in new tab"
-            title="Open paper"
-          >
-            <FiExternalLink />
-          </a>
+              aria-label="Open paper in new tab"
+              title="Open paper"
+              style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "8px 14px", borderRadius: "8px", border: "1px solid #e2e8f0", backgroundColor: "#ffffff", color: "#4f46e5", textDecoration: "none", fontSize: "13px", fontWeight: "700" }}
+            >
+              <span>Open</span>
+              <FiExternalLink />
+            </a>
           )
         )}
       </div>

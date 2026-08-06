@@ -531,6 +531,7 @@ function BookmarksPage() {
                     <PaperCard
                       key={paper.id}
                       {...paper}
+                      variant="rich"
                       saved
                       onBookmark={() => handleRemoveSavedPaper(paper.id)}
                     />
