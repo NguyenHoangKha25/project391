@@ -1055,6 +1055,16 @@ function MindMapWorkspace() {
       .slice(0, 100);
   }, [rootOptions, rootQuery]);
 
+  // Auto-select top search match when filtering options
+  useEffect(() => {
+    if (rootQuery.trim() && filteredRootOptions.length > 0) {
+      const exists = filteredRootOptions.some((item) => String(item.id) === String(selectedRootId));
+      if (!exists) {
+        setSelectedRootId(String(filteredRootOptions[0].id));
+      }
+    }
+  }, [rootQuery, filteredRootOptions, selectedRootId]);
+
   function changeRootType(type) {
     setRootType(type);
     setRootQuery("");
