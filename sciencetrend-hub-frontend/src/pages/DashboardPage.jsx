@@ -81,7 +81,9 @@ function getInitialDashboardData(cacheKeys) {
     console.warn("Dashboard cache corrupted, clearing:", err);
     try {
       window.localStorage.removeItem("sciencetrend_api_cache_v1");
-    } catch {}
+    } catch {
+      // Storage can be unavailable in restricted browser contexts.
+    }
     return { overview: null, topics: [] };
   }
 }
@@ -613,7 +615,9 @@ function DashboardPage() {
                     margin: "0 0 8px 0"
                   }}
                 >
-                  {(featuredPaper.title || "").replace(/<[^>]*>?/gm, "")}
+                  <span className="spotlight-title-text">
+                    {(featuredPaper.title || "").replace(/<[^>]*>?/gm, "")}
+                  </span>
                 </h3>
                 <p
                   className="spotlight-authors"
