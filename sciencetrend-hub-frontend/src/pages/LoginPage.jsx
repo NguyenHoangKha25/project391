@@ -8,6 +8,7 @@ import { useAuth } from "../context/useAuth";
 import { login } from "../services/authService";
 import { getCurrentUser } from "../services/userService";
 import { getDefaultAuthenticatedPath } from "../utils/authStorage";
+import { getSafeInternalPath, storePostLoginRedirect } from "../utils/postLoginRedirect";
 import "../styles/LoginPage.css";
 
 function LoginPage() {
@@ -20,6 +21,7 @@ function LoginPage() {
   const [successMessage, setSuccessMessage] = useState(
     location.state?.successMessage || "",
   );
+  const accessMessage = location.state?.accessMessage || "";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -52,7 +54,8 @@ function LoginPage() {
       } catch {
         // The login response remains a valid fallback if /auth/me is unavailable.
       }
-      navigate(getDefaultAuthenticatedPath(), { replace: true });
+      const requestedPath = getSafeInternalPath(location.state?.from);
+      navigate(requestedPath || getDefaultAuthenticatedPath(), { replace: true });
     } catch (error) {
       console.error("Login failed", error);
       setErrorMessage(error.message || "Invalid username or password.");
@@ -67,6 +70,7 @@ function LoginPage() {
       "http://localhost:8080/api/oauth2/authorization/google";
 
     const frontendOrigin = window.location.origin;
+    storePostLoginRedirect(location.state?.from);
 
     const googleLoginUrl = new URL(authUrl);
     googleLoginUrl.searchParams.set("redirect_origin", frontendOrigin);
@@ -179,6 +183,11 @@ function LoginPage() {
               {successMessage && (
                 <p className="auth-success-message" role="status">
                   {successMessage}
+                </p>
+              )}
+              {accessMessage && (
+                <p className="auth-access-message" role="status">
+                  <FiLock aria-hidden="true" /> {accessMessage}
                 </p>
               )}
               {errorMessage && (

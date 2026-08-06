@@ -40,11 +40,19 @@ function PublicOnlyRoute({ children }) {
 }
 
 // Chỉ cho vào khi đã đăng nhập.
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, accessMessage = "Please sign in to continue." }) {
   const { isLoggedIn } = useAuth();
+  const location = useLocation();
 
   if (!isLoggedIn) {
-    return <Navigate to={ROUTE_PATHS.LOGIN} replace />;
+    const requestedPath = `${location.pathname}${location.search}${location.hash}`;
+    return (
+      <Navigate
+        to={ROUTE_PATHS.LOGIN}
+        replace
+        state={{ from: requestedPath, accessMessage }}
+      />
+    );
   }
 
   return children;
@@ -121,7 +129,11 @@ function AppRoutes() {
 
       <Route
         path={ROUTE_PATHS.PAPERS}
-        element={<PapersPage />}
+        element={
+          <ProtectedRoute accessMessage="Sign in to search and explore research papers.">
+            <PapersPage />
+          </ProtectedRoute>
+        }
       />
 
       <Route path={ROUTE_PATHS.PAPER_DETAIL} element={<PaperDetailPage />} />

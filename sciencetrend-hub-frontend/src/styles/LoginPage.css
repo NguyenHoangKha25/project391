@@ -748,7 +748,8 @@
 
 /* Error/Success Feedbacks */
 .auth-error-message, 
-.auth-success-message {
+.auth-success-message,
+.auth-access-message {
   margin-top: 14px !important;
   padding: 11px 13px;
   border-radius: 13px;
@@ -765,6 +766,15 @@
   background: var(--st-success-soft);
   border: 1px solid rgba(35,132,91,.16);
 }
+.auth-access-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #3154c8 !important;
+  background: #eef3ff;
+  border: 1px solid rgba(49, 84, 200, .18);
+}
+.auth-access-message svg { flex: 0 0 auto; }
 
 /* Responsive Grid Breakpoints */
 @media (max-width: 1024px) {

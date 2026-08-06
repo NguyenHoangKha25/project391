@@ -168,6 +168,14 @@ function Navbar({
 
   // Debounced autocomplete search
   useEffect(() => {
+    if (!isLoggedIn) {
+      suggestionRequestRef.current += 1;
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setLoadingSuggestions(false);
+      return;
+    }
+
     if (searchValue.trim().length < 2) {
       suggestionRequestRef.current += 1;
       setSuggestions([]);
@@ -181,7 +189,7 @@ function Navbar({
     }, 280);
 
     return () => clearTimeout(timer);
-  }, [searchValue]);
+  }, [isLoggedIn, searchValue]);
 
   // Click outside to close suggestions dropdown
   useEffect(() => {
@@ -198,12 +206,21 @@ function Navbar({
     event.preventDefault();
     const query = searchValue.trim();
     setShowSuggestions(false);
+    const targetPath = query
+      ? `${ROUTE_PATHS.PAPERS}?q=${encodeURIComponent(query)}`
+      : ROUTE_PATHS.PAPERS;
 
-    navigate(
-      query
-        ? `${ROUTE_PATHS.PAPERS}?q=${encodeURIComponent(query)}`
-        : ROUTE_PATHS.PAPERS,
-    );
+    if (!isLoggedIn) {
+      navigate(ROUTE_PATHS.LOGIN, {
+        state: {
+          from: targetPath,
+          accessMessage: "Sign in to search and explore research papers.",
+        },
+      });
+      return;
+    }
+
+    navigate(targetPath);
   }
 
   function handleSuggestionClick(sug) {
@@ -215,7 +232,30 @@ function Navbar({
       : sug.type === "keyword"
         ? `${ROUTE_PATHS.PAPERS}?keyword=${encodeURIComponent(sug.value)}`
         : `${ROUTE_PATHS.PAPERS}?q=${encodeURIComponent(sug.value)}`;
+    if (!isLoggedIn) {
+      navigate(ROUTE_PATHS.LOGIN, {
+        state: {
+          from: path,
+          accessMessage: "Sign in to search and explore research papers.",
+        },
+      });
+      return;
+    }
     navigate(path);
+  }
+
+  function requireLoginForSearch() {
+    if (isLoggedIn) return;
+    const query = searchValue.trim();
+    const targetPath = query
+      ? `${ROUTE_PATHS.PAPERS}?q=${encodeURIComponent(query)}`
+      : ROUTE_PATHS.PAPERS;
+    navigate(ROUTE_PATHS.LOGIN, {
+      state: {
+        from: targetPath,
+        accessMessage: "Sign in to search and explore research papers.",
+      },
+    });
   }
 
   function goTo(path) {
@@ -270,6 +310,7 @@ function Navbar({
           <input
             type="search"
             value={searchValue}
+            readOnly={!isLoggedIn}
             onChange={(event) => {
               const nextValue = event.target.value;
               setSearchValue(nextValue);
@@ -277,9 +318,13 @@ function Navbar({
               if (nextValue.trim().length < 2) setSuggestions([]);
             }}
             onFocus={() => {
+              if (!isLoggedIn) {
+                requireLoginForSearch();
+                return;
+              }
               if (suggestions.length > 0) setShowSuggestions(true);
             }}
-            placeholder="Search papers, journals…"
+            placeholder={isLoggedIn ? "Search papers, journals…" : "Sign in to search papers"}
             aria-label="Search research papers, journals, and keywords"
           />
           {showSuggestions && searchValue.trim().length >= 2 && (

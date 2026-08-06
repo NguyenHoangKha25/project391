@@ -10,6 +10,7 @@ import {
   saveOAuthSessionFromQuery,
 } from "../utils/authStorage";
 import { getCurrentUser } from "../services/userService";
+import { consumePostLoginRedirect } from "../utils/postLoginRedirect";
 import "../styles/AuthStatusPage.css";
 
 // Backend OAuth2SuccessHandler redirect về:
@@ -49,7 +50,7 @@ function OAuth2CallbackPage() {
 
         // 3. Refresh context và navigate
         refreshAuthState();
-        navigate(getDefaultAuthenticatedPath(), { replace: true });
+        navigate(consumePostLoginRedirect() || getDefaultAuthenticatedPath(), { replace: true });
       } catch (err) {
         console.error("Google login callback failed", err);
         clearAuthSession();
