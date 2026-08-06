@@ -151,7 +151,7 @@ export async function apiRequest(endpoint, options = {}) {
       throw new Error("Request timed out. Please check your network connection.", { cause: error });
     }
     console.error(`[API Network Error] ${method} ${url} failed:`, error);
-    throw new Error("Network request failed. Please check your connection.", { cause: error });
+    throw new Error("Cannot connect to backend server. Please check if your backend is running.", { cause: error });
   }
 
   if (res.status === 401 && auth && !normalizeEndpoint(endpoint).startsWith("/auth/")) {
