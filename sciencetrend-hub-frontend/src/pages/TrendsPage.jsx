@@ -718,32 +718,13 @@ function TrendsPage() {
           <article className="trends-chart-panel glassmorphic-panel multi-line-comp-panel">
             <div className="panel-header-row">
               <h3>{trendTab === "keyword" ? "Keyword Comparison" : "Topic Comparison"}</h3>
-              <div className="trends-chart-view-switch" aria-label="Chart view mode">
-                <button
-                  type="button"
-                  className={`chart-view-btn ${chartType === "bars" ? "active" : ""}`}
-                  onClick={() => setChartType("bars")}
-                  title="Grouped Bars View (Cột nhóm)"
-                >
-                  <span className="btn-icon">📊</span>
-                  <span>Grouped Bars</span>
-                </button>
-                <button
-                  type="button"
-                  className={`chart-view-btn ${chartType === "lines" ? "active" : ""}`}
-                  onClick={() => setChartType("lines")}
-                  title="Line Curves View (Đường)"
-                >
-                  <span className="btn-icon">📈</span>
-                  <span>Lines</span>
-                </button>
-              </div>
+              <span className="badge-chip badge-cyan">Publication Trend Curves</span>
             </div>
 
             {comparisonLines.length > 0 ? (
               <>
                 <div className="trend-chart-guide">
-                  <p>Select a series to highlight its data and reveal yearly values.</p>
+                  <p>Click a card below to focus its line curve and reveal yearly values.</p>
                   {focusedSeries && <button type="button" onClick={() => setFocusedSeries("")}>Show all series</button>}
                 </div>
                 <div className="multi-line-legend-container" aria-label="Trend series">
@@ -774,7 +755,7 @@ function TrendsPage() {
                     viewBox={`0 0 ${COMPARISON_CHART_WIDTH} ${COMPARISON_CHART_HEIGHT}`}
                     className="trends-svg-chart multi-line-svg"
                     role="img"
-                    aria-label={`${trendTab === "keyword" ? "Keyword" : "Topic"} publication comparison by year`}
+                    aria-label={`${trendTab === "keyword" ? "Keyword" : "Topic"} publication comparison curves by year`}
                   >
                     <defs>
                       {comparisonLines.flatMap((series) => ([
@@ -784,8 +765,8 @@ function TrendsPage() {
                           <stop offset="100%" stopColor={series.color} stopOpacity="0.84" />
                         </linearGradient>,
                         <linearGradient key={series.areaGradientId} id={series.areaGradientId} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={series.color} stopOpacity="0.2" />
-                          <stop offset="100%" stopColor={series.color} stopOpacity="0.015" />
+                          <stop offset="0%" stopColor={series.color} stopOpacity="0.25" />
+                          <stop offset="100%" stopColor={series.color} stopOpacity="0.01" />
                         </linearGradient>,
                       ]))}
                     </defs>
@@ -825,113 +806,63 @@ function TrendsPage() {
                       })}
                     </g>
 
-                    {/* Render Grouped Bars or Line Curves based on chartType */}
-                    {chartType === "bars" && groupedBarData ? (
-                      <g className="trend-chart-grouped-bars">
-                        {groupedBarData.years.map((year, yearIdx) => {
-                          const groupStartX = COMPARISON_PLOT_LEFT + yearIdx * groupedBarData.yearBandWidth + (groupedBarData.yearBandWidth - groupedBarData.groupWidth) / 2;
-                          return comparisonLines.map((series, seriesIdx) => {
-                            const point = series.coords[yearIdx];
-                            const val = point?.value || 0;
-                            const barH = Math.max(val > 0 ? 3 : 0, (val / groupedBarData.axisMax) * groupedBarData.plotHeight);
-                            const barY = groupedBarData.plotBaseY - barH;
-                            const barX = groupStartX + seriesIdx * (groupedBarData.barWidth + groupedBarData.barGap);
-                            const isFocused = focusedSeries === series.label;
-                            const isMuted = Boolean(focusedSeries) && !isFocused;
-
-                            return (
-                              <g key={`${year}-${series.label}`} className="grouped-bar-item">
-                                {val > 0 && (
-                                  <rect
-                                    x={barX}
-                                    y={barY}
-                                    width={groupedBarData.barWidth}
-                                    height={barH}
-                                    rx="3"
-                                    ry="3"
-                                    fill={series.color}
-                                    opacity={isMuted ? 0.2 : isFocused ? 1 : 0.88}
-                                    className="grouped-bar-rect"
-                                  >
-                                    <title>{`${series.label} (${year}): ${formatNumber(val)} papers`}</title>
-                                  </rect>
-                                )}
-                                {(isFocused || (val > 0 && comparisonLines.length <= 3)) && (
-                                  <text
-                                    x={barX + groupedBarData.barWidth / 2}
-                                    y={Math.max(COMPARISON_PLOT_TOP + 10, barY - 4)}
-                                    textAnchor="middle"
-                                    fontSize="9"
-                                    fontWeight="800"
-                                    fill={series.color}
-                                    opacity={isMuted ? 0.3 : 1}
-                                  >
-                                    {val}
-                                  </text>
-                                )}
-                              </g>
-                            );
-                          });
-                        })}
-                      </g>
-                    ) : (
-                      comparisonLines.map((series) => {
-                        const isFocused = focusedSeries === series.label;
-                        const isMuted = Boolean(focusedSeries) && !isFocused;
-                        return (
-                          <g key={series.label} className={`trend-line-series ${isFocused ? "is-focused" : ""} ${isMuted ? "is-muted" : ""}`}>
-                            {isFocused && series.areaPath && (
-                              <path d={series.areaPath} fill={`url(#${series.areaGradientId})`} className="trend-line-area" />
-                            )}
-                            <path
-                              d={series.linePath}
-                              fill="none"
-                              stroke="#ffffff"
-                              strokeWidth={isFocused ? "6" : "4"}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              vectorEffect="non-scaling-stroke"
-                              className="trend-line-halo"
-                            />
-                            <path
-                              d={series.linePath}
-                              fill="none"
-                              stroke={`url(#${series.strokeGradientId})`}
-                              strokeWidth={isFocused ? "3.6" : "2.4"}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              vectorEffect="non-scaling-stroke"
-                              className="trend-smooth-line"
-                            />
-                            {series.coords.map((point) => (
-                              <g key={point.label} className="trend-line-point">
-                                <circle
-                                  cx={point.x}
-                                  cy={point.y}
-                                  r={isFocused ? "4.2" : "3"}
-                                  fill="#ffffff"
-                                  stroke={series.color}
-                                  strokeWidth={isFocused ? "2.6" : "1.8"}
-                                  vectorEffect="non-scaling-stroke"
+                    {/* Multi-Line Curves */}
+                    {comparisonLines.map((series) => {
+                      const isFocused = focusedSeries === series.label;
+                      const isMuted = Boolean(focusedSeries) && !isFocused;
+                      return (
+                        <g key={series.label} className={`trend-line-series ${isFocused ? "is-focused" : ""} ${isMuted ? "is-muted" : ""}`}>
+                          {isFocused && series.areaPath && (
+                            <path d={series.areaPath} fill={`url(#${series.areaGradientId})`} className="trend-line-area" />
+                          )}
+                          <path
+                            d={series.linePath}
+                            fill="none"
+                            stroke="#ffffff"
+                            strokeWidth={isFocused ? "6" : "3.5"}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            vectorEffect="non-scaling-stroke"
+                            className="trend-line-halo"
+                          />
+                          <path
+                            d={series.linePath}
+                            fill="none"
+                            stroke={`url(#${series.strokeGradientId})`}
+                            strokeWidth={isFocused ? "3.6" : "2.4"}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            vectorEffect="non-scaling-stroke"
+                            className="trend-smooth-line"
+                          />
+                          {series.coords.map((point) => (
+                            <g key={point.label} className="trend-line-point">
+                              <circle
+                                cx={point.x}
+                                cy={point.y}
+                                r={isFocused ? "4.2" : "3"}
+                                fill="#ffffff"
+                                stroke={series.color}
+                                strokeWidth={isFocused ? "2.6" : "1.8"}
+                                vectorEffect="non-scaling-stroke"
+                              >
+                                <title>{`${series.label} (${point.label}): ${formatNumber(point.value)} papers`}</title>
+                              </circle>
+                              {isFocused && (
+                                <text
+                                  x={point.x}
+                                  y={Math.max(COMPARISON_PLOT_TOP + 10, point.y - 10)}
+                                  textAnchor="middle"
+                                  className="trend-line-value"
                                 >
-                                  <title>{`${series.label} (${point.label}): ${formatNumber(point.value)} papers`}</title>
-                                </circle>
-                                {isFocused && (
-                                  <text
-                                    x={point.x}
-                                    y={Math.max(COMPARISON_PLOT_TOP + 10, point.y - 10)}
-                                    textAnchor="middle"
-                                    className="trend-line-value"
-                                  >
-                                    {formatNumber(point.value)}
-                                  </text>
-                                )}
-                              </g>
-                            ))}
-                          </g>
-                        );
-                      })
-                    )}
+                                  {formatNumber(point.value)}
+                                </text>
+                              )}
+                            </g>
+                          ))}
+                        </g>
+                      );
+                    })}
                     <g className="trend-chart-axis" aria-hidden="true">
                       <line
                         x1={COMPARISON_PLOT_LEFT}
