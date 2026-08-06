@@ -127,14 +127,7 @@ function AppRoutes() {
         }
       />
 
-      <Route
-        path={ROUTE_PATHS.PAPERS}
-        element={
-          <ProtectedRoute accessMessage="Sign in to search and explore research papers.">
-            <PapersPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path={ROUTE_PATHS.PAPERS} element={<PapersPage />} />
 
       <Route path={ROUTE_PATHS.PAPER_DETAIL} element={<PaperDetailPage />} />
 
