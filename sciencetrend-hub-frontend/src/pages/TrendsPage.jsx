@@ -756,10 +756,10 @@ function TrendsPage() {
                       onClick={() => setFocusedSeries((current) => current === series.label ? "" : series.label)}
                       aria-pressed={focusedSeries === series.label}
                     >
-                      <span className="legend-line-swatch" aria-hidden="true"><i /></span>
+                      <span className="legend-line-swatch" aria-hidden="true" />
                       <span className="legend-text" title={series.label}>
                         <strong>{series.label}</strong>
-                        <small>{series.totalValStr} papers across selected years</small>
+                        <small>{series.totalValStr} papers</small>
                       </span>
                       <span className="legend-latest-value" aria-label={`${series.finalYear}: ${series.finalValStr} papers`}>
                         <small>{series.finalYear}</small>
@@ -980,8 +980,8 @@ function TrendsPage() {
               <table className="trends-compact-table">
                 <thead>
                   <tr>
-                    <th style={{ width: "62%" }}>{trendTab === "keyword" ? "Keyword" : "Topic"}</th>
-                    <th style={{ width: "38%", textAlign: "right" }}>Publications</th>
+                    <th style={{ width: "52%" }}>{trendTab === "keyword" ? "Keyword" : "Topic"}</th>
+                    <th style={{ width: "48%", textAlign: "right" }}>Publications</th>
                   </tr>
                 </thead>
                 <tbody>
