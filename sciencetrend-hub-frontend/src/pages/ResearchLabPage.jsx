@@ -565,12 +565,19 @@ function PaperComparator() {
           <FiSearch />
           <input
             ref={searchInputRef}
+            type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search title, author or keyword"
+            aria-label="Search research papers by title, author or keyword"
           />
           <button type="submit" disabled={searching}>{searching ? "Searching…" : "Search"}</button>
         </form>
+
+        <div className="research-catalog-status" aria-live="polite">
+          <span>{searching ? "Scanning catalog" : `${availablePapers.length} candidate${availablePapers.length === 1 ? "" : "s"}`}</span>
+          <small>{query.trim() ? `Results for “${query.trim()}”` : "Sorted by citation impact"}</small>
+        </div>
 
         <div className="research-paper-options">
           {searching ? (
@@ -582,7 +589,7 @@ function PaperComparator() {
                 <p>{paper.authors} · {paper.year || "Year unavailable"}</p>
                 <span>{formatNumber(paper.citationCount)} citations</span>
               </div>
-              <button type="button" onClick={() => addPaper(paper)} disabled={selectedPapers.length >= MAX_COMPARISON_PAPERS}>
+              <button type="button" onClick={() => addPaper(paper)} disabled={selectedPapers.length >= MAX_COMPARISON_PAPERS} aria-label={`Add ${paper.title} to comparison`}>
                 <FiPlus /> Add
               </button>
             </article>
