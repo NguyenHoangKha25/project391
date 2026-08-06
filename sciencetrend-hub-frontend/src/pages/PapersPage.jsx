@@ -4,7 +4,7 @@ import { FiSearch, FiX, FiFilter, FiChevronDown } from "react-icons/fi";
 import PaperCard from "../components/PaperCard";
 import MainLayout from "../components/layout/MainLayout";
 import { getPapers } from "../services/paperService";
-import { toggleBookmark } from "../services/bookmarkService";
+import { getBookmarkedPapers, toggleBookmark } from "../services/bookmarkService";
 import { getAllTopics } from "../services/topicService";
 import { getAllKeywords } from "../services/keywordService";
 import { normalizeKeyword, normalizePaper, toArray, formatNumber } from "../utils/apiData";
@@ -88,6 +88,28 @@ function getCachedPapersMetadata() {
   };
 }
 
+function getPaperIdKey(paperOrId) {
+  const rawId = typeof paperOrId === "object" && paperOrId !== null
+    ? (paperOrId.paperId ?? paperOrId.researchPaperId ?? paperOrId.id)
+    : paperOrId;
+  return rawId === null || rawId === undefined ? "" : String(rawId);
+}
+
+function getBookmarkedPaperIds(response) {
+  return new Set(
+    toArray(response)
+      .map((bookmark) => getPaperIdKey(bookmark))
+      .filter(Boolean),
+  );
+}
+
+function mergeSavedPaperState(papers, savedPaperIds) {
+  return papers.map((paper) => ({
+    ...paper,
+    saved: savedPaperIds.has(getPaperIdKey(paper)),
+  }));
+}
+
 function useToast() {
   const [toast, setToast] = useState(null);
   useEffect(() => {
@@ -144,7 +166,9 @@ function PapersPage() {
   const [availableKeywords, setAvailableKeywords] = useState(initialMetadata.keywords);
 
   // Data states
-  const [papers, setPapers] = useState(() => initialResult?.papers ?? []);
+  const savedPaperIdsRef = useRef(new Set());
+  const bookmarkOverridesRef = useRef(new Map());
+  const [papers, setPapers] = useState(() => mergeSavedPaperState(initialResult?.papers ?? [], new Set()));
   const [loading, setLoading] = useState(!initialResult);
   const [errorMessage, setErrorMessage] = useState("");
   const [page, setPage] = useState(initialResult?.page ?? 0);
@@ -152,6 +176,38 @@ function PapersPage() {
   const [totalElements, setTotalElements] = useState(initialResult?.totalElements ?? 0);
   const loadRequestIdRef = useRef(0);
   const { toast, showToast } = useToast();
+
+  // Paper search is public catalog data, so bookmark state must be hydrated
+  // separately from the authenticated user's bookmark collection.
+  useEffect(() => {
+    bookmarkOverridesRef.current = new Map();
+
+    if (!isLoggedIn) {
+      savedPaperIdsRef.current = new Set();
+      setPapers((current) => mergeSavedPaperState(current, savedPaperIdsRef.current));
+      return undefined;
+    }
+
+    let cancelled = false;
+    getBookmarkedPapers()
+      .then((response) => {
+        if (cancelled) return;
+        const savedIds = getBookmarkedPaperIds(response);
+        bookmarkOverridesRef.current.forEach((saved, paperId) => {
+          if (saved) savedIds.add(paperId);
+          else savedIds.delete(paperId);
+        });
+        savedPaperIdsRef.current = savedIds;
+        setPapers((current) => mergeSavedPaperState(current, savedIds));
+      })
+      .catch((error) => {
+        console.warn("Bookmark state unavailable", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn]);
 
   // Load available keywords and topics for filters
   useEffect(() => {
@@ -211,7 +267,7 @@ function PapersPage() {
     const cachedResult = getCachedPapersResult(params);
 
     if (cachedResult) {
-      setPapers(cachedResult.papers);
+      setPapers(mergeSavedPaperState(cachedResult.papers, savedPaperIdsRef.current));
       setTotalPages(cachedResult.totalPages);
       setTotalElements(cachedResult.totalElements);
       setPage(cachedResult.page);
@@ -240,7 +296,7 @@ function PapersPage() {
           totalElements: response?.totalElements ?? items.length,
           page: pageNum,
         };
-        setPapers(freshResult.papers);
+        setPapers(mergeSavedPaperState(freshResult.papers, savedPaperIdsRef.current));
         setTotalPages(freshResult.totalPages);
         setTotalElements(freshResult.totalElements);
         setPage(freshResult.page);
@@ -363,10 +419,18 @@ function PapersPage() {
     }
     const paper = papers.find((p) => p.id === id);
     if (!paper) return;
+    const paperIdKey = getPaperIdKey(id);
+    const nextSaved = !paper.saved;
+
+    bookmarkOverridesRef.current.set(paperIdKey, nextSaved);
+    const optimisticSavedIds = new Set(savedPaperIdsRef.current);
+    if (nextSaved) optimisticSavedIds.add(paperIdKey);
+    else optimisticSavedIds.delete(paperIdKey);
+    savedPaperIdsRef.current = optimisticSavedIds;
 
     // Optimistic UI update
     setPapers((current) =>
-      current.map((p) => (p.id === id ? { ...p, saved: !p.saved } : p))
+      current.map((p) => (p.id === id ? { ...p, saved: nextSaved } : p))
     );
 
     try {
@@ -377,6 +441,11 @@ function PapersPage() {
       );
     } catch {
       // Rollback
+      bookmarkOverridesRef.current.set(paperIdKey, paper.saved);
+      const rollbackSavedIds = new Set(savedPaperIdsRef.current);
+      if (paper.saved) rollbackSavedIds.add(paperIdKey);
+      else rollbackSavedIds.delete(paperIdKey);
+      savedPaperIdsRef.current = rollbackSavedIds;
       setPapers((current) =>
         current.map((p) => (p.id === id ? { ...p, saved: paper.saved } : p))
       );
