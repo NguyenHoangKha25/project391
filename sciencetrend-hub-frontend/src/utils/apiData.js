@@ -46,6 +46,7 @@ export function formatDateTime(value) {
     year: "numeric", month: "short", day: "2-digit",
     hour: "2-digit", minute: "2-digit",
     hour12: true,
+    timeZone: "Asia/Ho_Chi_Minh",
   }).format(date);
 }
 
