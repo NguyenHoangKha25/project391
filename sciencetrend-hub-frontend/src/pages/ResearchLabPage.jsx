@@ -12,6 +12,7 @@ import {
   FiLayers,
   FiMap,
   FiMaximize2,
+  FiMinimize2,
   FiMinus,
   FiPlus,
   FiRefreshCw,
@@ -734,6 +735,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   const layout = useMemo(() => getMapLayout(nodes, data?.root, edges), [nodes, data?.root, edges]);
   const [zoom, setZoom] = useState(100);
   const [viewMode, setViewMode] = useState("structure");
+  const [isFocusMode, setIsFocusMode] = useState(false);
   const canvasRef = useRef(null);
   const scrollSnapshotRef = useRef(null);
   const restoreFrameRef = useRef([]);
@@ -743,6 +745,20 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   useEffect(() => {
     setZoom(100);
   }, [rootId]);
+
+  useEffect(() => {
+    if (!isFocusMode) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setIsFocusMode(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isFocusMode]);
 
   const captureScrollSnapshot = useCallback(() => {
     const canvas = canvasRef.current;
@@ -865,7 +881,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   }
 
   return (
-    <div className={`research-map-explorer view-${viewMode}`}>
+    <div className={`research-map-explorer view-${viewMode} ${isFocusMode ? "is-focus-mode" : "is-fit-mode"}`}>
       <header className="research-map-toolbar">
         <div>
           <span className={`research-map-toolbar-mark type-${rootType.toLowerCase()}`}>
@@ -889,15 +905,19 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
           </button>
         </div>
         <div className="research-map-zoom" aria-label="Mind map zoom controls">
-          <button type="button" onClick={() => setZoom((current) => Math.max(80, current - 10))} disabled={zoom <= 80} aria-label="Zoom out">
-            <FiMinus />
-          </button>
-          <span>{zoom}%</span>
-          <button type="button" onClick={() => setZoom((current) => Math.min(140, current + 10))} disabled={zoom >= 140} aria-label="Zoom in">
-            <FiPlus />
-          </button>
-          <button type="button" onClick={() => setZoom(100)} aria-label="Fit mind map">
-            <FiMaximize2 />
+          {isFocusMode && (
+            <>
+              <button type="button" onClick={() => setZoom((current) => Math.max(80, current - 10))} disabled={zoom <= 80} aria-label="Zoom out">
+                <FiMinus />
+              </button>
+              <span>{zoom}%</span>
+              <button type="button" onClick={() => setZoom((current) => Math.min(140, current + 10))} disabled={zoom >= 140} aria-label="Zoom in">
+                <FiPlus />
+              </button>
+            </>
+          )}
+          <button type="button" onClick={() => { setZoom(100); setIsFocusMode((current) => !current); }} aria-label={isFocusMode ? "Exit focus mode" : "Open focus mode"}>
+            {isFocusMode ? <FiMinimize2 /> : <FiMaximize2 />}
           </button>
         </div>
       </header>
@@ -911,7 +931,9 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
       <div className="research-map-canvas" ref={canvasRef}>
         <svg
           viewBox={`0 -110 ${layout.width} ${layout.height + 220}`}
-          style={{ width: `${zoom}%`, minWidth: `${Math.round(760 * zoom / 100)}px` }}
+          style={isFocusMode
+            ? { width: `${zoom}%`, minWidth: `${Math.round(760 * zoom / 100)}px` }
+            : { width: "100%", minWidth: 0, height: "100%" }}
           role="img"
           aria-label={`Research mind map for ${data.root?.label || "selected root"}`}
         >
@@ -1171,6 +1193,8 @@ function MindMapWorkspace() {
   const [rootType, setRootType] = useState("KEYWORD");
   const [researchQuestion, setResearchQuestion] = useState("");
   const [researchIntent, setResearchIntent] = useState("MOMENTUM");
+  const [isQuestionEditing, setIsQuestionEditing] = useState(true);
+  const [inspectorView, setInspectorView] = useState("decision");
   const [keywords, setKeywords] = useState([]);
   const [topics, setTopics] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -1255,6 +1279,7 @@ function MindMapWorkspace() {
     setMapData(null);
     setSelectedNode(null);
     setErrorMessage("");
+    setInspectorView("decision");
   }
 
   function changeResearchIntent(intent) {
@@ -1262,6 +1287,7 @@ function MindMapWorkspace() {
     setMapData(null);
     setSelectedNode(null);
     setErrorMessage("");
+    setInspectorView("decision");
   }
 
   async function buildMindMap(event) {
@@ -1301,6 +1327,8 @@ function MindMapWorkspace() {
       };
       setMapData(nextMap);
       setSelectedNode(normalizedRoot);
+      setIsQuestionEditing(false);
+      setInspectorView("decision");
       window.requestAnimationFrame(() => {
         mapPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       });
@@ -1353,15 +1381,6 @@ function MindMapWorkspace() {
     };
   }, [mapData, researchIntent]);
 
-  const selectedNodeSignal = useMemo(() => {
-    if (!selectedNode) return null;
-    const recent = Number(selectedNode.recentPaperCount) || 0;
-    const previous = Number(selectedNode.previousPaperCount) || 0;
-    const delta = recent - previous;
-    const percent = previous > 0 ? Math.round((delta / previous) * 100) : null;
-    return { delta, percent };
-  }, [selectedNode]);
-
   const selectedNodeAssessment = useMemo(
     () => selectedNode ? assessMindMapNode(selectedNode) : null,
     [selectedNode],
@@ -1404,6 +1423,11 @@ function MindMapWorkspace() {
     window.requestAnimationFrame(() => rootSelectRef.current?.focus());
   }
 
+  function inspectOpportunityNode(node) {
+    setSelectedNode(node);
+    setInspectorView("decision");
+  }
+
   return (
     <div className="research-mind-shell">
       <section className="research-mind-brief research-mind-command" aria-label="Research opportunity workflow">
@@ -1434,16 +1458,23 @@ function MindMapWorkspace() {
 
         <p className="research-builder-intro">Tell the workspace what decision you are trying to make, then anchor it to one indexed concept.</p>
 
-        <label className="research-map-field research-question-field">
-          <span>Research question</span>
-          <textarea
-            value={researchQuestion}
-            onChange={(event) => setResearchQuestion(event.target.value)}
-            placeholder="Example: Which directions around graph optimization show new activity and enough evidence to investigate?"
-            rows="4"
-          />
-          <small>{researchQuestion.trim() ? "This question will stay attached to the evidence map." : "Optional — the workspace will frame a default question from your selected root."}</small>
-        </label>
+        {mapData && !isQuestionEditing ? (
+          <div className="research-question-summary">
+            <div><small>Research question</small><strong>{mapData.question}</strong></div>
+            <button type="button" onClick={() => setIsQuestionEditing(true)}>Edit</button>
+          </div>
+        ) : (
+          <label className="research-map-field research-question-field">
+            <span>Research question</span>
+            <textarea
+              value={researchQuestion}
+              onChange={(event) => setResearchQuestion(event.target.value)}
+              placeholder="Example: Which directions show new activity and enough evidence to investigate?"
+              rows="2"
+            />
+            <small>{researchQuestion.trim() ? "Attached to the next evidence map." : "Optional — a default question will be framed from the selected root."}</small>
+          </label>
+        )}
 
         <label className="research-map-field">
           <span>Decision goal</span>
@@ -1568,81 +1599,88 @@ function MindMapWorkspace() {
           <span className="research-panel-step">03</span>
         </div>
 
-        {mapIntegrity && (
-          <div className={`research-integrity-banner is-${mapIntegrity.level}`}>
-            {mapIntegrity.level === "ready" ? <FiCheck /> : <FiActivity />}
-            <div><strong>{mapIntegrity.title}</strong><p>{mapIntegrity.message}</p></div>
-          </div>
-        )}
-
-        {selectedNode ? (
-          <>
-            <article className={`research-node-detail trend-${String(selectedNode.trendStatus || "no_data").toLowerCase()}`}>
-              <div className="research-node-detail-type">
-                <i>{normalizeMapType(selectedNode.type) === "TOPIC" ? <FiTag /> : normalizeMapType(selectedNode.type) === "JOURNAL" ? <FiBookOpen /> : <FiHash />}</i>
-                <span>{selectedNode.type}</span>
-              </div>
-              <h4>{selectedNode.label}</h4>
-              <div className="research-node-trend"><TrendStatusIcon status={selectedNode.trendStatus} /><strong>{selectedNodeAssessment?.signal.label}</strong></div>
-            </article>
-            <div className={`research-signal-explanation is-${selectedNodeAssessment?.signal.key || "insufficient"}`}>
-              <small>What the catalog supports</small>
-              <strong>{selectedNodeAssessment?.signal.label}</strong>
-              <p>{selectedNodeAssessment?.signal.reason}</p>
-            </div>
-            <dl className="research-node-metrics">
-              <div><dt>Direct papers</dt><dd>{formatNumber(selectedNode.paperCount)}</dd></div>
-              <div><dt>Recent 5 years</dt><dd>{formatNumber(selectedNode.recentPaperCount)}</dd></div>
-              <div><dt>Previous 5 years</dt><dd>{formatNumber(selectedNode.previousPaperCount)}</dd></div>
-            </dl>
-            <div className={`research-node-momentum ${selectedNodeSignal?.delta < 0 ? "is-negative" : selectedNodeSignal?.delta > 0 ? "is-positive" : ""}`}>
-              <span>{selectedNodeSignal?.delta < 0 ? <FiTrendingDown /> : <FiTrendingUp />}</span>
-              <div><small>Publication change</small><strong>{selectedNodeSignal?.delta > 0 ? "+" : ""}{formatNumber(selectedNodeSignal?.delta || 0)} papers {selectedNodeSignal?.percent !== null ? `· ${selectedNodeSignal.percent > 0 ? "+" : ""}${selectedNodeSignal.percent}%` : ""}</strong></div>
-            </div>
-            <div className={`research-evidence-strength is-${selectedNodeAssessment?.evidence.key || "none"}`}>
-              <div><small>Evidence strength</small><strong>{selectedNodeAssessment?.evidence.label}</strong></div>
-              <p>{selectedNodeAssessment?.evidence.detail}</p>
-            </div>
-            <Link className="research-inspector-action" to={selectedNodeExplorePath}>Open the supporting paper set <FiArrowRight /></Link>
-            <p className="research-signal-disclaimer"><FiActivity />This is a catalog signal, not a verified claim of novelty or a proven research gap.</p>
-          </>
-        ) : (
-          <div className="research-inspector-empty">
-            <FiActivity />
-            <strong>Select a signal to test whether it is worth pursuing</strong>
-            <p>The decision brief separates direct evidence from interpretation and limitation.</p>
-            <ul>
-              <li>direct catalog coverage</li>
-              <li>two verified 5-year windows</li>
-              <li>paper set for manual validation</li>
-            </ul>
-          </div>
-        )}
-
-        {mapData && mapInsights.candidates.length > 0 && (
-          <div className="research-opportunity-shortlist">
-            <div><small>Signal shortlist</small><strong>{mapData.intentLabel}</strong></div>
-            <ol>
-              {mapInsights.candidates.map(({ node, assessment }, index) => (
-                <li key={getMapNodeIdentity(node)}>
-                  <button type="button" onClick={() => setSelectedNode(node)}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    <div><strong>{node.label}</strong><small>{assessment.signal.label} · {formatNumber(node.paperCount)} papers</small></div>
-                    <FiArrowRight />
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </div>
-        )}
-
         {mapData && (
-          <div className="research-map-summary research-landscape-summary">
-            <h4>Landscape coverage</h4>
-            <div><span>Signals with evidence</span><strong>{mapInsights.evidencedNodes}/{mapInsights.relatedNodes}</strong></div>
-            <div><span>Growing or new activity</span><strong>{mapInsights.growingNodes}</strong></div>
-            <div><span>Topics / keywords</span><strong>{mapInsights.topics} / {mapInsights.keywords}</strong></div>
-            <div><span>Journal contexts</span><strong>{mapInsights.journals}</strong></div>
+          <div className="research-inspector-tabs" aria-label="Decision brief views">
+            <button type="button" className={inspectorView === "decision" ? "active" : ""} onClick={() => setInspectorView("decision")}>Decision</button>
+            <button type="button" className={inspectorView === "shortlist" ? "active" : ""} onClick={() => setInspectorView("shortlist")}>Shortlist</button>
+            <button type="button" className={inspectorView === "coverage" ? "active" : ""} onClick={() => setInspectorView("coverage")}>Coverage</button>
+          </div>
+        )}
+
+        {inspectorView === "decision" && (
+          <div className="research-inspector-view">
+            {selectedNode ? (
+              <>
+                <article className={`research-node-detail trend-${String(selectedNode.trendStatus || "no_data").toLowerCase()}`}>
+                  <div className="research-node-detail-type">
+                    <i>{normalizeMapType(selectedNode.type) === "TOPIC" ? <FiTag /> : normalizeMapType(selectedNode.type) === "JOURNAL" ? <FiBookOpen /> : <FiHash />}</i>
+                    <span>{selectedNode.type}</span>
+                  </div>
+                  <h4>{selectedNode.label}</h4>
+                  <div className="research-node-trend"><TrendStatusIcon status={selectedNode.trendStatus} /><strong>{selectedNodeAssessment?.signal.label}</strong></div>
+                </article>
+                <div className={`research-signal-explanation is-${selectedNodeAssessment?.signal.key || "insufficient"}`}>
+                  <small>What the catalog supports</small>
+                  <strong>{selectedNodeAssessment?.signal.label}</strong>
+                  <p>{selectedNodeAssessment?.signal.reason}</p>
+                </div>
+                <dl className="research-node-metrics research-node-metrics-compact">
+                  <div><dt>Direct</dt><dd>{formatNumber(selectedNode.paperCount)}</dd></div>
+                  <div><dt>Recent</dt><dd>{formatNumber(selectedNode.recentPaperCount)}</dd></div>
+                  <div><dt>Previous</dt><dd>{formatNumber(selectedNode.previousPaperCount)}</dd></div>
+                </dl>
+                <div className={`research-evidence-strength is-${selectedNodeAssessment?.evidence.key || "none"}`}>
+                  <div><small>Evidence strength</small><strong>{selectedNodeAssessment?.evidence.label}</strong></div>
+                  <p>{selectedNodeAssessment?.evidence.detail}</p>
+                </div>
+                <Link className="research-inspector-action" to={selectedNodeExplorePath}>Open supporting papers <FiArrowRight /></Link>
+                <p className="research-signal-disclaimer"><FiActivity />Catalog signal only — not a verified novelty or research-gap claim.</p>
+              </>
+            ) : (
+              <div className="research-inspector-empty">
+                <FiActivity />
+                <strong>Select a signal to test whether it is worth pursuing</strong>
+                <p>The decision brief separates evidence from interpretation.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {inspectorView === "shortlist" && mapData && (
+          <div className="research-inspector-view research-opportunity-shortlist is-tab-view">
+            <div><small>Signal shortlist</small><strong>{mapData.intentLabel}</strong></div>
+            {mapInsights.candidates.length > 0 ? (
+              <ol>
+                {mapInsights.candidates.map(({ node, assessment }, index) => (
+                  <li key={getMapNodeIdentity(node)}>
+                    <button type="button" onClick={() => inspectOpportunityNode(node)}>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <div><strong>{node.label}</strong><small>{assessment.signal.label} · {formatNumber(node.paperCount)} papers</small></div>
+                      <FiArrowRight />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            ) : <div className="research-empty-inline">No evidence-backed candidate is available for this scope.</div>}
+          </div>
+        )}
+
+        {inspectorView === "coverage" && mapData && (
+          <div className="research-inspector-view">
+            {mapIntegrity && (
+              <div className={`research-integrity-banner is-${mapIntegrity.level}`}>
+                {mapIntegrity.level === "ready" ? <FiCheck /> : <FiActivity />}
+                <div><strong>{mapIntegrity.title}</strong><p>{mapIntegrity.message}</p></div>
+              </div>
+            )}
+            <div className="research-map-summary research-landscape-summary">
+              <h4>Landscape coverage</h4>
+              <div><span>Signals with evidence</span><strong>{mapInsights.evidencedNodes}/{mapInsights.relatedNodes}</strong></div>
+              <div><span>Growing or new activity</span><strong>{mapInsights.growingNodes}</strong></div>
+              <div><span>Topics / keywords</span><strong>{mapInsights.topics} / {mapInsights.keywords}</strong></div>
+              <div><span>Journal contexts</span><strong>{mapInsights.journals}</strong></div>
+            </div>
+            <p className="research-signal-disclaimer"><FiActivity />Coverage describes this catalog only and must be validated against the paper set.</p>
           </div>
         )}
       </aside>

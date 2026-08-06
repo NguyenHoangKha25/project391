@@ -4148,3 +4148,146 @@ html body .st-layout .research-lab-v2 .research-map-canvas svg {
     min-height: 520px;
   }
 }
+
+/* Static cockpit: progressive disclosure keeps every tool without long panels. */
+.research-question-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 11px;
+  padding: 10px 11px;
+  border: 1px solid rgba(79, 70, 229, 0.14);
+  border-radius: 13px;
+  background: linear-gradient(120deg, #f1f4ff, #effbfb);
+}
+
+.research-question-summary > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.research-question-summary small { color: #6b73d8; font-size: 7.5px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.research-question-summary strong { display: -webkit-box; overflow: hidden; color: #2a3650; font-size: 9px; line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.research-question-summary button { min-height: 30px; padding: 0 9px; border: 1px solid rgba(79, 70, 229, 0.16); border-radius: 9px; color: #4f46e5; background: #fff; font-size: 8px; font-weight: 850; cursor: pointer; }
+
+.research-inspector-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  margin-bottom: 12px;
+  padding: 3px;
+  border: 1px solid #dfe6f1;
+  border-radius: 11px;
+  background: #f2f5f9;
+}
+
+.research-inspector-tabs button {
+  min-width: 0;
+  min-height: 32px;
+  padding: 0 5px;
+  border: 0;
+  border-radius: 8px;
+  color: #78859a;
+  background: transparent;
+  font-size: 8px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.research-inspector-tabs button.active {
+  color: #4338ca;
+  background: #fff;
+  box-shadow: 0 5px 13px rgba(48, 61, 103, 0.1);
+}
+
+.research-inspector-view {
+  animation: st-rise 170ms var(--ease-out) both;
+}
+
+.research-node-metrics-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.research-node-metrics-compact > div {
+  min-width: 0;
+  padding: 9px 6px;
+  border: 1px solid #e0e6f0;
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+}
+
+.research-node-metrics-compact dt { font-size: 7px; }
+.research-node-metrics-compact dd { margin-top: 3px; font-size: 12px; }
+.research-opportunity-shortlist.is-tab-view { margin-top: 0; padding-top: 0; border-top: 0; }
+
+html body .st-layout .research-lab-v2 .research-map-explorer.is-fit-mode .research-map-canvas {
+  height: clamp(570px, 64vh, 680px);
+  min-height: 570px;
+  overflow: hidden;
+  padding: 10px;
+}
+
+html body .st-layout .research-lab-v2 .research-map-explorer.is-fit-mode .research-map-canvas svg {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  margin: auto;
+}
+
+.research-map-explorer.is-focus-mode {
+  position: fixed;
+  z-index: 5000;
+  inset: 16px;
+  min-width: 0;
+  min-height: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(151, 171, 214, 0.64);
+  border-radius: 22px;
+  background: #f8fbff;
+  box-shadow: 0 34px 100px rgba(11, 20, 49, 0.42);
+}
+
+.research-map-explorer.is-focus-mode::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background: rgba(8, 15, 34, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+html body .st-layout .research-lab-v2 .research-map-explorer.is-focus-mode .research-map-toolbar {
+  flex: 0 0 auto;
+}
+
+html body .st-layout .research-lab-v2 .research-map-explorer.is-focus-mode .research-map-canvas {
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 18px;
+  scrollbar-width: thin;
+}
+
+html body .st-layout .research-lab-v2 .research-map-explorer.is-focus-mode .research-map-canvas::-webkit-scrollbar {
+  display: block;
+  width: 8px;
+  height: 8px;
+}
+
+html body .st-layout .research-lab-v2 .research-map-explorer.is-focus-mode .research-map-canvas::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(83, 97, 145, 0.32);
+}
+
+.research-map-explorer.is-focus-mode .research-map-legend {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 700px) {
+  html body .st-layout .research-lab-v2 .research-map-explorer.is-fit-mode .research-map-canvas {
+    height: 500px;
+    min-height: 500px;
+  }
+  .research-map-explorer.is-focus-mode { inset: 6px; border-radius: 16px; }
+}
