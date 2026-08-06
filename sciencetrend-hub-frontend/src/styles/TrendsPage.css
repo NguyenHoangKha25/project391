@@ -454,24 +454,12 @@
 
 .multi-line-legend-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   margin-bottom: 14px;
 }
 
-@media (max-width: 900px) {
-  .multi-line-legend-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .multi-line-legend-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .multi-line-legend-container {
     grid-template-columns: 1fr;
   }
