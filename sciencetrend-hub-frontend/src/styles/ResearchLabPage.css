@@ -4612,6 +4612,17 @@ html body .st-layout .research-lab-v2 .research-map-insights {
   overflow: visible !important;
 }
 
+/* Keep the release accent clear of rounded corners when these panels allow
+   visible overflow for the page-owned scrolling layout. */
+html body .st-layout .research-lab-v2 .research-map-builder::before,
+html body .st-layout .research-lab-v2 .research-map-insights::before {
+  left: 18px !important;
+  right: 18px !important;
+  width: auto !important;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
 html body .st-layout .research-lab-v2 .research-map-canvas {
   max-width: 100%;
   overflow-x: hidden !important;
