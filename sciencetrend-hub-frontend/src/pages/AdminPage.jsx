@@ -57,7 +57,7 @@ function AdminPage() {
   const [userSearch, setUserSearch] = useState("");
   const [fromYear, setFromYear] = useState(String(DEFAULT_BACKFILL_FROM_YEAR));
   const [toYear, setToYear] = useState(String(CURRENT_YEAR));
-  const [maxResults, setMaxResults] = useState("500");
+  const [maxResults, setMaxResults] = useState("20000");
   const [backfillError, setBackfillError] = useState("");
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState("");
@@ -177,8 +177,8 @@ function AdminPage() {
       setBackfillError("The start year cannot be later than the end year.");
       return;
     }
-    if (!Number.isInteger(parsedMaxResults) || parsedMaxResults < 1 || parsedMaxResults > 5000) {
-      setBackfillError("Maximum papers must be between 1 and 5,000.");
+    if (!Number.isInteger(parsedMaxResults) || parsedMaxResults < 1 || parsedMaxResults > 50000) {
+      setBackfillError("Maximum papers must be between 1 and 50,000.");
       return;
     }
 
@@ -261,7 +261,7 @@ function AdminPage() {
                       <span className="admin-year-separator" aria-hidden="true">to</span>
                       <label htmlFor="backfill-to-year">To year<input id="backfill-to-year" type="number" min="1900" max={CURRENT_YEAR} value={toYear} onChange={(event) => { setToYear(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                       <span className="admin-year-separator" aria-hidden="true">·</span>
-                      <label htmlFor="backfill-max-results">Max papers<input id="backfill-max-results" type="number" min="1" max="5000" value={maxResults} onChange={(event) => { setMaxResults(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
+                      <label htmlFor="backfill-max-results">Max papers<input id="backfill-max-results" type="number" min="1" max="50000" value={maxResults} onChange={(event) => { setMaxResults(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                     </div>
                     <button className="workspace-button primary admin-backfill-submit" type="submit" disabled={working === "backfill"}>{working === "backfill" ? <><FiRefreshCw className="is-spinning" /> Starting backfill…</> : <><FiDownload /> Start backfill</>}</button>
                     {backfillError && <p className="admin-backfill-error" role="alert"><FiAlertTriangle /> {backfillError}</p>}
