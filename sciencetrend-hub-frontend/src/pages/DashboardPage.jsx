@@ -16,6 +16,10 @@ import {
   FiTrendingDown,
   FiMinus,
   FiGitBranch,
+  FiAward,
+  FiClock,
+  FiTarget,
+  FiZap,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
@@ -251,7 +255,8 @@ function DashboardPage() {
         change: "Current",
         trendText: "catalog total",
         trendType: "neutral",
-        themeClass: "kpi-theme-emerald"
+        themeClass: "kpi-theme-emerald",
+        to: "/papers",
       },
       {
         title: "Journals",
@@ -260,7 +265,8 @@ function DashboardPage() {
         change: "Current",
         trendText: "catalog total",
         trendType: "neutral",
-        themeClass: "kpi-theme-indigo"
+        themeClass: "kpi-theme-indigo",
+        to: "/journals",
       },
       {
         title: "Keywords",
@@ -269,7 +275,8 @@ function DashboardPage() {
         change: "Current",
         trendText: "catalog total",
         trendType: "neutral",
-        themeClass: "kpi-theme-purple"
+        themeClass: "kpi-theme-purple",
+        to: "/keywords",
       },
       {
         title: "Topics",
@@ -278,7 +285,8 @@ function DashboardPage() {
         change: "Current",
         trendText: "catalog total",
         trendType: "neutral",
-        themeClass: "kpi-theme-amber"
+        themeClass: "kpi-theme-amber",
+        to: "/topics",
       }
     ];
 
@@ -295,7 +303,8 @@ function DashboardPage() {
           change: "Impact",
           trendText: "catalog citations",
           trendType: "neutral",
-          themeClass: "kpi-theme-indigo"
+          themeClass: "kpi-theme-indigo",
+          to: "/papers",
         },
         {
           title: "Avg Citations / Paper",
@@ -304,7 +313,8 @@ function DashboardPage() {
           change: "Average",
           trendText: "per publication",
           trendType: "neutral",
-          themeClass: "kpi-theme-purple"
+          themeClass: "kpi-theme-purple",
+          to: "/papers",
         },
         {
           title: "Publication Growth",
@@ -313,7 +323,8 @@ function DashboardPage() {
           change: growthRate > 0 ? "Growing" : growthRate < 0 ? "Declining" : "Stable",
           trendText: `${previousYear} to ${latestYear}`,
           trendType: growthRate > 0 ? "positive" : growthRate < 0 ? "negative" : "neutral",
-          themeClass: growthRate < 0 ? "kpi-theme-rose" : "kpi-theme-emerald"
+          themeClass: growthRate < 0 ? "kpi-theme-rose" : "kpi-theme-emerald",
+          to: "/trends",
         },
         {
           title: "High-Impact Papers",
@@ -322,7 +333,8 @@ function DashboardPage() {
           change: "Cited",
           trendText: "high-impact records",
           trendType: "neutral",
-          themeClass: "kpi-theme-amber"
+          themeClass: "kpi-theme-amber",
+          to: "/papers",
         },
       );
     }
@@ -473,6 +485,53 @@ function DashboardPage() {
   const latestPublication = papersByYear.at(-1) ?? null;
   const leadingJournal = topJournals[0] ?? null;
   const leadingTopic = trendingTopics[0] ?? null;
+  const leadingKeyword = topKeywords[0] ?? null;
+  const roleWorkspaceLabel = normalizedRole === "ADMIN"
+    ? "Admin research intelligence"
+    : normalizedRole === "RESEARCHER"
+      ? "Researcher intelligence workspace"
+      : normalizedRole === "LECTURER"
+        ? "Lecturer evidence workspace"
+        : "Research discovery workspace";
+  const briefingAction = canUseAnalytics
+    ? { label: "Open Research Lab", to: "/research-lab" }
+    : { label: "Explore Papers", to: "/papers" };
+  const researchBriefs = [
+    {
+      label: "Publication momentum",
+      title: latestPublication
+        ? `${latestPublication.label}: ${formatNumber(latestPublication.value)} indexed papers`
+        : "Yearly publication activity is awaiting data",
+      description: activitySummary
+        ? `Peak activity was ${activitySummary.peak.label} with ${formatNumber(activitySummary.peak.value)} publications.`
+        : "Refresh the catalog to surface publication momentum.",
+      icon: FiTrendingUp,
+      tone: "cyan",
+      to: latestPublication ? `/papers?yearFrom=${latestPublication.label}&yearTo=${latestPublication.label}` : "/papers",
+    },
+    {
+      label: "Journal concentration",
+      title: leadingJournal?.label || "No leading journal is available yet",
+      description: leadingJournal
+        ? `${formatNumber(leadingJournal.value)} indexed papers in the catalog's leading source.`
+        : "Journal coverage will appear after publications are indexed.",
+      icon: FiBookOpen,
+      tone: "violet",
+      to: "/journals",
+    },
+    {
+      label: "Discovery signal",
+      title: leadingTopic?.name || leadingKeyword?.label || "No emerging signal detected yet",
+      description: leadingTopic
+        ? "The strongest topic signal currently available for deeper exploration."
+        : leadingKeyword
+          ? `${formatNumber(leadingKeyword.value)} papers share this recurring keyword.`
+          : "Follow topics and keywords to build a discovery signal.",
+      icon: FiTarget,
+      tone: "amber",
+      to: leadingTopic ? "/topics" : "/keywords",
+    },
+  ];
 
   function renderMetricCard(stat, variant = "primary") {
     const Icon = stat.icon;
@@ -482,11 +541,14 @@ function DashboardPage() {
         ? FiTrendingDown
         : FiTrendingUp;
 
+    const MetricCard = stat.to ? Link : "article";
+
     return (
-      <article
+      <MetricCard
         key={stat.title}
         className={`db-kpi-card db-kpi-card--${variant} ${stat.themeClass || ""}`}
         aria-label={`${stat.title}: ${stat.value}`}
+        {...(stat.to ? { to: stat.to } : {})}
       >
         <div className="db-kpi-card-header">
           <span className="db-kpi-label">{stat.title}</span>
@@ -501,8 +563,9 @@ function DashboardPage() {
             {stat.change}
           </span>
           <span className="db-kpi-comparison">{stat.trendText}</span>
+          {stat.to && <FiArrowUpRight className="db-kpi-open" aria-hidden="true" />}
         </div>
-      </article>
+      </MetricCard>
     );
   }
 
@@ -519,13 +582,17 @@ function DashboardPage() {
 
   return (
     <MainLayout title="Dashboard" subtitle={dashboardSubtitle}>
-      <div className="premium-dashboard">
+      <div className="premium-dashboard dashboard-v5">
 
         <section className="db-v4-hero" aria-labelledby="dashboard-control-title">
           <div className="db-v4-hero-copy">
             <span className="db-v4-eyebrow"><FiActivity /> Research command center</span>
-            <h2 id="dashboard-control-title">See what matters in your research catalog.</h2>
-            <p>Move from catalog coverage to publication momentum, impact, and the next workspace action without digging through separate pages.</p>
+            <h2 id="dashboard-control-title">Turn catalog signals into your next research move.</h2>
+            <p>Track publication momentum, identify high-impact evidence, and move directly into the tools that support your next decision.</p>
+            <div className="db-v5-context-row" aria-label="Workspace context">
+              <span><FiCheckCircle /> {roleWorkspaceLabel}</span>
+              <span><FiActivity /> Live evidence signals</span>
+            </div>
             <div className="db-v4-hero-actions" aria-label="Workspace shortcuts">
               {quickActions.map(({ label, to, icon: Icon }, index) => (
                 <Link key={label} to={to} className={index === 0 ? "is-primary" : ""}>
@@ -558,7 +625,7 @@ function DashboardPage() {
                 <i />
                 {hasDashboardData(data) ? "Live catalog" : "Awaiting data"}
               </span>
-              <small className="vn-clock-badge" title="Live Vietnam Time (ICT UTC+7)">🇻🇳 ICT: {vietnamClock}</small>
+              <small className="vn-clock-badge" title="Live Vietnam Time (ICT UTC+7)"><FiClock /> ICT {vietnamClock}</small>
             </div>
             <div className="db-v4-snapshot-total">
               <span>Indexed papers</span>
@@ -588,6 +655,34 @@ function DashboardPage() {
               <span>{spinning ? "Refreshing data..." : "Refresh catalog data"}</span>
             </button>
           </aside>
+        </section>
+
+        <section className="db-research-briefing" aria-labelledby="research-briefing-title">
+          <header className="db-briefing-header">
+            <div className="db-briefing-heading">
+              <span><FiZap aria-hidden="true" /></span>
+              <div>
+                <small>Research briefing</small>
+                <h2 id="research-briefing-title">Three signals worth your attention</h2>
+              </div>
+            </div>
+            <Link to={briefingAction.to} className="db-briefing-action">
+              {briefingAction.label} <FiArrowUpRight aria-hidden="true" />
+            </Link>
+          </header>
+          <div className="db-briefing-grid">
+            {researchBriefs.map(({ label, title, description, icon: Icon, tone, to }) => (
+              <Link key={label} to={to} className={`db-brief-card is-${tone}`}>
+                <span className="db-brief-icon"><Icon aria-hidden="true" /></span>
+                <div>
+                  <small>{label}</small>
+                  <strong>{title}</strong>
+                  <p>{description}</p>
+                </div>
+                <FiArrowUpRight className="db-brief-open" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
         </section>
 
         {errorMessage && (
@@ -633,7 +728,7 @@ function DashboardPage() {
                 </p>
               </div>
               <div className="spotlight-metrics">
-                <span className="cit-badge">🔥 {formatNumber(featuredPaper.citationCount ?? 0)} Citations</span>
+                <span className="cit-badge"><FiAward /> {formatNumber(featuredPaper.citationCount ?? 0)} Citations</span>
                 <Link to="/papers" className="spotlight-btn">
                   Explore Papers <FiArrowUpRight />
                 </Link>
