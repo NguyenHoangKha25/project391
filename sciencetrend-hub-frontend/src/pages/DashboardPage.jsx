@@ -23,20 +23,13 @@ import {
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
-import {
-  getDashboardHome,
-  getDashboardOverview,
-  getDashboardAnalytics,
-  getDashboardOperations,
-} from "../services/dashboardService";
-import { getTrendingTopics } from "../services/trendService";
+import { getDashboardHome } from "../services/dashboardService";
 import {
   formatDateTime,
   formatRelativeTime,
   formatNumber,
   normalizeDashboardHome,
   normalizeTopic,
-  toArray,
 } from "../utils/apiData";
 
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
@@ -50,11 +43,12 @@ const DONUT_THEMES = [
   { color: "#ec4899", bgColor: "#fdf2f8", textColor: "#be185d" },
 ];
 
-function getDashboardCacheKeys(user = {}) {
+function getDashboardCacheKeys(user = {}, role = "STUDENT") {
   const userId = user.id ?? user.userId ?? user.username ?? "anon";
+  const roleKey = String(role || "STUDENT").toUpperCase();
   return {
-    overview: `dashboard_overview_v4_${userId}`,
-    topics: `dashboard_trending_topics_v3_${userId}`,
+    overview: `dashboard_overview_v5_${roleKey}_${userId}`,
+    topics: `dashboard_trending_topics_v4_${roleKey}_${userId}`,
   };
 }
 
@@ -108,17 +102,31 @@ function formatAxisValue(value) {
 function DashboardPage() {
   const { user, role } = useAuth();
   const normalizedRole = String(role || user?.role || "STUDENT").toUpperCase();
-  const canUseAnalytics = ["LECTURER", "RESEARCHER", "ADMIN"].includes(normalizedRole);
-  const isAdmin = normalizedRole === "ADMIN";
-  const cacheKeys = useMemo(() => getDashboardCacheKeys(user), [user]);
+  const cacheKeys = useMemo(() => getDashboardCacheKeys(user, normalizedRole), [normalizedRole, user]);
   const [initialData] = useState(() => getInitialDashboardData(cacheKeys));
   const [data, setData] = useState(initialData.overview);
   const [trendingTopics, setTrendingTopics] = useState(initialData.topics);
   const [analyticsData, setAnalyticsData] = useState(null);
   const [operationsData, setOperationsData] = useState(null);
+  const [capabilitiesData, setCapabilitiesData] = useState(null);
   const [loading, setLoading] = useState(!initialData.overview && initialData.topics.length === 0);
   const [spinning, setSpinning] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const canUseAnalytics = capabilitiesData?.canViewResearchAnalytics
+    ?? ["LECTURER", "RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const canManageSystem = capabilitiesData?.canManageSystem ?? normalizedRole === "ADMIN";
+  const canComparePapers = capabilitiesData?.canComparePapers
+    ?? ["RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const canCompareTrends = capabilitiesData?.canCompareTrends
+    ?? ["RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const canGenerateBasicReport = capabilitiesData?.canGenerateBasicReport
+    ?? ["LECTURER", "RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const canGenerateAdvancedReport = capabilitiesData?.canGenerateAdvancedReport
+    ?? ["RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const mindMapAccess = String(
+    capabilitiesData?.mindMapAccess
+      ?? (normalizedRole === "LECTURER" ? "BASIC" : ["RESEARCHER", "ADMIN"].includes(normalizedRole) ? "FULL" : "NONE"),
+  ).toUpperCase();
 
   const [vietnamClock, setVietnamClock] = useState(() => {
     return new Intl.DateTimeFormat("en-US", {
@@ -163,74 +171,35 @@ function DashboardPage() {
       else if (!hasCachedData) setLoading(true);
       setErrorMessage("");
 
-      // 1. Primary unified dashboard call: GET /dashboard/home
-      let homeData = null;
-      try {
-        const homeRes = await getDashboardHome();
-        homeData = normalizeDashboardHome(homeRes);
-      } catch {
-        // Fallback call: GET /dashboard/summary (accessible by Student, Lecturer, Researcher, Admin)
-        try {
-          const summaryRes = await getDashboardOverview();
-          homeData = normalizeDashboardHome({ overview: summaryRes });
-        } catch {
-          homeData = null;
-        }
-      }
+      // One role-aware contract supplies overview, analytics, operations and capabilities.
+      const homeRes = await getDashboardHome();
+      const homeData = normalizeDashboardHome(homeRes);
 
       if (homeData && homeData.overview) {
         setData(homeData.overview);
         setPersistentCachedData(cacheKeys.overview, homeData.overview);
         setErrorMessage("");
-
-        if (homeData.analytics) setAnalyticsData(homeData.analytics);
-        if (homeData.operations) setOperationsData(homeData.operations);
       }
+      setAnalyticsData(homeData.analytics);
+      setOperationsData(homeData.operations);
+      setCapabilitiesData(homeData.capabilities);
 
-      // 2. Fetch specific role-gated endpoints if not supplied in home
-      if (canUseAnalytics && (!homeData || !homeData.analytics)) {
-        try {
-          const analyticsRes = await getDashboardAnalytics();
-          if (analyticsRes) setAnalyticsData(analyticsRes);
-        } catch {
-          // silent fallback for analytics
-        }
-      }
-
-      if (isAdmin && (!homeData || !homeData.operations)) {
-        try {
-          const opsRes = await getDashboardOperations();
-          if (opsRes) setOperationsData(opsRes);
-        } catch {
-          // silent fallback for operations
-        }
-      }
-
-      // 3. Fetch trending topics for roles that have access
-      if (canUseAnalytics) {
-        try {
-          const topicsRes = await getTrendingTopics({ limit: 3 });
-          const normTopics = toArray(topicsRes)
-            .map(normalizeTopic)
-            .filter((t) => t.name !== "Untitled topic");
-          if (normTopics.length > 0) {
-            setTrendingTopics(normTopics);
-            setPersistentCachedData(cacheKeys.topics, normTopics);
-          }
-        } catch {
-          // silent fallback for trending topics
-        }
-      }
+      const normTopics = (homeData.analytics?.topTrendingTopics || [])
+        .map(normalizeTopic)
+        .filter((topic) => topic.name !== "Untitled topic")
+        .slice(0, 3);
+      setTrendingTopics(normTopics);
+      setPersistentCachedData(cacheKeys.topics, normTopics);
     } catch (error) {
       console.error("Cannot load dashboard", error);
-      if (!hasCachedData && !data) {
+      if (!hasCachedData) {
         setErrorMessage("Couldn't load dashboard data. Please verify your connection.");
       }
     } finally {
       setLoading(false);
       setSpinning(false);
     }
-  }, [cacheKeys, canUseAnalytics, isAdmin, data]);
+  }, [cacheKeys]);
 
   useEffect(() => {
     loadDashboard();
@@ -452,33 +421,23 @@ function DashboardPage() {
   }, [papersByYear]);
 
   const quickActions = useMemo(() => {
-    if (normalizedRole === "LECTURER") {
-      return [
-        { label: "Generate Report", to: "/reports", icon: FiFileText },
-        { label: "Browse Papers", to: "/papers", icon: FiBookOpen },
-        { label: "Compare Trends", to: "/trends", icon: FiTrendingUp },
-      ];
+    const actions = [];
+    if (canManageSystem) actions.push({ label: "Admin Panel", to: "/admin", icon: FiDatabase });
+    if (canComparePapers) actions.push({ label: "Compare Papers", to: "/research-lab", icon: FiGitBranch });
+    if (mindMapAccess === "BASIC" || mindMapAccess === "FULL") {
+      actions.push({ label: `Mind Map ${mindMapAccess === "BASIC" ? "Basic" : "Full"}`, to: "/research-lab", icon: FiGitBranch });
     }
-    if (normalizedRole === "RESEARCHER") {
-      return [
-        { label: "Research Lab", to: "/research-lab", icon: FiGitBranch },
-        { label: "Advanced Report", to: "/reports", icon: FiFileText },
-        { label: "Compare Trends", to: "/trends", icon: FiTrendingUp },
-      ];
-    }
-    if (normalizedRole === "ADMIN") {
-      return [
-        { label: "Admin Panel", to: "/admin", icon: FiDatabase },
-        { label: "Research Lab", to: "/research-lab", icon: FiGitBranch },
-        { label: "Browse Papers", to: "/papers", icon: FiBookOpen },
-      ];
-    }
+    if (canGenerateAdvancedReport) actions.push({ label: "Advanced Report", to: "/reports", icon: FiFileText });
+    else if (canGenerateBasicReport) actions.push({ label: "Generate Report", to: "/reports", icon: FiFileText });
+    if (canCompareTrends) actions.push({ label: "Compare Trends", to: "/trends", icon: FiTrendingUp });
+
+    if (actions.length > 0) return actions.slice(0, 4);
     return [
       { label: "Browse Papers", to: "/papers", icon: FiFileText },
       { label: "Explore Topics", to: "/topics", icon: FiTag },
       { label: "View Journals", to: "/journals", icon: FiBookOpen },
     ];
-  }, [normalizedRole]);
+  }, [canComparePapers, canCompareTrends, canGenerateAdvancedReport, canGenerateBasicReport, canManageSystem, mindMapAccess]);
 
   const primaryStats = dashboardStats.slice(0, 4);
   const supportingStats = dashboardStats.slice(4);
@@ -493,7 +452,7 @@ function DashboardPage() {
       : normalizedRole === "LECTURER"
         ? "Lecturer evidence workspace"
         : "Research discovery workspace";
-  const briefingAction = canUseAnalytics
+  const briefingAction = mindMapAccess === "BASIC" || mindMapAccess === "FULL"
     ? { label: "Open Research Lab", to: "/research-lab" }
     : { label: "Explore Papers", to: "/papers" };
   const researchBriefs = [
@@ -1074,7 +1033,7 @@ function DashboardPage() {
 
         </section>
 
-        {isAdmin && (
+        {canManageSystem && (
           <>
             <div className="db-section-intro db-section-intro-compact">
               <div>

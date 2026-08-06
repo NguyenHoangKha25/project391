@@ -34,3 +34,14 @@ export function getTrendByKeyword(keyword) {
 export function getTrendByTopic(topic) {
   return apiRequest("/trends/topic", { params: { topic } });
 }
+
+export function compareTrends({ type, items, fromYear, toYear }) {
+  return apiRequest("/trends/compare", {
+    params: {
+      type: String(type || "KEYWORD").toUpperCase(),
+      items,
+      ...(fromYear ? { fromYear } : {}),
+      ...(toYear ? { toYear } : {}),
+    },
+  });
+}

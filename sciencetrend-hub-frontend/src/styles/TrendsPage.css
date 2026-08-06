@@ -975,3 +975,58 @@
   font-weight: 750;
 }
 .trends-loading-notice .workspace-loading-spinner { width: 17px; height: 17px; border-width: 2px; }
+
+.trend-compare-picker {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 14px;
+  padding: 12px;
+  border: 1px solid rgba(79, 70, 229, 0.14);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.85), rgba(236, 254, 255, 0.65));
+}
+
+.trend-compare-picker > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.trend-compare-picker > div:first-child span {
+  color: #536078;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trend-compare-picker > div:first-child strong {
+  color: #4338ca;
+  font-size: 10px;
+}
+
+.trend-compare-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.trend-compare-options button {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: 1px solid #d9e1ef;
+  border-radius: 999px;
+  color: #59657b;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 9px;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.trend-compare-options button:hover { border-color: rgba(79, 70, 229, 0.35); color: #4338ca; }
+.trend-compare-options button.is-selected { border-color: #4f46e5; color: #fff; background: linear-gradient(135deg, #4f46e5, #2563eb); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.18); }
+.trend-compare-options button svg { width: 12px; height: 12px; }

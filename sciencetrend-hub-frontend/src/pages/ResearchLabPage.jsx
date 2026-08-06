@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { Link } from "react-router-dom";
 import {
   FiActivity,
+  FiAlertCircle,
   FiArrowRight,
   FiBarChart2,
   FiBookOpen,
@@ -22,12 +23,14 @@ import {
   FiSearch,
   FiShare2,
   FiTag,
+  FiTarget,
   FiTrash2,
   FiTrendingDown,
   FiTrendingUp,
   FiZap,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
+import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
 import { comparePapers, getPapers } from "../services/paperService";
 import { getResearchMindMap } from "../services/researchService";
@@ -65,6 +68,24 @@ function stringList(value) {
   return value.map((item) => String(item || "").trim()).filter(Boolean);
 }
 
+function normalizeAbstractAnalysis(value = {}) {
+  const analysis = value && typeof value === "object" ? value : {};
+  const objectiveHighlights = stringList(analysis.objectiveHighlights ?? analysis.objective_highlights);
+  const problemHighlights = stringList(analysis.problemHighlights ?? analysis.problem_highlights);
+  const methodHighlights = stringList(analysis.methodHighlights ?? analysis.method_highlights);
+  const resultHighlights = stringList(analysis.resultHighlights ?? analysis.result_highlights);
+  const hasHighlights = [objectiveHighlights, problemHighlights, methodHighlights, resultHighlights]
+    .some((items) => items.length > 0);
+
+  return {
+    source: String(analysis.source || (hasHighlights ? "ABSTRACT_AVAILABLE" : "ABSTRACT_NOT_AVAILABLE")).toUpperCase(),
+    objectiveHighlights,
+    problemHighlights,
+    methodHighlights,
+    resultHighlights,
+  };
+}
+
 function formatSimilarity(value) {
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue)) return "0%";
@@ -88,6 +109,7 @@ function normalizeComparison(response = {}) {
           topics: stringList(rawPaper.topics),
           uniqueKeywords: stringList(item?.uniqueKeywords),
           uniqueTopics: stringList(item?.uniqueTopics),
+          abstractAnalysis: normalizeAbstractAnalysis(item?.abstractAnalysis),
         };
       })
     : [];
@@ -289,6 +311,59 @@ function MetadataChips({ items, emptyText }) {
   );
 }
 
+const ABSTRACT_HIGHLIGHT_GROUPS = [
+  { key: "objectiveHighlights", label: "Objective", icon: FiTarget },
+  { key: "problemHighlights", label: "Problem", icon: FiAlertCircle },
+  { key: "methodHighlights", label: "Method", icon: FiCompass },
+  { key: "resultHighlights", label: "Result", icon: FiCheck },
+];
+
+function AbstractAnalysisCard({ paper, index }) {
+  const analysis = paper.abstractAnalysis || normalizeAbstractAnalysis();
+  const isUnavailable = analysis.source === "ABSTRACT_NOT_AVAILABLE";
+
+  return (
+    <article className={`research-abstract-card tone-${index % 4}`}>
+      <header>
+        <div>
+          <span className="research-section-kicker">Rule-based abstract highlights</span>
+          <h3>{shortTitle(paper.title, 86)}</h3>
+        </div>
+        <span className={`research-abstract-source ${isUnavailable ? "is-unavailable" : ""}`}>
+          {isUnavailable ? "Abstract not available" : "Abstract available"}
+        </span>
+      </header>
+
+      {isUnavailable ? (
+        <div className="research-abstract-unavailable">
+          <FiAlertCircle />
+          <div>
+            <strong>Abstract not available</strong>
+            <p>The catalog does not contain an abstract for rule-based objective, problem, method and result extraction.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="research-abstract-groups">
+          {ABSTRACT_HIGHLIGHT_GROUPS.map(({ key, label, icon: Icon }) => {
+            const highlights = analysis[key];
+            return (
+              <section key={key}>
+                <h4><Icon /> {label}</h4>
+                {highlights.length > 0 ? (
+                  <ul>{highlights.map((highlight, highlightIndex) => <li key={`${key}-${highlightIndex}`}>{highlight}</li>)}</ul>
+                ) : (
+                  <p>No {label.toLowerCase()} sentence was detected by the abstract rules.</p>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      )}
+      <footer>Abstract highlights are explanatory only; keyword/topic Jaccard similarity remains unchanged.</footer>
+    </article>
+  );
+}
+
 function PaperComparisonResults({ comparison }) {
   const pairRows = comparison.similarities.map((similarity, index) => ({
     ...similarity,
@@ -383,6 +458,21 @@ function PaperComparisonResults({ comparison }) {
             <MetadataChips items={paper.uniqueTopics} emptyText="No unique topics." />
           </article>
         ))}
+      </section>
+
+      <section className="research-abstract-panel" aria-labelledby="abstract-analysis-title">
+        <div className="research-panel-heading">
+          <div>
+            <span className="research-section-kicker">Abstract evidence</span>
+            <h3 id="abstract-analysis-title">Objective, problem, method and result signals</h3>
+          </div>
+          <span>Rule-based · {comparison.papers.length} papers</span>
+        </div>
+        <div className="research-abstract-list">
+          {comparison.papers.map((paper, index) => (
+            <AbstractAnalysisCard key={paper.id} paper={paper} index={index} />
+          ))}
+        </div>
       </section>
 
       <section className="research-similarity-panel">
@@ -1758,18 +1848,28 @@ function MindMapWorkspace() {
 }
 
 function ResearchLabPage() {
-  const [activeTool, setActiveTool] = useState("compare");
+  const { role, user } = useAuth();
+  const normalizedRole = String(role || user?.role || "LECTURER").toUpperCase();
+  const canComparePapers = ["RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const mindMapAccess = canComparePapers ? "Full" : "Basic";
+  const [activeTool, setActiveTool] = useState(() => (canComparePapers ? "compare" : "mind-map"));
+
+  useEffect(() => {
+    if (!canComparePapers && activeTool !== "mind-map") setActiveTool("mind-map");
+  }, [activeTool, canComparePapers]);
 
   return (
-    <MainLayout title="Research Lab" subtitle="Advanced evidence tools for researchers">
-      <section className="research-lab-page research-lab-v2">
+    <MainLayout title="Research Lab" subtitle={canComparePapers ? "Advanced evidence tools for researchers" : "Basic evidence mapping for lecturers"}>
+      <section className={`research-lab-page research-lab-v2 ${canComparePapers ? "is-full-access" : "is-basic-access"}`}>
         <header className="research-lab-hero">
           <div className="research-lab-hero-copy">
             <span className="research-lab-hero-icon"><FiGitBranch /></span>
             <div>
               <span>Research intelligence workspace</span>
-              <h2>Turn evidence into a clearer research direction.</h2>
-              <p>Compare a focused paper set or map the relationships around a concept, then move from catalog signals to your next defensible research decision.</p>
+              <h2>{canComparePapers ? "Turn evidence into a clearer research direction." : "Map the evidence around a research concept."}</h2>
+              <p>{canComparePapers
+                ? "Compare a focused paper set or map the relationships around a concept, then move from catalog signals to your next defensible research decision."
+                : "Start from a catalog keyword or topic, trace its strongest relationships and use the map to plan a focused reading path."}</p>
             </div>
           </div>
           <aside className="research-lab-hero-briefing">
@@ -1781,7 +1881,9 @@ function ResearchLabPage() {
               </div>
             </div>
             <h3>What should I examine next?</h3>
-            <p>Use live catalog evidence to narrow a question, compare influential work and expose adjacent concepts.</p>
+            <p>{canComparePapers
+              ? "Use live catalog evidence to narrow a question, compare influential work and expose adjacent concepts."
+              : "Use live catalog evidence to expose adjacent concepts and decide where to read next."}</p>
             <div className="research-lab-briefing-outcomes">
               <div><FiBarChart2 /><span><b>Compare evidence</b><small>Review 2–4 papers side by side</small></span></div>
               <div><FiMap /><span><b>Trace relationships</b><small>Connect topics, keywords and journals</small></span></div>
@@ -1791,8 +1893,8 @@ function ResearchLabPage() {
           <div className="research-lab-hero-orbit" aria-hidden="true"><i /><i /><i /><span /></div>
         </header>
 
-        <nav className="research-lab-tabs" aria-label="Research Lab tools">
-          <button type="button" className={activeTool === "compare" ? "active" : ""} onClick={() => setActiveTool("compare")}>
+        <nav className={`research-lab-tabs ${canComparePapers ? "" : "is-single-tool"}`} aria-label="Research Lab tools">
+          {canComparePapers && <button type="button" className={activeTool === "compare" ? "active" : ""} onClick={() => setActiveTool("compare")}>
             <span className="research-lab-tab-index">01</span>
             <span className="research-lab-tab-icon"><FiColumns /></span>
             <span className="research-lab-tab-copy">
@@ -1801,12 +1903,12 @@ function ResearchLabPage() {
               <p>Contrast citations, shared vocabulary and pair similarity across 2–4 publications.</p>
             </span>
             <span className="research-lab-tab-action">Open comparator <FiArrowRight /></span>
-          </button>
+          </button>}
           <button type="button" className={activeTool === "mind-map" ? "active" : ""} onClick={() => setActiveTool("mind-map")}>
-            <span className="research-lab-tab-index">02</span>
+            <span className="research-lab-tab-index">{canComparePapers ? "02" : "01"}</span>
             <span className="research-lab-tab-icon"><FiShare2 /></span>
             <span className="research-lab-tab-copy">
-              <small>Landscape discovery</small>
+              <small>Landscape discovery · {mindMapAccess}</small>
               <strong>Map a research concept</strong>
               <p>Reveal connected topics, keywords, journals and their publication momentum.</p>
             </span>
@@ -1814,7 +1916,7 @@ function ResearchLabPage() {
           </button>
         </nav>
 
-        {activeTool === "compare" ? <PaperComparator /> : <MindMapWorkspace />}
+        {canComparePapers && activeTool === "compare" ? <PaperComparator /> : <MindMapWorkspace />}
       </section>
     </MainLayout>
   );

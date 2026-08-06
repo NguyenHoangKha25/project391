@@ -484,6 +484,7 @@
 .admin-backfill-copy p { margin: 0; color: var(--st-muted-strong); font-size: 11px; }
 .admin-backfill-fields { display: flex; align-items: end; gap: 8px; }
 .admin-backfill-form label { display: grid; gap: 6px; color: var(--st-muted-strong); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.admin-backfill-form label small { color: #047857; font-size: 9px; font-weight: 750; letter-spacing: 0; text-transform: none; }
 .admin-backfill-form input { width: 130px; min-height: 42px; padding: 0 11px; border: 1px solid var(--st-border); border-radius: 11px; color: var(--st-heading); background: #fff; }
 .admin-backfill-form input:focus { border-color: var(--st-primary); outline: 3px solid var(--st-primary-soft); }
 .admin-backfill-form input:disabled { cursor: not-allowed; opacity: .65; }

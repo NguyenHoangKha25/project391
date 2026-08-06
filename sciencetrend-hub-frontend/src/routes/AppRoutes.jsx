@@ -196,7 +196,7 @@ function AppRoutes() {
       <Route
         path={ROUTE_PATHS.RESEARCH_LAB}
         element={
-          <RoleRoute allowedRoles={["RESEARCHER", "ADMIN"]}>
+          <RoleRoute allowedRoles={["LECTURER", "RESEARCHER", "ADMIN"]}>
             <ResearchLabPage />
           </RoleRoute>
         }

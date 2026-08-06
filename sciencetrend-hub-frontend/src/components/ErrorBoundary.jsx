@@ -19,7 +19,9 @@ class ErrorBoundary extends Component {
     try {
       localStorage.clear();
       sessionStorage.clear();
-    } catch {}
+    } catch {
+      // Storage may be blocked in privacy-focused browser contexts.
+    }
     window.location.href = "/dashboard";
   };
 

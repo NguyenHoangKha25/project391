@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  FiCheck,
   FiLayers,
   FiCalendar,
   FiChevronDown,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
-import { getTrendingKeywords, getTrendingTopics, getTrendStats } from "../services/trendService";
+import { useAuth } from "../context/useAuth";
+import { compareTrends, getTrendingKeywords, getTrendingTopics, getTrendStats } from "../services/trendService";
 import { getDashboardOverview } from "../services/dashboardService";
 import { getAllKeywords } from "../services/keywordService";
 import { getAllTopics } from "../services/topicService";
@@ -114,6 +116,23 @@ function normalizeTrendTopics(response) {
     .filter((topic) => topic.name && topic.name !== "Untitled topic");
 }
 
+function normalizeTrendComparison(response) {
+  const payload = response?.data ?? response ?? {};
+  return {
+    type: String(payload.type || "").toUpperCase(),
+    fromYear: Number(payload.fromYear) || null,
+    toYear: Number(payload.toYear) || null,
+    series: Array.isArray(payload.series)
+      ? payload.series.map((item) => ({
+          name: String(item?.name || "").trim(),
+          totalPapers: Number(item?.totalPapers) || 0,
+          growthRate: Number(item?.growthRate) || 0,
+          points: toArray(item?.yearlyData).map(normalizeChartPoint),
+        })).filter((item) => item.name && hasUsableTrendSeries(item.points))
+      : [],
+  };
+}
+
 function getDashboardKeywordFallback(dashboard) {
   if (!Array.isArray(dashboard?.topKeywords)) return [];
   return dashboard.topKeywords
@@ -169,12 +188,14 @@ function useToast() {
 }
 
 function TrendsPage() {
+  const { role, user } = useAuth();
+  const normalizedRole = String(role || user?.role || "LECTURER").toUpperCase();
+  const canCompareTrends = ["RESEARCHER", "ADMIN"].includes(normalizedRole);
   const [initialTrendData] = useState(getInitialTrendData);
 
   // Navigation tab: 'keyword' | 'topic'
   const [trendTab, setTrendTab] = useState("keyword");
   const [timeRange, setTimeRange] = useState("8y");
-  const [chartType, setChartType] = useState("bars"); // 'bars' | 'lines'
   
   // Data states from backend
   const [trendingTopics, setTrendingTopics] = useState(initialTrendData.topics);
@@ -194,12 +215,13 @@ function TrendsPage() {
   const [metadataLoading, setMetadataLoading] = useState(!initialTrendData.metadata);
   const [chartLoading, setChartLoading] = useState(false);
   const [comparisonSeries, setComparisonSeries] = useState([]);
+  const [comparisonSelections, setComparisonSelections] = useState([]);
   const [comparisonLoading, setComparisonLoading] = useState(false);
   const [focusedSeries, setFocusedSeries] = useState("");
   const [metadataSource, setMetadataSource] = useState(
     initialTrendData.metadata?.sources ?? { keyword: "trend", topic: "trend" },
   );
-  const { toast } = useToast();
+  const { toast, showToast } = useToast();
 
   useEffect(() => {
     let cancelled = false;
@@ -380,11 +402,38 @@ function TrendsPage() {
     .sort((left, right) => right.value - left.value)
     .slice(0, 3)
     .map((entry) => entry.item), [activeTrendItems]);
-  const comparisonTermKey = useMemo(() => activeTrendItems
-    .slice(0, 5)
+  const availableComparisonNames = useMemo(() => trendItems
     .map((item) => (typeof item === "string" ? item : (item?.name || item?.keyword || item?.topic || "")))
-    .filter(Boolean)
-    .join("\u0001"), [activeTrendItems]);
+    .filter(Boolean), [trendItems]);
+
+  useEffect(() => {
+    if (!canCompareTrends) return;
+    setComparisonSelections((current) => {
+      const available = new Set(availableComparisonNames);
+      const retained = current.filter((name) => available.has(name)).slice(0, 4);
+      if (retained.length >= 2) return retained;
+      return availableComparisonNames.slice(0, 4);
+    });
+  }, [availableComparisonNames, canCompareTrends, trendTab]);
+
+  const comparisonTermKey = useMemo(() => (
+    canCompareTrends ? comparisonSelections : [activeTrendTerm].filter(Boolean)
+  ).join("\u0001"), [activeTrendTerm, canCompareTrends, comparisonSelections]);
+
+  function toggleComparisonTerm(term) {
+    const isSelected = comparisonSelections.includes(term);
+    if (isSelected && comparisonSelections.length <= 2) {
+      showToast("Select at least two items for Compare Trends.", "warning");
+      return;
+    }
+    if (!isSelected && comparisonSelections.length >= 4) {
+      showToast("Compare Trends supports up to four items.", "warning");
+      return;
+    }
+    setComparisonSelections(isSelected
+      ? comparisonSelections.filter((item) => item !== term)
+      : [...comparisonSelections, term]);
+  }
 
   useEffect(() => {
     setFocusedSeries("");
@@ -450,33 +499,59 @@ function TrendsPage() {
     setComparisonSeries(cachedSeries);
     setComparisonLoading(cachedSeries.length < terms.length);
 
-    Promise.allSettled(terms.map(async (term) => {
-      const response = await getTrendStats(
-        trendTab === "keyword" ? { keyword: term } : { topic: term },
-      );
-      const points = toArray(response).map(normalizeChartPoint);
-      if (!hasUsableTrendSeries(points)) return null;
-      setPersistentCachedData(getTrendSeriesCacheKey(trendTab, term), points);
-      return { name: term, points };
-    }))
-      .then((results) => {
-        if (cancelled) return;
-        const cachedByName = new Map(cachedSeries.map((series) => [series.name, series]));
-        const availableSeries = results.flatMap((result, index) => {
-          if (result.status === "fulfilled" && result.value) return [result.value];
-          const cachedResult = cachedByName.get(terms[index]);
-          return cachedResult ? [cachedResult] : [];
-        });
-        setComparisonSeries(availableSeries);
-      })
-      .finally(() => {
-        if (!cancelled) setComparisonLoading(false);
+    async function fetchIndividualSeries() {
+      const results = await Promise.allSettled(terms.map(async (term) => {
+        const response = await getTrendStats(
+          trendTab === "keyword" ? { keyword: term } : { topic: term },
+        );
+        const points = toArray(response).map(normalizeChartPoint);
+        if (!hasUsableTrendSeries(points)) return null;
+        setPersistentCachedData(getTrendSeriesCacheKey(trendTab, term), points);
+        return { name: term, points };
+      }));
+      const cachedByName = new Map(cachedSeries.map((series) => [series.name, series]));
+      return results.flatMap((result, index) => {
+        if (result.status === "fulfilled" && result.value) return [result.value];
+        const cachedResult = cachedByName.get(terms[index]);
+        return cachedResult ? [cachedResult] : [];
       });
+    }
+
+    async function loadComparison() {
+      let availableSeries;
+      if (canCompareTrends && terms.length >= 2) {
+        const currentYear = new Date().getFullYear();
+        const periodYears = timeRange === "3y" ? 3 : timeRange === "5y" ? 5 : 8;
+        try {
+          const response = await compareTrends({
+            type: trendTab,
+            items: terms,
+            fromYear: currentYear - periodYears + 1,
+            toYear: currentYear,
+          });
+          const comparison = normalizeTrendComparison(response);
+          availableSeries = comparison.series;
+          availableSeries.forEach((series) => {
+            setPersistentCachedData(getTrendSeriesCacheKey(trendTab, series.name), series.points);
+          });
+        } catch {
+          availableSeries = await fetchIndividualSeries();
+        }
+      } else {
+        availableSeries = await fetchIndividualSeries();
+      }
+
+      if (!cancelled) setComparisonSeries(availableSeries);
+    }
+
+    loadComparison().finally(() => {
+      if (!cancelled) setComparisonLoading(false);
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [comparisonTermKey, trendTab]);
+  }, [canCompareTrends, comparisonTermKey, timeRange, trendTab]);
 
   // Aggregate only the selected API series by year. Never substitute catalog-wide or generated values.
   const effectiveChartData = useMemo(() => {
@@ -578,34 +653,6 @@ function TrendsPage() {
     }
     return comparisonLines[0]?.label || "";
   }, [focusedSeries, comparisonLines]);
-
-  const groupedBarData = useMemo(() => {
-    if (comparisonLines.length === 0) return null;
-    const years = comparisonLines[0]?.years || [];
-    if (years.length === 0) return null;
-
-    const plotWidth = COMPARISON_CHART_WIDTH - COMPARISON_PLOT_LEFT - COMPARISON_PLOT_RIGHT;
-    const plotHeight = COMPARISON_PLOT_HEIGHT - COMPARISON_PLOT_TOP - COMPARISON_PLOT_BOTTOM;
-    const plotBaseY = COMPARISON_PLOT_HEIGHT - COMPARISON_PLOT_BOTTOM;
-    const axisMax = comparisonLines[0]?.axisMax || 1;
-
-    const yearBandWidth = plotWidth / years.length;
-    const groupWidth = yearBandWidth * 0.76;
-    const numSeries = comparisonLines.length;
-    const barGap = numSeries > 4 ? 1.5 : 3;
-    const barWidth = Math.max(3, (groupWidth - (numSeries - 1) * barGap) / numSeries);
-
-    return {
-      years,
-      yearBandWidth,
-      groupWidth,
-      barWidth,
-      barGap,
-      plotBaseY,
-      plotHeight,
-      axisMax,
-    };
-  }, [comparisonLines]);
 
   const annualGrowth = useMemo(() => {
     if (!effectiveChartData || effectiveChartData.length < 2) return null;
@@ -713,7 +760,7 @@ function TrendsPage() {
               {activeTrendItems.length || "—"}
             </h3>
             <span className="stat-card-trend-text positive">
-              <span className="sub">Available for trend comparison</span>
+              <span className="sub">{canCompareTrends ? "Available for trend comparison" : "Available for trend analysis"}</span>
             </span>
           </div>
         </div>
@@ -724,9 +771,36 @@ function TrendsPage() {
           {/* Card 2: Keyword/Topic Comparison */}
           <article className="trends-chart-panel glassmorphic-panel multi-line-comp-panel">
             <div className="panel-header-row">
-              <h3>{trendTab === "keyword" ? "Keyword Comparison" : "Topic Comparison"}</h3>
-              <span className="badge-chip badge-cyan">Publication Trend Curves</span>
+              <h3>{canCompareTrends
+                ? `${trendTab === "keyword" ? "Keyword" : "Topic"} Comparison`
+                : `${trendTab === "keyword" ? "Keyword" : "Topic"} Publication Trend`}</h3>
+              <span className="badge-chip badge-cyan">{canCompareTrends ? "Compare 2–4 series" : "Basic trend access"}</span>
             </div>
+
+            {canCompareTrends && (
+              <div className="trend-compare-picker" aria-label="Choose trend series to compare">
+                <div>
+                  <span>Comparison set</span>
+                  <strong>{comparisonSelections.length}/4 selected</strong>
+                </div>
+                <div className="trend-compare-options">
+                  {availableComparisonNames.slice(0, 8).map((term) => {
+                    const selected = comparisonSelections.includes(term);
+                    return (
+                      <button
+                        type="button"
+                        key={term}
+                        className={selected ? "is-selected" : ""}
+                        onClick={() => toggleComparisonTerm(term)}
+                        aria-pressed={selected}
+                      >
+                        {selected && <FiCheck />} {term}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {comparisonLines.length > 0 ? (
               <>
