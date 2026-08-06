@@ -10,6 +10,7 @@ import {
   FiFileText,
   FiTag,
   FiLayers,
+  FiCalendar,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
@@ -553,6 +554,7 @@ function ReportsPage() {
   const [reportTitle, setReportTitle] = useState("");
   const [reportKeyword, setReportKeyword] = useState("");
   const [reportTopic, setReportTopic] = useState("");
+  const [reportTimeHorizonYears, setReportTimeHorizonYears] = useState("5");
   const [selected, setSelected] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -663,6 +665,10 @@ function ReportsPage() {
     if (sections.includes("TOPIC_TREND") && !reportTopic.trim()) {
       nextErrors.topic = "A topic is required for Topic Trend analysis.";
     }
+    const timeHorizonYears = Number(reportTimeHorizonYears);
+    if (!Number.isInteger(timeHorizonYears) || timeHorizonYears < 1 || timeHorizonYears > 30) {
+      nextErrors.timeHorizonYears = "Time horizon must be a whole number from 1 to 30 years.";
+    }
     if (Object.keys(nextErrors).length > 0) {
       setValidationErrors(nextErrors);
       return;
@@ -674,9 +680,11 @@ function ReportsPage() {
       setValidationErrors({});
       const payload = {
         title: reportTitle.trim(),
-        keyword: reportKeyword.trim() || undefined,
-        topic: reportTopic.trim() || undefined,
+        keyword: sections.includes("KEYWORD_TREND") ? reportKeyword.trim() : undefined,
+        topic: sections.includes("TOPIC_TREND") ? reportTopic.trim() : undefined,
+        timeHorizonYears,
         sections,
+        format: "TXT",
       };
       
       await generateReport(payload);
@@ -684,6 +692,7 @@ function ReportsPage() {
       setReportTitle("");
       setReportKeyword("");
       setReportTopic("");
+      setReportTimeHorizonYears("5");
       setSelectedSections([...BASIC_SECTIONS]);
       setAdvancedSections([]);
       setShowCreateModal(false);
@@ -830,6 +839,27 @@ function ReportsPage() {
                       placeholder="e.g. AI & Deep Learning Research Trend Report 2026"
                       required
                     />
+                  </div>
+
+                  <div className="modal-form-group">
+                    <label htmlFor="report-time-horizon"><FiCalendar /> Time Horizon *</label>
+                    <input
+                      id="report-time-horizon"
+                      type="number"
+                      min="1"
+                      max="30"
+                      step="1"
+                      value={reportTimeHorizonYears}
+                      onChange={(event) => {
+                        setReportTimeHorizonYears(event.target.value);
+                        setValidationErrors((current) => ({ ...current, timeHorizonYears: "" }));
+                      }}
+                      required
+                    />
+                    <p className="modal-form-help">Analyze publications from the latest 1–30 years. Default: 5 years.</p>
+                    {validationErrors.timeHorizonYears && (
+                      <p className="report-inline-error" role="alert">{validationErrors.timeHorizonYears}</p>
+                    )}
                   </div>
 
                   <div className="modal-form-grid-2">
