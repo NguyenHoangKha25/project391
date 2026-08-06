@@ -55,7 +55,34 @@ function statusClass(value) {
 }
 
 function syncLogDetails(log) {
-  return log.errorMessage || log.message || "";
+  const rawMessage = String(log.errorMessage || log.message || "").trim();
+  if (!rawMessage) return "";
+
+  const normalizedMessage = rawMessage.toLowerCase();
+  if (
+    normalizedMessage.includes("timeoutexception")
+    || normalizedMessage.includes("did not observe any item")
+    || normalizedMessage.includes("timed out")
+    || normalizedMessage.includes("timeout")
+  ) {
+    return "OpenAlex took too long to respond. Retry with a smaller batch (100–500 papers) or try again later.";
+  }
+  if (normalizedMessage.includes("openalex_api_key") || normalizedMessage.includes("openalex api key")) {
+    return "The OpenAlex API key is not configured on the backend. Add it to the Railway environment before retrying.";
+  }
+  if (normalizedMessage.includes("too many requests") || normalizedMessage.includes("rate limit") || normalizedMessage.includes("429")) {
+    return "OpenAlex is receiving too many requests. Wait a few minutes, then retry with a smaller batch.";
+  }
+  if (normalizedMessage.includes("already in progress") || normalizedMessage.includes("đang được thực hiện")) {
+    return "Another synchronization is already running. Wait for it to finish before starting a new backfill.";
+  }
+  if (normalizedMessage.includes("outofmemory") || normalizedMessage.includes("heap space")) {
+    return "The backend ran out of memory while processing this batch. Retry with 100–500 papers.";
+  }
+  if (/(?:java\.|reactor\.|org\.)[\w.$]+|\b(?:exception|error)\b.*(?:flatmap|stack|signal)/i.test(rawMessage)) {
+    return "The backend could not complete this backfill. Retry with a smaller batch or review the backend logs.";
+  }
+  return rawMessage;
 }
 
 function syncLogType(log) {
