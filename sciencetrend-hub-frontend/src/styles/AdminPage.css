@@ -482,9 +482,10 @@
 .admin-backfill-copy span { color: var(--st-primary); font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
 .admin-backfill-copy strong { color: var(--st-heading); font-size: 14px; }
 .admin-backfill-copy p { margin: 0; color: var(--st-muted-strong); font-size: 11px; }
+.admin-backfill-recommendation { width: fit-content; min-height: 24px; display: inline-flex; align-items: center; gap: 6px; margin-top: 3px; padding: 0 9px; border: 1px solid rgba(5,150,105,.18); border-radius: 999px; color: #047857; background: rgba(236,253,245,.86); font-size: 9px; font-weight: 800; white-space: nowrap; }
+.admin-backfill-recommendation svg { width: 12px; height: 12px; flex: 0 0 12px; }
 .admin-backfill-fields { display: grid; grid-template-columns: 130px auto 130px auto 164px; align-items: start; gap: 8px; }
 .admin-backfill-form label { display: grid; gap: 6px; color: var(--st-muted-strong); font-size: 10px; font-weight: 800; text-transform: uppercase; }
-.admin-backfill-form label small { min-height: 12px; color: #047857; font-size: 9px; font-weight: 750; line-height: 12px; letter-spacing: 0; text-transform: none; white-space: nowrap; }
 .admin-backfill-form input { width: 100%; min-height: 44px; padding: 0 11px; border: 1px solid var(--st-border); border-radius: 11px; color: var(--st-heading); background: #fff; }
 .admin-backfill-form input:focus { border-color: var(--st-primary); outline: 3px solid var(--st-primary-soft); }
 .admin-backfill-form input:disabled { cursor: not-allowed; opacity: .65; }
@@ -504,7 +505,7 @@
 .admin-user-detail dt { color: var(--st-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .admin-user-detail dd { margin: 0; color: var(--st-heading); font-size: 12px; word-break: break-word; }
 @media (max-width: 900px) { .admin-backfill-form { grid-template-columns: 1fr; align-items: stretch; } .admin-backfill-fields { width: 100%; } .admin-backfill-form input { width: 100%; } .admin-backfill-submit { margin-top: 0; } .admin-backfill-error { grid-column: 1; } }
-@media (max-width: 760px) { .admin-sync-actions { align-items: stretch; flex-direction: column; } .admin-backfill-fields { grid-template-columns: 1fr; align-items: stretch; } .admin-year-separator { display: none; } .admin-backfill-form label small { white-space: normal; } .admin-config-grid { grid-template-columns: 1fr; } .admin-search-form input { width: 100%; } }
+@media (max-width: 760px) { .admin-sync-actions { align-items: stretch; flex-direction: column; } .admin-backfill-fields { grid-template-columns: 1fr; align-items: stretch; } .admin-year-separator { display: none; } .admin-backfill-recommendation { white-space: normal; } .admin-config-grid { grid-template-columns: 1fr; } .admin-search-form input { width: 100%; } }
 
 /* Media Screen Adjustments */
 @media (max-width: 1150px) {
