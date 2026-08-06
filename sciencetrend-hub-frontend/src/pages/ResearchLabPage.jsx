@@ -971,16 +971,22 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
   );
 }
 
-function normalizeMindMapNode(rawNode) {
+function normalizeMindMapNode(rawNode, allConnectedNodes = []) {
   if (!rawNode || typeof rawNode !== "object") return null;
 
-  const paperCount = Number(rawNode.paperCount ?? rawNode.totalPapers ?? rawNode.paper_count ?? rawNode.count ?? 0) || 0;
-  const recentPaperCount = Number(rawNode.recentPaperCount ?? rawNode.recentCount ?? 0) || 0;
-  const previousPaperCount = Number(rawNode.previousPaperCount ?? rawNode.previousCount ?? 0) || 0;
+  let paperCount = Number(rawNode.paperCount ?? rawNode.totalPapers ?? rawNode.paper_count ?? rawNode.count ?? 0) || 0;
+  let recentPaperCount = Number(rawNode.recentPaperCount ?? rawNode.recentCount ?? 0) || 0;
+  let previousPaperCount = Number(rawNode.previousPaperCount ?? rawNode.previousCount ?? 0) || 0;
+
+  // Frontend Fallback: If backend returns 0 for root paperCount, compute from connected child nodes
+  if (paperCount === 0 && Array.isArray(allConnectedNodes) && allConnectedNodes.length > 0) {
+    paperCount = allConnectedNodes.reduce((max, node) => Math.max(max, Number(node?.paperCount || 0)), 0) || allConnectedNodes.length;
+    if (recentPaperCount === 0) recentPaperCount = paperCount;
+  }
 
   let trendStatus = String(rawNode.trendStatus || "NO_DATA").toUpperCase();
   if (trendStatus === "NO_DATA" || !trendStatus) {
-    if (recentPaperCount > previousPaperCount) trendStatus = "GROWING";
+    if (recentPaperCount > previousPaperCount && recentPaperCount > 0) trendStatus = "GROWING";
     else if (recentPaperCount === previousPaperCount && recentPaperCount > 0) trendStatus = "STABLE";
     else if (paperCount > 0) trendStatus = "EMERGING";
   }
@@ -1081,7 +1087,7 @@ function MindMapWorkspace() {
       }
 
       const normalizedNodes = rawNodes.map((n) => normalizeMindMapNode(n));
-      const normalizedRoot = normalizeMindMapNode(payload.root);
+      const normalizedRoot = normalizeMindMapNode(payload.root, normalizedNodes);
 
       const nextMap = {
         root: normalizedRoot,
