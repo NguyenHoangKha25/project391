@@ -154,7 +154,8 @@ function DashboardPage() {
           setOperationsData(null);
         }
       } else if (!cachedOverview) {
-        setErrorMessage("Couldn't load dashboard statistics. Please try again in a moment.");
+        const errorReason = homeRes.reason?.message;
+        setErrorMessage(errorReason || "Couldn't load dashboard statistics. Please check your connection or sign in again.");
       }
 
       if (topicsRes?.status === "fulfilled") {

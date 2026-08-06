@@ -297,12 +297,20 @@ export function normalizeOperations(data = {}) {
 
 // DashboardHomeResponse: { role, overview, analytics, operations, capabilities }
 export function normalizeDashboardHome(data = {}) {
+  const root = (data && typeof data === "object" && data.data && typeof data.data === "object" && !Array.isArray(data.data) && (data.data.overview || data.data.role || data.data.capabilities))
+    ? data.data
+    : (data && typeof data === "object" ? data : {});
+
+  const overviewData = root.overview || (root.totalPapers !== undefined ? root : null);
+  const analyticsData = root.analytics || null;
+  const operationsData = root.operations || null;
+
   return {
-    role: String(data.role || "").toUpperCase(),
-    overview: data.overview ? normalizeDashboard(data.overview) : null,
-    analytics: data.analytics ? normalizeAnalytics(data.analytics) : null,
-    operations: data.operations ? normalizeOperations(data.operations) : null,
-    capabilities: data.capabilities || {},
+    role: String(root.role || "").toUpperCase(),
+    overview: overviewData ? normalizeDashboard(overviewData) : null,
+    analytics: analyticsData ? normalizeAnalytics(analyticsData) : null,
+    operations: operationsData ? normalizeOperations(operationsData) : null,
+    capabilities: root.capabilities || {},
   };
 }
 
