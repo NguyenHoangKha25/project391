@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FiActivity,
@@ -20,6 +20,7 @@ import {
   FiZap,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
+import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
 import { comparePapers, getPapers } from "../services/paperService";
 import { getResearchMindMap } from "../services/researchService";
@@ -689,14 +690,14 @@ function PaperComparator() {
 }
 
 function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
-  const rootId = data.root?.id;
-  const nodes = useMemo(() => (Array.isArray(data.nodes) ? data.nodes : []), [data.nodes]);
-  const edges = useMemo(() => (Array.isArray(data.edges) ? data.edges : []), [data.edges]);
+  const rootId = data?.root?.id;
+  const nodes = useMemo(() => (Array.isArray(data?.nodes) ? data.nodes : []), [data?.nodes]);
+  const edges = useMemo(() => (Array.isArray(data?.edges) ? data.edges : []), [data?.edges]);
   const layout = useMemo(() => getMapLayout(nodes, rootId, edges), [nodes, rootId, edges]);
   const [zoom, setZoom] = useState(100);
   const canvasRef = useRef(null);
-  const rootType = normalizeMapType(data.root?.type);
-  const rootLines = splitMapLabel(data.root?.label, 24);
+  const rootType = normalizeMapType(data?.root?.type);
+  const rootLines = splitMapLabel(data?.root?.label, 24);
 
   useEffect(() => {
     setZoom(100);
@@ -706,6 +707,20 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
     const bendX = sourceX + (targetX - sourceX) * 0.52;
     return `M ${sourceX} ${sourceY} C ${bendX} ${sourceY}, ${bendX} ${targetY}, ${targetX} ${targetY}`;
   }
+
+  const bindNoFocusRef = useCallback((el) => {
+    if (el && !el._noFocusBound) {
+      el._noFocusBound = true;
+      const handler = (e) => {
+        if (e && typeof e.preventDefault === "function" && e.cancelable) {
+          e.preventDefault();
+        }
+      };
+      el.addEventListener("mousedown", handler, { capture: true });
+      el.addEventListener("pointerdown", handler, { capture: true });
+      el.addEventListener("touchstart", handler, { capture: true });
+    }
+  }, []);
 
   function selectNodeFromKeyboard(event, node) {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -717,7 +732,17 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
     if (event) {
       if (typeof event.preventDefault === "function") event.preventDefault();
       if (typeof event.stopPropagation === "function") event.stopPropagation();
+      if (event.nativeEvent && typeof event.nativeEvent.preventDefault === "function") {
+        event.nativeEvent.preventDefault();
+      }
     }
+
+    if (document.activeElement && typeof document.activeElement.blur === "function") {
+      document.activeElement.blur();
+    }
+
+    const currentWinX = window.scrollX || window.pageXOffset || 0;
+    const currentWinY = window.scrollY || window.pageYOffset || 0;
     const canvas = canvasRef.current;
     const scrollLeft = canvas ? canvas.scrollLeft : 0;
     const scrollTop = canvas ? canvas.scrollTop : 0;
@@ -725,11 +750,18 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
     onSelectNode(node);
 
     if (canvas) {
-      window.requestAnimationFrame(() => {
+      canvas.scrollLeft = scrollLeft;
+      canvas.scrollTop = scrollTop;
+    }
+    window.scrollTo(currentWinX, currentWinY);
+
+    window.requestAnimationFrame(() => {
+      if (canvas) {
         canvas.scrollLeft = scrollLeft;
         canvas.scrollTop = scrollTop;
-      });
-    }
+      }
+      window.scrollTo(currentWinX, currentWinY);
+    });
   }
 
   function preventPointerFocus(event) {
@@ -859,12 +891,13 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
           </g>
 
           <g
-            className={`research-map-root type-${rootType.toLowerCase()} trend-${String(data.root?.trendStatus || "no_data").toLowerCase()} ${String(selectedNodeId) === String(rootId) ? "is-selected" : ""}`}
+            ref={bindNoFocusRef}
+            className={`research-map-root type-${rootType.toLowerCase()} trend-${String(data?.root?.trendStatus || "no_data").toLowerCase()} ${String(selectedNodeId) === String(rootId) ? "is-selected" : ""}`}
             transform={`translate(${layout.root.x} ${layout.root.y})`}
             onPointerDown={preventPointerFocus}
             onMouseDown={preventPointerFocus}
-            onClick={(event) => selectMapNode(event, data.root)}
-            onKeyDown={(event) => selectNodeFromKeyboard(event, data.root)}
+            onClick={(event) => selectMapNode(event, data?.root)}
+            onKeyDown={(event) => selectNodeFromKeyboard(event, data?.root)}
             role="button"
             tabIndex="0"
             aria-pressed={String(selectedNodeId) === String(rootId)}
@@ -875,8 +908,8 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
             <text className="research-map-root-label" textAnchor="middle" y={rootLines.length > 1 ? -8 : 0}>
               {rootLines.map((line, index) => <tspan key={`${line}-${index}`} x="0" dy={index === 0 ? 0 : 17}>{line}</tspan>)}
             </text>
-            <text className="research-map-root-count" textAnchor="middle" y="37">{formatNumber(data.root?.paperCount)} indexed papers</text>
-            <title>{data.root?.label} · Research root · {data.root?.trendStatus}</title>
+            <text className="research-map-root-count" textAnchor="middle" y="37">{formatNumber(data?.root?.paperCount)} indexed papers</text>
+            <title>{data?.root?.label} · Research root · {data?.root?.trendStatus}</title>
           </g>
 
           <g className="research-map-nodes">
@@ -893,6 +926,7 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
               return (
                 <g
                   key={node.id}
+                  ref={bindNoFocusRef}
                   className={`research-map-node type-${typeClass} trend-${statusClass} ${isSelected ? "is-selected" : ""}`}
                   transform={`translate(${item.x} ${item.y})`}
                   onPointerDown={preventPointerFocus}
@@ -937,22 +971,12 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
   );
 }
 
-function normalizeMindMapNode(rawNode, allNodes = []) {
+function normalizeMindMapNode(rawNode) {
   if (!rawNode || typeof rawNode !== "object") return null;
 
-  const rawPaperCount = Number(rawNode.paperCount ?? rawNode.totalPapers ?? rawNode.paper_count ?? rawNode.count ?? 0) || 0;
-  const rawRecent = Number(rawNode.recentPaperCount ?? rawNode.recentCount ?? 0) || 0;
-  const rawPrevious = Number(rawNode.previousPaperCount ?? rawNode.previousCount ?? 0) || 0;
-
-  // If node paperCount is 0, attempt to aggregate from connected nodes
-  const connectedNodes = allNodes.filter((n) => String(n.id) !== String(rawNode.id));
-  const connectedPaperMax = connectedNodes.length > 0
-    ? Math.max(...connectedNodes.map((n) => Number(n.paperCount || 0)))
-    : 0;
-
-  const paperCount = rawPaperCount > 0 ? rawPaperCount : (connectedPaperMax > 0 ? connectedPaperMax : 0);
-  const recentPaperCount = rawRecent > 0 ? rawRecent : (paperCount > 0 ? Math.max(1, Math.ceil(paperCount * 0.6)) : 0);
-  const previousPaperCount = rawPrevious > 0 ? rawPrevious : (paperCount > 0 ? Math.max(0, Math.floor(paperCount * 0.4)) : 0);
+  const paperCount = Number(rawNode.paperCount ?? rawNode.totalPapers ?? rawNode.paper_count ?? rawNode.count ?? 0) || 0;
+  const recentPaperCount = Number(rawNode.recentPaperCount ?? rawNode.recentCount ?? 0) || 0;
+  const previousPaperCount = Number(rawNode.previousPaperCount ?? rawNode.previousCount ?? 0) || 0;
 
   let trendStatus = String(rawNode.trendStatus || "NO_DATA").toUpperCase();
   if (trendStatus === "NO_DATA" || !trendStatus) {
@@ -1052,17 +1076,17 @@ function MindMapWorkspace() {
       });
       const payload = response?.data ?? response;
       const rawNodes = Array.isArray(payload?.nodes) ? payload.nodes : [];
-      if (!payload?.root || rawNodes.length === 0) {
-        throw new Error("No connected research evidence was returned for this root.");
+      if (!payload?.root) {
+        throw new Error("No research root was returned for this item.");
       }
 
-      const normalizedNodes = rawNodes.map((n) => normalizeMindMapNode(n, rawNodes));
-      const normalizedRoot = normalizeMindMapNode(payload.root, rawNodes);
+      const normalizedNodes = rawNodes.map((n) => normalizeMindMapNode(n));
+      const normalizedRoot = normalizeMindMapNode(payload.root);
 
       const nextMap = {
         root: normalizedRoot,
         nodes: normalizedNodes,
-        edges: Array.isArray(payload.edges) ? payload.edges : [],
+        edges: Array.isArray(payload?.edges) ? payload.edges : [],
       };
       setMapData(nextMap);
       setSelectedNode(normalizedRoot);

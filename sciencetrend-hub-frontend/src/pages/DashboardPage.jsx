@@ -298,8 +298,33 @@ function DashboardPage() {
     const raw = data?.papersByYear || [];
     if (!Array.isArray(raw) || !raw.some((point) => Number(point?.value) > 0)) return [];
     const sorted = [...raw].sort((a, b) => parseInt(a.label || 0) - parseInt(b.label || 0));
-    return sorted.slice(-7);
+
+    if (sorted.length > 0) {
+      const minYear = parseInt(sorted[0].label || 0);
+      const maxYear = parseInt(sorted[sorted.length - 1].label || 0);
+      if (minYear > 1900 && maxYear >= minYear && maxYear - minYear <= 15) {
+        const yearMap = new Map(sorted.map((item) => [parseInt(item.label || 0), Number(item.value || 0)]));
+        const filled = [];
+        for (let y = minYear; y <= maxYear; y++) {
+          filled.push({ label: String(y), value: yearMap.get(y) || 0 });
+        }
+        return filled.slice(-8);
+      }
+    }
+    return sorted.slice(-8);
   }, [data]);
+
+  const activitySummary = useMemo(() => {
+    if (!papersByYear || papersByYear.length === 0) return null;
+    let peak = papersByYear[0];
+    let sum = 0;
+    papersByYear.forEach((p) => {
+      sum += Number(p.value || 0);
+      if (Number(p.value || 0) > Number(peak.value || 0)) peak = p;
+    });
+    const avg = Math.round(sum / papersByYear.length);
+    return { peak, total: sum, avg };
+  }, [papersByYear]);
 
   const topKeywords = useMemo(() => {
     let raw = data?.topKeywords || [];
@@ -588,11 +613,28 @@ function DashboardPage() {
               </div>
             </div>
             
-            <p className="chart-subtext">
-              {papersByYear.length > 0 
-                ? `${latestPublication?.label || "Latest year"} contains ${formatNumber(latestPublication?.value || 0)} indexed papers in this catalog.`
-                : "No publication statistics recorded in the database yet."}
-            </p>
+            <div className="db-v4-activity-footer">
+              {activitySummary ? (
+                <div className="activity-insights-strip">
+                  <div className="insight-stat-item">
+                    <span className="insight-label">Peak Year</span>
+                    <strong className="insight-val">{activitySummary.peak.label} ({formatNumber(activitySummary.peak.value)})</strong>
+                  </div>
+                  <div className="insight-stat-item">
+                    <span className="insight-label">Total Indexed</span>
+                    <strong className="insight-val">{formatNumber(activitySummary.total)} papers</strong>
+                  </div>
+                  <div className="insight-stat-item">
+                    <span className="insight-label">Avg / Year</span>
+                    <strong className="insight-val">{formatNumber(activitySummary.avg)} / yr</strong>
+                  </div>
+                </div>
+              ) : (
+                <p className="chart-subtext">
+                  No publication statistics recorded in the database yet.
+                </p>
+              )}
+            </div>
           </article>
 
           {/* Card 2: Top Keywords */}
@@ -650,8 +692,8 @@ function DashboardPage() {
                         cy="50" 
                         r="38" 
                         fill="transparent" 
-                        stroke="rgba(241, 245, 249, 0.8)" 
-                        strokeWidth="7" 
+                        stroke="rgba(226, 232, 240, 0.7)" 
+                        strokeWidth="8" 
                       />
                       {donutSegments.map((seg, idx) => (
                         <circle
@@ -661,9 +703,10 @@ function DashboardPage() {
                            r="38"
                            fill="transparent"
                            stroke={seg.color}
-                           strokeWidth="7"
+                           strokeWidth="8"
                            strokeDasharray={`${seg.strokeLength} 238.76`}
                            strokeDashoffset={seg.strokeOffset}
+                           strokeLinecap="round"
                            transform="rotate(-90 50 50)"
                            className="donut-segment"
                         />
@@ -671,7 +714,7 @@ function DashboardPage() {
                     </svg>
                     <div className="donut-center-text">
                       <strong>{donutSegments[0] ? `${donutSegments[0].percent}%` : "0%"}</strong>
-                      <span>Top Share</span>
+                      <span className="donut-center-badge">Top Share</span>
                     </div>
                   </div>
 

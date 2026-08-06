@@ -419,13 +419,13 @@
 .donut-chart-wrapper {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   min-height: 140px;
 }
 .donut-svg-box {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   flex-shrink: 0;
 }
 .donut-svg {
@@ -433,11 +433,12 @@
   height: 100%;
 }
 .donut-segment {
-  transition: stroke-width 0.2s ease, opacity 0.2s ease;
+  transition: stroke-width 0.25s ease, filter 0.25s ease, opacity 0.2s ease;
   cursor: pointer;
 }
 .donut-segment:hover {
   stroke-width: 11;
+  filter: drop-shadow(0 2px 8px rgba(37, 99, 235, 0.3));
   opacity: 0.95;
 }
 .donut-center-text {
@@ -448,24 +449,33 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 4px;
+  padding: 0;
+  pointer-events: none;
+  z-index: 2;
 }
 .donut-center-text strong {
-  font-size: 14px;
+  font-size: 17px;
   color: #0f172a;
-  font-weight: 900;
+  font-weight: 850;
   line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0;
 }
+.donut-center-text .donut-center-badge,
 .donut-center-text span {
   font-size: 9px;
   color: #2563eb;
-  font-weight: 850;
+  font-weight: 800;
   text-transform: uppercase;
-  margin-top: 2px;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  line-height: 1;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  padding: 2px 7px;
+  border-radius: 999px;
   white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.06);
 }
 .donut-legend {
   flex: 1;

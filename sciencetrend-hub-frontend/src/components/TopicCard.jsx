@@ -16,47 +16,43 @@ function TopicCard({ rank, name, paperCount, growth, score = 0, onUnfollow }) {
     }
   }
 
-  return (
-    <article className="db-topic-card" style={{ position: "relative" }}>
-      <span className="db-topic-rank">{String(rank).padStart(2, "0")}</span>
+  const formattedRank = rank !== undefined && rank !== null && rank !== ""
+    ? String(rank).padStart(2, "0")
+    : null;
 
-      <div className="db-topic-content" style={{ paddingRight: onUnfollow ? "40px" : "0" }}>
+  return (
+    <article className="db-topic-card">
+      {formattedRank && <span className="db-topic-rank">{formattedRank}</span>}
+
+      <div className="db-topic-content">
         <div className="db-topic-heading">
           <div>
             <strong>{name}</strong>
-            <small>{paperCount}</small>
+            {paperCount !== undefined && paperCount !== null && (
+              <small className="db-topic-paper-count">{paperCount} papers</small>
+            )}
           </div>
-          <span className="db-topic-growth">
-            <FiTrendingUp aria-hidden="true" />
-            {growth}
-          </span>
+          {growth && (
+            <span className="db-topic-growth">
+              <FiTrendingUp aria-hidden="true" />
+              {growth}
+            </span>
+          )}
         </div>
 
-        <div className="db-topic-progress" aria-label={`${name} score ${safeScore}%`}>
-          <span style={{ width: `${safeScore}%` }} />
-        </div>
+        {safeScore > 0 && (
+          <div className="db-topic-progress" aria-label={`${name} score ${safeScore}%`}>
+            <span style={{ width: `${safeScore}%` }} />
+          </div>
+        )}
       </div>
 
       {onUnfollow && (
         <button
           type="button"
+          className="db-topic-untrack-btn"
           onClick={handleUnfollow}
           disabled={unfollowing}
-          style={{
-            position: "absolute",
-            right: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "none",
-            border: "none",
-            color: "var(--st-danger, #ef4444)",
-            cursor: "pointer",
-            fontSize: "18px",
-            padding: "6px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
           title="Untrack topic"
         >
           {unfollowing ? <FiLoader className="is-spinning" /> : <FiMinusCircle />}
