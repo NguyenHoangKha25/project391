@@ -37,7 +37,13 @@ import {
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import "../styles/DashboardPage.css";
 
-const DONUT_COLORS = ["#10b981", "#4f46e5", "#8b5cf6", "#f59e0b", "#ec4899", "#06b6d4"];
+const DONUT_THEMES = [
+  { color: "#10b981", bgColor: "#ecfdf5", textColor: "#047857" },
+  { color: "#6366f1", bgColor: "#eef2ff", textColor: "#3730a3" },
+  { color: "#8b5cf6", bgColor: "#f5f3ff", textColor: "#5b21b6" },
+  { color: "#f59e0b", bgColor: "#fffbeb", textColor: "#b45309" },
+  { color: "#ec4899", bgColor: "#fdf2f8", textColor: "#be185d" },
+];
 
 function getDashboardCacheKeys(user = {}) {
   const userId = user.id ?? user.userId ?? user.username ?? "anon";
@@ -323,13 +329,16 @@ function DashboardPage() {
       const strokeLength = percent * circumference;
       const strokeOffset = circumference - (cumulativePercent * circumference);
 
+      const theme = DONUT_THEMES[i % DONUT_THEMES.length];
       return {
         label: j.label,
         value: j.value,
         percent: (percent * 100).toFixed(1),
         strokeLength,
         strokeOffset,
-        color: DONUT_COLORS[i % DONUT_COLORS.length]
+        color: theme.color,
+        bgColor: theme.bgColor,
+        textColor: theme.textColor,
       };
     });
   }, [topJournals]);
@@ -668,11 +677,13 @@ function DashboardPage() {
 
                   <div className="donut-legend">
                     {donutSegments.map((seg, idx) => (
-                      <div key={idx} className="legend-item">
-                        <span className="legend-dot" style={{ backgroundColor: seg.color, boxShadow: `0 0 0 3px ${seg.color}25` }} />
-                        <div className="legend-texts">
-                          <strong className="legend-name">{seg.label}</strong>
-                          <span className="legend-val" style={{ color: seg.color }}>{formatNumber(seg.value)} ({seg.percent}%)</span>
+                      <div key={idx} className="legend-item" style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                        <span className="legend-dot" style={{ backgroundColor: seg.color, width: "10px", height: "10px", borderRadius: "50%", marginTop: "5px", flexShrink: 0, boxShadow: `0 0 0 3.5px ${seg.color}35` }} />
+                        <div className="legend-texts" style={{ display: "flex", flexDirection: "column", gap: "3px", minWidth: 0, flex: 1 }}>
+                          <strong className="legend-name" style={{ color: "#0f172a", fontSize: "13px", fontWeight: "780", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{seg.label}</strong>
+                          <span className="legend-val-badge" style={{ display: "inline-block", color: seg.textColor, backgroundColor: seg.bgColor, border: `1px solid ${seg.color}40`, borderRadius: "6px", padding: "2px 8px", fontSize: "11.5px", fontWeight: "850", width: "fit-content" }}>
+                            {formatNumber(seg.value)} ({seg.percent}%)
+                          </span>
                         </div>
                       </div>
                     ))}
