@@ -14,7 +14,7 @@ import {
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
-import { deleteReport, generateReport, getReports, searchReports } from "../services/reportService";
+import { deleteReport, generateReport, getReports, getAdminReports, searchReports } from "../services/reportService";
 import { getAllTopics } from "../services/topicService";
 import {
   formatDateTime,
@@ -568,7 +568,18 @@ function ReportsPage() {
     try {
       setLoading(true);
       setErrorMessage("");
-      const raw = searchQuery ? await searchReports(searchQuery) : await getReports();
+      let raw;
+      if (searchQuery) {
+        raw = await searchReports(searchQuery);
+      } else if (normalizedRole === "ADMIN") {
+        try {
+          raw = await getAdminReports();
+        } catch {
+          raw = await getReports();
+        }
+      } else {
+        raw = await getReports();
+      }
       setReports(toArray(raw).map(normalizeReport));
     } catch (err) {
       console.error("Failed to load reports", err);
@@ -576,7 +587,7 @@ function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [normalizedRole]);
 
   useEffect(() => {
     loadReports();
