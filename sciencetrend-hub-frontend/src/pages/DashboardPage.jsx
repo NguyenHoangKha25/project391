@@ -37,7 +37,7 @@ import {
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import "../styles/DashboardPage.css";
 
-const DONUT_COLORS = ["#3b82f6", "#10b981", "#8b5cf6", "#f43f5e", "#f59e0b", "#06b6d4"];
+const DONUT_COLORS = ["#10b981", "#4f46e5", "#8b5cf6", "#f59e0b", "#ec4899", "#06b6d4"];
 
 function getDashboardCacheKeys(user = {}) {
   const userId = user.id ?? user.userId ?? user.username ?? "anon";
@@ -662,21 +662,17 @@ function DashboardPage() {
                     </svg>
                     <div className="donut-center-text">
                       <strong>{donutSegments[0] ? `${donutSegments[0].percent}%` : "0%"}</strong>
-                      <span>{donutSegments[0] 
-                        ? (donutSegments[0].label.length > 10 
-                            ? donutSegments[0].label.substring(0, 8) + ".." 
-                            : donutSegments[0].label)
-                        : "Top Share"}</span>
+                      <span>Top Share</span>
                     </div>
                   </div>
 
                   <div className="donut-legend">
                     {donutSegments.map((seg, idx) => (
                       <div key={idx} className="legend-item">
-                        <span className="legend-dot" style={{ backgroundColor: seg.color }} />
+                        <span className="legend-dot" style={{ backgroundColor: seg.color, boxShadow: `0 0 0 3px ${seg.color}25` }} />
                         <div className="legend-texts">
                           <strong className="legend-name">{seg.label}</strong>
-                          <span className="legend-val">{formatNumber(seg.value)} ({seg.percent}%)</span>
+                          <span className="legend-val" style={{ color: seg.color }}>{formatNumber(seg.value)} ({seg.percent}%)</span>
                         </div>
                       </div>
                     ))}
