@@ -362,9 +362,16 @@ function DashboardPage() {
   }, [data]);
 
   const topCitedPapers = useMemo(() => {
-    let raw = data?.topCitedPapers || [];
+    let raw = Array.isArray(data?.topCitedPapers) ? data.topCitedPapers : [];
     return raw.slice(0, 10);
   }, [data]);
+
+  const featuredPaper = useMemo(() => {
+    if (!Array.isArray(topCitedPapers) || topCitedPapers.length === 0) return null;
+    const first = topCitedPapers[0];
+    if (!first || typeof first !== "object" || !first.title) return null;
+    return first;
+  }, [topCitedPapers]);
 
   const donutSegments = useMemo(() => {
     const sliceJournals = topJournals.slice(0, 5);
@@ -558,18 +565,18 @@ function DashboardPage() {
           </div>
         )}
 
-        {topCitedPapers.length > 0 && (
+        {featuredPaper && (
           <article className="db-featured-spotlight-card">
             <div className="spotlight-badge">
               <FiCheckCircle /> <span>Featured High-Impact Research</span>
             </div>
             <div className="spotlight-body">
               <div className="spotlight-main">
-                <h3 className="spotlight-title">{(topCitedPapers[0].title || "").replace(/<[^>]*>?/gm, "")}</h3>
-                <p className="spotlight-authors">{topCitedPapers[0].authors || "Unknown author"} {topCitedPapers[0].year ? `(${topCitedPapers[0].year})` : ""}</p>
+                <h3 className="spotlight-title">{(featuredPaper.title || "").replace(/<[^>]*>?/gm, "")}</h3>
+                <p className="spotlight-authors">{featuredPaper.authors || "Unknown author"} {featuredPaper.year ? `(${featuredPaper.year})` : ""}</p>
               </div>
               <div className="spotlight-metrics">
-                <span className="cit-badge">🔥 {formatNumber(topCitedPapers[0].citationCount)} Citations</span>
+                <span className="cit-badge">🔥 {formatNumber(featuredPaper.citationCount ?? 0)} Citations</span>
                 <Link to="/papers" className="spotlight-btn">
                   Explore Papers <FiArrowUpRight />
                 </Link>
