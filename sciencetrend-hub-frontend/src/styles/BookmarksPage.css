@@ -36,8 +36,8 @@
   content: "";
   position: absolute;
   bottom: -2px;
-  left: 0;
-  right: 0;
+  left: 4px;
+  right: 4px;
   height: 3px;
   background: linear-gradient(90deg, var(--st-primary), var(--st-primary-dark));
   border-radius: 9px;
