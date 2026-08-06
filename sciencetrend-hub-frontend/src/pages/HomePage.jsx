@@ -361,7 +361,11 @@ function HomePage() {
             <p>
               Start from a publication, a journal, a broader topic, or a specific keyword. Every path leads back to the evidence behind it.
             </p>
-            <Link to={ROUTE_PATHS.PAPERS} className="home-catalog-main-link">
+            <Link
+              to={ROUTE_PATHS.PAPERS}
+              reloadDocument
+              className="home-catalog-main-link"
+            >
               Open publication directory <FiArrowRight aria-hidden="true" />
             </Link>
           </div>
