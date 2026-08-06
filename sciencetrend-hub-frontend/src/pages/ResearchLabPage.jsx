@@ -715,6 +715,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   const edges = useMemo(() => (Array.isArray(data?.edges) ? data.edges : []), [data?.edges]);
   const layout = useMemo(() => getMapLayout(nodes, data?.root, edges), [nodes, data?.root, edges]);
   const [zoom, setZoom] = useState(100);
+  const [viewMode, setViewMode] = useState("structure");
   const canvasRef = useRef(null);
   const scrollSnapshotRef = useRef(null);
   const restoreFrameRef = useRef([]);
@@ -846,7 +847,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   }
 
   return (
-    <div className="research-map-explorer">
+    <div className={`research-map-explorer view-${viewMode}`}>
       <header className="research-map-toolbar">
         <div>
           <span className={`research-map-toolbar-mark type-${rootType.toLowerCase()}`}>
@@ -860,6 +861,14 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
         <div className="research-map-toolbar-meta">
           <span><b>{Math.max(0, nodes.length - 1)}</b> related nodes</span>
           <span><b>{edges.length}</b> verified links</span>
+        </div>
+        <div className="research-map-view-switch" aria-label="Mind map display mode">
+          <button type="button" className={viewMode === "structure" ? "active" : ""} onClick={() => setViewMode("structure")}>
+            <FiLayers />Structure
+          </button>
+          <button type="button" className={viewMode === "momentum" ? "active" : ""} onClick={() => setViewMode("momentum")}>
+            <FiTrendingUp />Momentum
+          </button>
         </div>
         <div className="research-map-zoom" aria-label="Mind map zoom controls">
           <button type="button" onClick={() => setZoom((current) => Math.max(80, current - 10))} disabled={zoom <= 80} aria-label="Zoom out">
@@ -1042,7 +1051,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
           <span className="is-stable"><i />Stable</span>
           <span className="is-declining"><i />Declining</span>
         </div>
-        <small>Click any node to inspect its evidence</small>
+        <small>Indexed evidence only · Select a node to inspect</small>
       </footer>
     </div>
   );
@@ -1135,6 +1144,7 @@ function MindMapWorkspace() {
     () => rootOptions.find((item) => String(item.id) === String(selectedRootId)) ?? null,
     [rootOptions, selectedRootId],
   );
+  const suggestedRoots = useMemo(() => rootOptions.slice(0, 4), [rootOptions]);
 
   // Auto-select top search match when filtering options
   useEffect(() => {
@@ -1218,31 +1228,58 @@ function MindMapWorkspace() {
     };
   }, [mapData]);
 
+  const selectedNodeSignal = useMemo(() => {
+    if (!selectedNode) return null;
+    const recent = Number(selectedNode.recentPaperCount) || 0;
+    const previous = Number(selectedNode.previousPaperCount) || 0;
+    const delta = recent - previous;
+    const percent = previous > 0 ? Math.round((delta / previous) * 100) : null;
+    return { delta, percent };
+  }, [selectedNode]);
+
+  const selectedNodeExplorePath = useMemo(() => {
+    if (!selectedNode?.label) return ROUTE_PATHS.PAPERS;
+    const type = normalizeMapType(selectedNode.type);
+    const parameter = type === "TOPIC" ? "topic" : type === "JOURNAL" ? "journal" : "keyword";
+    return `${ROUTE_PATHS.PAPERS}?${parameter}=${encodeURIComponent(selectedNode.label)}`;
+  }, [selectedNode]);
+
+  function chooseSuggestedRoot(root) {
+    setRootQuery("");
+    setSelectedRootId(String(root.id));
+    setErrorMessage("");
+    window.requestAnimationFrame(() => rootSelectRef.current?.focus());
+  }
+
   return (
     <div className="research-mind-shell">
-      <section className="research-mind-brief" aria-label="Knowledge map workflow">
+      <section className="research-mind-brief research-mind-command" aria-label="Knowledge map workflow">
         <div className="research-mind-brief-icon"><FiMap /></div>
         <div>
-          <span className="research-section-kicker">Relationship explorer</span>
-          <h3>Turn a research concept into an evidence landscape</h3>
-          <p>Start from one catalog keyword or topic. The lab traces its strongest connections and shows where activity is growing, stable or declining.</p>
+          <span className="research-section-kicker">Research intelligence graph</span>
+          <h3>Reveal the evidence around a research concept</h3>
+          <p>Build a catalog-grounded network, read publication momentum and move directly into the strongest evidence.</p>
         </div>
-        <ol>
-          <li><b>01</b><span><strong>Choose a root</strong><small>Anchor the research question</small></span></li>
-          <li><b>02</b><span><strong>Generate links</strong><small>Map catalog relationships</small></span></li>
-          <li><b>03</b><span><strong>Inspect evidence</strong><small>Read momentum by node</small></span></li>
-        </ol>
+        <div className="research-mind-progress" aria-label="Mind map progress">
+          <span className={selectedRoot ? "is-complete" : "is-active"}><b>01</b>Root</span>
+          <i />
+          <span className={mapData ? "is-complete" : selectedRoot ? "is-active" : ""}><b>02</b>Map</span>
+          <i />
+          <span className={selectedNode && mapData ? "is-active" : ""}><b>03</b>Inspect</span>
+        </div>
       </section>
 
       <div className="research-mind-layout">
       <form className="research-map-builder" onSubmit={buildMindMap}>
         <div className="research-panel-heading">
           <div>
-            <span className="research-section-kicker">Knowledge graph builder</span>
-            <h3>Choose a research root</h3>
+            <span className="research-section-kicker">Graph builder</span>
+            <h3>Anchor the question</h3>
           </div>
-          <FiGitBranch />
+          <span className="research-panel-step">01</span>
         </div>
+
+        <p className="research-builder-intro">Start with one indexed concept. Every connection in the map traces back to catalog metadata.</p>
 
         <div className="research-root-type-switch">
           <button type="button" className={rootType === "KEYWORD" ? "active" : ""} onClick={() => changeRootType("KEYWORD")}>
@@ -1292,9 +1329,10 @@ function MindMapWorkspace() {
           {mapLoading
             ? <><FiRefreshCw className="is-spinning" />Building map…</>
             : selectedRootId
-              ? <><FiGitBranch />Generate mind map</>
+              ? <><FiGitBranch />Generate intelligence map</>
               : <><FiPlus />Choose a root to continue</>}
         </button>
+        <small className="research-builder-footnote"><FiCheck />Uses indexed topics, keywords, journals and papers only</small>
       </form>
 
       <section className="research-map-panel" ref={mapPanelRef}>
@@ -1303,27 +1341,40 @@ function MindMapWorkspace() {
         ) : mapData ? (
           <MindMapGraph data={mapData} selectedNode={selectedNode} onSelectNode={setSelectedNode} />
         ) : (
-          <div className="research-tool-empty research-map-empty-state">
-            <div className="research-map-empty-visual" aria-hidden="true">
-              <span className="is-root"><FiGitBranch /></span>
-              <span className="is-node node-one"><FiHash /></span>
-              <span className="is-node node-two"><FiTag /></span>
-              <span className="is-node node-three"><FiBookOpen /></span>
-              <i className="line-one" /><i className="line-two" /><i className="line-three" />
+          <div className="research-map-empty-shell">
+            <header className="research-map-empty-toolbar">
+              <div><span><FiMap /></span><div><small>Infinite evidence canvas</small><strong>Landscape preview</strong></div></div>
+              <span className={selectedRoot ? "is-ready" : ""}>{selectedRoot ? "Root ready" : "Waiting for root"}</span>
+            </header>
+            <div className="research-tool-empty research-map-empty-state">
+            <div className="research-map-preview-network" aria-hidden="true">
+              <i className="preview-link link-one" /><i className="preview-link link-two" /><i className="preview-link link-three" /><i className="preview-link link-four" /><i className="preview-link link-five" />
+              <span className="preview-root"><FiGitBranch /><b>{selectedRoot?.name || "Research idea"}</b><small>Evidence root</small></span>
+              <span className="preview-node preview-topic"><FiTag /><b>Topics</b><small>Related fields</small></span>
+              <span className="preview-node preview-keyword"><FiHash /><b>Keywords</b><small>Shared concepts</small></span>
+              <span className="preview-node preview-journal"><FiBookOpen /><b>Journals</b><small>Publication context</small></span>
+              <span className="preview-node preview-signal"><FiTrendingUp /><b>Momentum</b><small>Growth signals</small></span>
             </div>
-            <span className="research-section-kicker">Evidence landscape preview</span>
-            <h3>{selectedRoot ? `Ready to map “${selectedRoot.name}”` : "Reveal the structure around a research idea"}</h3>
+            <span className="research-section-kicker">Evidence landscape</span>
+            <h3>{selectedRoot ? `Ready to investigate “${selectedRoot.name}”` : "Start with a concept. Reveal what surrounds it."}</h3>
             <p>{selectedRoot
-              ? "Generate the map to surface related concepts, publication venues and momentum signals."
-              : "Choose a catalog keyword or topic to turn a broad question into an explorable network."}</p>
+              ? "Generate the network to surface adjacent concepts, publication venues and changes in research activity."
+              : "Choose an indexed keyword or topic, then explore the strongest relationships behind your next research direction."}</p>
             <div className="research-map-empty-outcomes">
               <span><FiLayers />Related concepts</span>
               <span><FiTrendingUp />Momentum signals</span>
               <span><FiBookOpen />Journal context</span>
             </div>
+            {!selectedRoot && suggestedRoots.length > 0 && (
+              <div className="research-map-starters">
+                <small>Quick starts</small>
+                <div>{suggestedRoots.map((root) => <button key={root.id} type="button" onClick={() => chooseSuggestedRoot(root)}>{root.name}</button>)}</div>
+              </div>
+            )}
             <button type="button" onClick={() => selectedRootId ? rootSelectRef.current?.form?.requestSubmit() : rootSelectRef.current?.focus()}>
-              {selectedRootId ? <><FiGitBranch />Build this evidence map</> : <><FiSearch />Choose a research root</>}
+              {selectedRootId ? <><FiGitBranch />Build this intelligence map</> : <><FiSearch />Choose a research root</>}
             </button>
+            </div>
           </div>
         )}
       </section>
@@ -1332,33 +1383,41 @@ function MindMapWorkspace() {
         <div className="research-panel-heading">
           <div>
             <span className="research-section-kicker">Evidence inspector</span>
-            <h3>Node analysis</h3>
+            <h3>Read the signal</h3>
           </div>
-          <FiActivity />
+          <span className="research-panel-step">03</span>
         </div>
 
         {selectedNode ? (
           <>
             <article className={`research-node-detail trend-${String(selectedNode.trendStatus || "no_data").toLowerCase()}`}>
-              <span>{selectedNode.type}</span>
+              <div className="research-node-detail-type">
+                <i>{normalizeMapType(selectedNode.type) === "TOPIC" ? <FiTag /> : normalizeMapType(selectedNode.type) === "JOURNAL" ? <FiBookOpen /> : <FiHash />}</i>
+                <span>{selectedNode.type}</span>
+              </div>
               <h4>{selectedNode.label}</h4>
-              <div><TrendStatusIcon status={selectedNode.trendStatus} /><strong>{String(selectedNode.trendStatus || "NO_DATA").replaceAll("_", " ")}</strong></div>
+              <div className="research-node-trend"><TrendStatusIcon status={selectedNode.trendStatus} /><strong>{String(selectedNode.trendStatus || "NO_DATA").replaceAll("_", " ")}</strong></div>
             </article>
             <dl className="research-node-metrics">
               <div><dt>Total papers</dt><dd>{formatNumber(selectedNode.paperCount)}</dd></div>
               <div><dt>Recent period</dt><dd>{formatNumber(selectedNode.recentPaperCount)}</dd></div>
               <div><dt>Previous period</dt><dd>{formatNumber(selectedNode.previousPaperCount)}</dd></div>
             </dl>
+            <div className={`research-node-momentum ${selectedNodeSignal?.delta < 0 ? "is-negative" : selectedNodeSignal?.delta > 0 ? "is-positive" : ""}`}>
+              <span>{selectedNodeSignal?.delta < 0 ? <FiTrendingDown /> : <FiTrendingUp />}</span>
+              <div><small>Publication change</small><strong>{selectedNodeSignal?.delta > 0 ? "+" : ""}{formatNumber(selectedNodeSignal?.delta || 0)} papers {selectedNodeSignal?.percent !== null ? `· ${selectedNodeSignal.percent > 0 ? "+" : ""}${selectedNodeSignal.percent}%` : ""}</strong></div>
+            </div>
+            <Link className="research-inspector-action" to={selectedNodeExplorePath}>Explore supporting papers <FiArrowRight /></Link>
           </>
         ) : (
           <div className="research-inspector-empty">
             <FiActivity />
-            <strong>Evidence details appear here</strong>
-            <p>After generating a map, select any node to review:</p>
+            <strong>Select a node to inspect its evidence</strong>
+            <p>The inspector stays beside the canvas so the graph never loses context.</p>
             <ul>
-              <li>total catalog papers</li>
-              <li>recent vs previous activity</li>
-              <li>growth or decline status</li>
+              <li>catalog paper volume</li>
+              <li>recent publication change</li>
+              <li>direct path to supporting papers</li>
             </ul>
           </div>
         )}
