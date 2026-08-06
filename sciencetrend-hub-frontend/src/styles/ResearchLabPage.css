@@ -4635,6 +4635,43 @@ html body .st-layout .research-lab-v2 .research-map-canvas {
   overflow-x: hidden !important;
 }
 
+/* The global research theme gives every input its own 44px frame. Inside the
+   catalog filter the wrapper is the frame, so keep the child input visually
+   neutral and let focus styling belong to the unified search control. */
+html body .st-layout .research-lab-v2 .research-map-field > div {
+  height: 44px !important;
+  gap: 10px;
+  overflow: hidden;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+html body .st-layout .research-lab-v2 .research-map-field > div:focus-within {
+  border-color: rgba(79, 92, 247, .58) !important;
+  box-shadow: 0 0 0 3px rgba(79, 92, 247, .1) !important;
+}
+
+html body .st-layout .research-lab-v2 .research-map-field > div > svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+
+html body .st-layout .research-lab-v2 .research-map-field > div > input,
+html body .st-layout .research-lab-v2 .research-map-field > div > input:focus,
+html body .st-layout .research-lab-v2 .research-map-field > div > input:focus-visible {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  flex: 1 1 auto;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 @container research-lab-workspace (max-width: 1240px) {
   html body .st-layout .research-lab-v2 .research-mind-layout {
     grid-template-columns: minmax(250px, 290px) minmax(0, 1fr);
