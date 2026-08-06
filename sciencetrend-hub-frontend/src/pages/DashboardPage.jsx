@@ -537,7 +537,25 @@ function DashboardPage() {
 
           <aside className="db-v4-snapshot" aria-label="Current catalog snapshot">
             <div className="db-v4-snapshot-status">
-              <span className={hasDashboardData(data) ? "is-ready" : ""}><i />{hasDashboardData(data) ? "Live catalog" : "Awaiting data"}</span>
+              <span
+                className={hasDashboardData(data) ? "is-ready" : ""}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "5px 14px",
+                  borderRadius: "999px",
+                  fontSize: "12px",
+                  fontWeight: 850,
+                  border: "1px solid rgba(110, 231, 183, 0.45)",
+                  background: "linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(52, 211, 153, 0.15))",
+                  color: "#6ee7b7",
+                  boxShadow: "0 2px 10px rgba(16, 185, 129, 0.2)"
+                }}
+              >
+                <i />
+                {hasDashboardData(data) ? "Live catalog" : "Awaiting data"}
+              </span>
               <small className="vn-clock-badge" title="Live Vietnam Time (ICT UTC+7)">🇻🇳 ICT: {vietnamClock}</small>
             </div>
             <div className="db-v4-snapshot-total">
@@ -584,8 +602,31 @@ function DashboardPage() {
             </div>
             <div className="spotlight-body">
               <div className="spotlight-main">
-                <h3 className="spotlight-title">{(featuredPaper.title || "").replace(/<[^>]*>?/gm, "")}</h3>
-                <p className="spotlight-authors">{featuredPaper.authors || "Unknown author"} {featuredPaper.year ? `(${featuredPaper.year})` : ""}</p>
+                <h3
+                  className="spotlight-title"
+                  style={{
+                    color: "#ffffff",
+                    WebkitTextFillColor: "#ffffff",
+                    fontSize: "22px",
+                    fontWeight: 900,
+                    textShadow: "0 2px 12px rgba(0, 0, 0, 0.8)",
+                    margin: "0 0 8px 0"
+                  }}
+                >
+                  {(featuredPaper.title || "").replace(/<[^>]*>?/gm, "")}
+                </h3>
+                <p
+                  className="spotlight-authors"
+                  style={{
+                    color: "#e0e7ff",
+                    WebkitTextFillColor: "#e0e7ff",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    margin: 0
+                  }}
+                >
+                  {featuredPaper.authors || "Unknown author"} {featuredPaper.year ? `(${featuredPaper.year})` : ""}
+                </p>
               </div>
               <div className="spotlight-metrics">
                 <span className="cit-badge">🔥 {formatNumber(featuredPaper.citationCount ?? 0)} Citations</span>
