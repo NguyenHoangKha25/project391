@@ -2097,3 +2097,261 @@ html body .st-layout .db-featured-spotlight-card .spotlight-btn:hover {
   background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
   transform: translateY(-1px) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   PREMIUM OPERATIONS PANEL — Admin sync health dashboard
+   ═══════════════════════════════════════════════════════════ */
+
+.db-ops-premium {
+  background: linear-gradient(145deg, rgba(255,255,255,0.97) 0%, rgba(241,245,249,0.92) 100%) !important;
+  border: 1px solid rgba(148,163,184,0.18) !important;
+  border-radius: 24px !important;
+  box-shadow:
+    0 8px 32px rgba(15,23,42,0.06),
+    0 1px 3px rgba(15,23,42,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.9) !important;
+  padding: 28px !important;
+  backdrop-filter: blur(20px) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.db-ops-premium::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.db-ops-premium .panel-header-row h3 {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* --- Health progress bar --- */
+.ops-health-bar-wrapper {
+  margin: 18px 0 20px;
+}
+
+.ops-health-bar-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ops-health-bar-meta span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ops-health-bar-meta strong {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.ops-health-bar-meta strong.health-good { color: #059669; }
+.ops-health-bar-meta strong.health-warn { color: #d97706; }
+.ops-health-bar-meta strong.health-bad  { color: #dc2626; }
+
+.ops-health-bar-track {
+  height: 10px;
+  background: rgba(226,232,240,0.7);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.ops-health-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+.ops-health-bar-fill.health-good {
+  background: linear-gradient(90deg, #10b981, #34d399);
+  box-shadow: 0 0 12px rgba(16,185,129,0.35);
+}
+
+.ops-health-bar-fill.health-warn {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 12px rgba(245,158,11,0.35);
+}
+
+.ops-health-bar-fill.health-bad {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  box-shadow: 0 0 12px rgba(239,68,68,0.35);
+}
+
+/* Animated shimmer on the health bar */
+.ops-health-bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: healthBarShimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes healthBarShimmer {
+  0%   { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* --- Stat cards with icon badges --- */
+.db-ops-premium .db-operations-grid {
+  gap: 14px !important;
+}
+
+.ops-stat-card {
+  position: relative;
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px !important;
+  padding: 20px 18px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(226,232,240,0.6) !important;
+  background: rgba(255,255,255,0.85) !important;
+  box-shadow:
+    0 2px 8px rgba(15,23,42,0.04),
+    0 0 0 0 transparent !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  overflow: hidden;
+}
+
+.ops-stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 18px 18px 0 0;
+}
+
+.ops-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 24px rgba(15,23,42,0.08),
+    0 2px 6px rgba(15,23,42,0.04) !important;
+}
+
+/* Icon badge */
+.ops-stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+/* --- Color themes for each stat --- */
+
+/* Indigo — OpenAlex records */
+.ops-stat-indigo::before { background: linear-gradient(90deg, #6366f1, #818cf8); }
+.ops-stat-indigo { border-color: rgba(99,102,241,0.15) !important; background: linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(255,255,255,0.9) 50%) !important; }
+.ops-stat-indigo .ops-stat-icon { background: rgba(99,102,241,0.1); color: #4f46e5; }
+.ops-stat-indigo:hover { border-color: rgba(99,102,241,0.3) !important; }
+
+/* Emerald — Successful syncs */
+.ops-stat-emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
+.ops-stat-emerald { border-color: rgba(16,185,129,0.15) !important; background: linear-gradient(135deg, rgba(16,185,129,0.04) 0%, rgba(255,255,255,0.9) 50%) !important; }
+.ops-stat-emerald .ops-stat-icon { background: rgba(16,185,129,0.1); color: #059669; }
+.ops-stat-emerald:hover { border-color: rgba(16,185,129,0.3) !important; }
+
+/* Rose — Failed syncs */
+.ops-stat-rose::before { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+.ops-stat-rose { border-color: rgba(244,63,94,0.15) !important; background: linear-gradient(135deg, rgba(244,63,94,0.04) 0%, rgba(255,255,255,0.9) 50%) !important; }
+.ops-stat-rose .ops-stat-icon { background: rgba(244,63,94,0.1); color: #e11d48; }
+.ops-stat-rose:hover { border-color: rgba(244,63,94,0.3) !important; }
+
+/* Amber — Latest sync */
+.ops-stat-amber::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.ops-stat-amber { border-color: rgba(245,158,11,0.15) !important; background: linear-gradient(135deg, rgba(245,158,11,0.04) 0%, rgba(255,255,255,0.9) 50%) !important; }
+.ops-stat-amber .ops-stat-icon { background: rgba(245,158,11,0.1); color: #d97706; }
+.ops-stat-amber:hover { border-color: rgba(245,158,11,0.3) !important; }
+
+/* Stat card text */
+.ops-stat-card > span {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: #94a3b8 !important;
+}
+
+.ops-stat-card > strong {
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.ops-stat-card > small {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  line-height: 1.3 !important;
+}
+
+/* Status badge upgrade */
+.db-ops-premium .db-operation-status {
+  padding: 5px 14px !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.05em !important;
+  border-radius: 999px !important;
+}
+
+.db-ops-premium .db-operation-status.failed {
+  background: linear-gradient(135deg, rgba(244,63,94,0.12), rgba(244,63,94,0.18)) !important;
+  color: #be123c !important;
+  box-shadow: 0 2px 8px rgba(244,63,94,0.15) !important;
+  animation: failedPulse 2s ease-in-out infinite;
+}
+
+.db-ops-premium .db-operation-status.success,
+.db-ops-premium .db-operation-status.completed {
+  background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.18)) !important;
+  color: #047857 !important;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.15) !important;
+}
+
+@keyframes failedPulse {
+  0%, 100% { box-shadow: 0 2px 8px rgba(244,63,94,0.15); }
+  50%      { box-shadow: 0 2px 16px rgba(244,63,94,0.3); }
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .db-ops-premium .db-operations-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .db-ops-premium .db-operations-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .db-ops-premium {
+    padding: 20px !important;
+    border-radius: 18px !important;
+  }
+}

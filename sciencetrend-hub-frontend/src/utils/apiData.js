@@ -62,10 +62,13 @@ export function formatRelativeTime(value) {
   const diffMinutes = Math.round(diffMs / 60000);
   const absMinutes = Math.abs(diffMinutes);
   if (absMinutes < 1) return "Just now";
+  if (absMinutes === 1) return "1 minute ago";
   if (absMinutes < 60) return `${absMinutes} minutes ago`;
   const absHours = Math.round(absMinutes / 60);
+  if (absHours === 1) return "1 hour ago";
   if (absHours < 24) return `${absHours} hours ago`;
   const absDays = Math.round(absHours / 24);
+  if (absDays === 1) return "1 day ago";
   if (absDays < 7) return `${absDays} days ago`;
   return formatDateTime(value);
 }

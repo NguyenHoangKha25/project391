@@ -937,27 +937,52 @@ function DashboardPage() {
               </div>
               <p>Admin-only ingestion totals and the latest synchronization run.</p>
             </div>
-            <section className="db-operations-panel" aria-label="OpenAlex operations">
+            <section className="db-operations-panel db-ops-premium" aria-label="OpenAlex operations">
               <div className="panel-header-row">
-                <h3>Operations status</h3>
+                <h3><FiDatabase style={{ marginRight: 8, verticalAlign: "-2px" }} />Operations status</h3>
                 <span className={`db-operation-status ${String(operationsData?.latestSyncLog?.status || "unknown").toLowerCase()}`}>
+                  {String(operationsData?.latestSyncLog?.status || "unknown").toLowerCase() === "failed" ? "⚠ " : ""}
                   {operationsData?.latestSyncLog?.status || "No sync recorded"}
                 </span>
               </div>
+
+              {/* Sync health progress bar */}
+              {(() => {
+                const success = Number(operationsData?.successfulSyncCount ?? 0);
+                const failed = Number(operationsData?.failedSyncCount ?? 0);
+                const total = success + failed;
+                const healthPct = total > 0 ? Math.round((success / total) * 100) : 0;
+                return (
+                  <div className="ops-health-bar-wrapper">
+                    <div className="ops-health-bar-meta">
+                      <span>Sync health rate</span>
+                      <strong className={healthPct >= 70 ? "health-good" : healthPct >= 40 ? "health-warn" : "health-bad"}>{healthPct}%</strong>
+                    </div>
+                    <div className="ops-health-bar-track">
+                      <div className={`ops-health-bar-fill ${healthPct >= 70 ? "health-good" : healthPct >= 40 ? "health-warn" : "health-bad"}`} style={{ width: `${healthPct}%` }} />
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="db-operations-grid">
-                <div>
+                <div className="ops-stat-card ops-stat-indigo">
+                  <div className="ops-stat-icon"><FiDatabase /></div>
                   <span>OpenAlex records</span>
                   <strong>{formatNumber(operationsData?.openAlexPaperCount ?? 0)}</strong>
                 </div>
-                <div>
+                <div className="ops-stat-card ops-stat-emerald">
+                  <div className="ops-stat-icon"><FiCheckCircle /></div>
                   <span>Successful syncs</span>
                   <strong>{formatNumber(operationsData?.successfulSyncCount ?? 0)}</strong>
                 </div>
-                <div>
+                <div className="ops-stat-card ops-stat-rose">
+                  <div className="ops-stat-icon"><FiAlertTriangle /></div>
                   <span>Failed syncs</span>
                   <strong>{formatNumber(operationsData?.failedSyncCount ?? 0)}</strong>
                 </div>
-                <div>
+                <div className="ops-stat-card ops-stat-amber">
+                  <div className="ops-stat-icon"><FiRefreshCw /></div>
                   <span>Latest sync</span>
                   <strong>
                     {operationsData?.latestSyncLog?.startedAt
