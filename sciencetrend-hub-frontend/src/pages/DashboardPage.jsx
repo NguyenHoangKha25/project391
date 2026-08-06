@@ -21,6 +21,9 @@ import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import {
   getDashboardHome,
+  getDashboardOverview,
+  getDashboardAnalytics,
+  getDashboardOperations,
 } from "../services/dashboardService";
 import { getTrendingTopics } from "../services/trendService";
 import {
@@ -107,9 +110,6 @@ function DashboardPage() {
       if (cachedOverview) setData(cachedOverview);
       if (cachedTopics.length > 0) setTrendingTopics(cachedTopics);
       setLoading(false);
-    } else if (!isRefresh) {
-      setData(null);
-      setTrendingTopics([]);
     }
 
     try {
@@ -117,60 +117,74 @@ function DashboardPage() {
       else if (!hasCachedData) setLoading(true);
       setErrorMessage("");
 
-      // Single unified dashboard request + optional trending topics
-      const requests = [getDashboardHome()];
-      // Only fetch trending topics for roles that have access
-      if (canUseAnalytics) {
-        requests.push(getTrendingTopics({ limit: 3 }));
+      // 1. Primary unified dashboard call: GET /dashboard/home
+      let homeData = null;
+      try {
+        const homeRes = await getDashboardHome();
+        homeData = normalizeDashboardHome(homeRes);
+      } catch {
+        // Fallback call: GET /dashboard/summary (accessible by Student, Lecturer, Researcher, Admin)
+        try {
+          const summaryRes = await getDashboardOverview();
+          homeData = normalizeDashboardHome({ overview: summaryRes });
+        } catch {
+          homeData = null;
+        }
       }
 
-      const results = await Promise.allSettled(requests);
-      const homeRes = results[0];
-      const topicsRes = canUseAnalytics ? results[1] : null;
-
-      if (homeRes.status === "fulfilled") {
-        const home = normalizeDashboardHome(homeRes.value);
-        const normOverview = home.overview || {};
-
-        setData(normOverview);
-        setPersistentCachedData(cacheKeys.overview, normOverview);
+      if (homeData && homeData.overview) {
+        setData(homeData.overview);
+        setPersistentCachedData(cacheKeys.overview, homeData.overview);
         setErrorMessage("");
 
-        if (home.analytics) {
-          setAnalyticsData(home.analytics);
-        } else {
-          setAnalyticsData(null);
-        }
-
-        if (home.operations) {
-          setOperationsData(home.operations);
-        } else {
-          setOperationsData(null);
-        }
-      } else if (!cachedOverview) {
-        const errorReason = homeRes.reason?.message;
-        setErrorMessage(errorReason || "Couldn't load dashboard statistics. Please check your connection or sign in again.");
+        if (homeData.analytics) setAnalyticsData(homeData.analytics);
+        if (homeData.operations) setOperationsData(homeData.operations);
       }
 
-      if (topicsRes?.status === "fulfilled") {
-        const normTopics = toArray(topicsRes.value)
-          .map(normalizeTopic)
-          .filter((topic) => topic.name !== "Untitled topic");
-        if (normTopics.length > 0) {
-          setTrendingTopics(normTopics);
-          setPersistentCachedData(cacheKeys.topics, normTopics);
+      // 2. Fetch specific role-gated endpoints if not supplied in home
+      if (canUseAnalytics && (!homeData || !homeData.analytics)) {
+        try {
+          const analyticsRes = await getDashboardAnalytics();
+          if (analyticsRes) setAnalyticsData(analyticsRes);
+        } catch {
+          // silent fallback for analytics
+        }
+      }
+
+      if (isAdmin && (!homeData || !homeData.operations)) {
+        try {
+          const opsRes = await getDashboardOperations();
+          if (opsRes) setOperationsData(opsRes);
+        } catch {
+          // silent fallback for operations
+        }
+      }
+
+      // 3. Fetch trending topics for roles that have access
+      if (canUseAnalytics) {
+        try {
+          const topicsRes = await getTrendingTopics({ limit: 3 });
+          const normTopics = toArray(topicsRes)
+            .map(normalizeTopic)
+            .filter((t) => t.name !== "Untitled topic");
+          if (normTopics.length > 0) {
+            setTrendingTopics(normTopics);
+            setPersistentCachedData(cacheKeys.topics, normTopics);
+          }
+        } catch {
+          // silent fallback for trending topics
         }
       }
     } catch (error) {
       console.error("Cannot load dashboard", error);
-      if (!hasCachedData) {
-        setErrorMessage(error.message || "Couldn't reach the server. Please try again in a moment.");
+      if (!hasCachedData && !data) {
+        setErrorMessage("Couldn't load dashboard data. Please verify your connection.");
       }
     } finally {
       setLoading(false);
       setSpinning(false);
     }
-  }, [cacheKeys, canUseAnalytics, isAdmin]);
+  }, [cacheKeys, canUseAnalytics, isAdmin, data]);
 
   useEffect(() => {
     loadDashboard();
