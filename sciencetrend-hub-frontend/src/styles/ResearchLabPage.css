@@ -2889,8 +2889,8 @@ html body .st-layout .research-lab-v2 .research-map-insights {
 }
 
 html body .st-layout .research-lab-v2 .research-map-builder {
-  position: sticky;
-  top: 92px;
+  position: relative;
+  top: auto;
 }
 
 @media (max-width: 1100px) {
