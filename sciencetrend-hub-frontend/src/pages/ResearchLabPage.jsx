@@ -6,6 +6,8 @@ import {
   FiBarChart2,
   FiBookOpen,
   FiCheck,
+  FiChevronLeft,
+  FiChevronRight,
   FiCompass,
   FiGitBranch,
   FiHash,
@@ -40,6 +42,7 @@ import "../styles/ResearchLabPage.css";
 
 const MAX_COMPARISON_PAPERS = 4;
 const MIN_COMPARISON_PAPERS = 2;
+const COMPARATOR_PAGE_SIZE = 4;
 const MAP_WIDTH = 1180;
 const MAP_MIN_HEIGHT = 640;
 const MAP_NODE_WIDTH = 240;
@@ -426,6 +429,7 @@ function PaperComparator() {
   const [comparing, setComparing] = useState(false);
   const [comparison, setComparison] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [candidatePage, setCandidatePage] = useState(0);
   const builderPanelRef = useRef(null);
   const searchInputRef = useRef(null);
   const resultsRef = useRef(null);
@@ -446,6 +450,7 @@ function PaperComparator() {
           .map(normalizePaper)
           .filter((paper) => paper.id && paper.title !== "Untitled paper"),
       );
+      setCandidatePage(0);
     } catch (error) {
       setPaperOptions([]);
       setErrorMessage(error.message || "Could not load research papers.");
@@ -519,6 +524,10 @@ function PaperComparator() {
   const availablePapers = paperOptions.filter(
     (paper) => !selectedPapers.some((selected) => String(selected.id) === String(paper.id)),
   );
+  const candidatePageCount = Math.max(1, Math.ceil(availablePapers.length / COMPARATOR_PAGE_SIZE));
+  const activeCandidatePage = Math.min(candidatePage, candidatePageCount - 1);
+  const candidateStart = activeCandidatePage * COMPARATOR_PAGE_SIZE;
+  const visibleCandidatePapers = availablePapers.slice(candidateStart, candidateStart + COMPARATOR_PAGE_SIZE);
   const papersNeeded = Math.max(0, MIN_COMPARISON_PAPERS - selectedPapers.length);
   const isReady = papersNeeded === 0;
   const selectionProgress = Math.min(
@@ -590,15 +599,19 @@ function PaperComparator() {
 
         <div className="research-catalog-status" aria-live="polite">
           <span>{searching ? "Scanning catalog" : `${availablePapers.length} candidate${availablePapers.length === 1 ? "" : "s"}`}</span>
-          <small>{query.trim() ? `Results for “${query.trim()}”` : "Sorted by citation impact"}</small>
+          <small>{searching
+            ? "Reading indexed evidence"
+            : availablePapers.length > 0
+              ? `Showing ${candidateStart + 1}–${Math.min(candidateStart + COMPARATOR_PAGE_SIZE, availablePapers.length)} · ${query.trim() ? `“${query.trim()}”` : "citation impact"}`
+              : "No candidate page"}</small>
         </div>
 
         <div className="research-paper-options">
           {searching ? (
             <div className="research-mini-loading"><span className="workspace-loading-spinner" />Loading papers…</div>
-          ) : availablePapers.length > 0 ? availablePapers.map((paper, index) => (
+          ) : visibleCandidatePapers.length > 0 ? visibleCandidatePapers.map((paper, index) => (
             <article key={paper.id}>
-              <span className="research-paper-rank">{String(index + 1).padStart(2, "0")}</span>
+              <span className="research-paper-rank">{String(candidateStart + index + 1).padStart(2, "0")}</span>
               <div className="research-paper-copy">
                 <h4>{paper.title}</h4>
                 <p>{paper.authors} · {paper.year || "Year unavailable"}</p>
@@ -615,6 +628,18 @@ function PaperComparator() {
             <div className="research-empty-inline">No papers match this search. The catalog may need an Admin backfill.</div>
           )}
         </div>
+
+        {!searching && availablePapers.length > COMPARATOR_PAGE_SIZE && (
+          <nav className="research-candidate-pagination" aria-label="Candidate paper pages">
+            <button type="button" onClick={() => setCandidatePage((current) => Math.max(0, current - 1))} disabled={activeCandidatePage === 0}>
+              <FiChevronLeft />Previous
+            </button>
+            <span><strong>{activeCandidatePage + 1}</strong> / {candidatePageCount}</span>
+            <button type="button" onClick={() => setCandidatePage((current) => Math.min(candidatePageCount - 1, current + 1))} disabled={activeCandidatePage >= candidatePageCount - 1}>
+              Next<FiChevronRight />
+            </button>
+          </nav>
+        )}
       </aside>
 
       <section className="research-selection-panel">
