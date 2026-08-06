@@ -2598,6 +2598,61 @@ html body .st-layout .research-lab-v2 .research-lab-tabs button.active .research
   box-shadow: 0 9px 20px rgba(3, 16, 57, .18) !important;
 }
 
+html body .st-layout .research-lab-v2 .research-lab-tabs button .research-lab-tab-icon {
+  width: 56px;
+  height: 56px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .52);
+  box-shadow: 0 12px 24px rgba(49, 60, 184, .24), inset 0 1px 0 rgba(255, 255, 255, .42) !important;
+  transform: translateZ(0);
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button:first-child .research-lab-tab-icon {
+  color: #fff !important;
+  background: linear-gradient(145deg, #6d5dfc 0%, #3b5be9 55%, #168ed5 100%) !important;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button:nth-child(2) .research-lab-tab-icon {
+  color: #fff !important;
+  background: linear-gradient(145deg, #06b6d4 0%, #168bd2 48%, #3f4be0 100%) !important;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button .research-lab-tab-icon::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255, 255, 255, .26), transparent 48%);
+  pointer-events: none;
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button .research-lab-tab-icon svg {
+  width: 26px;
+  height: 26px;
+  position: relative;
+  z-index: 1;
+  color: #fff !important;
+  stroke: currentColor !important;
+  stroke-width: 2.35;
+  filter: drop-shadow(0 2px 5px rgba(14, 23, 76, .28));
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button:hover .research-lab-tab-icon,
+html body .st-layout .research-lab-v2 .research-lab-tabs button.active .research-lab-tab-icon {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, .72);
+  box-shadow: 0 15px 30px rgba(31, 48, 163, .3), 0 0 0 5px rgba(103, 232, 249, .1), inset 0 1px 0 rgba(255, 255, 255, .5) !important;
+  transform: translateY(-2px);
+  filter: saturate(1.08);
+}
+
+html body .st-layout .research-lab-v2 .research-lab-tabs button.active .research-lab-tab-icon svg {
+  color: #fff !important;
+  stroke: currentColor !important;
+}
+
 @media (max-width: 1100px) {
   html body .st-layout .research-lab-v2 .research-lab-hero {
     min-height: 0;
