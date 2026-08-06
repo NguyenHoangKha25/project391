@@ -1921,3 +1921,22 @@ html body .st-layout .reports-trigger-create-btn:hover {
   box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4) !important;
   transform: translateY(-2px) !important;
 }
+
+/* --------------------------------------------------------------------------
+   MindMap Root Card Viewport Margin Fix
+   -------------------------------------------------------------------------- */
+
+html body .st-layout .research-map-canvas {
+  overflow: auto !important;
+  overflow-anchor: none !important;
+  overscroll-behavior: contain !important;
+  padding: 24px 20px !important;
+}
+
+html body .st-layout .research-map-canvas svg {
+  overflow: visible !important;
+}
+
+html body .st-layout .research-map-root {
+  outline: none !important;
+}

@@ -803,7 +803,7 @@ function MindMapGraph({ data, selectedNodeId, onSelectNode }) {
 
       <div className="research-map-canvas" ref={canvasRef}>
         <svg
-          viewBox={`0 0 ${layout.width} ${layout.height}`}
+          viewBox={`0 -50 ${layout.width} ${layout.height + 100}`}
           style={{ width: `${zoom}%`, minWidth: `${Math.round(760 * zoom / 100)}px` }}
           role="img"
           aria-label={`Research mind map for ${data.root?.label || "selected root"}`}
