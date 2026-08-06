@@ -572,6 +572,14 @@ function TrendsPage() {
     });
   }, [comparisonSeries, timeRange]);
 
+  const activeFocusedSeries = useMemo(() => {
+    if (focusedSeries === "ALL") return "ALL";
+    if (focusedSeries && comparisonLines.some((line) => line.label === focusedSeries)) {
+      return focusedSeries;
+    }
+    return comparisonLines[0]?.label || "";
+  }, [focusedSeries, comparisonLines]);
+
   const groupedBarData = useMemo(() => {
     if (comparisonLines.length === 0) return null;
     const years = comparisonLines[0]?.years || [];
@@ -725,29 +733,36 @@ function TrendsPage() {
               <>
                 <div className="trend-chart-guide">
                   <p>Click a card below to focus its line curve and reveal yearly values.</p>
-                  {focusedSeries && <button type="button" onClick={() => setFocusedSeries("")}>Show all series</button>}
+                  {activeFocusedSeries !== "ALL" ? (
+                    <button type="button" onClick={() => setFocusedSeries("ALL")}>Overview all series</button>
+                  ) : (
+                    <button type="button" onClick={() => setFocusedSeries(comparisonLines[0]?.label || "")}>Focus single line</button>
+                  )}
                 </div>
                 <div className="multi-line-legend-container" aria-label="Trend series">
-                  {comparisonLines.map((series) => (
-                    <button
-                      type="button"
-                      key={series.label}
-                      className={`multi-line-legend-item ${focusedSeries === series.label ? "is-active" : ""} ${focusedSeries && focusedSeries !== series.label ? "is-muted" : ""}`}
-                      style={{ "--series-color": series.color }}
-                      onClick={() => setFocusedSeries((current) => current === series.label ? "" : series.label)}
-                      aria-pressed={focusedSeries === series.label}
-                    >
-                      <span className="legend-line-swatch" aria-hidden="true" />
-                      <span className="legend-text" title={series.label}>
-                        <strong>{series.label}</strong>
-                        <small>{series.totalValStr} papers</small>
-                      </span>
-                      <span className="legend-latest-value" aria-label={`${series.finalYear}: ${series.finalValStr} papers`}>
-                        <small>{series.finalYear}</small>
-                        <strong>{series.finalValStr}</strong>
-                      </span>
-                    </button>
-                  ))}
+                  {comparisonLines.map((series) => {
+                    const isSelected = activeFocusedSeries === series.label;
+                    return (
+                      <button
+                        type="button"
+                        key={series.label}
+                        className={`multi-line-legend-item ${isSelected ? "is-active" : ""} ${activeFocusedSeries !== "ALL" && !isSelected ? "is-muted" : ""}`}
+                        style={{ "--series-color": series.color }}
+                        onClick={() => setFocusedSeries(series.label)}
+                        aria-pressed={isSelected}
+                      >
+                        <span className="legend-line-swatch" aria-hidden="true" />
+                        <span className="legend-text" title={series.label}>
+                          <strong>{series.label}</strong>
+                          <small>{series.totalValStr} papers</small>
+                        </span>
+                        <span className="legend-latest-value" aria-label={`${series.finalYear}: ${series.finalValStr} papers`}>
+                          <small>{series.finalYear}</small>
+                          <strong>{series.finalValStr}</strong>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="trends-svg-chart-container">
@@ -760,9 +775,9 @@ function TrendsPage() {
                     <defs>
                       {comparisonLines.flatMap((series) => ([
                         <linearGradient key={series.strokeGradientId} id={series.strokeGradientId} x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor={series.color} stopOpacity="0.72" />
+                          <stop offset="0%" stopColor={series.color} stopOpacity="0.75" />
                           <stop offset="48%" stopColor={series.color} stopOpacity="1" />
-                          <stop offset="100%" stopColor={series.color} stopOpacity="0.84" />
+                          <stop offset="100%" stopColor={series.color} stopOpacity="0.85" />
                         </linearGradient>,
                         <linearGradient key={series.areaGradientId} id={series.areaGradientId} x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor={series.color} stopOpacity="0.25" />
@@ -808,8 +823,8 @@ function TrendsPage() {
 
                     {/* Multi-Line Curves */}
                     {comparisonLines.map((series) => {
-                      const isFocused = focusedSeries === series.label;
-                      const isMuted = Boolean(focusedSeries) && !isFocused;
+                      const isFocused = activeFocusedSeries === series.label;
+                      const isMuted = activeFocusedSeries !== "ALL" && !isFocused;
                       return (
                         <g key={series.label} className={`trend-line-series ${isFocused ? "is-focused" : ""} ${isMuted ? "is-muted" : ""}`}>
                           {isFocused && series.areaPath && (
@@ -819,7 +834,8 @@ function TrendsPage() {
                             d={series.linePath}
                             fill="none"
                             stroke="#ffffff"
-                            strokeWidth={isFocused ? "6" : "3.5"}
+                            strokeWidth={isFocused ? "6" : "3"}
+                            strokeDasharray={isMuted ? "5 4" : "none"}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             vectorEffect="non-scaling-stroke"
@@ -829,7 +845,8 @@ function TrendsPage() {
                             d={series.linePath}
                             fill="none"
                             stroke={`url(#${series.strokeGradientId})`}
-                            strokeWidth={isFocused ? "3.6" : "2.4"}
+                            strokeWidth={isFocused ? "4" : "1.8"}
+                            strokeDasharray={isMuted ? "5 4" : "none"}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             vectorEffect="non-scaling-stroke"
@@ -840,15 +857,15 @@ function TrendsPage() {
                               <circle
                                 cx={point.x}
                                 cy={point.y}
-                                r={isFocused ? "4.2" : "3"}
+                                r={isFocused ? "4.5" : "2.6"}
                                 fill="#ffffff"
                                 stroke={series.color}
-                                strokeWidth={isFocused ? "2.6" : "1.8"}
+                                strokeWidth={isFocused ? "2.8" : "1.6"}
                                 vectorEffect="non-scaling-stroke"
                               >
                                 <title>{`${series.label} (${point.label}): ${formatNumber(point.value)} papers`}</title>
                               </circle>
-                              {isFocused && (
+                              {(isFocused || activeFocusedSeries === "ALL") && (
                                 <text
                                   x={point.x}
                                   y={Math.max(COMPARISON_PLOT_TOP + 10, point.y - 10)}
