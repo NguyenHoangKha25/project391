@@ -45,6 +45,9 @@ const MIN_COMPARISON_PAPERS = 2;
 const COMPARATOR_PAGE_SIZE = 4;
 const MAP_WIDTH = 1180;
 const MAP_MIN_HEIGHT = 640;
+const MAP_ZOOM_MIN = 60;
+const MAP_ZOOM_MAX = 180;
+const MAP_ZOOM_STEP = 10;
 const MAP_NODE_WIDTH = 240;
 const MAP_NODE_HEIGHT = 68;
 const MAP_TYPE_ORDER = ["TOPIC", "KEYWORD", "JOURNAL", "UNKNOWN"];
@@ -766,6 +769,19 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   const restoreFrameRef = useRef([]);
   const rootType = normalizeMapType(data?.root?.type);
   const rootLines = splitMapLabel(data?.root?.label, 24);
+  const baseViewBoxY = -110;
+  const baseViewBoxHeight = layout.height + 220;
+  const fitZoomRatio = 100 / zoom;
+  const fitViewBoxWidth = layout.width * fitZoomRatio;
+  const fitViewBoxHeight = baseViewBoxHeight * fitZoomRatio;
+  const zoomInProgress = Math.max(0, zoom - 100) / (MAP_ZOOM_MAX - 100);
+  const fitViewBoxCenterX = layout.width / 2 - zoomInProgress * 180;
+  const fitViewBoxCenterY = baseViewBoxY + baseViewBoxHeight / 2;
+  const fitViewBoxX = fitViewBoxCenterX - fitViewBoxWidth / 2;
+  const fitViewBoxY = fitViewBoxCenterY - fitViewBoxHeight / 2;
+  const mapViewBox = isFocusMode
+    ? `0 ${baseViewBoxY} ${layout.width} ${baseViewBoxHeight}`
+    : `${fitViewBoxX} ${fitViewBoxY} ${fitViewBoxWidth} ${fitViewBoxHeight}`;
 
   useEffect(() => {
     setZoom(100);
@@ -930,18 +946,34 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
           </button>
         </div>
         <div className="research-map-zoom" aria-label="Mind map zoom controls">
-          {isFocusMode && (
-            <>
-              <button type="button" onClick={() => setZoom((current) => Math.max(80, current - 10))} disabled={zoom <= 80} aria-label="Zoom out">
-                <FiMinus />
-              </button>
-              <span>{zoom}%</span>
-              <button type="button" onClick={() => setZoom((current) => Math.min(140, current + 10))} disabled={zoom >= 140} aria-label="Zoom in">
-                <FiPlus />
-              </button>
-            </>
-          )}
-          <button type="button" onClick={() => { setZoom(100); setIsFocusMode((current) => !current); }} aria-label={isFocusMode ? "Exit focus mode" : "Open focus mode"}>
+          <button
+            type="button"
+            onClick={() => setZoom((current) => Math.max(MAP_ZOOM_MIN, current - MAP_ZOOM_STEP))}
+            disabled={zoom <= MAP_ZOOM_MIN}
+            aria-label="Zoom out"
+            title="Zoom out"
+          >
+            <FiMinus />
+          </button>
+          <button
+            type="button"
+            className="research-map-zoom-value"
+            onClick={() => setZoom(100)}
+            aria-label={`Reset zoom to 100 percent. Current zoom ${zoom} percent`}
+            title="Reset zoom"
+          >
+            {zoom}%
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoom((current) => Math.min(MAP_ZOOM_MAX, current + MAP_ZOOM_STEP))}
+            disabled={zoom >= MAP_ZOOM_MAX}
+            aria-label="Zoom in"
+            title="Zoom in"
+          >
+            <FiPlus />
+          </button>
+          <button type="button" onClick={() => setIsFocusMode((current) => !current)} aria-label={isFocusMode ? "Exit focus mode" : "Open focus mode"}>
             {isFocusMode ? <FiMinimize2 /> : <FiMaximize2 />}
           </button>
         </div>
@@ -955,7 +987,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
 
       <div className="research-map-canvas" ref={canvasRef}>
         <svg
-          viewBox={`0 -110 ${layout.width} ${layout.height + 220}`}
+          viewBox={mapViewBox}
           style={isFocusMode
             ? { width: `${zoom}%`, minWidth: `${Math.round(760 * zoom / 100)}px` }
             : { width: "100%", minWidth: 0, height: "100%" }}
