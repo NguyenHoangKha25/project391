@@ -9,12 +9,14 @@ import {
   FiRefreshCw,
   FiSearch,
   FiSettings,
+  FiStopCircle,
   FiTrash2,
   FiUsers,
   FiX,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import {
+  cancelAdminSync,
   deleteAdminUser,
   getAdminReports,
   getAdminSyncLogs,
@@ -43,7 +45,11 @@ const CURRENT_YEAR = new Date().getFullYear();
 const DEFAULT_BACKFILL_FROM_YEAR = 2015;
 
 function statusClass(value) {
-  return ["SUCCESS", "COMPLETED", "ACTIVE", "CONNECTED"].includes(String(value).toUpperCase()) ? "connected" : "error";
+  const status = String(value).toUpperCase();
+  if (["SUCCESS", "COMPLETED", "ACTIVE", "CONNECTED"].includes(status)) return "connected";
+  if (status === "RUNNING") return "running";
+  if (status === "CANCELLED") return "cancelled";
+  return "error";
 }
 
 function AdminPage() {
@@ -61,7 +67,13 @@ function AdminPage() {
   const [backfillError, setBackfillError] = useState("");
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState("");
+  const [cancellingSyncId, setCancellingSyncId] = useState(null);
   const [message, setMessage] = useState("");
+
+  const refreshSyncLogs = useCallback(async () => {
+    const response = await getAdminSyncLogs({ page: 0, size: 100 });
+    setSyncLogs(toArray(response, ["logs", "syncLogs"]));
+  }, []);
 
   const loadAdminData = useCallback(async () => {
     setLoading(true);
@@ -92,6 +104,33 @@ function AdminPage() {
   useEffect(() => {
     loadAdminData();
   }, [loadAdminData]);
+
+  const hasRunningSync = syncLogs.some((log) => String(log.status).toUpperCase() === "RUNNING");
+
+  useEffect(() => {
+    const shouldPoll = tab === "sync"
+      || working === "sync"
+      || working === "backfill"
+      || hasRunningSync;
+    if (!shouldPoll) return undefined;
+
+    let disposed = false;
+    const poll = async () => {
+      try {
+        const response = await getAdminSyncLogs({ page: 0, size: 100 });
+        if (!disposed) setSyncLogs(toArray(response, ["logs", "syncLogs"]));
+      } catch {
+        // Keep the current table visible when one background poll fails.
+      }
+    };
+
+    poll();
+    const intervalId = window.setInterval(poll, 2500);
+    return () => {
+      disposed = true;
+      window.clearInterval(intervalId);
+    };
+  }, [tab, working, hasRunningSync]);
 
   async function searchUsers(event) {
     event.preventDefault();
@@ -146,12 +185,21 @@ function AdminPage() {
   }
 
   async function runSync() {
+    if (hasRunningSync) {
+      setMessage("Stop the running sync/backfill job before starting another one.");
+      return;
+    }
     setWorking("sync");
     setMessage("");
     try {
-      await triggerAdminSync();
-      setMessage("Manual OpenAlex sync was started.");
+      const response = await triggerAdminSync();
+      const finalStatus = String(response?.status || "").toUpperCase();
       await loadAdminData();
+      setMessage(finalStatus === "CANCELLED"
+        ? "Manual OpenAlex sync was cancelled."
+        : finalStatus === "FAILED"
+          ? "Manual OpenAlex sync finished with errors."
+          : "Manual OpenAlex sync completed successfully.");
     } catch (error) {
       setMessage(error.message || "Could not start sync.");
     } finally {
@@ -161,6 +209,10 @@ function AdminPage() {
 
   async function runBackfill(event) {
     event.preventDefault();
+    if (hasRunningSync) {
+      setBackfillError("Stop the running sync/backfill job before starting another one.");
+      return;
+    }
     const parsedFromYear = Number(fromYear);
     const parsedToYear = Number(toYear);
     const parsedMaxResults = Number(maxResults);
@@ -186,13 +238,36 @@ function AdminPage() {
     setMessage("");
     setBackfillError("");
     try {
-      await triggerAdminBackfill({ fromYear: parsedFromYear, toYear: parsedToYear, maxResults: parsedMaxResults });
+      const response = await triggerAdminBackfill({ fromYear: parsedFromYear, toYear: parsedToYear, maxResults: parsedMaxResults });
+      const finalStatus = String(response?.status || "").toUpperCase();
       await loadAdminData();
-      setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} (max ${formatNumber(parsedMaxResults)} papers) completed successfully.`);
+      setMessage(finalStatus === "CANCELLED"
+        ? `Historical backfill ${parsedFromYear}–${parsedToYear} was cancelled.`
+        : finalStatus === "FAILED"
+          ? `Historical backfill ${parsedFromYear}–${parsedToYear} finished with errors.`
+          : `Historical backfill ${parsedFromYear}–${parsedToYear} (max ${formatNumber(parsedMaxResults)} papers) completed successfully.`);
     } catch (error) {
       setMessage(error.message || "Could not start backfill.");
     } finally {
       setWorking("");
+    }
+  }
+
+  async function stopSync(log) {
+    const syncLogId = log.syncLogId ?? log.id;
+    if (!syncLogId || String(log.status).toUpperCase() !== "RUNNING") return;
+    if (!window.confirm("Stop this sync/backfill job? Imported records will be kept.")) return;
+
+    setCancellingSyncId(syncLogId);
+    setMessage("");
+    try {
+      await cancelAdminSync(syncLogId);
+      await refreshSyncLogs();
+      setMessage(`Stop requested for sync job #${syncLogId}.`);
+    } catch (error) {
+      setMessage(error.message || "Could not stop this sync job.");
+    } finally {
+      setCancellingSyncId(null);
     }
   }
 
@@ -236,7 +311,7 @@ function AdminPage() {
                     <AdminUsersTable users={users.slice(0, 5)} onView={viewUser} onRole={updateRole} onDelete={removeUser} working={working} compact />
                   </article>
                   <article className="admin-panel">
-                    <div className="panel-header-row"><h3>Latest sync runs</h3><div className="admin-sync-actions"><button className="admin-secondary-action-btn" type="button" onClick={() => setTab("sync")}><FiDatabase /> Backfill years</button><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Sync now</button></div></div>
+                    <div className="panel-header-row"><h3>Latest sync runs</h3><div className="admin-sync-actions"><button className="admin-secondary-action-btn" type="button" onClick={() => setTab("sync")}><FiDatabase /> Backfill years</button><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync" || hasRunningSync}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Sync now</button></div></div>
                     <SyncTable logs={syncLogs.slice(0, 5)} compact />
                   </article>
                 </div>
@@ -253,7 +328,7 @@ function AdminPage() {
             {tab === "sync" && (
               <div className="admin-sync-layout">
                 <article className="admin-panel-detailed">
-                  <div className="panel-header-row"><div><h3>OpenAlex synchronization</h3><p>Start a current sync or backfill a historical year range.</p></div><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Manual sync</button></div>
+                  <div className="panel-header-row"><div><h3>OpenAlex synchronization</h3><p>Start a current sync or backfill a historical year range.</p></div><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync" || hasRunningSync}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Manual sync</button></div>
                   <form className="admin-backfill-form" onSubmit={runBackfill}>
                     <div className="admin-backfill-copy"><span>Historical data</span><strong>Backfill publications by year</strong><p>Import missing OpenAlex records for the selected period.</p></div>
                     <div className="admin-backfill-fields">
@@ -263,11 +338,11 @@ function AdminPage() {
                       <span className="admin-year-separator" aria-hidden="true">·</span>
                       <label htmlFor="backfill-max-results">Max papers<input id="backfill-max-results" type="number" min="1" max="20000" value={maxResults} onChange={(event) => { setMaxResults(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                     </div>
-                    <button className="workspace-button primary admin-backfill-submit" type="submit" disabled={working === "backfill"}>{working === "backfill" ? <><FiRefreshCw className="is-spinning" /> Starting backfill…</> : <><FiDownload /> Start backfill</>}</button>
+                    <button className="workspace-button primary admin-backfill-submit" type="submit" disabled={working === "backfill" || hasRunningSync}>{working === "backfill" ? <><FiRefreshCw className="is-spinning" /> Running backfill…</> : hasRunningSync ? <><FiStopCircle /> Stop running job first</> : <><FiDownload /> Start backfill</>}</button>
                     {backfillError && <p className="admin-backfill-error" role="alert"><FiAlertTriangle /> {backfillError}</p>}
                   </form>
                 </article>
-                <article className="admin-panel-detailed"><div className="panel-header-row"><h3>Sync history</h3></div><SyncTable logs={syncLogs} /></article>
+                <article className="admin-panel-detailed"><div className="panel-header-row"><h3>Sync history</h3></div><SyncTable logs={syncLogs} onCancel={stopSync} cancellingSyncId={cancellingSyncId} /></article>
               </div>
             )}
 
@@ -348,8 +423,13 @@ function AdminUsersTable({ users, onView, onRole, onDelete, working, compact = f
   );
 }
 
-function SyncTable({ logs, compact = false }) {
-  return <div className="admin-detailed-table-wrap"><table className={compact ? "admin-compact-table" : "admin-detailed-table"}><thead><tr><th>Status</th><th>Records</th><th>Started</th>{!compact && <th>Details</th>}</tr></thead><tbody>{logs.map((log, index) => <tr key={log.id ?? index}><td><span className={`status-label ${statusClass(log.status)}`}>{log.status || "UNKNOWN"}</span></td><td>{formatNumber(log.paperSynced ?? log.newRecords ?? log.recordsIndexed ?? 0)}</td><td>{log.startedAt ? formatDateTime(log.startedAt) : "—"}</td>{!compact && <td>{log.message || "—"}</td>}</tr>)}{logs.length === 0 && <tr><td colSpan="4">No sync logs available.</td></tr>}</tbody></table></div>;
+function SyncTable({ logs, compact = false, onCancel, cancellingSyncId }) {
+  return <div className="admin-detailed-table-wrap"><table className={compact ? "admin-compact-table" : "admin-detailed-table"}><thead><tr><th>Status</th><th>Records</th><th>Started</th>{!compact && <><th>Details</th><th>Actions</th></>}</tr></thead><tbody>{logs.map((log, index) => {
+    const syncLogId = log.syncLogId ?? log.id;
+    const isRunning = String(log.status).toUpperCase() === "RUNNING";
+    const isCancelling = cancellingSyncId === syncLogId;
+    return <tr key={syncLogId ?? index}><td><span className={`status-label ${statusClass(log.status)}`}>{log.status || "UNKNOWN"}</span></td><td>{formatNumber(log.paperSynced ?? log.newRecords ?? log.recordsIndexed ?? 0)}</td><td>{log.startedAt ? formatDateTime(log.startedAt) : "—"}</td>{!compact && <><td>{log.errorMessage || log.message || "—"}</td><td>{isRunning ? <button className="admin-stop-sync-btn" type="button" onClick={() => onCancel?.(log)} disabled={isCancelling}>{isCancelling ? <FiRefreshCw className="is-spinning" /> : <FiStopCircle />}{isCancelling ? "Stopping…" : "Stop"}</button> : "—"}</td></>}</tr>;
+  })}{logs.length === 0 && <tr><td colSpan={compact ? 3 : 5}>No sync logs available.</td></tr>}</tbody></table></div>;
 }
 
 function ReportsTable({ reports }) {
