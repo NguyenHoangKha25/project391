@@ -108,7 +108,7 @@ function RegisterPage() {
       }
     } else if (name === "confirmPassword") {
       if (!value) {
-        error = "Please confirm password.";
+        error = "Confirm required.";
       } else if (value !== form.password) {
         error = "Passwords do not match.";
       }

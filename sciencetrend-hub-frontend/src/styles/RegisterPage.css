@@ -421,6 +421,8 @@ html body .register-page .form-label-row {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  min-height: 18px !important;
+  gap: 8px !important;
 }
 
 html body .register-page .form-group label {
@@ -429,12 +431,18 @@ html body .register-page .form-group label {
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.04em !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
 }
 
 html body .register-page .field-error-text {
   color: #ef4444 !important;
   font-size: 10.5px !important;
   font-weight: 600 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  text-align: right !important;
 }
 
 /* Input Wrappers & Style */
