@@ -1162,3 +1162,39 @@
 .trend-compare-options button.is-selected { border-color: #4f46e5; color: #fff; background: linear-gradient(135deg, #4f46e5, #2563eb); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.18); }
 .trend-compare-options button:disabled { cursor: default; opacity: 0.78; }
 .trend-compare-options button svg { width: 12px; height: 12px; }
+
+/* Keep catalog suggestions above animated metric cards for Student and Lecturer. */
+html body .st-layout .trends-page-container {
+  overflow: visible !important;
+}
+
+html body .st-layout .trends-controls-bar {
+  position: relative !important;
+  z-index: 120 !important;
+  overflow: visible !important;
+  isolation: isolate;
+}
+
+html body .st-layout .trends-filter-inputs-group,
+html body .st-layout .trends-autocomplete,
+html body .st-layout .trends-search-box-wrap {
+  overflow: visible !important;
+}
+
+html body .st-layout .trends-autocomplete {
+  z-index: 130 !important;
+}
+
+html body .st-layout .trends-autocomplete-menu {
+  z-index: 140 !important;
+  opacity: 1 !important;
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 22px 58px rgba(15, 23, 42, 0.24) !important;
+}
+
+html body .st-layout .trends-stats-cards-row,
+html body .st-layout .trends-middle-grid {
+  position: relative;
+  z-index: 1;
+}
