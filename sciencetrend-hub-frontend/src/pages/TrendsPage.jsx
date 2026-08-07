@@ -76,7 +76,7 @@ function TrendsSuggestionPortal({ anchorRef, children, id, isOpen }) {
 function hasUsableTrendSeries(points) {
   return Array.isArray(points)
     && points.length > 0
-    && points.some((point) => Number(point?.value) > 0);
+    && points.some((point) => Number.isFinite(Number(point?.value)));
 }
 
 function hasUsableDashboard(dashboard) {
@@ -105,7 +105,7 @@ const COMPARISON_PLOT_LEFT = 48;
 const COMPARISON_PLOT_RIGHT = 24;
 const COMPARISON_PLOT_TOP = 22;
 const COMPARISON_PLOT_BOTTOM = 25;
-const COMPARISON_GRID_LEVELS = [1, 0.75, 0.5, 0.25, 0];
+const COMPARISON_GRID_LEVELS = [1, 0.5, 0, -0.5, -1];
 const CURRENT_YEAR = new Date().getFullYear();
 
 function getRangeStartYear(timeRange) {
@@ -115,7 +115,7 @@ function getRangeStartYear(timeRange) {
 
 function getTrendSeriesCacheKey(tab, term, fromYear, toYear) {
   const termStr = typeof term === "string" ? term : (term?.name || term?.keyword || term?.term || String(term || ""));
-  return `trend_analysis_${tab}_${termStr.trim().toLowerCase()}_${fromYear ?? "role-default"}_${toYear ?? "role-default"}`;
+  return `trend_growth_analysis_v2_${tab}_${termStr.trim().toLowerCase()}_${fromYear ?? "role-default"}_${toYear ?? "role-default"}`;
 }
 
 function formatPaperCount(value) {
@@ -159,13 +159,57 @@ function formatTrendType(value, sufficientData = true) {
   return normalized.charAt(0) + normalized.slice(1).toLowerCase();
 }
 
+const TREND_TYPE_DESCRIPTIONS = {
+  EMERGING: "Strong recent activity emerging from a low publication base.",
+  GROWING: "Publication activity is increasing across the analysis window.",
+  STABLE: "Publication activity is broadly stable without a clear growth direction.",
+  DECLINING: "Publication activity is decreasing across the analysis window.",
+  INSUFFICIENT_DATA: "Fewer than 30 papers are available, so no trend conclusion is made.",
+};
+
+function normalizeGrowthPoint(item, index) {
+  const growthRate = Number(item?.growthRate) || 0;
+  return {
+    label: String(item?.year ?? item?.label ?? index + 1),
+    value: growthRate * 100,
+    growthRate,
+    paperCount: Number(item?.paperCount) || 0,
+    previousPaperCount: Number(item?.previousPaperCount) || 0,
+    trendScore: Number(item?.trendScore) || 0,
+  };
+}
+
+function deriveGrowthData(yearlyData) {
+  const rawPoints = toArray(yearlyData)
+    .map(normalizeChartPoint)
+    .filter((point) => /^\d{4}$/.test(String(point?.label ?? "")))
+    .sort((left, right) => Number(left.label) - Number(right.label));
+
+  return rawPoints.map((point, index) => {
+    const paperCount = Number(point.value) || 0;
+    const previousPaperCount = index > 0 ? Number(rawPoints[index - 1]?.value) || 0 : 0;
+    const growthRate = previousPaperCount > 0
+      ? (paperCount - previousPaperCount) / previousPaperCount
+      : index > 0 && paperCount > 0 ? 1 : 0;
+    return {
+      label: point.label,
+      value: growthRate * 100,
+      growthRate,
+      paperCount,
+      previousPaperCount,
+      trendScore: 0,
+    };
+  });
+}
+
 function normalizeTrendAnalysis(response, fallbackName = "") {
   const payload = response?.data ?? response ?? {};
+  const trendType = String(payload.trendType || "INSUFFICIENT_DATA").toUpperCase();
   const sufficientData = payload.sufficientData !== false
-    && String(payload.trendType || "").toUpperCase() !== "INSUFFICIENT_DATA";
+    && trendType !== "INSUFFICIENT_DATA";
   return {
     name: String(payload.name ?? payload.keyword ?? payload.topic ?? fallbackName).trim(),
-    trendType: String(payload.trendType || "INSUFFICIENT_DATA").toUpperCase(),
+    trendType,
     sufficientData,
     growthRate: Number(payload.growthRate) || 0,
     trendScore: Number(payload.trendScore) || 0,
@@ -174,7 +218,7 @@ function normalizeTrendAnalysis(response, fallbackName = "") {
     totalPapers: Number(payload.totalPapers) || 0,
     fromYear: Number(payload.fromYear) || null,
     toYear: Number(payload.toYear) || null,
-    yearlyData: toArray(payload.yearlyData).map(normalizeChartPoint),
+    yearlyGrowthData: toArray(payload.yearlyGrowthData).map(normalizeGrowthPoint),
   };
 }
 
@@ -229,18 +273,24 @@ function normalizeTrendComparison(response) {
     fromYear: Number(payload.fromYear) || null,
     toYear: Number(payload.toYear) || null,
     series: Array.isArray(payload.series)
-      ? payload.series.map((item) => ({
+      ? payload.series.map((item) => {
+          const trendType = String(item?.trendType || "INSUFFICIENT_DATA").toUpperCase();
+          const backendGrowthData = toArray(item?.yearlyGrowthData);
+          return {
           name: String(item?.name || "").trim(),
           totalPapers: Number(item?.totalPapers) || 0,
           growthRate: Number(item?.growthRate) || 0,
           trendScore: Number(item?.trendScore) || 0,
           recentCount: Number(item?.recentCount) || 0,
           previousCount: Number(item?.previousCount) || 0,
-          trendType: String(item?.trendType || "INSUFFICIENT_DATA").toUpperCase(),
+          trendType,
           sufficientData: item?.sufficientData !== false
-            && String(item?.trendType || "").toUpperCase() !== "INSUFFICIENT_DATA",
-          points: toArray(item?.yearlyData).map(normalizeChartPoint),
-        })).filter((item) => item.name)
+            && trendType !== "INSUFFICIENT_DATA",
+          points: backendGrowthData.length > 0
+            ? backendGrowthData.map(normalizeGrowthPoint)
+            : deriveGrowthData(item?.yearlyData),
+        };
+        }).filter((item) => item.name)
       : [],
   };
 }
@@ -646,7 +696,7 @@ function TrendsPage() {
 
     if (cached) {
       setTrendAnalysis(cached);
-      setChartData(cached.yearlyData || []);
+      setChartData(cached.yearlyGrowthData || []);
       setChartLoading(false);
     } else {
       setTrendAnalysis(null);
@@ -662,7 +712,7 @@ function TrendsPage() {
         if (cancelled) return;
         const analysis = normalizeTrendAnalysis(response, singleTrendTerm);
         setTrendAnalysis(analysis);
-        setChartData(analysis.yearlyData);
+        setChartData(analysis.yearlyGrowthData);
         setPersistentCachedData(cacheKey, analysis);
       })
       .catch(() => {
@@ -694,7 +744,7 @@ function TrendsPage() {
         getTrendSeriesCacheKey(trendTab, term, getRangeStartYear(timeRange), CURRENT_YEAR),
         ANALYTICS_CACHE_TTL_MS,
       );
-      return points?.name ? [{ ...points, points: points.yearlyData || [] }] : [];
+      return points?.name ? [{ ...points, points: points.yearlyGrowthData || [] }] : [];
     });
 
     setComparisonSeries(cachedSeries);
@@ -711,7 +761,7 @@ function TrendsPage() {
           getTrendSeriesCacheKey(trendTab, term, fromYear, CURRENT_YEAR),
           analysis,
         );
-        return { ...analysis, points: analysis.yearlyData };
+        return { ...analysis, points: analysis.yearlyGrowthData };
       }));
       const cachedByName = new Map(cachedSeries.map((series) => [series.name, series]));
       return results.flatMap((result, index) => {
@@ -735,7 +785,7 @@ function TrendsPage() {
           const comparison = normalizeTrendComparison(response);
           availableSeries = comparison.series;
           availableSeries.forEach((series) => {
-            const analysis = { ...series, yearlyData: series.points };
+            const analysis = { ...series, yearlyGrowthData: series.points };
             setPersistentCachedData(
               getTrendSeriesCacheKey(trendTab, series.name, fromYear, CURRENT_YEAR),
               analysis,
@@ -759,28 +809,6 @@ function TrendsPage() {
       cancelled = true;
     };
   }, [canCompare, comparisonTermKey, timeRange, trendTab]);
-
-  // Aggregate only the selected API series by year. Never substitute catalog-wide or generated values.
-  const effectiveChartData = useMemo(() => {
-    if (!hasUsableTrendSeries(chartData)) return [];
-    const yearMap = {};
-    chartData.forEach((item) => {
-      if (!item) return;
-      const yr = String(item.label ?? item.year ?? "").trim();
-      if (/^\d{4}$/.test(yr)) {
-        yearMap[yr] = (yearMap[yr] || 0) + (Number(item.value) || 0);
-      }
-    });
-
-    const fromYear = canCompare ? getRangeStartYear(timeRange) : Number.NEGATIVE_INFINITY;
-    const sortedYears = Object.keys(yearMap)
-      .filter((year) => Number(year) >= fromYear && Number(year) <= CURRENT_YEAR)
-      .sort((a, b) => Number(a) - Number(b));
-    return sortedYears.map((year) => ({
-      label: year,
-      value: yearMap[year],
-    }));
-  }, [canCompare, chartData, timeRange]);
 
   const visualSeries = useMemo(() => {
     if (isMultiSeriesComparison) {
@@ -812,39 +840,51 @@ function TrendsPage() {
     const paddingRight = COMPARISON_PLOT_RIGHT;
     const paddingTop = COMPARISON_PLOT_TOP;
     const paddingBottom = COMPARISON_PLOT_BOTTOM;
-    const valuesBySeries = visualSeries.map((series) => {
-      const yearlyValues = new Map();
+    const pointsBySeries = visualSeries.map((series) => {
+      const yearlyPoints = new Map();
       series.points.forEach((point) => {
         const year = String(point?.label ?? "").trim();
         if (!/^\d{4}$/.test(year)) return;
-        yearlyValues.set(year, (yearlyValues.get(year) || 0) + (Number(point?.value) || 0));
+        yearlyPoints.set(year, point);
       });
-      return years.map((year) => yearlyValues.get(year) || 0);
+      return years.map((year) => yearlyPoints.get(year) || {
+        label: year,
+        value: 0,
+        paperCount: 0,
+        previousPaperCount: 0,
+        trendScore: 0,
+      });
     });
-    const maxVal = Math.max(1, ...valuesBySeries.flat());
-    const axisMax = Math.max(2, maxVal);
+    const allValues = pointsBySeries.flat().map((point) => Number(point.value) || 0);
+    const maxAbsoluteValue = Math.max(10, ...allValues.map((value) => Math.abs(value)));
+    const axisMax = Math.ceil(maxAbsoluteValue / 10) * 10;
+    const axisMin = -axisMax;
     const plotWidth = width - paddingLeft - paddingRight;
     const plotHeight = height - paddingTop - paddingBottom;
-    const plotBaseY = height - paddingBottom;
+    const zeroY = paddingTop + (axisMax / (axisMax - axisMin)) * plotHeight;
 
     return visualSeries.map((series, seriesIndex) => {
-      const values = valuesBySeries[seriesIndex];
-      const coords = values.map((value, index) => {
+      const seriesPoints = pointsBySeries[seriesIndex];
+      const coords = seriesPoints.map((sourcePoint, index) => {
+        const value = Number(sourcePoint.value) || 0;
         const x = years.length === 1
           ? paddingLeft + plotWidth / 2
           : paddingLeft + (plotWidth * index) / (years.length - 1);
-        const y = plotBaseY - (value / axisMax) * plotHeight;
+        const y = paddingTop + ((axisMax - value) / (axisMax - axisMin)) * plotHeight;
         return {
           x,
           y,
           value,
           label: years[index],
+          paperCount: Number(sourcePoint.paperCount) || 0,
+          previousPaperCount: Number(sourcePoint.previousPaperCount) || 0,
+          trendScore: Number(sourcePoint.trendScore) || 0,
         };
       });
       const finalPoint = coords[coords.length - 1];
       const linePath = createSmoothLinePath(coords);
       const areaPath = coords.length > 1
-        ? `${linePath} L ${coords.at(-1).x.toFixed(1)},${plotBaseY.toFixed(1)} L ${coords[0].x.toFixed(1)},${plotBaseY.toFixed(1)} Z`
+        ? `${linePath} L ${coords.at(-1).x.toFixed(1)},${zeroY.toFixed(1)} L ${coords[0].x.toFixed(1)},${zeroY.toFixed(1)} Z`
         : "";
 
       return {
@@ -855,10 +895,12 @@ function TrendsPage() {
         coords,
         linePath,
         areaPath,
-        finalValStr: formatNumber(finalPoint?.value ?? 0),
+        finalValStr: formatPercentValue(finalPoint?.value ?? 0),
         finalYear: finalPoint?.label ?? "",
-        totalValStr: formatNumber(values.reduce((sum, value) => sum + value, 0)),
+        finalPaperCountStr: formatNumber(finalPoint?.paperCount ?? 0),
         axisMax,
+        axisMin,
+        zeroY,
         years,
       };
     });
@@ -872,24 +914,9 @@ function TrendsPage() {
     return comparisonLines[0]?.label || "";
   }, [focusedSeries, comparisonLines]);
 
-  const annualGrowth = useMemo(() => {
-    if (!effectiveChartData || effectiveChartData.length < 2) return null;
-    const first = Number(effectiveChartData[0]?.value);
-    const last = Number(effectiveChartData[effectiveChartData.length - 1]?.value);
-    const numYears = Math.max(1, effectiveChartData.length - 1);
-
-    if (!Number.isFinite(first) || !Number.isFinite(last) || first <= 0 || last <= 0) {
-      return null;
-    }
-
-    // Compound Annual Growth Rate (CAGR) Formula: ((last / first) ^ (1 / n) - 1) * 100
-    const ratio = last / first;
-    const cagr = (Math.pow(ratio, 1 / numYears) - 1) * 100;
-    return Number.isFinite(cagr) ? cagr : null;
-  }, [effectiveChartData]);
   const displayedGrowth = trendAnalysis?.sufficientData
     ? Number(trendAnalysis.growthRate) * 100
-    : annualGrowth;
+    : null;
 
   return (
     <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
@@ -1084,8 +1111,8 @@ function TrendsPage() {
           <article className="trends-chart-panel glassmorphic-panel multi-line-comp-panel">
             <div className="panel-header-row">
               <h3>{isMultiSeriesComparison
-                ? `${trendTab === "keyword" ? "Keyword" : "Topic"} Comparison`
-                : `${trendTab === "keyword" ? "Keyword" : "Topic"} Publication Trend`}</h3>
+                ? `${trendTab === "keyword" ? "Keyword" : "Topic"} Growth Rate Comparison`
+                : `${trendTab === "keyword" ? "Keyword" : "Topic"} Growth Rate by Year`}</h3>
               <span className="badge-chip badge-cyan">
                 {canCompare
                   ? isMultiSeriesComparison ? "Multi-series comparison" : "Select 2–5 series"
@@ -1117,6 +1144,9 @@ function TrendsPage() {
                   {canCompare && trendAnalysis.fromYear && trendAnalysis.toYear
                     ? `Analysis period: ${trendAnalysis.fromYear}–${trendAnalysis.toYear}`
                     : "Analysis window: Previous 5 years vs Recent 5 years"}
+                </p>
+                <p className="trend-analysis-explanation">
+                  {TREND_TYPE_DESCRIPTIONS[trendAnalysis.sufficientData ? trendAnalysis.trendType : "INSUFFICIENT_DATA"]}
                 </p>
               </section>
             )}
@@ -1257,9 +1287,9 @@ function TrendsPage() {
                         <span className="legend-line-swatch" aria-hidden="true" />
                         <span className="legend-text" title={series.label}>
                           <strong>{series.label}</strong>
-                          <small>{series.totalValStr} papers</small>
+                          <small>{series.finalPaperCountStr} papers in {series.finalYear}</small>
                         </span>
-                        <span className="legend-latest-value" aria-label={`${series.finalYear}: ${series.finalValStr} papers`}>
+                        <span className="legend-latest-value" aria-label={`${series.finalYear}: ${series.finalValStr} annual growth`}>
                           <small>{series.finalYear}</small>
                           <strong>{series.finalValStr}</strong>
                         </span>
@@ -1269,11 +1299,12 @@ function TrendsPage() {
                 </div>
 
                 <div className="trends-svg-chart-container">
+                  <span className="trend-y-axis-title">Annual growth rate (%)</span>
                   <svg
                     viewBox={`0 0 ${COMPARISON_CHART_WIDTH} ${COMPARISON_CHART_HEIGHT}`}
                     className="trends-svg-chart multi-line-svg"
                     role="img"
-                    aria-label={`${trendTab === "keyword" ? "Keyword" : "Topic"} publication comparison curves by year`}
+                    aria-label={`${trendTab === "keyword" ? "Keyword" : "Topic"} annual growth rate percentage by year`}
                   >
                     <defs>
                       {comparisonLines.flatMap((series) => ([
@@ -1299,7 +1330,7 @@ function TrendsPage() {
                     <g className="trend-chart-grid" aria-hidden="true">
                       {COMPARISON_GRID_LEVELS.map((level) => {
                         const gridY = COMPARISON_PLOT_TOP
-                          + (1 - level)
+                          + ((1 - level) / 2)
                           * (COMPARISON_PLOT_HEIGHT - COMPARISON_PLOT_TOP - COMPARISON_PLOT_BOTTOM);
                         return (
                           <g key={level}>
@@ -1308,7 +1339,7 @@ function TrendsPage() {
                               y1={gridY}
                               x2={COMPARISON_CHART_WIDTH - COMPARISON_PLOT_RIGHT}
                               y2={gridY}
-                              className="trend-chart-grid-line"
+                              className={`trend-chart-grid-line ${level === 0 ? "is-zero" : ""}`}
                             />
                             <text
                               x={COMPARISON_PLOT_LEFT - 9}
@@ -1317,7 +1348,7 @@ function TrendsPage() {
                               dominantBaseline="middle"
                               className="trend-chart-grid-label"
                             >
-                              {formatNumber(Math.round((comparisonLines[0]?.axisMax ?? 0) * level))}
+                              {formatPercentValue((comparisonLines[0]?.axisMax ?? 0) * level)}
                             </text>
                           </g>
                         );
@@ -1364,7 +1395,7 @@ function TrendsPage() {
                                 strokeWidth={isFocused ? "3.2" : "2.4"}
                                 vectorEffect="non-scaling-stroke"
                               >
-                                <title>{`${series.label} (${point.label}): ${formatNumber(point.value)} papers`}</title>
+                                <title>{`${series.label} (${point.label}): ${formatPercentValue(point.value)} growth; ${formatNumber(point.paperCount)} papers; previous year ${formatNumber(point.previousPaperCount)} papers`}</title>
                               </circle>
                               {isFocused && activeFocusedSeries !== "ALL" && (
                                 <text
@@ -1373,7 +1404,7 @@ function TrendsPage() {
                                   textAnchor="middle"
                                   className="trend-line-value"
                                 >
-                                  {formatNumber(point.value)}
+                                  {formatPercentValue(point.value)}
                                 </text>
                               )}
                             </g>
@@ -1384,9 +1415,9 @@ function TrendsPage() {
                     <g className="trend-chart-axis" aria-hidden="true">
                       <line
                         x1={COMPARISON_PLOT_LEFT}
-                        y1={COMPARISON_PLOT_HEIGHT - COMPARISON_PLOT_BOTTOM}
+                        y1={comparisonLines[0]?.zeroY ?? COMPARISON_PLOT_HEIGHT - COMPARISON_PLOT_BOTTOM}
                         x2={COMPARISON_CHART_WIDTH - COMPARISON_PLOT_RIGHT}
-                        y2={COMPARISON_PLOT_HEIGHT - COMPARISON_PLOT_BOTTOM}
+                        y2={comparisonLines[0]?.zeroY ?? COMPARISON_PLOT_HEIGHT - COMPARISON_PLOT_BOTTOM}
                         className="trend-chart-axis-line"
                       />
                     {comparisonLines[0]?.coords.map((point) => (
@@ -1444,8 +1475,8 @@ function TrendsPage() {
                 {chartLoading || comparisonLoading
                   ? "Loading data…"
                   : !singleTrendTerm && !isMultiSeriesComparison
-                    ? `Search and select a ${trendTab} to view its yearly publication trend.`
-                    : `No yearly publication data is available for the selected ${trendTab}${isMultiSeriesComparison ? "s" : ""}.`}
+                    ? `Search and select a ${trendTab} to view its annual growth rate.`
+                    : `No annual growth data is available for the selected ${trendTab}${isMultiSeriesComparison ? "s" : ""}.`}
               </div>
             )}
           </article>

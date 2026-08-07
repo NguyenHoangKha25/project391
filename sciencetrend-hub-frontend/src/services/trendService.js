@@ -1,6 +1,7 @@
 import { apiRequest } from "./api";
 
-// Connect to GET /api/trends/keyword or GET /api/trends/topic from backend
+// Legacy raw-count helpers retained for callers outside TrendsPage.
+// TrendsPage uses the /analysis endpoints below as its source of truth.
 export function getTrendStats(params = {}) {
   const topic = String(params.topic || "").trim();
   if (topic) {

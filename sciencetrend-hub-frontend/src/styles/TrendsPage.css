@@ -405,12 +405,23 @@
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
 }
 .trends-svg-chart-container {
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin-top: 6px;
   flex: 1;
+}
+
+.trend-y-axis-title {
+  align-self: flex-start;
+  margin: 2px 0 -4px 46px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 .trends-svg-chart {
   width: 100%;
@@ -636,6 +647,12 @@
   stroke: rgba(138, 151, 179, 0.16);
   stroke-width: 1;
   stroke-dasharray: 4 7;
+}
+
+.trend-chart-grid-line.is-zero {
+  stroke: rgba(51, 65, 85, 0.52);
+  stroke-width: 1.4;
+  stroke-dasharray: none;
 }
 
 .trend-chart-grid-label {
@@ -1466,6 +1483,12 @@ html body .st-layout .trends-inline-suggestions .trends-suggestion-arrow {
   color: #64748b;
   font-size: 11px;
   font-weight: 650;
+}
+
+.trend-analysis-summary > p.trend-analysis-explanation {
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--trend-tone) 18%, #e2e8f0);
+  line-height: 1.55;
 }
 
 .trend-analysis-table-wrap {
