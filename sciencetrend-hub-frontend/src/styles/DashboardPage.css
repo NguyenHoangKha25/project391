@@ -2269,3 +2269,111 @@ html body .st-layout .premium-dashboard.dashboard-v5 a.db-kpi-card {
   }
 }
 
+/* Dashboard motion system: purposeful entrance and live-data cues. */
+@keyframes db-dashboard-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes db-dashboard-slide-in {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes db-dashboard-grid-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
+  50% { transform: translate3d(-14px, 8px, 0) scale(1.03); opacity: 0.78; }
+}
+
+@keyframes db-dashboard-live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.35); }
+  50% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); }
+}
+
+@keyframes db-dashboard-bar-grow {
+  from { transform: scaleY(0.08); opacity: 0.4; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes db-dashboard-fill-grow {
+  from { transform: scaleX(0); opacity: 0.45; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+html body .st-layout .dashboard-v5 .db-v4-hero-copy {
+  animation: db-dashboard-rise 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html body .st-layout .dashboard-v5 .db-v4-snapshot {
+  animation: db-dashboard-slide-in 660ms 90ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html body .st-layout .premium-dashboard.dashboard-v5 .db-v4-hero::after {
+  animation: db-dashboard-grid-drift 12s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.dashboard-v5 .db-v4-snapshot-status .is-ready i {
+  animation: db-dashboard-live-pulse 2.4s ease-in-out infinite;
+}
+
+.dashboard-v5 .db-research-briefing,
+.dashboard-v5 .db-featured-spotlight-card,
+.dashboard-v5 .db-section-intro,
+.dashboard-v5 .db-impact-strip,
+.dashboard-v5 .db-charts-grid > article {
+  animation: db-dashboard-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dashboard-v5 .db-research-briefing { animation-delay: 130ms; }
+.dashboard-v5 .db-featured-spotlight-card { animation-delay: 180ms; }
+.dashboard-v5 .db-section-intro { animation-delay: 210ms; }
+.dashboard-v5 .db-impact-strip { animation-delay: 280ms; }
+.dashboard-v5 .db-charts-grid > article:nth-child(1) { animation-delay: 300ms; }
+.dashboard-v5 .db-charts-grid > article:nth-child(2) { animation-delay: 350ms; }
+.dashboard-v5 .db-charts-grid > article:nth-child(3) { animation-delay: 400ms; }
+
+.dashboard-v5 .db-brief-card,
+.dashboard-v5 .db-metrics-grid-primary > * {
+  animation: db-dashboard-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dashboard-v5 .db-brief-card:nth-child(1),
+.dashboard-v5 .db-metrics-grid-primary > *:nth-child(1) { animation-delay: 180ms; }
+.dashboard-v5 .db-brief-card:nth-child(2),
+.dashboard-v5 .db-metrics-grid-primary > *:nth-child(2) { animation-delay: 230ms; }
+.dashboard-v5 .db-brief-card:nth-child(3),
+.dashboard-v5 .db-metrics-grid-primary > *:nth-child(3) { animation-delay: 280ms; }
+.dashboard-v5 .db-metrics-grid-primary > *:nth-child(4) { animation-delay: 330ms; }
+
+.dashboard-v5 .db-v4-activity-card .bar-fill {
+  transform-origin: center bottom;
+  animation: db-dashboard-bar-grow 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dashboard-v5 .db-v4-activity-card .chart-bar-col:nth-child(2n) .bar-fill { animation-delay: 70ms; }
+.dashboard-v5 .db-v4-activity-card .chart-bar-col:nth-child(3n) .bar-fill { animation-delay: 120ms; }
+
+.dashboard-v5 .db-v4-keywords-card .keyword-bar-fill {
+  transform-origin: left center;
+  animation: db-dashboard-fill-grow 720ms 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .st-layout .dashboard-v5 .db-v4-hero-copy,
+  html body .st-layout .dashboard-v5 .db-v4-snapshot,
+  html body .st-layout .premium-dashboard.dashboard-v5 .db-v4-hero::after,
+  .dashboard-v5 .db-v4-snapshot-status .is-ready i,
+  .dashboard-v5 .db-research-briefing,
+  .dashboard-v5 .db-featured-spotlight-card,
+  .dashboard-v5 .db-section-intro,
+  .dashboard-v5 .db-impact-strip,
+  .dashboard-v5 .db-charts-grid > article,
+  .dashboard-v5 .db-brief-card,
+  .dashboard-v5 .db-metrics-grid-primary > *,
+  .dashboard-v5 .db-v4-activity-card .bar-fill,
+  .dashboard-v5 .db-v4-keywords-card .keyword-bar-fill {
+    animation: none !important;
+  }
+}
+

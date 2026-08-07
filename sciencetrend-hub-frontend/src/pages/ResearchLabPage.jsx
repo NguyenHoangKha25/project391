@@ -11,6 +11,7 @@ import {
   FiChevronRight,
   FiColumns,
   FiCompass,
+  FiCopy,
   FiGitBranch,
   FiHash,
   FiLayers,
@@ -61,6 +62,26 @@ const MAP_TYPE_META = {
   KEYWORD: { label: "Keywords", shortLabel: "K", relation: "Related keywords" },
   JOURNAL: { label: "Journals", shortLabel: "J", relation: "Published in" },
   UNKNOWN: { label: "Evidence", shortLabel: "E", relation: "Related evidence" },
+};
+const RESEARCH_EVIDENCE_STANDARDS = {
+  EXPLORATORY: {
+    label: "Exploratory scan",
+    shortLabel: "Explore",
+    minimumPapers: 1,
+    description: "Keep early signals visible for broad discovery.",
+  },
+  REVIEW: {
+    label: "Literature review",
+    shortLabel: "Review",
+    minimumPapers: 5,
+    description: "Require a usable starting set before shortlisting.",
+  },
+  DEFENSE: {
+    label: "Proposal defense",
+    shortLabel: "Defend",
+    minimumPapers: 10,
+    description: "Prioritize directions with stronger catalog coverage.",
+  },
 };
 
 function stringList(value) {
@@ -1351,6 +1372,9 @@ function MindMapWorkspace() {
   const [rootType, setRootType] = useState("KEYWORD");
   const [researchQuestion, setResearchQuestion] = useState("");
   const [researchIntent, setResearchIntent] = useState("MOMENTUM");
+  const [evidenceStandardKey, setEvidenceStandardKey] = useState("REVIEW");
+  const [decisionContext, setDecisionContext] = useState("");
+  const [briefCopied, setBriefCopied] = useState(false);
   const [isQuestionEditing, setIsQuestionEditing] = useState(true);
   const [inspectorView, setInspectorView] = useState("decision");
   const [keywords, setKeywords] = useState([]);
@@ -1410,6 +1434,7 @@ function MindMapWorkspace() {
     [rootOptions, selectedRootId],
   );
   const suggestedRoots = useMemo(() => rootOptions.slice(0, 4), [rootOptions]);
+  const evidenceStandard = RESEARCH_EVIDENCE_STANDARDS[evidenceStandardKey];
 
   // Auto-select top search match when filtering options
   useEffect(() => {
@@ -1509,7 +1534,7 @@ function MindMapWorkspace() {
 
     const assessedNodes = relatedNodes.map((node) => ({ node, assessment: assessMindMapNode(node) }));
     const rankedNodes = [...assessedNodes]
-      .filter(({ node, assessment }) => node.type !== "JOURNAL" && assessment.evidence.key !== "none")
+      .filter(({ node }) => node.type !== "JOURNAL" && Number(node.paperCount || 0) >= evidenceStandard.minimumPapers)
       .sort((first, second) => {
         if (researchIntent === "EVIDENCE") {
           return Number(second.node.paperCount || 0) - Number(first.node.paperCount || 0);
@@ -1525,6 +1550,7 @@ function MindMapWorkspace() {
           || Number(second.node.paperCount || 0) - Number(first.node.paperCount || 0);
       });
     const evidencedNodes = assessedNodes.filter(({ assessment }) => assessment.evidence.key !== "none").length;
+    const qualifyingNodes = assessedNodes.filter(({ node }) => Number(node.paperCount || 0) >= evidenceStandard.minimumPapers).length;
 
     return {
       relatedNodes: relatedNodes.length,
@@ -1535,9 +1561,10 @@ function MindMapWorkspace() {
       keywords: relatedNodes.filter((node) => node.type === "KEYWORD").length,
       journals: relatedNodes.filter((node) => node.type === "JOURNAL").length,
       evidencedNodes,
+      qualifyingNodes,
       candidates: rankedNodes.slice(0, 3),
     };
-  }, [mapData, researchIntent]);
+  }, [evidenceStandard.minimumPapers, mapData, researchIntent]);
 
   const selectedNodeAssessment = useMemo(
     () => selectedNode ? assessMindMapNode(selectedNode) : null,
@@ -1554,6 +1581,13 @@ function MindMapWorkspace() {
         message: "Related catalog nodes may still exist, but they do not prove a research gap or opportunity for this root.",
       };
     }
+    if (mapInsights.qualifyingNodes === 0) {
+      return {
+        level: "warning",
+        title: `No signal meets the ${evidenceStandard.shortLabel.toLowerCase()} standard`,
+        message: `This shortlist requires at least ${evidenceStandard.minimumPapers} directly linked papers per direction. Broaden the landscape or switch to an exploratory scan.`,
+      };
+    }
     if (mapInsights.evidencedNodes < Math.max(2, Math.ceil(mapInsights.relatedNodes / 2))) {
       return {
         level: "warning",
@@ -1566,7 +1600,7 @@ function MindMapWorkspace() {
       title: "Catalog evidence available",
       message: "Signals are grounded in direct paper counts and two backend 5-year publication windows.",
     };
-  }, [mapData, mapInsights.evidencedNodes, mapInsights.relatedNodes]);
+  }, [evidenceStandard, mapData, mapInsights.evidencedNodes, mapInsights.qualifyingNodes, mapInsights.relatedNodes]);
 
   const selectedNodeExplorePath = useMemo(() => {
     if (!selectedNode?.label) return ROUTE_PATHS.PAPERS;
@@ -1584,6 +1618,40 @@ function MindMapWorkspace() {
   function inspectOpportunityNode(node) {
     setSelectedNode(node);
     setInspectorView("decision");
+  }
+
+  useEffect(() => {
+    setBriefCopied(false);
+  }, [decisionContext, evidenceStandardKey, mapData]);
+
+  async function copyDecisionBrief() {
+    if (!mapData) return;
+    const candidateLines = mapInsights.candidates.length > 0
+      ? mapInsights.candidates.map(({ node, assessment }, index) =>
+          `${index + 1}. ${node.label} — ${assessment.signal.label}; ${formatNumber(node.paperCount)} direct papers.`,
+        )
+      : ["No direction currently meets the selected evidence standard."];
+    const brief = [
+      "RESEARCH DECISION BRIEF",
+      `Question: ${mapData.question}`,
+      `Evidence root: ${mapData.root?.label || "Not available"}`,
+      decisionContext.trim() ? `Decision context: ${decisionContext.trim()}` : null,
+      `Decision goal: ${mapData.intentLabel}`,
+      `Evidence standard: ${evidenceStandard.label} (minimum ${evidenceStandard.minimumPapers} direct papers per shortlisted direction)`,
+      `Catalog coverage: ${mapInsights.evidencedNodes}/${mapInsights.relatedNodes} related signals have direct evidence; ${mapInsights.qualifyingNodes} meet the selected standard.`,
+      "",
+      "SHORTLIST",
+      ...candidateLines,
+      "",
+      "Caution: These are catalog-derived signals, not verified novelty or research-gap claims. Validate every direction against its supporting paper set.",
+    ].filter((line) => line !== null).join("\n");
+
+    try {
+      await navigator.clipboard.writeText(brief);
+      setBriefCopied(true);
+    } catch {
+      setErrorMessage("Could not copy the decision brief. Check clipboard permission and try again.");
+    }
   }
 
   return (
@@ -1633,6 +1701,34 @@ function MindMapWorkspace() {
             <small>{researchQuestion.trim() ? "Attached to the next evidence map." : "Optional — a default question will be framed from the selected root."}</small>
           </label>
         )}
+
+        <fieldset className="research-evidence-standard">
+          <legend>Evidence standard</legend>
+          <div className="research-evidence-standard-options">
+            {Object.entries(RESEARCH_EVIDENCE_STANDARDS).map(([key, standard]) => (
+              <button
+                key={key}
+                type="button"
+                className={evidenceStandardKey === key ? "active" : ""}
+                onClick={() => setEvidenceStandardKey(key)}
+                aria-pressed={evidenceStandardKey === key}
+              >
+                <strong>{standard.shortLabel}</strong>
+                <small>≥{standard.minimumPapers} papers</small>
+              </button>
+            ))}
+          </div>
+          <p>{evidenceStandard.description} This controls the shortlist, not the backend data.</p>
+        </fieldset>
+
+        <label className="research-map-field research-decision-context">
+          <span>Decision context <small>optional</small></span>
+          <input
+            value={decisionContext}
+            onChange={(event) => setDecisionContext(event.target.value)}
+            placeholder="Population, setting, institution or thesis context"
+          />
+        </label>
 
         <label className="research-map-field">
           <span>Decision goal</span>
@@ -1765,6 +1861,16 @@ function MindMapWorkspace() {
           </div>
         )}
 
+        {mapData && (
+          <div className="research-protocol-readiness">
+            <div>
+              <small>Evidence protocol</small>
+              <strong>{evidenceStandard.label}</strong>
+            </div>
+            <span>{mapInsights.qualifyingNodes}/{mapInsights.relatedNodes} meet ≥{evidenceStandard.minimumPapers}</span>
+          </div>
+        )}
+
         {inspectorView === "decision" && (
           <div className="research-inspector-view">
             {selectedNode ? (
@@ -1819,7 +1925,7 @@ function MindMapWorkspace() {
                   </li>
                 ))}
               </ol>
-            ) : <div className="research-empty-inline">No evidence-backed candidate is available for this scope.</div>}
+            ) : <div className="research-empty-inline">No direction meets the {evidenceStandard.label.toLowerCase()} standard. Try an exploratory scan or broaden the landscape.</div>}
           </div>
         )}
 
@@ -1834,12 +1940,19 @@ function MindMapWorkspace() {
             <div className="research-map-summary research-landscape-summary">
               <h4>Landscape coverage</h4>
               <div><span>Signals with evidence</span><strong>{mapInsights.evidencedNodes}/{mapInsights.relatedNodes}</strong></div>
+              <div><span>Meet {evidenceStandard.shortLabel.toLowerCase()} standard</span><strong>{mapInsights.qualifyingNodes}</strong></div>
               <div><span>Growing or new activity</span><strong>{mapInsights.growingNodes}</strong></div>
               <div><span>Topics / keywords</span><strong>{mapInsights.topics} / {mapInsights.keywords}</strong></div>
               <div><span>Journal contexts</span><strong>{mapInsights.journals}</strong></div>
             </div>
             <p className="research-signal-disclaimer"><FiActivity />Coverage describes this catalog only and must be validated against the paper set.</p>
           </div>
+        )}
+        {mapData && (
+          <button type="button" className={`research-copy-brief ${briefCopied ? "is-copied" : ""}`} onClick={copyDecisionBrief}>
+            {briefCopied ? <FiCheck /> : <FiCopy />}
+            {briefCopied ? "Decision brief copied" : "Copy defensible brief"}
+          </button>
         )}
       </aside>
       </div>

@@ -4851,3 +4851,135 @@ html body .st-layout .research-lab-v2.is-basic-access .research-lab-briefing-out
   .research-abstract-card > header { flex-direction: column; }
   .research-abstract-groups { grid-template-columns: 1fr; }
 }
+
+/* Professor-grade scope protocol and portable decision brief. */
+.research-evidence-standard {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgba(79, 70, 229, 0.15);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(238, 242, 255, 0.82), rgba(240, 253, 250, 0.72));
+}
+
+.research-evidence-standard legend {
+  padding: 0 6px;
+  color: #34405a;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.research-evidence-standard-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.research-evidence-standard-options button {
+  min-width: 0;
+  min-height: 46px;
+  display: grid;
+  place-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 1px solid #dbe2f1;
+  border-radius: 10px;
+  color: #596780;
+  background: rgba(255, 255, 255, 0.84);
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.research-evidence-standard-options button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(79, 70, 229, 0.38);
+}
+
+.research-evidence-standard-options button.active {
+  border-color: rgba(79, 70, 229, 0.55);
+  color: #3730a3;
+  background: #fff;
+  box-shadow: 0 7px 18px rgba(79, 70, 229, 0.13);
+}
+
+.research-evidence-standard-options strong { font-size: 9px; }
+.research-evidence-standard-options small { color: #8490a6; font-size: 7.5px; font-weight: 800; }
+.research-evidence-standard p { margin: 0; color: #728096; font-size: 8px; line-height: 1.45; }
+
+.research-decision-context > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.research-decision-context > span small {
+  color: #9aa5b8;
+  font-size: 7px;
+  font-weight: 750;
+  text-transform: none;
+}
+
+html body .st-layout .research-lab-v2 .research-decision-context > input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #dce3ef;
+  border-radius: 11px;
+  color: #26334d;
+  background: #fff;
+  font-size: 10px;
+}
+
+html body .st-layout .research-lab-v2 .research-decision-context > input:focus {
+  border-color: rgba(79, 70, 229, 0.58);
+  outline: 3px solid rgba(79, 70, 229, 0.1);
+}
+
+.research-protocol-readiness {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -2px 0 12px;
+  padding: 10px 11px;
+  border: 1px solid rgba(14, 165, 164, 0.17);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f0fdfa, #eef2ff);
+}
+
+.research-protocol-readiness > div { min-width: 0; display: grid; gap: 2px; }
+.research-protocol-readiness small { color: #0f8b83; font-size: 7px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.research-protocol-readiness strong { overflow: hidden; color: #25324b; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.research-protocol-readiness > span { flex: 0 0 auto; padding: 5px 7px; border-radius: 999px; color: #4338ca; background: #fff; font-size: 7.5px; font-weight: 850; box-shadow: 0 3px 10px rgba(61, 72, 118, 0.08); }
+
+.research-copy-brief {
+  width: 100%;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #168db4);
+  box-shadow: 0 10px 22px rgba(67, 56, 202, 0.17);
+  font-size: 9px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.research-copy-brief:hover { transform: translateY(-1px); box-shadow: 0 13px 25px rgba(67, 56, 202, 0.23); }
+.research-copy-brief.is-copied { color: #047857; border-color: rgba(5, 150, 105, 0.22); background: #ecfdf5; box-shadow: none; }
+
+@container research-lab-workspace (max-width: 560px) {
+  .research-evidence-standard-options { grid-template-columns: 1fr; }
+  .research-evidence-standard-options button { min-height: 40px; }
+  .research-protocol-readiness { align-items: flex-start; flex-direction: column; }
+}
