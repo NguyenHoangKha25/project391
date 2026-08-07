@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  FiActivity,
+  FiArrowUpRight,
   FiBookOpen,
   FiCheckCircle,
   FiFileText,
+  FiLock,
   FiMail,
   FiRefreshCw,
   FiShield,
@@ -17,6 +20,13 @@ import { formatRoleForDisplay, normalizeRoleValue } from "../utils/authStorage";
 import "../styles/MyAccountPage.css";
 
 const REPORT_ROLES = new Set(["LECTURER", "RESEARCHER", "ADMIN"]);
+
+const ROLE_WORKSPACE_COPY = {
+  ADMIN: "Full catalog operations, system oversight and research intelligence access.",
+  RESEARCHER: "Advanced evidence synthesis, mind maps and reporting are ready for your work.",
+  LECTURER: "Teaching-focused insights, saved evidence and reporting stay connected here.",
+  STUDENT: "Your saved evidence and personal research trail stay connected across the catalog.",
+};
 
 function getInitials(value) {
   const source = String(value || "").trim();
@@ -58,8 +68,11 @@ function MyAccountPage() {
   const displayName = profile.username || profile.email || "Researcher";
   const email = profile.email || "Email is not available yet";
   const roleLabel = formatRoleForDisplay(profile.role || displayRole);
-  const canViewReports = REPORT_ROLES.has(normalizeRoleValue(profile.role || displayRole));
+  const normalizedRole = normalizeRoleValue(profile.role || displayRole);
+  const canViewReports = REPORT_ROLES.has(normalizedRole);
   const initials = useMemo(() => getInitials(displayName || email), [displayName, email]);
+  const workspaceCopy = ROLE_WORKSPACE_COPY[normalizedRole]
+    || "Your identity, access and saved research stay connected in one workspace.";
 
   useEffect(() => {
     setProfile(buildProfile(user));
@@ -91,37 +104,59 @@ function MyAccountPage() {
         <article className="account-hero-card">
           <div className="account-hero-bg" aria-hidden="true" />
 
-          <div className="account-avatar-xl" aria-label="Account avatar">
-            {initials}
+          <div className="account-identity-cluster">
+            <div className="account-avatar-wrap">
+              <div className="account-avatar-xl" aria-label="Account avatar">
+                {initials}
+              </div>
+              <span className="account-presence-dot" aria-label="Account is active" />
+            </div>
+
+            <div className="account-hero-copy">
+              <span className="account-eyebrow account-hero-eyebrow">
+                <FiCheckCircle /> Active ScienceTrend identity
+              </span>
+              <h2>{displayName}</h2>
+              <div className="account-hero-meta">
+                <span><FiShield /> {roleLabel} access</span>
+                <span><FiMail /> {email}</span>
+              </div>
+              <p>{workspaceCopy}</p>
+            </div>
           </div>
 
-          <div className="account-hero-copy">
-            <span className="account-eyebrow">Signed-in account</span>
-            <h2>{displayName}</h2>
-            <p>
-              This page shows the username and Gmail/email connected to your current login session.
-            </p>
-          </div>
+          <aside className="account-session-card" aria-label="Current account session">
+            <div className="account-session-heading">
+              <span><FiActivity /> Workspace access</span>
+              <strong>{roleLabel}</strong>
+            </div>
 
-          <button
-            type="button"
-            className="account-refresh-btn"
-            onClick={refreshProfile}
-            disabled={loading}
-          >
-            <FiRefreshCw className={loading ? "is-spinning" : ""} />
-            {loading ? "Refreshing…" : "Refresh"}
-          </button>
+            <div className="account-session-status">
+              <span><FiLock /> Secure session</span>
+              <span><FiCheckCircle /> Identity connected</span>
+            </div>
+
+            <button
+              type="button"
+              className="account-refresh-btn"
+              onClick={refreshProfile}
+              disabled={loading}
+            >
+              <FiRefreshCw className={loading ? "is-spinning" : ""} />
+              {loading ? "Refreshing…" : "Sync account details"}
+            </button>
+          </aside>
         </article>
 
-        {notice && <div className="account-notice">{notice}</div>}
+        {notice && <div className="account-notice" aria-live="polite">{notice}</div>}
 
         <div className="account-grid">
           <article className="account-panel account-info-panel">
             <div className="account-panel-header">
               <div>
-                <span className="account-eyebrow">Profile details</span>
+                <span className="account-eyebrow">Identity details</span>
                 <h3>Account information</h3>
+                <p>Your current login identity and role permissions.</p>
               </div>
               <FiCheckCircle />
             </div>
@@ -154,25 +189,43 @@ function MyAccountPage() {
           </article>
 
           <aside className="account-panel account-side-panel">
-            <span className="account-eyebrow">Quick access</span>
-            <h3>Your workspace</h3>
-            <p>
-              {canViewReports
-                ? "Continue with saved papers or open reports directly from your account page."
-                : "Continue with papers you have saved for later."}
-            </p>
+            <div className="account-side-heading">
+              <span className="account-eyebrow">Research shortcuts</span>
+              <h3>Continue your work</h3>
+              <p>
+                {canViewReports
+                  ? "Return to saved evidence or continue building your research outputs."
+                  : "Return to the papers you saved for your next reading session."}
+              </p>
+            </div>
 
             <div className="account-actions">
               <Link to={ROUTE_PATHS.BOOKMARKS}>
-                <FiBookOpen />
-                Open my bookmarks
+                <span className="account-action-icon"><FiBookOpen /></span>
+                <span className="account-action-copy">
+                  <strong>Saved evidence</strong>
+                  <small>Open bookmarked papers</small>
+                </span>
+                <FiArrowUpRight className="account-action-arrow" />
               </Link>
               {canViewReports && (
                 <Link to={ROUTE_PATHS.REPORTS}>
-                  <FiFileText />
-                  View reports
+                  <span className="account-action-icon"><FiFileText /></span>
+                  <span className="account-action-copy">
+                    <strong>Research reports</strong>
+                    <small>Review generated outputs</small>
+                  </span>
+                  <FiArrowUpRight className="account-action-arrow" />
                 </Link>
               )}
+            </div>
+
+            <div className="account-trust-note">
+              <FiShield />
+              <span>
+                <strong>Role-aware workspace</strong>
+                <small>Tools and actions follow your {roleLabel} permissions.</small>
+              </span>
             </div>
           </aside>
         </div>
