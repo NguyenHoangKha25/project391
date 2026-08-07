@@ -189,8 +189,13 @@ function useToast() {
 
 function TrendsPage() {
   const { role, user } = useAuth();
-  const normalizedRole = String(role || user?.role || "LECTURER").toUpperCase();
+  const normalizedRole = String(role || user?.role || "STUDENT").toUpperCase();
   const canCompareTrends = ["RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const advancedAccess = ["RESEARCHER", "ADMIN"].includes(normalizedRole)
+    ? "FULL"
+    : normalizedRole === "LECTURER"
+      ? "BASIC"
+      : "NONE";
   const [initialTrendData] = useState(getInitialTrendData);
 
   // Navigation tab: 'keyword' | 'topic'
@@ -983,7 +988,8 @@ function TrendsPage() {
             )}
           </article>
 
-          {/* Card 3: Top Trending Topics list */}
+          {/* Card 3: Top Trending Topics list — hidden from STUDENT */}
+          {advancedAccess !== "NONE" && (
           <article className="trends-table-panel glassmorphic-panel">
             <div className="panel-header-row">
               <h3>
@@ -992,7 +998,9 @@ function TrendsPage() {
                   : `Top Trending ${trendTab === "keyword" ? "Keywords" : "Topics"}`}
               </h3>
               <span className="badge-chip badge-amber">
-                {metadataSource[trendTab] === "catalog" ? "Catalog ranked" : "Top 5"}
+                {advancedAccess === "BASIC"
+                  ? (metadataSource[trendTab] === "catalog" ? "Catalog ranked" : "Top 3")
+                  : (metadataSource[trendTab] === "catalog" ? "Catalog ranked" : "Top 5")}
               </span>
             </div>
             <div className="trends-compact-table-wrap">
@@ -1004,7 +1012,7 @@ function TrendsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {activeTrendItems.slice(0, 5).map((item, idx) => (
+                  {activeTrendItems.slice(0, advancedAccess === "BASIC" ? 3 : 5).map((item, idx) => (
                     <tr key={item.id ?? idx}>
                       <td>
                         <div className="trends-topic-cell">
@@ -1030,10 +1038,12 @@ function TrendsPage() {
               </table>
             </div>
           </article>
+          )}
 
         </div>
 
-        {/* Bottom row: Top Growing list, Topic Momentum list, Insights text boxes */}
+        {/* Bottom row: Top Growing list, Topic Momentum list, Insights text boxes — hidden from STUDENT */}
+        {advancedAccess !== "NONE" && (
         <div className="trends-bottom-grid">
           
           {/* Card 1: Top Growing Topics */}
@@ -1116,6 +1126,7 @@ function TrendsPage() {
           </article>
 
         </div>
+        )}
 
       </div>
     </MainLayout>

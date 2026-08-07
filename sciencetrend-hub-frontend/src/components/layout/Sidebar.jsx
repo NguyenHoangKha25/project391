@@ -32,7 +32,7 @@ const menuGroups = [
       { label: "Topics", path: ROUTE_PATHS.TOPICS, icon: FiTag, public: true },
       { label: "Journals", path: ROUTE_PATHS.JOURNALS, icon: FiBookOpen, public: true },
       { label: "Keywords", path: ROUTE_PATHS.KEYWORDS, icon: FiKey, public: true },
-      { label: "Trends", path: ROUTE_PATHS.TRENDS, icon: FiTrendingUp, roles: ["LECTURER", "RESEARCHER", "ADMIN"] },
+      { label: "Trends", path: ROUTE_PATHS.TRENDS, icon: FiTrendingUp, roles: ["STUDENT", "LECTURER", "RESEARCHER", "ADMIN"] },
     ],
   },
   {
