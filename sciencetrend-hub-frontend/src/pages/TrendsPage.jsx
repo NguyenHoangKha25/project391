@@ -8,6 +8,8 @@ import {
   FiSearch,
   FiPlus,
   FiX,
+  FiHash,
+  FiArrowRight,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
@@ -38,8 +40,8 @@ function TrendsSuggestionPortal({ anchorRef, children, id, isOpen }) {
         position: "fixed",
         top: `${rect.bottom + 6}px`,
         left: `${rect.left}px`,
-        width: `${rect.width}px`,
-        maxHeight: `${Math.max(140, Math.min(280, window.innerHeight - rect.bottom - 18))}px`,
+        width: `${Math.max(340, rect.width)}px`,
+        maxHeight: `${Math.max(160, Math.min(320, window.innerHeight - rect.bottom - 18))}px`,
         zIndex: 2147483647,
       });
     }
@@ -53,14 +55,25 @@ function TrendsSuggestionPortal({ anchorRef, children, id, isOpen }) {
     };
   }, [anchorRef, isOpen, children]);
 
-  if (!isOpen || !position || typeof document === "undefined") return null;
+  if (!isOpen || typeof document === "undefined") return null;
+
+  const activeStyle = position || (anchorRef?.current ? {
+    position: "fixed",
+    top: `${anchorRef.current.getBoundingClientRect().bottom + 6}px`,
+    left: `${anchorRef.current.getBoundingClientRect().left}px`,
+    width: `${Math.max(340, anchorRef.current.getBoundingClientRect().width)}px`,
+    maxHeight: `${Math.max(160, Math.min(320, window.innerHeight - anchorRef.current.getBoundingClientRect().bottom - 18))}px`,
+    zIndex: 2147483647,
+  } : null);
+
+  if (!activeStyle) return null;
 
   return createPortal(
     <div
       className="trends-autocomplete-menu-portal"
       id={id}
       role="listbox"
-      style={position}
+      style={activeStyle}
     >
       {children}
     </div>,
@@ -879,14 +892,23 @@ function TrendsPage() {
                           type="button"
                           role="option"
                           key={suggestion.value}
+                          className="trends-portal-suggestion-item"
                           onMouseDown={(e) => {
                             e.preventDefault();
                             selectAutocompleteSuggestion(suggestion.value);
                           }}
                           onClick={() => selectAutocompleteSuggestion(suggestion.value)}
                         >
-                          <span>{suggestion.value}</span>
-                          {suggestion.paperCount > 0 && <small>{formatNumber(suggestion.paperCount)} papers</small>}
+                          <div className="trends-suggestion-icon-wrap">
+                            <FiHash />
+                          </div>
+                          <div className="trends-suggestion-text-wrap">
+                            <span className="trends-suggestion-title">{suggestion.value}</span>
+                            <span className="trends-suggestion-sub">
+                              {suggestion.paperCount > 0 ? `${formatNumber(suggestion.paperCount)} catalog papers` : "Indexed term"}
+                            </span>
+                          </div>
+                          <FiArrowRight className="trends-suggestion-arrow" />
                         </button>
                       ))
                     ) : (
@@ -1055,6 +1077,7 @@ function TrendsPage() {
                             role="option"
                             key={suggestion.value}
                             disabled={comparisonSelections.includes(suggestion.value)}
+                            className={`trends-portal-suggestion-item ${comparisonSelections.includes(suggestion.value) ? "is-selected" : ""}`}
                             onMouseDown={(e) => {
                               if (!comparisonSelections.includes(suggestion.value)) {
                                 e.preventDefault();
@@ -1063,14 +1086,20 @@ function TrendsPage() {
                             }}
                             onClick={() => selectAutocompleteSuggestion(suggestion.value)}
                           >
-                            <span>{suggestion.value}</span>
-                            <small>
-                              {comparisonSelections.includes(suggestion.value)
-                                ? "Selected"
-                                : suggestion.paperCount > 0
-                                  ? `${formatNumber(suggestion.paperCount)} papers`
-                                  : "Add"}
-                            </small>
+                            <div className="trends-suggestion-icon-wrap">
+                              <FiHash />
+                            </div>
+                            <div className="trends-suggestion-text-wrap">
+                              <span className="trends-suggestion-title">{suggestion.value}</span>
+                              <span className="trends-suggestion-sub">
+                                {comparisonSelections.includes(suggestion.value)
+                                  ? "Already selected"
+                                  : suggestion.paperCount > 0
+                                    ? `${formatNumber(suggestion.paperCount)} catalog papers`
+                                    : "Add to comparison"}
+                              </span>
+                            </div>
+                            <FiArrowRight className="trends-suggestion-arrow" />
                           </button>
                         ))
                       ) : (

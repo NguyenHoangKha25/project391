@@ -3145,7 +3145,7 @@ html body .st-layout :is(.trend-compare-header, .trend-compare-search) {
   z-index: 9999999 !important;
 }
 
-/* Fix trends search suggestion dropdown portal styling and z-index */
+/* Fix trends search suggestion dropdown portal styling and max z-index */
 body > .trends-autocomplete-menu-portal,
 .trends-autocomplete-menu-portal,
 div.trends-autocomplete-menu-portal,
@@ -3156,10 +3156,10 @@ html body .trends-autocomplete-menu-portal {
   background-color: #ffffff !important;
   opacity: 1 !important;
   visibility: visible !important;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.45) !important;
-  border: 1.5px solid rgba(148, 163, 184, 0.5) !important;
-  border-radius: 14px !important;
-  padding: 6px !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28) !important;
+  border: 1.5px solid rgba(203, 213, 225, 0.8) !important;
+  border-radius: 18px !important;
+  padding: 8px !important;
   overflow-y: auto !important;
   pointer-events: auto !important;
   isolation: isolate !important;
@@ -3167,41 +3167,89 @@ html body .trends-autocomplete-menu-portal {
   -webkit-backdrop-filter: none !important;
 }
 
-.trends-autocomplete-menu-portal button {
+.trends-autocomplete-menu-portal .trends-portal-suggestion-item {
   width: 100% !important;
-  min-height: 42px !important;
+  min-height: 48px !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
-  gap: 14px !important;
-  padding: 8px 12px !important;
+  gap: 12px !important;
+  padding: 10px 12px !important;
   border: 0 !important;
-  border-radius: 9px !important;
-  color: #172033 !important;
+  border-radius: 12px !important;
   background: #ffffff !important;
   background-color: #ffffff !important;
-  font-size: 12.5px !important;
-  font-weight: 700 !important;
   text-align: left !important;
   cursor: pointer !important;
-  opacity: 1 !important;
+  transition: background 0.15s ease, transform 0.15s ease !important;
 }
 
-.trends-autocomplete-menu-portal button:hover,
-.trends-autocomplete-menu-portal button:focus-visible {
-  color: #3730a3 !important;
-  background: #eef2ff !important;
-  background-color: #eef2ff !important;
+.trends-autocomplete-menu-portal .trends-portal-suggestion-item:hover,
+.trends-autocomplete-menu-portal .trends-portal-suggestion-item:focus-visible {
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
   outline: none !important;
+}
+
+.trends-autocomplete-menu-portal .trends-portal-suggestion-item.is-selected {
+  opacity: 0.65 !important;
+  cursor: default !important;
+}
+
+.trends-autocomplete-menu-portal .trends-suggestion-icon-wrap {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 10px !important;
+  background: #eef2ff !important;
+  color: #4f46e5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 15px !important;
+}
+
+.trends-autocomplete-menu-portal .trends-suggestion-text-wrap {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.trends-autocomplete-menu-portal .trends-suggestion-title {
+  color: #0f172a !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.trends-autocomplete-menu-portal .trends-suggestion-sub {
+  color: #64748b !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+.trends-autocomplete-menu-portal .trends-suggestion-arrow {
+  color: #94a3b8 !important;
+  font-size: 14px !important;
+  flex: 0 0 auto !important;
+  transition: color 0.15s ease, transform 0.15s ease !important;
+}
+
+.trends-autocomplete-menu-portal .trends-portal-suggestion-item:hover .trends-suggestion-arrow {
+  color: #4f46e5 !important;
+  transform: translateX(2px) !important;
 }
 
 .trends-autocomplete-menu-portal .trends-autocomplete-state {
   display: block !important;
-  padding: 12px 14px !important;
+  padding: 14px 16px !important;
   color: #64748b !important;
   background: #ffffff !important;
   background-color: #ffffff !important;
-  font-size: 12px !important;
+  font-size: 12.5px !important;
   font-weight: 600 !important;
   opacity: 1 !important;
 }
