@@ -198,9 +198,13 @@ export function normalizeKeyword(keyword = {}, index = 0) {
     name,
     paperCount: toNumber(
       keyword.paperCount
+      ?? keyword.catalogPaperCount
+      ?? keyword.totalPapers
       ?? keyword.count
       ?? keyword.worksCount
       ?? nestedKeyword.paperCount
+      ?? nestedKeyword.catalogPaperCount
+      ?? nestedKeyword.totalPapers
       ?? nestedKeyword.count
       ?? nestedKeyword.worksCount,
     ),

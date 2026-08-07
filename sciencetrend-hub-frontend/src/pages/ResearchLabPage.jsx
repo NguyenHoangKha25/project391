@@ -1859,7 +1859,21 @@ function MindMapWorkspace() {
           : await getTopicSuggestions(query, 0, 10);
         if (cancelled) return;
         const nextSuggestions = toArray(response?.data ?? response, ["suggestions", "keywords", "topics", "content", "items"])
-          .map(rootType === "KEYWORD" ? normalizeKeyword : normalizeTopic)
+          .map((item, index) => {
+            const normalized = rootType === "KEYWORD" ? normalizeKeyword(item, index) : normalizeTopic(item, index);
+            const rawCatalogCount = item?.catalogPaperCount
+              ?? item?.totalCatalogPaperCount
+              ?? item?.paperCount
+              ?? item?.totalPapers
+              ?? item?.worksCount
+              ?? item?.count;
+            return {
+              ...normalized,
+              catalogPaperCount: rawCatalogCount === undefined || rawCatalogCount === null
+                ? null
+                : Number(rawCatalogCount) || 0,
+            };
+          })
           .filter((item) => Number.isFinite(Number(item.id)) && !item.name.startsWith("Untitled"))
           .slice(0, 10);
         setRootSuggestions(nextSuggestions);
@@ -2090,7 +2104,12 @@ function MindMapWorkspace() {
               {rootSuggestions.length > 0 ? rootSuggestions.map((option) => (
                 <button key={`${rootType}-${option.id}`} type="button" role="option" onClick={() => selectResearchRoot(option)}>
                   <span>{rootType === "KEYWORD" ? <FiHash /> : <FiTag />}</span>
-                  <div><strong>{option.name}</strong><small>{formatNumber(option.paperCount || option.catalogPaperCount || 0)} catalog papers</small></div>
+                  <div>
+                    <strong>{option.name}</strong>
+                    <small>{option.catalogPaperCount === null
+                      ? "Catalog count shown after analysis"
+                      : `${formatNumber(option.catalogPaperCount)} catalog papers`}</small>
+                  </div>
                   <FiArrowRight />
                 </button>
               )) : !suggestionsLoading && (
@@ -2109,9 +2128,9 @@ function MindMapWorkspace() {
             <small>{selectedRoot ? "Research root selected" : "Waiting for a research root"}</small>
             <strong>{selectedRoot?.name || "Choose a catalog concept above"}</strong>
             <p>{selectedRoot
-              ? Number(selectedRoot.catalogPaperCount ?? selectedRoot.paperCount) > 0
-                ? `${formatNumber(selectedRoot.catalogPaperCount ?? selectedRoot.paperCount)} papers in the catalog`
-                : "The map API will return the catalog size for this root."
+              ? selectedRoot.catalogPaperCount !== null
+                ? `${formatNumber(selectedRoot.catalogPaperCount)} papers in the catalog`
+                : "The map API will return the catalog size after analysis."
               : "Search by keyword or topic to anchor the graph in real evidence."}</p>
           </div>
         </div>
