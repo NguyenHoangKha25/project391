@@ -1332,3 +1332,238 @@ html body .st-layout .trends-inline-suggestions .trends-suggestion-arrow {
     width: 100%;
   }
 }
+
+/* Backend trend-analysis contract */
+.trends-fixed-window {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  color: #334155;
+  background: #ffffff;
+}
+
+.trends-fixed-window > svg {
+  flex: 0 0 auto;
+  color: #4f46e5;
+}
+
+.trends-fixed-window span {
+  display: grid;
+  gap: 1px;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.trends-fixed-window small {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trend-analysis-summary {
+  --trend-tone: #4f46e5;
+  margin: 14px 0 18px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--trend-tone) 25%, #dbe4f2);
+  border-radius: 18px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--trend-tone) 7%, #ffffff), #ffffff 62%);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.trend-analysis-summary.trend-emerging { --trend-tone: #7c3aed; }
+.trend-analysis-summary.trend-growing { --trend-tone: #059669; }
+.trend-analysis-summary.trend-stable { --trend-tone: #4f46e5; }
+.trend-analysis-summary.trend-declining { --trend-tone: #dc2626; }
+.trend-analysis-summary.is-insufficient { --trend-tone: #64748b; }
+
+.trend-analysis-heading,
+.trend-analysis-table-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.trend-analysis-heading > div,
+.trend-analysis-table-heading > div {
+  min-width: 0;
+}
+
+.trend-analysis-heading span,
+.trend-analysis-table-heading span {
+  color: #64748b;
+  font-size: 9.5px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.trend-analysis-heading h4,
+.trend-analysis-table-heading h4 {
+  margin: 3px 0 0;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trend-analysis-heading > strong,
+.trend-status {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border-radius: 999px;
+  color: var(--trend-tone);
+  background: color-mix(in srgb, var(--trend-tone) 11%, #ffffff);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.trend-analysis-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.trend-analysis-metrics > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 10px 11px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.trend-analysis-metrics small {
+  overflow: hidden;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.trend-analysis-metrics b {
+  color: #0f172a;
+  font-size: 15px;
+}
+
+.trend-analysis-summary > p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.trend-analysis-table-wrap {
+  margin-top: 18px;
+  overflow: hidden;
+  border: 1px solid #dbe4f2;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.trend-analysis-table-heading {
+  padding: 13px 15px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.trend-analysis-table-heading h4 {
+  font-size: 14px;
+}
+
+.trend-analysis-table-heading > small {
+  color: #475569;
+  font-weight: 750;
+}
+
+.trend-analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.trend-analysis-table th,
+.trend-analysis-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #eef2f7;
+  color: #334155;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.trend-analysis-table th:first-child,
+.trend-analysis-table td:first-child {
+  max-width: 210px;
+  overflow: hidden;
+  color: #0f172a;
+  font-weight: 750;
+  text-align: left;
+  text-overflow: ellipsis;
+}
+
+.trend-analysis-table th {
+  color: #64748b;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.trend-analysis-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.trend-analysis-table tr.is-insufficient td {
+  color: #94a3b8;
+}
+
+.trend-status {
+  --trend-tone: #4f46e5;
+  display: inline-flex;
+  padding: 5px 8px;
+  font-size: 9px;
+}
+
+.trend-status.trend-emerging { --trend-tone: #7c3aed; }
+.trend-status.trend-growing { --trend-tone: #059669; }
+.trend-status.trend-stable { --trend-tone: #4f46e5; }
+.trend-status.trend-declining { --trend-tone: #dc2626; }
+.trend-status.trend-insufficient_data { --trend-tone: #64748b; }
+
+@media (max-width: 900px) {
+  .trend-analysis-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .trend-analysis-table-wrap {
+    overflow-x: auto;
+  }
+
+  .trend-analysis-table {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 600px) {
+  .trend-analysis-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trends-fixed-window {
+    width: 100%;
+  }
+}

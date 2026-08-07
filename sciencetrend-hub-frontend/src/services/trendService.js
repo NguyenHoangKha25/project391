@@ -13,10 +13,30 @@ export function getTrendStats(params = {}) {
   return apiRequest("/trends/keyword", { params: { keyword } });
 }
 
-// Connect to GET /api/topics/trending limit=10 from backend
+export function getKeywordTrendAnalysis(keyword, fromYear, toYear) {
+  return apiRequest("/trends/keyword/analysis", {
+    params: {
+      keyword: String(keyword || "").trim(),
+      ...(fromYear ? { fromYear } : {}),
+      ...(toYear ? { toYear } : {}),
+    },
+  });
+}
+
+export function getTopicTrendAnalysis(topic, fromYear, toYear) {
+  return apiRequest("/trends/topic/analysis", {
+    params: {
+      topic: String(topic || "").trim(),
+      ...(fromYear ? { fromYear } : {}),
+      ...(toYear ? { toYear } : {}),
+    },
+  });
+}
+
+// Connect to the role-aware top-topic trend endpoint.
 export function getTrendingTopics(params = {}) {
   const limit = params.limit || 10;
-  return apiRequest("/topics/trending", {
+  return apiRequest("/trends/top-topics", {
     params: {
       limit,
       ...(params.fromYear ? { fromYear: params.fromYear } : {}),

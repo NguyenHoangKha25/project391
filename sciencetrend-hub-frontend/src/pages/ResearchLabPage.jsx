@@ -1911,8 +1911,8 @@ function MindMapWorkspace() {
   const [selectedRootId, setSelectedRootId] = useState("");
   const [exploredRoot, setExploredRoot] = useState(null);
   const [limit, setLimit] = useState(5);
-  const [fromYear, setFromYear] = useState(CURRENT_YEAR - 4);
-  const [toYear, setToYear] = useState(CURRENT_YEAR);
+  const fromYear = CURRENT_YEAR - 4;
+  const toYear = CURRENT_YEAR;
   const [mapLoading, setMapLoading] = useState(false);
   const [mapData, setMapData] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -2248,18 +2248,6 @@ function MindMapWorkspace() {
             <option value={5}>Expanded — top 5 nodes per lane</option>
           </select>
         </label>
-
-        <div className="research-map-year-range">
-          <label>
-            <span>From year</span>
-            <input type="number" min="1900" max={CURRENT_YEAR} value={fromYear} onChange={(event) => setFromYear(event.target.value)} />
-          </label>
-          <span>to</span>
-          <label>
-            <span>To year</span>
-            <input type="number" min="1900" max={CURRENT_YEAR} value={toYear} onChange={(event) => setToYear(event.target.value)} />
-          </label>
-        </div>
 
         {errorMessage && <div className="workspace-notice warning" role="alert">{errorMessage}</div>}
 

@@ -16,10 +16,11 @@ import { useAuth } from "../context/useAuth";
 import {
   compareTrends,
   getKeywordSuggestions,
+  getKeywordTrendAnalysis,
   getTopicSuggestions,
+  getTopicTrendAnalysis,
   getTrendingKeywords,
   getTrendingTopics,
-  getTrendStats,
 } from "../services/trendService";
 import { getDashboardOverview } from "../services/dashboardService";
 import { normalizeChartPoint, normalizeKeyword, normalizeTopic, toArray, formatNumber, normalizeDashboard } from "../utils/apiData";
@@ -95,7 +96,7 @@ function hasUsableMetadata(metadata) {
     );
 }
 
-const TRENDS_METADATA_CACHE_PREFIX = "trends_metadata_v9";
+const TRENDS_METADATA_CACHE_PREFIX = "trends_metadata_v10";
 const ANALYTICS_CACHE_TTL_MS = 10 * 60 * 1000;
 const COMPARISON_CHART_WIDTH = 760;
 const COMPARISON_CHART_HEIGHT = 300;
@@ -112,9 +113,9 @@ function getRangeStartYear(timeRange) {
   return CURRENT_YEAR - rangeYears + 1;
 }
 
-function getTrendSeriesCacheKey(tab, term) {
+function getTrendSeriesCacheKey(tab, term, fromYear, toYear) {
   const termStr = typeof term === "string" ? term : (term?.name || term?.keyword || term?.term || String(term || ""));
-  return `trend_series_${tab}_${termStr.trim().toLowerCase()}`;
+  return `trend_analysis_${tab}_${termStr.trim().toLowerCase()}_${fromYear ?? "role-default"}_${toYear ?? "role-default"}`;
 }
 
 function formatPaperCount(value) {
@@ -134,16 +135,47 @@ function parseMetricNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function formatGrowthPercentage(rawGrowth) {
+function formatGrowthRate(rawGrowth) {
   if (rawGrowth === null || rawGrowth === undefined || String(rawGrowth).trim() === "") return "";
   if (typeof rawGrowth === "string" && rawGrowth.trim().endsWith("%")) return rawGrowth.trim();
   const numericGrowth = Number(rawGrowth);
   if (!Number.isFinite(numericGrowth)) return "";
-  const percentage = numericGrowth !== 0 && Math.abs(numericGrowth) < 1
-    ? numericGrowth * 100
-    : numericGrowth;
+  const percentage = numericGrowth * 100;
   const rounded = Math.round(percentage * 10) / 10;
   return `${rounded >= 0 ? "+" : ""}${rounded}%`;
+}
+
+function formatPercentValue(value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return "";
+  const rounded = Math.round(numericValue * 10) / 10;
+  return `${rounded >= 0 ? "+" : ""}${rounded}%`;
+}
+
+function formatTrendType(value, sufficientData = true) {
+  if (sufficientData === false) return "Not enough evidence";
+  const normalized = String(value || "INSUFFICIENT_DATA").trim().toUpperCase();
+  if (normalized === "INSUFFICIENT_DATA") return "Not enough evidence";
+  return normalized.charAt(0) + normalized.slice(1).toLowerCase();
+}
+
+function normalizeTrendAnalysis(response, fallbackName = "") {
+  const payload = response?.data ?? response ?? {};
+  const sufficientData = payload.sufficientData !== false
+    && String(payload.trendType || "").toUpperCase() !== "INSUFFICIENT_DATA";
+  return {
+    name: String(payload.name ?? payload.keyword ?? payload.topic ?? fallbackName).trim(),
+    trendType: String(payload.trendType || "INSUFFICIENT_DATA").toUpperCase(),
+    sufficientData,
+    growthRate: Number(payload.growthRate) || 0,
+    trendScore: Number(payload.trendScore) || 0,
+    recentCount: Number(payload.recentCount) || 0,
+    previousCount: Number(payload.previousCount) || 0,
+    totalPapers: Number(payload.totalPapers) || 0,
+    fromYear: Number(payload.fromYear) || null,
+    toYear: Number(payload.toYear) || null,
+    yearlyData: toArray(payload.yearlyData).map(normalizeChartPoint),
+  };
 }
 
 function createSmoothLinePath(points = []) {
@@ -162,11 +194,16 @@ function normalizeTrendKeywords(response) {
     .map((item, index) => {
       const keyword = normalizeKeyword(item, index);
       const rawGrowth = item?.growthRate ?? item?.growth ?? item?.percentage;
-      const growth = formatGrowthPercentage(rawGrowth);
+      const sufficientData = item?.sufficientData !== false
+        && String(item?.trendType || "").toUpperCase() !== "INSUFFICIENT_DATA";
+      const growth = sufficientData ? formatGrowthRate(rawGrowth) : "";
       return {
         ...keyword,
         growth,
+        paperCount: Number(item?.paperCount ?? item?.recentCount) || keyword.paperCount,
         totalPapers: Number(item?.totalPapers) || keyword.paperCount,
+        trendType: String(item?.trendType || "").toUpperCase(),
+        sufficientData,
       };
     })
     .filter((keyword) => keyword.name && keyword.name !== "Untitled keyword");
@@ -174,7 +211,14 @@ function normalizeTrendKeywords(response) {
 
 function normalizeTrendTopics(response) {
   return toArray(response)
-    .map(normalizeTopic)
+    .map((item) => ({
+      ...normalizeTopic(item),
+      paperCount: Number(item?.paperCount ?? item?.recentCount) || 0,
+      growth: item?.sufficientData === false ? "" : formatGrowthRate(item?.growthRate),
+      trendType: String(item?.trendType || "").toUpperCase(),
+      sufficientData: item?.sufficientData !== false
+        && String(item?.trendType || "").toUpperCase() !== "INSUFFICIENT_DATA",
+    }))
     .filter((topic) => topic.name && topic.name !== "Untitled topic");
 }
 
@@ -189,8 +233,14 @@ function normalizeTrendComparison(response) {
           name: String(item?.name || "").trim(),
           totalPapers: Number(item?.totalPapers) || 0,
           growthRate: Number(item?.growthRate) || 0,
+          trendScore: Number(item?.trendScore) || 0,
+          recentCount: Number(item?.recentCount) || 0,
+          previousCount: Number(item?.previousCount) || 0,
+          trendType: String(item?.trendType || "INSUFFICIENT_DATA").toUpperCase(),
+          sufficientData: item?.sufficientData !== false
+            && String(item?.trendType || "").toUpperCase() !== "INSUFFICIENT_DATA",
           points: toArray(item?.yearlyData).map(normalizeChartPoint),
-        })).filter((item) => item.name && hasUsableTrendSeries(item.points))
+        })).filter((item) => item.name)
       : [],
   };
 }
@@ -311,6 +361,7 @@ function TrendsPage() {
   const suggestionAnchorRef = useRef(null);
   
   const [chartData, setChartData] = useState([]);
+  const [trendAnalysis, setTrendAnalysis] = useState(null);
   const [dashboard, setDashboard] = useState(initialTrendData.metadata?.dashboard ?? null);
   const [metadataLoading, setMetadataLoading] = useState(!initialTrendData.metadata);
   const [chartLoading, setChartLoading] = useState(false);
@@ -325,7 +376,7 @@ function TrendsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    const fromYear = getRangeStartYear(timeRange);
+    const fromYear = canCompare ? getRangeStartYear(timeRange) : undefined;
     const cacheKey = getTrendsMetadataCacheKey(normalizedRole, timeRange);
     const storedMetadata = getPersistentCachedData(cacheKey, ANALYTICS_CACHE_TTL_MS);
     const cached = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
@@ -393,7 +444,7 @@ function TrendsPage() {
     return () => {
       cancelled = true;
     };
-  }, [canViewTopTrending, normalizedRole, timeRange]);
+  }, [canCompare, canViewTopTrending, normalizedRole, timeRange]);
 
   useEffect(() => {
     const names = dbKeywords
@@ -438,6 +489,8 @@ function TrendsPage() {
           name,
           paperCount: displayCount,
           growth: growthStr,
+          trendType: kw?.trendType,
+          sufficientData: kw?.sufficientData !== false,
         };
       });
     }
@@ -467,7 +520,7 @@ function TrendsPage() {
       const latestValue = yearlyValues.get(latestYear) || 0;
       if (firstValue <= 0) return [];
       const growth = ((latestValue - firstValue) / firstValue) * 100;
-      return [[String(series.name || "").trim().toLowerCase(), formatGrowthPercentage(growth)]];
+      return [[String(series.name || "").trim().toLowerCase(), formatPercentValue(growth)]];
     }));
   }, [comparisonSeries]);
   const activeTrendItems = useMemo(() => trendItems.map((item) => {
@@ -476,6 +529,7 @@ function TrendsPage() {
     return derivedGrowth ? { ...item, growth: derivedGrowth, growthDerived: true } : item;
   }), [derivedGrowthByName, trendItems]);
   const topGrowingItems = useMemo(() => activeTrendItems
+    .filter((item) => item?.sufficientData !== false)
     .map((item) => ({ item, value: parseMetricNumber(item?.growth) }))
     .filter((entry) => entry.value !== null)
     .sort((left, right) => right.value - left.value)
@@ -578,36 +632,44 @@ function TrendsPage() {
   useEffect(() => {
     if (!singleTrendTerm) {
       setChartData([]);
+      setTrendAnalysis(null);
       setChartLoading(false);
       return;
     }
 
     let cancelled = false;
-    const cacheKey = getTrendSeriesCacheKey(trendTab, singleTrendTerm);
-    const storedSeries = getPersistentCachedData(cacheKey, ANALYTICS_CACHE_TTL_MS);
-    const cached = hasUsableTrendSeries(storedSeries) ? storedSeries : null;
+    const fromYear = canCompare ? getRangeStartYear(timeRange) : undefined;
+    const toYear = canCompare ? CURRENT_YEAR : undefined;
+    const cacheKey = getTrendSeriesCacheKey(trendTab, singleTrendTerm, fromYear, toYear);
+    const storedAnalysis = getPersistentCachedData(cacheKey, ANALYTICS_CACHE_TTL_MS);
+    const cached = storedAnalysis?.name ? storedAnalysis : null;
 
     if (cached) {
-      setChartData(cached);
+      setTrendAnalysis(cached);
+      setChartData(cached.yearlyData || []);
       setChartLoading(false);
     } else {
+      setTrendAnalysis(null);
       setChartData([]);
       setChartLoading(true);
     }
 
-    getTrendStats(trendTab === "keyword" ? { keyword: singleTrendTerm } : { topic: singleTrendTerm })
+    const request = trendTab === "keyword"
+      ? getKeywordTrendAnalysis(singleTrendTerm, fromYear, toYear)
+      : getTopicTrendAnalysis(singleTrendTerm, fromYear, toYear);
+    request
       .then((response) => {
         if (cancelled) return;
-        const points = toArray(response).map(normalizeChartPoint);
-        if (hasUsableTrendSeries(points)) {
-          setChartData(points);
-          setPersistentCachedData(cacheKey, points);
-        } else if (!cached) {
-          setChartData([]);
-        }
+        const analysis = normalizeTrendAnalysis(response, singleTrendTerm);
+        setTrendAnalysis(analysis);
+        setChartData(analysis.yearlyData);
+        setPersistentCachedData(cacheKey, analysis);
       })
       .catch(() => {
-        if (!cancelled && !cached) setChartData([]);
+        if (!cancelled && !cached) {
+          setTrendAnalysis(null);
+          setChartData([]);
+        }
       })
       .finally(() => {
         if (!cancelled) setChartLoading(false);
@@ -616,7 +678,7 @@ function TrendsPage() {
     return () => {
       cancelled = true;
     };
-  }, [singleTrendTerm, trendTab]);
+  }, [canCompare, singleTrendTerm, timeRange, trendTab]);
 
   useEffect(() => {
     const terms = comparisonTermKey ? comparisonTermKey.split("\u0001") : [];
@@ -629,10 +691,10 @@ function TrendsPage() {
     let cancelled = false;
     const cachedSeries = terms.flatMap((term) => {
       const points = getPersistentCachedData(
-        getTrendSeriesCacheKey(trendTab, term),
+        getTrendSeriesCacheKey(trendTab, term, getRangeStartYear(timeRange), CURRENT_YEAR),
         ANALYTICS_CACHE_TTL_MS,
       );
-      return hasUsableTrendSeries(points) ? [{ name: term, points }] : [];
+      return points?.name ? [{ ...points, points: points.yearlyData || [] }] : [];
     });
 
     setComparisonSeries(cachedSeries);
@@ -640,13 +702,16 @@ function TrendsPage() {
 
     async function fetchIndividualSeries() {
       const results = await Promise.allSettled(terms.map(async (term) => {
-        const response = await getTrendStats(
-          trendTab === "keyword" ? { keyword: term } : { topic: term },
+        const fromYear = getRangeStartYear(timeRange);
+        const response = trendTab === "keyword"
+          ? await getKeywordTrendAnalysis(term, fromYear, CURRENT_YEAR)
+          : await getTopicTrendAnalysis(term, fromYear, CURRENT_YEAR);
+        const analysis = normalizeTrendAnalysis(response, term);
+        setPersistentCachedData(
+          getTrendSeriesCacheKey(trendTab, term, fromYear, CURRENT_YEAR),
+          analysis,
         );
-        const points = toArray(response).map(normalizeChartPoint);
-        if (!hasUsableTrendSeries(points)) return null;
-        setPersistentCachedData(getTrendSeriesCacheKey(trendTab, term), points);
-        return { name: term, points };
+        return { ...analysis, points: analysis.yearlyData };
       }));
       const cachedByName = new Map(cachedSeries.map((series) => [series.name, series]));
       return results.flatMap((result, index) => {
@@ -670,7 +735,11 @@ function TrendsPage() {
           const comparison = normalizeTrendComparison(response);
           availableSeries = comparison.series;
           availableSeries.forEach((series) => {
-            setPersistentCachedData(getTrendSeriesCacheKey(trendTab, series.name), series.points);
+            const analysis = { ...series, yearlyData: series.points };
+            setPersistentCachedData(
+              getTrendSeriesCacheKey(trendTab, series.name, fromYear, CURRENT_YEAR),
+              analysis,
+            );
           });
         } catch {
           availableSeries = await fetchIndividualSeries();
@@ -703,7 +772,7 @@ function TrendsPage() {
       }
     });
 
-    const fromYear = getRangeStartYear(timeRange);
+    const fromYear = canCompare ? getRangeStartYear(timeRange) : Number.NEGATIVE_INFINITY;
     const sortedYears = Object.keys(yearMap)
       .filter((year) => Number(year) >= fromYear && Number(year) <= CURRENT_YEAR)
       .sort((a, b) => Number(a) - Number(b));
@@ -711,10 +780,12 @@ function TrendsPage() {
       label: year,
       value: yearMap[year],
     }));
-  }, [chartData, timeRange]);
+  }, [canCompare, chartData, timeRange]);
 
   const visualSeries = useMemo(() => {
-    if (isMultiSeriesComparison) return comparisonSeries;
+    if (isMultiSeriesComparison) {
+      return comparisonSeries.filter((series) => hasUsableTrendSeries(series.points));
+    }
     if (!singleTrendTerm || !hasUsableTrendSeries(chartData)) return [];
     return [{ name: singleTrendTerm, points: chartData }];
   }, [chartData, comparisonSeries, isMultiSeriesComparison, singleTrendTerm]);
@@ -723,7 +794,7 @@ function TrendsPage() {
     const colors = ["#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#06b6d4"];
     if (visualSeries.length === 0) return [];
 
-    const fromYear = getRangeStartYear(timeRange);
+    const fromYear = canCompare ? getRangeStartYear(timeRange) : Number.NEGATIVE_INFINITY;
     const years = [...new Set(visualSeries.flatMap((series) =>
       series.points
         .map((point) => String(point?.label ?? "").trim())
@@ -791,7 +862,7 @@ function TrendsPage() {
         years,
       };
     });
-  }, [timeRange, visualSeries]);
+  }, [canCompare, timeRange, visualSeries]);
 
   const activeFocusedSeries = useMemo(() => {
     if (focusedSeries === "ALL") return "ALL";
@@ -816,6 +887,9 @@ function TrendsPage() {
     const cagr = (Math.pow(ratio, 1 / numYears) - 1) * 100;
     return Number.isFinite(cagr) ? cagr : null;
   }, [effectiveChartData]);
+  const displayedGrowth = trendAnalysis?.sufficientData
+    ? Number(trendAnalysis.growthRate) * 100
+    : annualGrowth;
 
   return (
     <MainLayout title="Trends & Topics" subtitle="Discover emerging research trends and topic evolution">
@@ -908,20 +982,27 @@ function TrendsPage() {
                 )}
               </div>
             )}
-            <div className="trends-select-wrapper-custom">
-              <FiCalendar style={{ left: "12px", right: "auto", position: "absolute", color: "var(--st-primary)" }} />
-              <select 
-                value={timeRange} 
-                onChange={(e) => setTimeRange(e.target.value)} 
-                style={{ paddingLeft: "34px", paddingRight: "30px", fontWeight: 700, color: "var(--st-heading)" }} 
-                aria-label="Select trend time horizon"
-              >
-                <option value="8y">Range: Recent 8 Years</option>
-                <option value="5y">Range: Recent 5 Years</option>
-                <option value="3y">Range: Recent 3 Years</option>
-              </select>
-              <FiChevronDown />
-            </div>
+            {canCompare ? (
+              <div className="trends-select-wrapper-custom">
+                <FiCalendar style={{ left: "12px", right: "auto", position: "absolute", color: "var(--st-primary)" }} />
+                <select
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value)}
+                  style={{ paddingLeft: "34px", paddingRight: "30px", fontWeight: 700, color: "var(--st-heading)" }}
+                  aria-label="Select trend time horizon"
+                >
+                  <option value="8y">Range: Recent 8 Years</option>
+                  <option value="5y">Range: Recent 5 Years</option>
+                  <option value="3y">Range: Recent 3 Years</option>
+                </select>
+                <FiChevronDown />
+              </div>
+            ) : (
+              <div className="trends-fixed-window" aria-label="Fixed analysis window">
+                <FiCalendar />
+                <span><small>Analysis window</small>Previous 5 years vs Recent 5 years</span>
+              </div>
+            )}
 
             <div
               className="trends-status-badge"
@@ -965,12 +1046,12 @@ function TrendsPage() {
             </span>
           </div>
           <div className="trend-stat-card card-accent-emerald">
-            <span className="stat-card-label">Avg. Annual Growth</span>
+            <span className="stat-card-label">Selected Trend Growth</span>
             <h3 className="stat-card-value">
-              {annualGrowth === null ? "—" : `${annualGrowth >= 0 ? "+" : ""}${annualGrowth.toFixed(1)}%`}
+              {displayedGrowth === null ? "—" : `${displayedGrowth >= 0 ? "+" : ""}${displayedGrowth.toFixed(1)}%`}
             </h3>
             <span className="stat-card-trend-text positive">
-              <span className="sub">Across the selected series</span>
+              <span className="sub">Recent period vs previous period</span>
             </span>
           </div>
           <div className="trend-stat-card card-accent-purple">
@@ -1011,6 +1092,34 @@ function TrendsPage() {
                   : isLecturer ? "Lecturer basic trend" : "Student single trend"}
               </span>
             </div>
+
+            {!isMultiSeriesComparison && singleTrendTerm && trendAnalysis && (
+              <section className={`trend-analysis-summary trend-${trendAnalysis.trendType.toLowerCase()} ${trendAnalysis.sufficientData ? "" : "is-insufficient"}`}>
+                <div className="trend-analysis-heading">
+                  <div>
+                    <span>Backend trend conclusion</span>
+                    <h4>{singleTrendTerm}</h4>
+                  </div>
+                  <strong>{formatTrendType(trendAnalysis.trendType, trendAnalysis.sufficientData)}</strong>
+                </div>
+                <div className="trend-analysis-metrics">
+                  <div><small>Previous</small><b>{formatNumber(trendAnalysis.previousCount)}</b></div>
+                  <div><small>Recent</small><b>{formatNumber(trendAnalysis.recentCount)}</b></div>
+                  <div>
+                    <small>Growth</small>
+                    <b>{trendAnalysis.sufficientData ? formatGrowthRate(trendAnalysis.growthRate) : "—"}</b>
+                  </div>
+                  <div><small>Trend score</small><b>{trendAnalysis.sufficientData ? trendAnalysis.trendScore.toFixed(2) : "—"}</b></div>
+                  <div><small>Total papers</small><b>{formatNumber(trendAnalysis.totalPapers)}</b></div>
+                </div>
+                <p>
+                  <FiCalendar />
+                  {canCompare && trendAnalysis.fromYear && trendAnalysis.toYear
+                    ? `Analysis period: ${trendAnalysis.fromYear}–${trendAnalysis.toYear}`
+                    : "Analysis window: Previous 5 years vs Recent 5 years"}
+                </p>
+              </section>
+            )}
 
             {canCompare && (
               <div className="trend-compare-picker" aria-label="Choose trend series to compare">
@@ -1294,6 +1403,41 @@ function TrendsPage() {
                     </g>
                   </svg>
                 </div>
+                {isMultiSeriesComparison && comparisonSeries.length > 0 && (
+                  <div className="trend-analysis-table-wrap">
+                    <div className="trend-analysis-table-heading">
+                      <div>
+                        <span>Backend analysis</span>
+                        <h4>Previous period vs recent period</h4>
+                      </div>
+                      <small>{getRangeStartYear(timeRange)}–{CURRENT_YEAR}</small>
+                    </div>
+                    <table className="trend-analysis-table">
+                      <thead>
+                        <tr>
+                          <th>Series</th>
+                          <th>Previous</th>
+                          <th>Recent</th>
+                          <th>Growth</th>
+                          <th>Trend score</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {comparisonSeries.map((series) => (
+                          <tr key={series.name} className={series.sufficientData ? "" : "is-insufficient"}>
+                            <td>{series.name}</td>
+                            <td>{formatNumber(series.previousCount)}</td>
+                            <td>{formatNumber(series.recentCount)}</td>
+                            <td>{series.sufficientData ? formatGrowthRate(series.growthRate) : "—"}</td>
+                            <td>{series.sufficientData ? Number(series.trendScore || 0).toFixed(2) : "—"}</td>
+                            <td><span className={`trend-status trend-${String(series.trendType).toLowerCase()}`}>{formatTrendType(series.trendType, series.sufficientData)}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </>
             ) : (
               <div className="trend-comparison-empty" role="status">
@@ -1324,7 +1468,7 @@ function TrendsPage() {
                 <thead>
                   <tr>
                     <th style={{ width: "52%" }}>{trendTab === "keyword" ? "Keyword" : "Topic"}</th>
-                    <th style={{ width: "48%", textAlign: "right" }}>Publications</th>
+                    <th style={{ width: "48%", textAlign: "right" }}>Recent-period papers</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -106,7 +106,7 @@ export function clearPersistentCacheByPrefix(prefixes = []) {
 }
 
 export function clearAnalyticsCache() {
-  clearPersistentCacheByPrefix(["dashboard_", "trends_metadata_", "trend_series_"]);
+  clearPersistentCacheByPrefix(["dashboard_", "trends_metadata_", "trend_series_", "trend_analysis_"]);
   clearCache();
 }
 
