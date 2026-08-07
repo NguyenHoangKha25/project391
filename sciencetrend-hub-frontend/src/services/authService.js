@@ -1,52 +1,5 @@
 import { apiRequest } from "./api";
 
-const AUTH_WARMUP_TTL = 2 * 60 * 1000;
-const AUTH_WARMUP_TIMEOUT = 20000;
-const LOGIN_TIMEOUT = 45000;
-const LOGIN_RETRY_DELAY = 800;
-
-let authWarmupRequest = null;
-let authServiceReadyUntil = 0;
-
-function isRetryableLoginError(error) {
-  const message = String(error?.message || "").toLowerCase();
-  return message.includes("unable to connect")
-    || message.includes("timed out")
-    || message.includes("server ran into a problem");
-}
-
-function waitForLoginRetry() {
-  return new Promise((resolve) => {
-    setTimeout(resolve, LOGIN_RETRY_DELAY);
-  });
-}
-
-/**
- * Wakes the deployed API through a small public catalog request. Railway can
- * suspend an idle service, while Google OAuth naturally wakes it by navigating
- * through the backend first. Password login should receive the same treatment.
- */
-export function warmAuthService() {
-  if (Date.now() < authServiceReadyUntil) return Promise.resolve(true);
-  if (authWarmupRequest) return authWarmupRequest;
-
-  authWarmupRequest = apiRequest("/papers", {
-    params: { page: 0, size: 1 },
-    auth: false,
-    timeout: AUTH_WARMUP_TIMEOUT,
-  })
-    .then(() => {
-      authServiceReadyUntil = Date.now() + AUTH_WARMUP_TTL;
-      return true;
-    })
-    .catch(() => false)
-    .finally(() => {
-      authWarmupRequest = null;
-    });
-
-  return authWarmupRequest;
-}
-
 /**
  * Sends a authentication request to log in a user.
  * 
@@ -55,23 +8,13 @@ export function warmAuthService() {
  * @param {string} credentials.password - The raw password of the user.
  * @returns {Promise<Object>} The server response containing token and user info.
  */
-export async function login({ username, password }) {
-  await warmAuthService();
-
-  const options = {
+export function login({ username, password }) {
+  return apiRequest("/auth/login", {
     method: "POST",
     body: { username, password },
     auth: false,
-    timeout: LOGIN_TIMEOUT,
-  };
-
-  try {
-    return await apiRequest("/auth/login", options);
-  } catch (error) {
-    if (!isRetryableLoginError(error)) throw error;
-    await waitForLoginRetry();
-    return apiRequest("/auth/login", options);
-  }
+    sameOrigin: true,
+  });
 }
 
 /**

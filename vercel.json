@@ -2,5 +2,11 @@
   "buildCommand": "cd sciencetrend-hub-frontend && npm run build",
   "outputDirectory": "sciencetrend-hub-frontend/dist",
   "installCommand": "cd sciencetrend-hub-frontend && npm install",
-  "framework": "vite"
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://su26swp06-be-production-8747.up.railway.app/api/:path*"
+    }
+  ]
 }

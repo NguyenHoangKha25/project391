@@ -118,6 +118,7 @@ export async function apiRequest(endpoint, options = {}) {
     headers: customHeaders = {},
     auth = true,
     timeout = 12000,
+    sameOrigin = false,
     ...fetchOptions
   } = options;
 
@@ -136,7 +137,8 @@ export async function apiRequest(endpoint, options = {}) {
       ? JSON.stringify(body)
       : body;
 
-  const url = `${API_BASE_URL}${normalizeEndpoint(endpoint)}${buildQueryString(params)}`;
+  const requestBaseUrl = sameOrigin ? "/api" : API_BASE_URL;
+  const url = `${requestBaseUrl}${normalizeEndpoint(endpoint)}${buildQueryString(params)}`;
   const method = (fetchOptions.method || "GET").toUpperCase();
 
   const controller = new AbortController();
