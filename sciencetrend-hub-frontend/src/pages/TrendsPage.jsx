@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   FiCheck,
   FiLayers,
@@ -23,6 +24,46 @@ import { normalizeChartPoint, normalizeKeyword, normalizeTopic, toArray, formatN
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/TrendsPage.css";
+
+function TrendsSuggestionPortal({ anchorRef, children, id }) {
+  const [position, setPosition] = useState(null);
+
+  useLayoutEffect(() => {
+    function updatePosition() {
+      const anchor = anchorRef.current;
+      if (!anchor) return;
+      const rect = anchor.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 7,
+        left: rect.left,
+        width: rect.width,
+        maxHeight: Math.max(140, Math.min(280, window.innerHeight - rect.bottom - 18)),
+      });
+    }
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [anchorRef]);
+
+  if (!position || typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="trends-autocomplete-menu trends-autocomplete-menu-portal"
+      id={id}
+      role="listbox"
+      style={position}
+    >
+      {children}
+    </div>,
+    document.body,
+  );
+}
 
 /* ── Toast Overlay ── */
 function hasUsableTrendSeries(points) {
@@ -257,6 +298,7 @@ function TrendsPage() {
   const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const suggestionAnchorRef = useRef(null);
   
   const [chartData, setChartData] = useState([]);
   const [dashboard, setDashboard] = useState(initialTrendData.metadata?.dashboard ?? null);
@@ -794,9 +836,11 @@ function TrendsPage() {
           <div className="trends-filter-inputs-group">
             {!canCompare && (
               <div
+                ref={suggestionAnchorRef}
                 className="trends-autocomplete trends-single-select"
                 onBlur={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget)) setSuggestionsOpen(false);
+                  if (!event.currentTarget.contains(event.relatedTarget)
+                    && !event.relatedTarget?.closest?.(".trends-autocomplete-menu-portal")) setSuggestionsOpen(false);
                 }}
               >
                 <div className="trends-search-box-wrap">
@@ -816,7 +860,7 @@ function TrendsPage() {
                   />
                 </div>
                 {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                  <div className="trends-autocomplete-menu" id="trend-single-suggestions" role="listbox">
+                  <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-single-suggestions">
                     {suggestionsLoading ? (
                       <span className="trends-autocomplete-state">Finding matches…</span>
                     ) : autocompleteSuggestions.length > 0 ? (
@@ -834,7 +878,7 @@ function TrendsPage() {
                     ) : (
                       <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                     )}
-                  </div>
+                  </TrendsSuggestionPortal>
                 )}
               </div>
             )}
@@ -964,9 +1008,11 @@ function TrendsPage() {
                 </div>
 
                 <div
+                  ref={suggestionAnchorRef}
                   className="trends-autocomplete trend-compare-search"
                   onBlur={(event) => {
-                    if (!event.currentTarget.contains(event.relatedTarget)) setSuggestionsOpen(false);
+                    if (!event.currentTarget.contains(event.relatedTarget)
+                      && !event.relatedTarget?.closest?.(".trends-autocomplete-menu-portal")) setSuggestionsOpen(false);
                   }}
                 >
                   <div className="trends-search-box-wrap">
@@ -986,7 +1032,7 @@ function TrendsPage() {
                     />
                   </div>
                   {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                    <div className="trends-autocomplete-menu" id="trend-compare-suggestions" role="listbox">
+                    <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-compare-suggestions">
                       {suggestionsLoading ? (
                         <span className="trends-autocomplete-state">Finding matches…</span>
                       ) : autocompleteSuggestions.length > 0 ? (
@@ -1011,7 +1057,7 @@ function TrendsPage() {
                       ) : (
                         <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                       )}
-                    </div>
+                    </TrendsSuggestionPortal>
                   )}
                 </div>
 

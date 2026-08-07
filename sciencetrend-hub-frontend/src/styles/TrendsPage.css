@@ -1198,3 +1198,16 @@ html body .st-layout .trends-middle-grid {
   position: relative;
   z-index: 1;
 }
+
+body > .trends-autocomplete-menu-portal {
+  position: fixed !important;
+  right: auto !important;
+  z-index: 2147483000 !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+  opacity: 1 !important;
+  background: #ffffff !important;
+  isolation: isolate;
+  backdrop-filter: none !important;
+  box-shadow: 0 22px 58px rgba(15, 23, 42, 0.26) !important;
+}
