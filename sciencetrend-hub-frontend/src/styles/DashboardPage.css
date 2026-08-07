@@ -200,8 +200,9 @@
   background: rgba(244, 63, 94, 0.14);
 }
 .db-kpi-change.neutral {
-  color: #2563eb;
-  background: rgba(59, 130, 246, 0.12);
+  color: #1e40af;
+  background: rgba(59, 130, 246, 0.18);
+  -webkit-text-fill-color: #1e40af;
 }
 
 .db-kpi-comparison {
@@ -1224,7 +1225,11 @@ html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured .db-k
 html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--featured .db-kpi-change {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.22) !important;
+  background: rgba(255, 255, 255, 0.32) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.02em !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
 
 html body .st-layout .premium-dashboard .db-kpi-card.db-kpi-card--summary {

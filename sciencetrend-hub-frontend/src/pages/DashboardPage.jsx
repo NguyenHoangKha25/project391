@@ -361,9 +361,12 @@ function DashboardPage() {
 
   const featuredPaper = useMemo(() => {
     if (!Array.isArray(topCitedPapers) || topCitedPapers.length === 0) return null;
-    const first = topCitedPapers[0];
-    if (!first || typeof first !== "object" || !first.title) return null;
-    return first;
+    // Rotate daily: pick a different paper based on current date
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+    const idx = dayOfYear % topCitedPapers.length;
+    const pick = topCitedPapers[idx];
+    if (!pick || typeof pick !== "object" || !pick.title) return topCitedPapers[0] || null;
+    return pick;
   }, [topCitedPapers]);
 
   const donutSegments = useMemo(() => {
