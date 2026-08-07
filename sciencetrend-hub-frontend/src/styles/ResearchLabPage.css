@@ -2838,6 +2838,17 @@ html body .st-layout .research-lab-v2 .research-search-form {
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
+html body .st-layout .research-search-form input,
+html body .st-layout .research-search-form input:focus,
+html body .st-layout .research-search-form input:focus-visible {
+  border: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
 html body .st-layout .research-lab-v2 .research-search-form:focus-within {
   border-color: rgba(79, 70, 229, .5) !important;
   box-shadow: 0 0 0 4px rgba(79, 70, 229, .1), 0 8px 22px rgba(40, 55, 96, .08) !important;

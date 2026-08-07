@@ -2979,10 +2979,10 @@ html body .st-layout .account-page .account-detail-row strong {
   -webkit-text-fill-color: #111a34 !important;
 }
 
-/* Fix double nested rounded borders on search forms */
-html body .st-layout :is(.reports-search, .keywords-search-box, .journals-search-box, .papers-search-bar, .catalog-search) input,
-html body .st-layout :is(.reports-search, .keywords-search-box, .journals-search-box, .papers-search-bar, .catalog-search) input:focus,
-html body .st-layout :is(.reports-search, .keywords-search-box, .journals-search-box, .papers-search-bar, .catalog-search) input:focus-visible {
+/* Fix double nested rounded borders on all search forms project-wide */
+html body .st-layout :is(.reports-search, .research-search-form, .admin-search-form, .keywords-search-box, .journals-search-box, .topics-search-box, .papers-search-bar, .catalog-search, .search-input-wrapper) input,
+html body .st-layout :is(.reports-search, .research-search-form, .admin-search-form, .keywords-search-box, .journals-search-box, .topics-search-box, .papers-search-bar, .catalog-search, .search-input-wrapper) input:focus,
+html body .st-layout :is(.reports-search, .research-search-form, .admin-search-form, .keywords-search-box, .journals-search-box, .topics-search-box, .papers-search-bar, .catalog-search, .search-input-wrapper) input:focus-visible {
   border: none !important;
   border-radius: 0 !important;
   outline: none !important;
