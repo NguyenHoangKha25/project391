@@ -35,11 +35,11 @@ function TrendsSuggestionPortal({ anchorRef, children, id }) {
       const rect = anchor.getBoundingClientRect();
       setPosition({
         position: "fixed",
-        top: rect.bottom + 7,
-        left: rect.left,
-        width: rect.width,
-        maxHeight: Math.max(140, Math.min(280, window.innerHeight - rect.bottom - 18)),
-        zIndex: 99999999,
+        top: `${rect.bottom + 6}px`,
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+        maxHeight: `${Math.max(140, Math.min(280, window.innerHeight - rect.bottom - 18))}px`,
+        zIndex: 2147483647,
       });
     }
 
@@ -862,7 +862,7 @@ function TrendsPage() {
                   />
                 </div>
                 {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                  <div className="trends-autocomplete-menu" id="trend-single-suggestions" role="listbox">
+                  <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-single-suggestions">
                     {suggestionsLoading ? (
                       <span className="trends-autocomplete-state">Finding matches…</span>
                     ) : autocompleteSuggestions.length > 0 ? (
@@ -880,7 +880,7 @@ function TrendsPage() {
                     ) : (
                       <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                     )}
-                  </div>
+                  </TrendsSuggestionPortal>
                 )}
               </div>
             )}
@@ -1034,7 +1034,7 @@ function TrendsPage() {
                     />
                   </div>
                   {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                    <div className="trends-autocomplete-menu" id="trend-compare-suggestions" role="listbox">
+                    <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-compare-suggestions">
                       {suggestionsLoading ? (
                         <span className="trends-autocomplete-state">Finding matches…</span>
                       ) : autocompleteSuggestions.length > 0 ? (
@@ -1059,7 +1059,7 @@ function TrendsPage() {
                       ) : (
                         <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                       )}
-                    </div>
+                    </TrendsSuggestionPortal>
                   )}
                 </div>
 

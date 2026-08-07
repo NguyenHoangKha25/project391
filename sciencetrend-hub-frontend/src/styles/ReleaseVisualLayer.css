@@ -3112,37 +3112,45 @@ html body .st-layout .admin-panel .admin-sync-failure-summary {
   display: none !important;
 }
 
-/* Fix trends autocomplete search suggestion dropdown covered by cards below */
-html body .st-layout .trends-page-container {
-  position: relative !important;
+/* Fix trends autocomplete search suggestion dropdown portal */
+.trends-autocomplete-menu-portal,
+div.trends-autocomplete-menu-portal,
+body > .trends-autocomplete-menu-portal,
+html body .trends-autocomplete-menu-portal {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.32) !important;
+  border: 1.5px solid rgba(148, 163, 184, 0.45) !important;
+  border-radius: 14px !important;
+  overflow-y: auto !important;
+  pointer-events: auto !important;
   isolation: isolate !important;
 }
 
-html body .st-layout :is(.trends-controls-bar, .trends-filter-inputs-group, .trends-autocomplete, .trend-compare-header, .trend-compare-search) {
-  position: relative !important;
-  z-index: 999999 !important;
-  overflow: visible !important;
-}
-
-html body .st-layout .trends-autocomplete-menu {
-  position: absolute !important;
-  top: calc(100% + 6px) !important;
-  left: 0 !important;
-  right: 0 !important;
+.trends-autocomplete-menu-portal button {
   width: 100% !important;
-  max-height: 280px !important;
-  overflow-y: auto !important;
-  z-index: 9999999 !important;
-  background: #ffffff !important;
-  box-shadow: 0 22px 58px rgba(15, 23, 42, 0.28) !important;
-  border: 1.5px solid rgba(148, 163, 184, 0.4) !important;
-  border-radius: 14px !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  padding: 8px 12px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  color: #172033 !important;
+  background: transparent !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+  cursor: pointer !important;
 }
 
-html body .st-layout :is(.trends-stats-cards-row, .trends-middle-grid, .trends-chart-card, .trend-stat-card, .stat-card-glass) {
-  position: relative !important;
-  z-index: 1 !important;
+.trends-autocomplete-menu-portal button:hover,
+.trends-autocomplete-menu-portal button:focus-visible {
+  color: #3730a3 !important;
+  background: #eef2ff !important;
+  outline: none !important;
 }
