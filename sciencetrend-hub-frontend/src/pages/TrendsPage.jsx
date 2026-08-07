@@ -93,6 +93,7 @@ function hasUsableMetadata(metadata) {
 }
 
 const TRENDS_METADATA_CACHE_PREFIX = "trends_metadata_v9";
+const ANALYTICS_CACHE_TTL_MS = 10 * 60 * 1000;
 const COMPARISON_CHART_WIDTH = 760;
 const COMPARISON_CHART_HEIGHT = 300;
 const COMPARISON_PLOT_HEIGHT = 250;
@@ -235,12 +236,15 @@ function normalizeAutocompleteSuggestions(response, type) {
     .slice(0, 10);
 }
 
-function getTrendsMetadataCacheKey(role) {
-  return `${TRENDS_METADATA_CACHE_PREFIX}_${String(role || "STUDENT").toUpperCase()}`;
+function getTrendsMetadataCacheKey(role, timeRange = "8y") {
+  return `${TRENDS_METADATA_CACHE_PREFIX}_${String(role || "STUDENT").toUpperCase()}_${timeRange}`;
 }
 
-function getInitialTrendData(role) {
-  const storedMetadata = getPersistentCachedData(getTrendsMetadataCacheKey(role));
+function getInitialTrendData(role, timeRange = "8y") {
+  const storedMetadata = getPersistentCachedData(
+    getTrendsMetadataCacheKey(role, timeRange),
+    ANALYTICS_CACHE_TTL_MS,
+  );
   const metadata = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
   const keywords = Array.isArray(metadata?.dbKeywords) && metadata.dbKeywords.length > 0
     ? metadata.dbKeywords
@@ -279,7 +283,7 @@ function TrendsPage() {
   const isLecturer = normalizedRole === "LECTURER";
   const canCompare = ["RESEARCHER", "ADMIN"].includes(normalizedRole);
   const canViewTopTrending = !isStudent;
-  const [initialTrendData] = useState(() => getInitialTrendData(normalizedRole));
+  const [initialTrendData] = useState(() => getInitialTrendData(normalizedRole, "8y"));
 
   // Navigation tab: 'keyword' | 'topic'
   const [trendTab, setTrendTab] = useState("keyword");
@@ -318,8 +322,9 @@ function TrendsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    const cacheKey = getTrendsMetadataCacheKey(normalizedRole);
-    const storedMetadata = getPersistentCachedData(cacheKey);
+    const fromYear = getRangeStartYear(timeRange);
+    const cacheKey = getTrendsMetadataCacheKey(normalizedRole, timeRange);
+    const storedMetadata = getPersistentCachedData(cacheKey, ANALYTICS_CACHE_TTL_MS);
     const cached = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
 
     function applyMetadata(metadata) {
@@ -343,8 +348,8 @@ function TrendsPage() {
 
     async function loadMetadata() {
       const [topicTrendResult, keywordTrendResult, dashboardResult] = await Promise.allSettled([
-        canViewTopTrending ? getTrendingTopics({ limit: 10 }) : Promise.resolve(null),
-        canViewTopTrending ? getTrendingKeywords({ limit: 10 }) : Promise.resolve(null),
+        canViewTopTrending ? getTrendingTopics({ limit: 10, fromYear }) : Promise.resolve(null),
+        canViewTopTrending ? getTrendingKeywords({ limit: 10, fromYear }) : Promise.resolve(null),
         canViewTopTrending ? getDashboardOverview() : Promise.resolve(null),
       ]);
 
@@ -385,7 +390,7 @@ function TrendsPage() {
     return () => {
       cancelled = true;
     };
-  }, [canViewTopTrending, normalizedRole]);
+  }, [canViewTopTrending, normalizedRole, timeRange]);
 
   useEffect(() => {
     const names = dbKeywords
@@ -576,7 +581,7 @@ function TrendsPage() {
 
     let cancelled = false;
     const cacheKey = getTrendSeriesCacheKey(trendTab, singleTrendTerm);
-    const storedSeries = getPersistentCachedData(cacheKey);
+    const storedSeries = getPersistentCachedData(cacheKey, ANALYTICS_CACHE_TTL_MS);
     const cached = hasUsableTrendSeries(storedSeries) ? storedSeries : null;
 
     if (cached) {
@@ -620,7 +625,10 @@ function TrendsPage() {
 
     let cancelled = false;
     const cachedSeries = terms.flatMap((term) => {
-      const points = getPersistentCachedData(getTrendSeriesCacheKey(trendTab, term));
+      const points = getPersistentCachedData(
+        getTrendSeriesCacheKey(trendTab, term),
+        ANALYTICS_CACHE_TTL_MS,
+      );
       return hasUsableTrendSeries(points) ? [{ name: term, points }] : [];
     });
 

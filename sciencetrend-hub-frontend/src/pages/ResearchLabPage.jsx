@@ -1427,8 +1427,8 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
   const evidenceRequestRef = useRef(0);
   const rootType = normalizeMapType(data?.root?.type);
   const rootLines = splitMapLabel(data?.root?.label, 25);
-  const unavailableLanes = useMemo(() => (Array.isArray(data?.lanes) ? data.lanes : [])
-    .filter((lane) => Number(lane?.displayedCount) === 0), [data?.lanes]);
+  const unavailableLanes = (Array.isArray(data?.lanes) ? data.lanes : [])
+    .filter((lane) => Number(lane?.displayedCount) === 0);
   const visibleLaneCount = layout.groups.length;
   const fitZoomRatio = 100 / zoom;
   const viewBoxWidth = layout.width * fitZoomRatio;

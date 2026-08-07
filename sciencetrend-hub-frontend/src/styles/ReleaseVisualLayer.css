@@ -3148,7 +3148,8 @@ html body .st-layout :is(.trend-compare-header, .trend-compare-search) {
 /* Fix trends search suggestion dropdown portal styling and z-index */
 body > .trends-autocomplete-menu-portal,
 .trends-autocomplete-menu-portal,
-div.trends-autocomplete-menu-portal {
+div.trends-autocomplete-menu-portal,
+html body .trends-autocomplete-menu-portal {
   position: fixed !important;
   z-index: 2147483647 !important;
   background: #ffffff !important;
@@ -3162,6 +3163,8 @@ div.trends-autocomplete-menu-portal {
   overflow-y: auto !important;
   pointer-events: auto !important;
   isolation: isolate !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .trends-autocomplete-menu-portal button {
@@ -3175,16 +3178,30 @@ div.trends-autocomplete-menu-portal {
   border: 0 !important;
   border-radius: 9px !important;
   color: #172033 !important;
-  background: transparent !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
   font-size: 12.5px !important;
   font-weight: 700 !important;
   text-align: left !important;
   cursor: pointer !important;
+  opacity: 1 !important;
 }
 
 .trends-autocomplete-menu-portal button:hover,
 .trends-autocomplete-menu-portal button:focus-visible {
   color: #3730a3 !important;
   background: #eef2ff !important;
+  background-color: #eef2ff !important;
   outline: none !important;
+}
+
+.trends-autocomplete-menu-portal .trends-autocomplete-state {
+  display: block !important;
+  padding: 12px 14px !important;
+  color: #64748b !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
 }
