@@ -721,9 +721,31 @@ function TrendsPage() {
               <FiChevronDown />
             </div>
 
-            <div className="trends-status-badge">
+            <div
+              className="trends-status-badge"
+              style={{
+                background: "rgba(16, 185, 129, 0.12)",
+                border: "1px solid rgba(16, 185, 129, 0.35)",
+                color: "#047857",
+                padding: "0 14px",
+                height: "36px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                borderRadius: "10px",
+              }}
+            >
               <span className="live-dot" />
-              <span>{metadataSource[trendTab] === "catalog" ? "Live Catalog Analytics" : "Live Trend Analytics"}</span>
+              <span
+                style={{
+                  color: "#047857",
+                  WebkitTextFillColor: "#047857",
+                  fontWeight: "800",
+                  fontSize: "12.5px",
+                }}
+              >
+                {metadataSource[trendTab] === "catalog" ? "Live Catalog Analytics" : "Live Trend Analytics"}
+              </span>
             </div>
           </div>
         </div>
