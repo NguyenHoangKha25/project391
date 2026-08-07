@@ -1430,6 +1430,11 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
   const unavailableLanes = (Array.isArray(data?.lanes) ? data.lanes : [])
     .filter((lane) => Number(lane?.displayedCount) === 0);
   const visibleLaneCount = layout.groups.length;
+  const limitedEvidenceMax = Math.max(1, Number(data?.minStrongSharedPapers || 3) - 1);
+  const recentPeriodLabel = data?.fromYear && data?.toYear ? `${data.fromYear}–${data.toYear}` : "Recent period";
+  const previousPeriodLabel = data?.previousFromYear && data?.previousToYear
+    ? `${data.previousFromYear}–${data.previousToYear}`
+    : "Previous period";
   const fitZoomRatio = 100 / zoom;
   const viewBoxWidth = layout.width * fitZoomRatio;
   const viewBoxHeight = layout.height * fitZoomRatio;
@@ -1638,7 +1643,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
                 <text className="research-weighted-lane-title" x={group.laneLeft + 54} y={group.laneTop + 30}>{group.meta.label}</text>
                 <text className="research-weighted-lane-count" textAnchor="end" x={group.laneLeft + group.laneWidth - 20} y={group.laneTop + 30}>{group.nodes.length} ranked nodes</text>
                 {String(group.lane?.evidenceLevel || "").toUpperCase() === "LIMITED" && (
-                  <text className="research-weighted-lane-empty is-limited" x={group.laneLeft + 54} y={group.laneTop + 50}>Limited evidence: 1–2 shared papers</text>
+                  <text className="research-weighted-lane-empty is-limited" x={group.laneLeft + 54} y={group.laneTop + 50}>Limited evidence: 1–{limitedEvidenceMax} shared papers</text>
                 )}
               </g>
             ))}
@@ -1663,7 +1668,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
                   <path className="research-weighted-edge-hit" d={edgePath(x, y)} />
                   <path className="research-weighted-edge-line" d={edgePath(x, y)} style={style} />
                   <title>
-                    {`${formatNumber(edge.sharedPaperCount)} shared papers · recent ${formatNumber(edge.recentSharedPaperCount)} vs previous ${formatNumber(edge.previousSharedPaperCount)} · growth ${edge.growthRate > 0 ? "+" : ""}${edge.growthRate}% · association ${Math.round(normalizeAssociationScore(edge.associationScore || edge.rankScore) * 100)}%${edge.evidenceLevel === "LIMITED" ? " · Limited evidence" : ""}`}
+                    {`${formatNumber(edge.sharedPaperCount)} shared papers · ${recentPeriodLabel}: ${formatNumber(edge.recentSharedPaperCount)} vs ${previousPeriodLabel}: ${formatNumber(edge.previousSharedPaperCount)} · growth ${edge.growthRate > 0 ? "+" : ""}${edge.growthRate}% · association ${Math.round(normalizeAssociationScore(edge.associationScore || edge.rankScore) * 100)}%${edge.evidenceLevel === "LIMITED" ? " · Limited evidence" : ""}`}
                   </title>
                   <g className="research-weighted-edge-badge" transform={`translate(${x - MAP_NODE_WIDTH / 2 - 31} ${y})`}>
                     <rect x="-25" y="-11" width="50" height="22" rx="11" />
@@ -1725,7 +1730,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
                       <text x="34" y="12" textAnchor="middle">LIMITED</text>
                     </g>
                   )}
-                  <title>{node.label} · {formatNumber(edge.sharedPaperCount)} shared · {formatNumber(node.catalogPaperCount)} catalog · {associationPercent}% association · {getMapStatusLabel(edge.trendStatus)}{edge.evidenceLevel === "LIMITED" ? " · Limited evidence: 1–2 shared papers" : ""}</title>
+                  <title>{node.label} · {formatNumber(edge.sharedPaperCount)} shared · {formatNumber(node.catalogPaperCount)} catalog · {associationPercent}% association · {getMapStatusLabel(edge.trendStatus)}{edge.evidenceLevel === "LIMITED" ? ` · Limited evidence: 1–${limitedEvidenceMax} shared papers` : ""}</title>
                 </g>
               );
             })}
@@ -1755,14 +1760,14 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
             <div><small>Shared papers</small><strong>{formatNumber(selectedEdge.edge.sharedPaperCount)}</strong></div>
             <div><small>Association</small><strong>{Math.round(normalizeAssociationScore(selectedEdge.edge.associationScore) * 100)}%</strong></div>
             <div><small>Trend</small><strong>{getMapStatusLabel(selectedEdge.edge.trendStatus)}</strong></div>
-            <div><small>Recent period</small><strong>{formatNumber(selectedEdge.edge.recentSharedPaperCount)}</strong></div>
-            <div><small>Previous period</small><strong>{formatNumber(selectedEdge.edge.previousSharedPaperCount)}</strong></div>
+            <div><small>{recentPeriodLabel}</small><strong>{formatNumber(selectedEdge.edge.recentSharedPaperCount)}</strong></div>
+            <div><small>{previousPeriodLabel}</small><strong>{formatNumber(selectedEdge.edge.previousSharedPaperCount)}</strong></div>
             <div><small>Growth rate</small><strong>{selectedEdge.edge.growthRate > 0 ? "+" : ""}{selectedEdge.edge.growthRate}%</strong></div>
           </div>
           {selectedEdge.edge.evidenceLevel === "LIMITED" && (
             <div className="research-edge-evidence-level is-limited">
               <FiAlertCircle />
-              <span><strong>Limited evidence:</strong> 1–2 shared papers. Verify the supporting papers before using this relationship.</span>
+              <span><strong>Limited evidence:</strong> 1–{limitedEvidenceMax} shared papers. Verify the supporting papers before using this relationship.</span>
             </div>
           )}
           {evidenceLoading ? (

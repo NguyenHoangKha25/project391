@@ -1,6 +1,6 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
-import AdminPage from "../pages/AdminPage";
 import DashboardPage from "../pages/DashboardPage";
 import ForgotPassWordPage from "../pages/ForgotPassWordPage";
 import HomePage from "../pages/HomePage";
@@ -11,8 +11,6 @@ import NotificationsPage from "../pages/NotificationsPage";
 import OAuth2CallbackPage from "../pages/OAuth2CallbackPage";
 import PapersPage from "../pages/PapersPage";
 import RegisterPage from "../pages/RegisterPage";
-import ResearchLabPage from "../pages/ResearchLabPage";
-import ReportsPage from "../pages/ReportsPage";
 import ResetPassWord from "../pages/ResetPassWord";
 import TrendsPage from "../pages/TrendsPage";
 import TopicsPage from "../pages/TopicsPage";
@@ -21,6 +19,10 @@ import JournalsPage from "../pages/JournalsPage";
 import KeywordsPage from "../pages/KeywordsPage";
 import PaperDetailPage from "../pages/PaperDetailPage";
 import { ROUTE_PATHS } from "./routePaths";
+
+const AdminPage = lazy(() => import("../pages/AdminPage"));
+const ResearchLabPage = lazy(() => import("../pages/ResearchLabPage"));
+const ReportsPage = lazy(() => import("../pages/ReportsPage"));
 
 // Cho phép truy cập khi chưa đăng nhập.
 // Nếu đã đăng nhập → redirect về dashboard.
@@ -92,6 +94,7 @@ function AppRoutes() {
   const { isLoggedIn, defaultPath } = useAuth();
 
   return (
+    <Suspense fallback={<div className="page-loading-state" role="status"><span className="workspace-loading-spinner" />Loading workspace…</div>}>
     <Routes>
       <Route path={ROUTE_PATHS.HOME} element={<HomePage />} />
 
@@ -216,6 +219,7 @@ function AppRoutes() {
         element={<Navigate to={isLoggedIn ? defaultPath : ROUTE_PATHS.HOME} replace />}
       />
     </Routes>
+    </Suspense>
   );
 }
 

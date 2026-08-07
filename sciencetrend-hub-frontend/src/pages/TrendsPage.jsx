@@ -51,7 +51,7 @@ function TrendsSuggestionPortal({ anchorRef, children, id, isOpen }) {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [anchorRef, isOpen]);
+  }, [anchorRef, isOpen, children]);
 
   if (!isOpen || !position || typeof document === "undefined") return null;
 
@@ -847,14 +847,13 @@ function TrendsPage() {
           <div className="trends-filter-inputs-group">
             {!canCompare && (
               <div
-                ref={suggestionAnchorRef}
                 className="trends-autocomplete trends-single-select"
                 onBlur={(event) => {
                   if (!event.currentTarget.contains(event.relatedTarget)
                     && !event.relatedTarget?.closest?.(".trends-autocomplete-menu-portal")) setSuggestionsOpen(false);
                 }}
               >
-                <div className="trends-search-box-wrap">
+                <div ref={suggestionAnchorRef} className="trends-search-box-wrap">
                   <FiSearch />
                   <input
                     type="text"
@@ -1023,14 +1022,13 @@ function TrendsPage() {
                 </div>
 
                 <div
-                  ref={suggestionAnchorRef}
                   className="trends-autocomplete trend-compare-search"
                   onBlur={(event) => {
                     if (!event.currentTarget.contains(event.relatedTarget)
                       && !event.relatedTarget?.closest?.(".trends-autocomplete-menu-portal")) setSuggestionsOpen(false);
                   }}
                 >
-                  <div className="trends-search-box-wrap">
+                  <div ref={suggestionAnchorRef} className="trends-search-box-wrap">
                     <FiSearch />
                     <input
                       type="text"
