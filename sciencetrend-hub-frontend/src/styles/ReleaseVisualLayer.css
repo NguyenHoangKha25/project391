@@ -3058,3 +3058,7 @@ html body .st-layout .admin-panel .admin-compact-table td:nth-child(2) {
   white-space: nowrap !important;
   max-width: 160px !important;
 }
+
+html body .st-layout .admin-panel .admin-sync-failure-summary {
+  display: none !important;
+}

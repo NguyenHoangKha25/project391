@@ -479,7 +479,7 @@ function SyncTable({ logs, compact = false }) {
           </tbody>
         </table>
       </div>
-      {latestFailure && (
+      {!compact && latestFailure && (
         <div className="admin-sync-failure-summary" role="status">
           <FiAlertTriangle />
           <div>
