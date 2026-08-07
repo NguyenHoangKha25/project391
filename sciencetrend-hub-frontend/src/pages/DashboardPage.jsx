@@ -115,6 +115,7 @@ function DashboardPage() {
   const canUseAnalytics = capabilitiesData?.canViewResearchAnalytics
     ?? ["LECTURER", "RESEARCHER", "ADMIN"].includes(normalizedRole);
   const canManageSystem = capabilitiesData?.canManageSystem ?? normalizedRole === "ADMIN";
+  const canAccessResearchLab = ["RESEARCHER", "ADMIN"].includes(normalizedRole);
   const canComparePapers = capabilitiesData?.canComparePapers
     ?? ["RESEARCHER", "ADMIN"].includes(normalizedRole);
   const canCompareTrends = capabilitiesData?.canCompareTrends
@@ -423,8 +424,8 @@ function DashboardPage() {
   const quickActions = useMemo(() => {
     const actions = [];
     if (canManageSystem) actions.push({ label: "Admin Panel", to: "/admin", icon: FiDatabase });
-    if (canComparePapers) actions.push({ label: "Compare Papers", to: "/research-lab", icon: FiGitBranch });
-    if (mindMapAccess === "BASIC" || mindMapAccess === "FULL") {
+    if (canAccessResearchLab && canComparePapers) actions.push({ label: "Compare Papers", to: "/research-lab", icon: FiGitBranch });
+    if (canAccessResearchLab && (mindMapAccess === "BASIC" || mindMapAccess === "FULL")) {
       actions.push({ label: `Mind Map ${mindMapAccess === "BASIC" ? "Basic" : "Full"}`, to: "/research-lab", icon: FiGitBranch });
     }
     if (canGenerateAdvancedReport) actions.push({ label: "Advanced Report", to: "/reports", icon: FiFileText });
@@ -437,7 +438,7 @@ function DashboardPage() {
       { label: "Explore Topics", to: "/topics", icon: FiTag },
       { label: "View Journals", to: "/journals", icon: FiBookOpen },
     ];
-  }, [canComparePapers, canCompareTrends, canGenerateAdvancedReport, canGenerateBasicReport, canManageSystem, mindMapAccess]);
+  }, [canAccessResearchLab, canComparePapers, canCompareTrends, canGenerateAdvancedReport, canGenerateBasicReport, canManageSystem, mindMapAccess]);
 
   const primaryStats = dashboardStats.slice(0, 4);
   const supportingStats = dashboardStats.slice(4);
@@ -452,7 +453,7 @@ function DashboardPage() {
       : normalizedRole === "LECTURER"
         ? "Lecturer evidence workspace"
         : "Research discovery workspace";
-  const briefingAction = mindMapAccess === "BASIC" || mindMapAccess === "FULL"
+  const briefingAction = canAccessResearchLab && (mindMapAccess === "BASIC" || mindMapAccess === "FULL")
     ? { label: "Open Research Lab", to: "/research-lab" }
     : { label: "Explore Papers", to: "/papers" };
   const researchBriefs = [

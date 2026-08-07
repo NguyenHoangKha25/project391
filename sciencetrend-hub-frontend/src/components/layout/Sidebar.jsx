@@ -47,7 +47,7 @@ const menuGroups = [
     label: "Research tools",
     items: [
       { label: "Reports", path: ROUTE_PATHS.REPORTS, icon: FiBarChart2, roles: ["LECTURER", "RESEARCHER", "ADMIN"] },
-      { label: "Research Lab", path: ROUTE_PATHS.RESEARCH_LAB, icon: FiGitBranch, roles: ["LECTURER", "RESEARCHER", "ADMIN"] },
+      { label: "Research Lab", path: ROUTE_PATHS.RESEARCH_LAB, icon: FiGitBranch, roles: ["RESEARCHER", "ADMIN"] },
       { label: "Admin", path: ROUTE_PATHS.ADMIN, icon: FiSettings, adminOnly: true },
     ],
   },
