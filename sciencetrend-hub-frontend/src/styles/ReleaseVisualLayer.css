@@ -3111,3 +3111,34 @@ html body .st-layout .admin-panel .admin-compact-table .admin-row-actions button
 html body .st-layout .admin-panel .admin-sync-failure-summary {
   display: none !important;
 }
+
+/* Fix trends autocomplete search suggestion dropdown covered by cards below */
+.trends-autocomplete-menu-portal,
+div.trends-autocomplete-menu-portal,
+body > .trends-autocomplete-menu-portal,
+html body .trends-autocomplete-menu-portal {
+  position: fixed !important;
+  z-index: 99999999 !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: 0 20px 52px rgba(15, 23, 42, 0.26) !important;
+  border: 1px solid rgba(148, 163, 184, 0.38) !important;
+  border-radius: 14px !important;
+  overflow-y: auto !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
+}
+
+html body .st-layout .trends-controls-bar,
+html body .st-layout .trends-filter-inputs-group,
+html body .st-layout .trends-autocomplete {
+  position: relative !important;
+  z-index: 200 !important;
+}
+
+html body .st-layout .trends-stats-cards-row,
+html body .st-layout .trends-middle-grid,
+html body .st-layout .trends-chart-card {
+  position: relative !important;
+  z-index: 1 !important;
+}

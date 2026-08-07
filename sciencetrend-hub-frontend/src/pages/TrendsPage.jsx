@@ -34,10 +34,12 @@ function TrendsSuggestionPortal({ anchorRef, children, id }) {
       if (!anchor) return;
       const rect = anchor.getBoundingClientRect();
       setPosition({
+        position: "fixed",
         top: rect.bottom + 7,
         left: rect.left,
         width: rect.width,
         maxHeight: Math.max(140, Math.min(280, window.innerHeight - rect.bottom - 18)),
+        zIndex: 99999999,
       });
     }
 
