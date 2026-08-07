@@ -54,6 +54,8 @@ function TrendsSuggestionPortal({ anchorRef, children, id }) {
 
   if (!position || typeof document === "undefined") return null;
 
+  const targetNode = document.getElementById("portal-root") || document.body;
+
   return createPortal(
     <div
       className="trends-autocomplete-menu trends-autocomplete-menu-portal"
@@ -63,7 +65,7 @@ function TrendsSuggestionPortal({ anchorRef, children, id }) {
     >
       {children}
     </div>,
-    document.body,
+    targetNode,
   );
 }
 

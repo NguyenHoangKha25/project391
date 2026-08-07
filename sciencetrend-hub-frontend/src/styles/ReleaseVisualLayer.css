@@ -3113,6 +3113,12 @@ html body .st-layout .admin-panel .admin-sync-failure-summary {
 }
 
 /* Fix trends autocomplete search suggestion dropdown portal */
+#portal-root {
+  position: relative !important;
+  z-index: 2147483647 !important;
+}
+
+#portal-root .trends-autocomplete-menu-portal,
 .trends-autocomplete-menu-portal,
 div.trends-autocomplete-menu-portal,
 body > .trends-autocomplete-menu-portal,
@@ -3122,7 +3128,7 @@ html body .trends-autocomplete-menu-portal {
   background: #ffffff !important;
   opacity: 1 !important;
   visibility: visible !important;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.32) !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35) !important;
   border: 1.5px solid rgba(148, 163, 184, 0.45) !important;
   border-radius: 14px !important;
   overflow-y: auto !important;
