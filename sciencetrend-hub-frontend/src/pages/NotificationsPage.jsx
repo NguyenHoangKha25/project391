@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { FiBell, FiBookOpen, FiFileText, FiTrendingUp } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
+import { ROUTE_PATHS } from "../routes/routePaths";
 import {
   getNotifications,
   markAllNotificationsAsRead,
@@ -135,6 +137,21 @@ function NotificationsPage() {
                     <div>
                       <h3>{item.title}</h3>
                       <p>{item.message}</p>
+                      {item.matchedReason && (
+                        <p className="notification-matched-reason" style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>
+                          <strong>Reason:</strong> {item.matchedReason}
+                        </p>
+                      )}
+                      {item.paperId && (
+                        <Link
+                          to={ROUTE_PATHS.paperDetail(item.paperId)}
+                          className="workspace-button secondary notification-view-paper-btn"
+                          style={{ marginTop: "8px", display: "inline-flex", fontSize: "12px", padding: "4px 12px" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View Paper →
+                        </Link>
+                      )}
                     </div>
                     <time>{formatRelativeTime(item.time)}</time>
                   </button>

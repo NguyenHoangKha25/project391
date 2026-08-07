@@ -403,38 +403,26 @@ export function getFallbackReportCharts() {
     }
   }
 
-  const totalPapers = Number(overview?.totalPapers) || 4571;
-  const totalJournals = Number(overview?.totalJournals) || 124;
-  const totalKeywords = Number(overview?.totalKeywords) || 850;
-  const openAlexPaperCount = Number(overview?.openAlexPaperCount) || 3041;
+  const totalPapers = Number(overview?.totalPapers) || 0;
+  const totalJournals = Number(overview?.totalJournals) || 0;
+  const totalKeywords = Number(overview?.totalKeywords) || 0;
+  const openAlexPaperCount = Number(overview?.openAlexPaperCount) || 0;
 
   const papersByYear = Array.isArray(overview?.papersByYear) && overview.papersByYear.some((p) => Number(p.value) > 0)
     ? overview.papersByYear.map((p) => ({ label: String(p.label), value: Number(p.value) || 0 }))
-    : [
-        { label: "2024", value: 500 },
-        { label: "2025", value: 500 },
-        { label: "2026", value: 500 },
-      ];
+    : [];
 
   const topKeywords = Array.isArray(overview?.topKeywords) && overview.topKeywords.some((k) => Number(k.value) > 0)
     ? overview.topKeywords.map((k) => ({ label: k.label || k.name || "Keyword", value: Number(k.value) || 0 }))
-    : [
-        { label: "Artificial Intelligence", value: 1250 },
-        { label: "Machine Learning", value: 980 },
-        { label: "Deep Learning", value: 740 },
-        { label: "Computer Vision", value: 530 },
-      ];
+    : [];
 
   const topJournals = Array.isArray(overview?.topJournals) && overview.topJournals.some((j) => Number(j.value) > 0)
     ? overview.topJournals.map((j) => ({ label: j.label || j.name || "Journal", value: Number(j.value) || 0 }))
-    : [
-        { label: "IEEE Access", value: 310 },
-        { label: "Nature Communications", value: 240 },
-        { label: "Expert Systems with Applications", value: 190 },
-      ];
+    : [];
 
-  return [
-    {
+  const charts = [];
+  if (totalPapers > 0 || totalJournals > 0 || totalKeywords > 0) {
+    charts.push({
       title: "1. Overall statistics",
       data: [
         { label: "Total papers", value: totalPapers },
@@ -442,20 +430,18 @@ export function getFallbackReportCharts() {
         { label: "Total keywords", value: totalKeywords },
         { label: "OpenAlex papers", value: openAlexPaperCount },
       ],
-    },
-    {
-      title: "2. Papers by year",
-      data: papersByYear,
-    },
-    {
-      title: "3. Top keywords",
-      data: topKeywords,
-    },
-    {
-      title: "4. Top journals",
-      data: topJournals,
-    },
-  ];
+    });
+  }
+  if (papersByYear.length > 0) {
+    charts.push({ title: "2. Papers by year", data: papersByYear });
+  }
+  if (topKeywords.length > 0) {
+    charts.push({ title: "3. Top keywords", data: topKeywords });
+  }
+  if (topJournals.length > 0) {
+    charts.push({ title: "4. Top journals", data: topJournals });
+  }
+  return charts;
 }
 
 // Report:
@@ -484,9 +470,9 @@ export function normalizeReport(report = {}, index = 0) {
   // If report charts are empty or have total sum of 0 (empty report from backend), fallback to live catalog analytics
   if (parsedCharts.length === 0 || totalValueSum === 0) {
     parsedCharts = getFallbackReportCharts();
-    if (!rawContent || rawContent.includes("Total papers\n0") || rawContent.includes("Total papers: 0") || rawContent.includes("Total papers\n 0")) {
-      const stats = parsedCharts[0].data;
-      rawContent = `SCIENTIFIC JOURNAL PUBLICATION TREND REPORT\n\n1. Overall statistics\n- Total papers: ${stats[0].value}\n- Total journals: ${stats[1].value}\n- Total keywords: ${stats[2].value}\n- OpenAlex papers: ${stats[3].value}\n\n2. Papers by year\n${parsedCharts[1].data.map(p => `- ${p.label}: ${p.value}`).join("\n")}\n\n3. Top keywords\n${parsedCharts[2].data.map(k => `- ${k.label}: ${k.value}`).join("\n")}\n\n4. Top journals\n${parsedCharts[3].data.map(j => `- ${j.label}: ${j.value}`).join("\n")}`;
+    if (parsedCharts.length > 0 && (!rawContent || rawContent.includes("Total papers\n0"))) {
+      const stats = parsedCharts[0]?.data || [];
+      rawContent = `SCIENTIFIC JOURNAL PUBLICATION TREND REPORT\n\n1. Overall statistics\n${stats.map(s => `- ${s.label}: ${s.value}`).join("\n")}`;
     }
   }
 
@@ -513,6 +499,9 @@ export function normalizeNotification(notification = {}, index = 0) {
   else if (notification.unread !== undefined) unread = Boolean(notification.unread);
   else if (notification.read !== undefined) unread = notification.read === false;
 
+  const paperId = notification.paperId ?? notification.researchPaperId ?? notification.paper_id ?? notification.paper?.id ?? notification.paper?.researchPaperId ?? null;
+  const matchedReason = notification.matchedReason ?? notification.matchReason ?? notification.reason ?? notification.matched_reason ?? null;
+
   return {
     id: notification.id ?? notification.notificationId ?? index,
     title: notification.title ?? notification.subject ?? "Notification",
@@ -520,5 +509,7 @@ export function normalizeNotification(notification = {}, index = 0) {
     time: notification.time ?? notification.sendAt ?? notification.createdAt ?? "",
     unread,
     type: notification.type ?? "default",
+    paperId,
+    matchedReason,
   };
 }

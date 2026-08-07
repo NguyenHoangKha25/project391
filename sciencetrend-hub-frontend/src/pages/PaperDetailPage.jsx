@@ -115,7 +115,7 @@ function PaperDetailPage() {
             </div>
             <dl className="paper-detail-meta">
               <div><dt>Year</dt><dd>{paper.year || "Not provided"}</dd></div>
-              <div><dt>Journal / source</dt><dd>{paper.journalName || paper.source}</dd></div>
+              <div><dt>Journal / source</dt><dd>{paper.journalTitle || paper.journalName || paper.source || "Not specified"}</dd></div>
               <div><dt>Citations</dt><dd>{Number(paper.citationCount || 0).toLocaleString()}</dd></div>
               <div><dt>DOI</dt><dd>{paper.doi || "Not provided"}</dd></div>
             </dl>
@@ -130,6 +130,17 @@ function PaperDetailPage() {
                   {paper.keywords.map((keyword) => {
                     const value = typeof keyword === "string" ? keyword : keyword.name || keyword.keyword;
                     return <Link key={value} to={`${ROUTE_PATHS.PAPERS}?keyword=${encodeURIComponent(value)}`}>{value}</Link>;
+                  })}
+                </div>
+              </section>
+            )}
+            {paper.topics?.length > 0 && (
+              <section className="paper-detail-section">
+                <h3>Topics</h3>
+                <div className="paper-keywords">
+                  {paper.topics.map((topic) => {
+                    const value = typeof topic === "string" ? topic : topic.name || topic.topicName || topic.title;
+                    return <span key={value} className="paper-topic-chip" style={{ display: "inline-block", background: "#f1f5f9", color: "#475569", padding: "4px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: "600", marginRight: "6px", marginBottom: "6px" }}>{value}</span>;
                   })}
                 </div>
               </section>

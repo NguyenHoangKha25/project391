@@ -567,3 +567,22 @@ select option {
 .st-guest-login { color: var(--st-primary); border: 1px solid rgba(21,127,145,.22); background: #fff; }
 .st-guest-register { color: #fff; background: linear-gradient(135deg,var(--st-primary),var(--st-primary-dark)); box-shadow: 0 10px 22px rgba(21,127,145,.18); }
 @media (max-width: 680px) { .st-guest-register { display: none; } }
+
+.st-unread-badge-count {
+  position: absolute !important;
+  top: 2px !important;
+  right: 2px !important;
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  padding: 1px 5px !important;
+  border-radius: 999px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
+}

@@ -244,6 +244,41 @@ function AdminPage() {
         setBackfillError(syncLogDetails(result) || "The backend could not complete this backfill. Check Sync history for details.");
         return;
       }
+
+      if (resultStatus === "RUNNING" || resultStatus === "PENDING" || resultStatus === "IN_PROGRESS" || !resultStatus) {
+        setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} is running in background. Polling sync log status…`);
+        let attempts = 0;
+        while (attempts < 25) {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          attempts++;
+          try {
+            const logsRes = await getAdminSyncLogs({ page: 0, size: 5 });
+            const logsList = toArray(logsRes, ["logs", "syncLogs"]);
+            const latest = logsList[0];
+            if (latest) {
+              const status = String(latest.status || "").toUpperCase();
+              if (status === "COMPLETED" || status === "SUCCESS") {
+                await loadAdminData();
+                const imported = latest.paperSynced ?? latest.newRecords ?? latest.recordsIndexed;
+                const summary = imported == null ? "" : ` ${formatNumber(imported)} new papers were indexed.`;
+                setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} completed successfully.${summary}`);
+                return;
+              }
+              if (status === "FAILED" || status === "ERROR") {
+                await loadAdminData();
+                setBackfillError(syncLogDetails(latest) || "Backfill failed according to SyncLog.");
+                return;
+              }
+            }
+          } catch (pollErr) {
+            console.warn("Polling SyncLog error:", pollErr);
+          }
+        }
+        await loadAdminData();
+        setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} is processing in background. Check Sync history for updates.`);
+        return;
+      }
+
       const importedPapers = result?.paperSynced ?? result?.newRecords ?? result?.recordsIndexed;
       const importedSummary = importedPapers == null ? "" : ` ${formatNumber(importedPapers)} new papers were indexed.`;
       setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} (max ${formatNumber(parsedMaxResults)} papers) completed successfully.${importedSummary}`);

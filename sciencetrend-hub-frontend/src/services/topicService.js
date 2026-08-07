@@ -15,6 +15,11 @@ export function getTrendingTopics(limit = 10) {
   return apiRequest("/topics/trending", { params: { limit } });
 }
 
+// Connect to GET /api/topics/popular?limit=...
+export function getPopularTopics(limit = 10) {
+  return apiRequest("/topics/popular", { params: { limit }, auth: false });
+}
+
 // Connect to GET /api/topics/{topicId}
 export function getTopicDetail(topicId) {
   return apiRequest(`/topics/${topicId}`, { auth: false });

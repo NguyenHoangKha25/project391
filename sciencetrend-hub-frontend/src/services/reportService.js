@@ -19,7 +19,7 @@ export function generateReport(params = {}) {
 export function searchReports(query, params = {}) {
   return apiRequest("/reports/search", {
     method: "GET",
-    params: { ...params, query },
+    params: { ...params, keyword: query },
   });
 }
 

@@ -18,6 +18,7 @@ import {
 import { useAuth } from "../../context/useAuth";
 import { ROUTE_PATHS } from "../../routes/routePaths";
 import { searchPapers } from "../../services/paperService";
+import { getUnreadNotifications } from "../../services/notificationService";
 import { normalizePaper, toArray } from "../../utils/apiData";
 import "../../styles/layout.css";
 
@@ -78,6 +79,22 @@ function Navbar({
   );
   const role = displayRole;
   const canUseReports = ["LECTURER", "RESEARCHER", "ADMIN"].includes(rawRole);
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    let active = true;
+    getUnreadNotifications()
+      .then((res) => {
+        if (!active) return;
+        const list = toArray(res, ["notifications"]);
+        const count = list.filter((n) => n.isRead === false || n.unread === true || n.read === false).length || list.length;
+        setUnreadCount(count);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [isLoggedIn]);
 
   useEffect(() => {
     function handlePointerDown(event) {
@@ -356,12 +373,18 @@ function Navbar({
           <>
             <button
               type="button"
-              className="st-icon-btn"
-              aria-label="Open notifications dashboard and system alerts"
+              className="st-icon-btn st-nav-notification-btn"
+              aria-label={`Open notifications (${unreadCount} unread)`}
               onClick={() => navigate(ROUTE_PATHS.NOTIFICATIONS)}
+              style={{ position: "relative" }}
             >
               <FiBell />
               <span className="st-icon-btn-label">Notifications</span>
+              {unreadCount > 0 && (
+                <span className="st-unread-badge-count">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </button>
 
             <div className="st-account" ref={accountRef}>

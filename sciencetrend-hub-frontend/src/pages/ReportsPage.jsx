@@ -556,6 +556,7 @@ function ReportsPage() {
   const [reportTopic, setReportTopic] = useState("");
   const [reportTimeHorizonYears, setReportTimeHorizonYears] = useState("5");
   const [selected, setSelected] = useState(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [keywordSuggestions, setKeywordSuggestions] = useState([]);
@@ -565,6 +566,24 @@ function ReportsPage() {
   const [selectedSections, setSelectedSections] = useState(() => [...BASIC_SECTIONS]);
   const [advancedSections, setAdvancedSections] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
+
+  const handleOpenPreview = useCallback(async (report) => {
+    if (!report) return;
+    setSelected(report);
+    if (!report.id) return;
+    try {
+      setLoadingPreview(true);
+      const res = await getReportById(report.id);
+      const rawDetail = res?.data ?? res;
+      if (rawDetail) {
+        setSelected(normalizeReport(rawDetail));
+      }
+    } catch (err) {
+      console.warn("Could not fetch full report by ID:", err);
+    } finally {
+      setLoadingPreview(false);
+    }
+  }, []);
 
   const loadReports = useCallback(async (searchQuery = "") => {
     try {
@@ -785,7 +804,7 @@ function ReportsPage() {
             {reports.map((report) => (
               <article className="report-row" key={report.id}>
                 <span className="report-row-icon"><FiBarChart2 /></span>
-                <button type="button" className="report-row-main" onClick={() => setSelected(report)}>
+                <button type="button" className="report-row-main" onClick={() => handleOpenPreview(report)}>
                   <strong>{report.title}</strong>
                   <span>{report.description ? report.description.substring(0, 110) + "..." : "Click to view analytical report breakdown & charts"}</span>
                 </button>

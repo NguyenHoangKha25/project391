@@ -2170,7 +2170,20 @@ function ResearchLabPage() {
           </button>
         </nav>
 
-        {canComparePapers && activeTool === "compare" ? <PaperComparator /> : <MindMapWorkspace />}
+        {canComparePapers ? (
+          activeTool === "compare" ? <PaperComparator /> : <MindMapWorkspace />
+        ) : (
+          <div className="workspace-empty" style={{ padding: "60px 20px", textAlign: "center" }}>
+            <FiGitBranch style={{ fontSize: "40px", color: "#6366f1", marginBottom: "16px" }} />
+            <h3>Mind Map & Research Comparator</h3>
+            <p style={{ maxWidth: "480px", margin: "8px auto 20px", color: "#64748b" }}>
+              Interactive Mind Maps and multi-paper evidence comparison are reserved for Researcher and Admin roles.
+            </p>
+            <Link to={ROUTE_PATHS.PAPERS} className="workspace-button primary">
+              Browse Catalog Papers
+            </Link>
+          </div>
+        )}
       </section>
     </MainLayout>
   );

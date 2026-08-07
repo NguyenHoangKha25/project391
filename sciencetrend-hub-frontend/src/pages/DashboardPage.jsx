@@ -24,6 +24,8 @@ import {
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import { getDashboardHome } from "../services/dashboardService";
+import { getPopularTopics, getTrendingTopics } from "../services/topicService";
+import { ROUTE_PATHS } from "../routes/routePaths";
 import {
   formatDateTime,
   formatRelativeTime,
@@ -185,10 +187,28 @@ function DashboardPage() {
       setOperationsData(homeData.operations);
       setCapabilitiesData(homeData.capabilities);
 
-      const normTopics = (homeData.analytics?.topTrendingTopics || [])
+      let normTopics = (homeData.analytics?.topTrendingTopics || [])
         .map(normalizeTopic)
         .filter((topic) => topic.name !== "Untitled topic")
-        .slice(0, 3);
+        .slice(0, 5);
+
+      if (normTopics.length === 0) {
+        try {
+          const popularRes = await getPopularTopics(5);
+          normTopics = toArray(popularRes, ["topics"])
+            .map(normalizeTopic)
+            .filter((t) => t.name !== "Untitled topic")
+            .slice(0, 5);
+        } catch {
+          try {
+            const trendRes = await getTrendingTopics(5);
+            normTopics = toArray(trendRes, ["topics"])
+              .map(normalizeTopic)
+              .filter((t) => t.name !== "Untitled topic")
+              .slice(0, 5);
+          } catch {}
+        }
+      }
       setTrendingTopics(normTopics);
       setPersistentCachedData(cacheKeys.topics, normTopics);
     } catch (error) {
@@ -265,6 +285,12 @@ function DashboardPage() {
       const growthPercent = growthRate * 100;
       const latestYear = analyticsData?.latestCompleteYear || "latest year";
       const previousYear = analyticsData?.previousCompleteYear || "previous year";
+      const latestYearCount = analyticsData?.latestCompleteYearPaperCount;
+      const previousYearCount = analyticsData?.previousCompleteYearPaperCount;
+      const growthTrendText = (latestYearCount != null && previousYearCount != null && latestYearCount > 0)
+        ? `${latestYear} (${formatNumber(latestYearCount)}) vs ${previousYear} (${formatNumber(previousYearCount)})`
+        : `${previousYear} to ${latestYear}`;
+
       stats.push(
         {
           title: "Total Citations",
@@ -291,7 +317,7 @@ function DashboardPage() {
           value: `${growthPercent > 0 ? "+" : ""}${formatDecimal(growthPercent)}%`,
           icon: growthRate < 0 ? FiTrendingDown : FiTrendingUp,
           change: growthRate > 0 ? "Growing" : growthRate < 0 ? "Declining" : "Stable",
-          trendText: `${previousYear} to ${latestYear}`,
+          trendText: growthTrendText,
           trendType: growthRate > 0 ? "positive" : growthRate < 0 ? "negative" : "neutral",
           themeClass: growthRate < 0 ? "kpi-theme-rose" : "kpi-theme-emerald",
           to: "/trends",
@@ -428,8 +454,8 @@ function DashboardPage() {
     const actions = [];
     if (canManageSystem) actions.push({ label: "Admin Panel", to: "/admin", icon: FiDatabase });
     if (canAccessResearchLab && canComparePapers) actions.push({ label: "Compare Papers", to: "/research-lab", icon: FiGitBranch });
-    if (canAccessResearchLab && (mindMapAccess === "BASIC" || mindMapAccess === "FULL")) {
-      actions.push({ label: `Mind Map ${mindMapAccess === "BASIC" ? "Basic" : "Full"}`, to: "/research-lab", icon: FiGitBranch });
+    if (canAccessResearchLab && mindMapAccess === "FULL") {
+      actions.push({ label: "Mind Map", to: "/research-lab", icon: FiGitBranch });
     }
     if (canGenerateAdvancedReport) actions.push({ label: "Advanced Report", to: "/reports", icon: FiFileText });
     else if (canGenerateBasicReport) actions.push({ label: "Generate Report", to: "/reports", icon: FiFileText });
@@ -1037,6 +1063,47 @@ function DashboardPage() {
               )}
             </div>
           </article>
+
+          {/* Card 3: Top Trending Keywords (Lecturer / Researcher / Admin) */}
+          {canUseAnalytics && Array.isArray(analyticsData?.topTrendingKeywords) && analyticsData.topTrendingKeywords.length > 0 && (
+            <article className="table-card glassmorphic-panel db-v4-keywords-card" style={{ gridColumn: "1 / -1", marginTop: "12px" }}>
+              <div className="panel-header-row">
+                <h3>Top Trending Keywords</h3>
+                <Link to="/papers" className="footer-link">
+                  View literature <FiArrowRight />
+                </Link>
+              </div>
+
+              <div className="trending-keywords-chips-wrap" style={{ display: "flex", flexWrap: "wrap", gap: "8px", paddingTop: "12px" }}>
+                {analyticsData.topTrendingKeywords.map((kw, idx) => {
+                  const kwName = typeof kw === "string" ? kw : kw.name || kw.label || kw.keyword || "Keyword";
+                  return (
+                    <Link
+                      key={kwName + idx}
+                      to={`${ROUTE_PATHS.PAPERS}?keyword=${encodeURIComponent(kwName)}`}
+                      className="db-keyword-pill-chip"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "6px 14px",
+                        borderRadius: "999px",
+                        background: "rgba(99, 102, 241, 0.08)",
+                        color: "#4f46e5",
+                        border: "1px solid rgba(99, 102, 241, 0.2)",
+                        fontSize: "12.5px",
+                        fontWeight: "700",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <FiTag style={{ fontSize: "12px" }} />
+                      <span>{kwName}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </article>
+          )}
 
         </section>
 

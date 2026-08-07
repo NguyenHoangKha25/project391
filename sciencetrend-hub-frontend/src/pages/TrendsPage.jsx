@@ -1012,7 +1012,7 @@ function TrendsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {activeTrendItems.slice(0, advancedAccess === "BASIC" ? 3 : 5).map((item, idx) => (
+                  {activeTrendItems.slice(0, 5).map((item, idx) => (
                     <tr key={item.id ?? idx}>
                       <td>
                         <div className="trends-topic-cell">
@@ -1107,7 +1107,7 @@ function TrendsPage() {
             </div>
             <div className="trends-insights-scroll-list">
               {activeTrendItems.length > 0 ? (
-                activeTrendItems.slice(0, 3).map((item, idx) => (
+                activeTrendItems.slice(0, 5).map((item, idx) => (
                   <div key={idx} className={`insight-card-item ${idx === 0 ? "insight-amber" : idx === 1 ? "insight-purple" : "insight-emerald"}`}>
                     <div className={`insight-icon-circle ${idx === 0 ? "amber" : idx === 1 ? "purple" : "emerald"}`}>
                       <FiLayers />
