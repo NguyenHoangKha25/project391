@@ -2022,16 +2022,17 @@ html body .st-layout .trend-stat-card .stat-card-trend-text .sub {
 }
 
 html body .st-layout .trends-status-badge {
-  background: rgba(255, 255, 255, 0.18) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  color: #047857 !important;
+  -webkit-text-fill-color: #047857 !important;
   font-weight: 800 !important;
 }
 
 html body .st-layout .trends-status-badge span {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+  color: #047857 !important;
+  -webkit-text-fill-color: #047857 !important;
+  font-weight: 800 !important;
 }
 
 /* --------------------------------------------------------------------------
