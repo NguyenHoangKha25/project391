@@ -33,6 +33,7 @@ import {
   normalizeTopic,
   normalizeKeyword,
   normalizeNotification,
+  isFollowedPaperNotification,
   toArray,
   formatDateTime,
 } from "../utils/apiData";
@@ -103,7 +104,7 @@ function BookmarksPage() {
       setSavedKeywords(cachedData.savedKeywords);
       setFollowedJournals(cachedData.followedJournals);
       setFollowedTopics(cachedData.followedTopics);
-      setNotifications(cachedData.notifications);
+      setNotifications((cachedData.notifications || []).filter(isFollowedPaperNotification));
       setLoading(false);
 
       // Perform a silent background validation to refresh cache seamlessly
@@ -119,7 +120,9 @@ function BookmarksPage() {
           savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => normalizeKeyword(kw, i)) : cachedData.savedKeywords,
           followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(normalizeJournal) : cachedData.followedJournals,
           followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : cachedData.followedTopics,
-          notifications: notifsRes.status === "fulfilled" ? toArray(notifsRes.value).map(normalizeNotification) : cachedData.notifications
+          notifications: notifsRes.status === "fulfilled"
+            ? toArray(notifsRes.value).map(normalizeNotification).filter(isFollowedPaperNotification)
+            : (cachedData.notifications || []).filter(isFollowedPaperNotification)
         };
         setSavedPapers(freshData.savedPapers);
         setSavedKeywords(freshData.savedKeywords);
@@ -152,7 +155,9 @@ function BookmarksPage() {
         savedKeywords: keywordsRes.status === "fulfilled" ? toArray(keywordsRes.value).map((kw, i) => normalizeKeyword(kw, i)) : [],
         followedJournals: journalsRes.status === "fulfilled" ? toArray(journalsRes.value).map(normalizeJournal) : [],
         followedTopics: topicsRes.status === "fulfilled" ? toArray(topicsRes.value).map(normalizeTopic) : [],
-        notifications: notifsRes.status === "fulfilled" ? toArray(notifsRes.value).map(normalizeNotification) : []
+        notifications: notifsRes.status === "fulfilled"
+          ? toArray(notifsRes.value).map(normalizeNotification).filter(isFollowedPaperNotification)
+          : []
       };
 
       setSavedPapers(freshData.savedPapers);

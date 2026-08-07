@@ -19,7 +19,12 @@ import { useAuth } from "../../context/useAuth";
 import { ROUTE_PATHS } from "../../routes/routePaths";
 import { searchPapers } from "../../services/paperService";
 import { getUnreadNotifications } from "../../services/notificationService";
-import { normalizePaper, toArray } from "../../utils/apiData";
+import {
+  isFollowedPaperNotification,
+  normalizeNotification,
+  normalizePaper,
+  toArray,
+} from "../../utils/apiData";
 import "../../styles/layout.css";
 
 function UserAvatar({ name, role, size = "sm" }) {
@@ -88,8 +93,10 @@ function Navbar({
     getUnreadNotifications()
       .then((res) => {
         if (!active) return;
-        const list = toArray(res, ["notifications"]);
-        const count = list.filter((n) => n && (n.isRead === false || n.unread === true || n.read === false)).length;
+        const list = toArray(res, ["notifications"])
+          .map(normalizeNotification)
+          .filter(isFollowedPaperNotification);
+        const count = list.filter((notification) => notification.unread).length;
         setUnreadCount(count);
       })
       .catch(() => {});

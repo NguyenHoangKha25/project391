@@ -8,7 +8,12 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../services/notificationService";
-import { formatRelativeTime, normalizeNotification, toArray } from "../utils/apiData";
+import {
+  formatRelativeTime,
+  isFollowedPaperNotification,
+  normalizeNotification,
+  toArray,
+} from "../utils/apiData";
 import "../styles/WorkspacePages.css";
 import "../styles/NotificationsPage.css";
 
@@ -30,7 +35,11 @@ function NotificationsPage() {
       setLoading(true);
       setErrorMessage("");
       const response = await getNotifications();
-      setNotifications(toArray(response, ["notifications"]).map(normalizeNotification));
+      setNotifications(
+        toArray(response, ["notifications"])
+          .map(normalizeNotification)
+          .filter(isFollowedPaperNotification),
+      );
     } catch (error) {
       console.error("Cannot load notifications", error);
       setNotifications([]);
@@ -84,7 +93,7 @@ function NotificationsPage() {
   return (
     <MainLayout
       title="Notifications"
-      subtitle="Review updates from papers, journals and tracked topics"
+      subtitle="New papers from the journals and topics you follow"
     >
       <section className="workspace-page notifications-page">
         <div className="workspace-toolbar">
@@ -166,7 +175,7 @@ function NotificationsPage() {
             </div>
           ) : (
             <div className="workspace-empty">
-              No notifications yet. You'll get updates here when papers sync, trends shift, or journals are tracked.
+              No followed-paper updates yet. Follow a journal or topic to receive its newly indexed papers here.
             </div>
           )}
         </article>

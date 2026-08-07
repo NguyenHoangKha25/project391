@@ -446,3 +446,22 @@ export function normalizeNotification(notification = {}, index = 0) {
     matchedReason,
   };
 }
+
+export function isFollowedPaperNotification(notification = {}) {
+  const paperId = notification.paperId
+    ?? notification.researchPaperId
+    ?? notification.paper_id
+    ?? notification.paper?.id
+    ?? notification.paper?.researchPaperId;
+  const matchedReason = String(
+    notification.matchedReason
+      ?? notification.matchReason
+      ?? notification.reason
+      ?? notification.matched_reason
+      ?? "",
+  ).trim().toLowerCase();
+
+  return Boolean(paperId)
+    && (matchedReason.startsWith("following topic:")
+      || matchedReason.startsWith("following journal:"));
+}
