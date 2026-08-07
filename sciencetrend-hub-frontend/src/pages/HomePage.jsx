@@ -357,7 +357,9 @@ function HomePage() {
             <span className="home-eyebrow">
               <FiDatabase aria-hidden="true" /> EXPLORE THE CATALOG
             </span>
-            <h2 id="catalog-title">Choose a clear way into the research collection</h2>
+            <h2 id="catalog-title">
+              Choose a clear way into <span className="hero-highlight-cyan">the research collection</span>
+            </h2>
             <p>
               Start from a publication, a journal, a broader topic, or a specific keyword. Every path leads back to the evidence behind it.
             </p>
@@ -391,7 +393,9 @@ function HomePage() {
             <span className="home-eyebrow">
               <FiShield aria-hidden="true" /> THE PRODUCT
             </span>
-            <h2>Useful tools, arranged around your research process</h2>
+            <h2>
+              Useful tools, arranged around <span className="hero-highlight-blue">your research process</span>
+            </h2>
           </div>
           <p>
             ScienceTrend keeps discovery, organization, monitoring, and reporting close together—so every step builds on the last one.
@@ -421,7 +425,9 @@ function HomePage() {
           <span className="home-eyebrow">
             <FiBookOpen aria-hidden="true" /> A SIMPLE WORKFLOW
           </span>
-          <h2>Move from a question to a useful outcome</h2>
+          <h2>
+            Move from a question to <span className="hero-highlight-emerald">a useful outcome</span>
+          </h2>
           <p>
             The workspace follows the natural shape of research instead of forcing you into another complicated system.
           </p>
@@ -444,7 +450,9 @@ function HomePage() {
         <div className="home-section-heading home-section-heading-split">
           <div>
             <span className="home-eyebrow"><FiUsers aria-hidden="true" /> WHO IT IS FOR</span>
-            <h2>Built for people who work with evidence</h2>
+            <h2>
+              Built for people who <span className="hero-highlight-purple">work with evidence</span>
+            </h2>
           </div>
           <p>Different roles see the tools they need while sharing the same publication catalog and research language.</p>
         </div>
@@ -466,7 +474,9 @@ function HomePage() {
       <section className="home-final-cta" aria-labelledby="home-cta-title" data-home-reveal>
         <div className="home-final-cta-copy">
           <span>READY FOR YOUR NEXT RESEARCH QUESTION?</span>
-          <h2 id="home-cta-title">Keep the whole trail—from discovery to report—in one workspace.</h2>
+          <h2 id="home-cta-title">
+            Keep the whole trail—from discovery to report—in <span className="hero-highlight">one connected workspace</span>
+          </h2>
           <p>Start with the public catalog, then sign in when you are ready to save, follow, and report.</p>
         </div>
         <div className="home-final-cta-actions">
