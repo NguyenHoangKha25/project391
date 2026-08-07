@@ -125,11 +125,17 @@ function NotificationsPage() {
               {notifications.map((item) => {
                 const Icon = getNotificationIcon(item.type);
                 return (
-                  <button
-                    type="button"
+                  <div
                     key={item.id}
                     className={`workspace-notification ${item.unread ? "unread" : ""}`}
                     onClick={() => handleOpenNotification(item.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        handleOpenNotification(item.id);
+                      }
+                    }}
                   >
                     <span className="workspace-notification-icon">
                       <Icon />
@@ -154,7 +160,7 @@ function NotificationsPage() {
                       )}
                     </div>
                     <time>{formatRelativeTime(item.time)}</time>
-                  </button>
+                  </div>
                 );
               })}
             </div>

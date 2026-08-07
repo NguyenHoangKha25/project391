@@ -89,7 +89,7 @@ function Navbar({
       .then((res) => {
         if (!active) return;
         const list = toArray(res, ["notifications"]);
-        const count = list.filter((n) => n.isRead === false || n.unread === true || n.read === false).length || list.length;
+        const count = list.filter((n) => n && (n.isRead === false || n.unread === true || n.read === false)).length;
         setUnreadCount(count);
       })
       .catch(() => {});
