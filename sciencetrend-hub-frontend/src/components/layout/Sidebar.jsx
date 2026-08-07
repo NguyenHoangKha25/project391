@@ -39,7 +39,6 @@ const menuGroups = [
     label: "My research",
     items: [
       { label: "Bookmarks", path: ROUTE_PATHS.BOOKMARKS, icon: FiBookmark, authenticated: true },
-      { label: "Following", path: ROUTE_PATHS.FOLLOWING, icon: FiUsers, authenticated: true },
       { label: "Notifications", path: ROUTE_PATHS.NOTIFICATIONS, icon: FiBell, authenticated: true },
     ],
   },

@@ -34,7 +34,6 @@ export const ROUTE_PATHS = {
   journalPapers: (journal) => appendFilterQuery("journal", journal),
   topicPapers: (topic) => appendFilterQuery("topic", topic),
   BOOKMARKS: "/bookmarks",
-  FOLLOWING: "/following",
   NOTIFICATIONS: "/notifications",
   REPORTS: "/reports",
   RESEARCH_LAB: "/research-lab",
