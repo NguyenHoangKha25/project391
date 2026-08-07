@@ -61,7 +61,7 @@ function TrendsSuggestionPortal({ anchorRef, children, id, isOpen }) {
 
   return createPortal(
     <div
-      className="trends-autocomplete-menu-portal"
+      className="trends-autocomplete-menu trends-autocomplete-menu-portal"
       id={id}
       role="listbox"
       style={position}
@@ -930,7 +930,7 @@ function TrendsPage() {
         {toast && <div className={`papers-toast papers-toast--${toast.type}`}>{toast.message}</div>}
         
         {/* Sub-toolbar for filters, search, and switch tab buttons */}
-        <div className={`trends-controls-bar ${!canCompare && suggestionsOpen && suggestionQuery.trim().length >= 2 ? "has-inline-suggestions" : ""}`}>
+        <div className="trends-controls-bar">
           <div className="trends-tab-buttons-group">
             <button
               type="button"
@@ -974,7 +974,7 @@ function TrendsPage() {
                   />
                 </div>
                 {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                  <div className="trends-inline-suggestions" id="trend-single-suggestions" role="listbox">
+                  <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-single-suggestions" isOpen={suggestionsOpen}>
                     {suggestionsLoading ? (
                       <span className="trends-autocomplete-state">Finding matches…</span>
                     ) : autocompleteSuggestions.length > 0 ? (
@@ -1005,7 +1005,7 @@ function TrendsPage() {
                     ) : (
                       <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                     )}
-                  </div>
+                  </TrendsSuggestionPortal>
                 )}
               </div>
             )}
