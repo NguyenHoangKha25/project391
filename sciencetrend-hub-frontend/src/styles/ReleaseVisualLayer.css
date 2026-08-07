@@ -2990,3 +2990,11 @@ html body .st-layout :is(.reports-search, .research-search-form, .admin-search-f
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+/* Space out year range inputs and analyze button in Research Lab Mind Map builder */
+html body .st-layout .research-map-year-range {
+  margin-bottom: 16px !important;
+}
+html body .st-layout .research-run-button {
+  margin-top: 14px !important;
+}
