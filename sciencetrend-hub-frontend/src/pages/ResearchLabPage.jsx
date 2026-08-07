@@ -11,7 +11,6 @@ import {
   FiChevronRight,
   FiColumns,
   FiCompass,
-  FiCopy,
   FiGitBranch,
   FiHash,
   FiLayers,
@@ -33,10 +32,9 @@ import {
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
-import { getAllKeywords } from "../services/keywordService";
-import { comparePapers, getPaperById, getPapers } from "../services/paperService";
-import { getResearchMindMap } from "../services/researchService";
-import { getAllTopics } from "../services/topicService";
+import { comparePapers, getPapers } from "../services/paperService";
+import { getMindMapEvidence, getResearchMindMap } from "../services/researchService";
+import { getKeywordSuggestions, getTopicSuggestions } from "../services/trendService";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import {
   formatNumber,
@@ -58,33 +56,13 @@ const MAP_ZOOM_STEP = 10;
 const MAP_NODE_WIDTH = 206;
 const MAP_NODE_HEIGHT = 66;
 const MAP_TYPE_ORDER = ["TOPIC", "KEYWORD", "JOURNAL"];
+const CURRENT_YEAR = new Date().getFullYear();
 const MAP_TYPE_META = {
   TOPIC: { label: "Topics", shortLabel: "T", relation: "Related topics" },
   KEYWORD: { label: "Keywords", shortLabel: "K", relation: "Related keywords" },
   JOURNAL: { label: "Journals", shortLabel: "J", relation: "Published in" },
   UNKNOWN: { label: "Evidence", shortLabel: "E", relation: "Related evidence" },
 };
-const RESEARCH_EVIDENCE_STANDARDS = {
-  EXPLORATORY: {
-    label: "Exploratory scan",
-    shortLabel: "Explore",
-    minimumPapers: 1,
-    description: "Keep early signals visible for broad discovery.",
-  },
-  REVIEW: {
-    label: "Literature review",
-    shortLabel: "Review",
-    minimumPapers: 5,
-    description: "Require a usable starting set before shortlisting.",
-  },
-  DEFENSE: {
-    label: "Proposal defense",
-    shortLabel: "Defend",
-    minimumPapers: 10,
-    description: "Prioritize directions with stronger catalog coverage.",
-  },
-};
-
 function stringList(value) {
   if (!Array.isArray(value)) return [];
   return value.map((item) => String(item || "").trim()).filter(Boolean);
@@ -216,8 +194,6 @@ function normalizeAssociationScore(value) {
 
 function normalizeMindMapEdge(rawEdge, targetNode, root, index) {
   const edge = rawEdge && typeof rawEdge === "object" ? rawEdge : {};
-  const evidencePapers = edge.evidencePapers ?? edge.sharedPapers ?? edge.papers ?? edge.evidence ?? [];
-  const evidencePaperIds = edge.evidencePaperIds ?? edge.sharedPaperIds ?? edge.paperIds ?? [];
   const trendStatus = String(
     edge.trendStatus ?? edge.status ?? edge.growthStatus ?? targetNode?.trendStatus ?? "STABLE",
   ).toUpperCase();
@@ -230,15 +206,16 @@ function normalizeMindMapEdge(rawEdge, targetNode, root, index) {
     targetId: edge.targetId ?? edge.target?.id ?? edge.nodeId ?? edge.relatedNodeId ?? targetNode?.id,
     targetType: normalizeMapType(edge.targetType ?? edge.target?.type ?? edge.nodeType ?? targetNode?.type),
     sharedPaperCount: Number(
-      edge.sharedPaperCount ?? edge.sharedCount ?? edge.coOccurrenceCount ?? edge.paperCount ?? edge.weight ?? 0,
+      edge.sharedPaperCount ?? edge.sharedCount ?? edge.coOccurrenceCount ?? targetNode?.sharedPaperCount ?? edge.paperCount ?? edge.weight ?? 0,
     ) || 0,
     associationScore: normalizeAssociationScore(
-      edge.associationScore ?? edge.score ?? edge.strength ?? edge.normalizedWeight ?? 0,
+      edge.associationScore ?? edge.score ?? edge.strength ?? edge.normalizedWeight ?? edge.rankScore ?? targetNode?.associationScore ?? targetNode?.rankScore ?? 0,
     ),
+    rankScore: normalizeAssociationScore(edge.rankScore ?? edge.associationScore ?? edge.score ?? targetNode?.rankScore ?? targetNode?.associationScore ?? 0),
     trendStatus,
     growthRate: Number(edge.growthRate ?? edge.growthPercent ?? targetNode?.growthRate ?? 0) || 0,
-    evidencePapers: Array.isArray(evidencePapers) ? evidencePapers : [],
-    evidencePaperIds: Array.isArray(evidencePaperIds) ? evidencePaperIds : [],
+    recentPaperCount: Number(edge.recentPaperCount ?? edge.recentCount ?? targetNode?.recentPaperCount ?? 0) || 0,
+    previousPaperCount: Number(edge.previousPaperCount ?? edge.previousCount ?? targetNode?.previousPaperCount ?? 0) || 0,
   };
 }
 
@@ -1431,11 +1408,6 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
     return { ...item, group, edge };
   })), [data?.root, edges, layout.groups]);
 
-  const maximumSharedPapers = useMemo(
-    () => Math.max(1, ...renderedEdges.map(({ edge }) => Number(edge.sharedPaperCount) || 0)),
-    [renderedEdges],
-  );
-
   useEffect(() => {
     evidenceRequestRef.current += 1;
     setZoom(100);
@@ -1466,11 +1438,10 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
   }
 
   function getEdgeStyle(edge) {
-    const sharedRatio = Math.sqrt(Math.max(0, Number(edge.sharedPaperCount) || 0) / maximumSharedPapers);
-    const associationScore = normalizeAssociationScore(edge.associationScore);
+    const associationScore = normalizeAssociationScore(edge.associationScore || edge.rankScore);
     return {
-      strokeWidth: 1.8 + sharedRatio * 5.2,
-      opacity: 0.34 + associationScore * 0.66,
+      strokeWidth: 1.8 + associationScore * 5.8,
+      opacity: 0.42 + associationScore * 0.58,
     };
   }
 
@@ -1496,34 +1467,25 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
     const nextSelection = { edge, node, catalogPath: getEvidenceCatalogPath(edge, node) };
     setSelectedEdge(nextSelection);
     setEvidenceError("");
-    setEvidenceLoading(false);
-
-    const embeddedPapers = edge.evidencePapers
-      .filter((paper) => paper && typeof paper === "object")
-      .map((paper, index) => normalizePaper(paper, index));
-    if (embeddedPapers.length > 0) {
-      setEvidencePapers(embeddedPapers.slice(0, 6));
-      return;
-    }
-
-    const paperIds = edge.evidencePaperIds
-      .map((paperId) => typeof paperId === "object" ? paperId.id : paperId)
-      .filter((paperId) => paperId !== null && paperId !== undefined)
-      .slice(0, 6);
-    if (paperIds.length === 0) {
-      setEvidencePapers([]);
-      return;
-    }
+    setEvidencePapers([]);
 
     try {
       setEvidenceLoading(true);
-      const responses = await Promise.allSettled(paperIds.map((paperId) => getPaperById(paperId)));
+      const response = await getMindMapEvidence({
+        rootType: normalizeMapType(data?.root?.type),
+        rootId: data?.root?.id,
+        targetType: normalizeMapType(node?.type),
+        targetId: node?.id,
+        page: 0,
+        size: 5,
+      });
       if (evidenceRequestRef.current !== requestId) return;
-      const hydratedPapers = responses
-        .filter((result) => result.status === "fulfilled")
-        .map((result, index) => normalizePaper(result.value?.data ?? result.value, index));
-      setEvidencePapers(hydratedPapers);
-      if (hydratedPapers.length === 0) setEvidenceError("The evidence paper records could not be loaded.");
+      const hydratedPapers = toArray(response?.data ?? response, ["evidencePapers", "papers", "content", "items"])
+        .map((paper, index) => ({
+          ...normalizePaper(paper, index),
+          journal: paper.journalTitle ?? paper.journalName ?? paper.journal?.name ?? "Journal unavailable",
+        }));
+      setEvidencePapers(hydratedPapers.slice(0, 5));
     } catch (error) {
       if (evidenceRequestRef.current !== requestId) return;
       setEvidencePapers([]);
@@ -1536,9 +1498,15 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
   function chooseNode(event, node) {
     event?.preventDefault();
     event?.stopPropagation();
-    evidenceRequestRef.current += 1;
-    setSelectedEdge(null);
     onSelectNode(node);
+    if (getMapNodeIdentity(node) === rootNodeKey) {
+      evidenceRequestRef.current += 1;
+      setSelectedEdge(null);
+      return;
+    }
+    const nodeEdge = findEdgeForNode(edges, node)
+      || normalizeMindMapEdge(node?.edge || node?.association || node, node, data?.root, "selected-node");
+    openEdgeEvidence(nodeEdge, node);
   }
 
   function handleNodeKeyDown(event, node) {
@@ -1565,6 +1533,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
           </div>
         </div>
         <div className="research-map-toolbar-meta">
+          <span><b>{data?.fromYear}-{data?.toYear}</b> analysis period</span>
           <span><b>{renderedEdges.length}</b> ranked associations</span>
           <span><b>3</b> evidence lanes</span>
         </div>
@@ -1579,7 +1548,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
       <div className="research-map-decision-bar research-map-model-bar">
         <FiShare2 />
         <div><small>Evidence model</small><strong>One-hop associations ranked by shared papers, strength and publication momentum</strong></div>
-        <span>Click an edge for papers</span>
+        <span>{data?.fromYear}-{data?.toYear} · click an edge for papers</span>
       </div>
 
       <div className="research-map-canvas">
@@ -1635,6 +1604,9 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
                 >
                   <path className="research-weighted-edge-hit" d={edgePath(x, y)} />
                   <path className="research-weighted-edge-line" d={edgePath(x, y)} style={style} />
+                  <title>
+                    {`${formatNumber(edge.sharedPaperCount)} shared papers · recent ${formatNumber(edge.recentPaperCount)} vs previous ${formatNumber(edge.previousPaperCount)} · growth ${edge.growthRate > 0 ? "+" : ""}${edge.growthRate}% · association ${Math.round(normalizeAssociationScore(edge.associationScore || edge.rankScore) * 100)}%`}
+                  </title>
                   <g className="research-weighted-edge-badge" transform={`translate(${x - MAP_NODE_WIDTH / 2 - 31} ${y})`}>
                     <rect x="-25" y="-11" width="50" height="22" rx="11" />
                     <text textAnchor="middle" y="4">{formatNumber(edge.sharedPaperCount)}</text>
@@ -1659,7 +1631,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
             <text className="research-map-root-label" textAnchor="middle" y={rootLines.length > 1 ? -11 : 0}>
               {rootLines.map((line, index) => <tspan key={`${line}-${index}`} x="0" dy={index === 0 ? 0 : 20}>{line}</tspan>)}
             </text>
-            <text className="research-map-root-count" textAnchor="middle" y="45">{Number(data?.root?.paperCount) > 0 ? `${formatNumber(data.root.paperCount)} indexed papers` : "Evidence root"}</text>
+            <text className="research-map-root-count" textAnchor="middle" y="45">{Number(data?.root?.catalogPaperCount) > 0 ? `${formatNumber(data.root.catalogPaperCount)} catalog papers` : "Catalog size unavailable"}</text>
           </g>
 
           <g className="research-map-nodes">
@@ -1687,9 +1659,9 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
                   <text className="research-map-node-label" x={-MAP_NODE_WIDTH / 2 + 52} y={lines.length > 1 ? -12 : -4}>
                     {lines.map((line, index) => <tspan key={`${line}-${index}`} x={-MAP_NODE_WIDTH / 2 + 52} dy={index === 0 ? 0 : 14}>{line}</tspan>)}
                   </text>
-                  <text className="research-map-node-count" x={-MAP_NODE_WIDTH / 2 + 52} y={lines.length > 1 ? 22 : 17}>{formatNumber(edge.sharedPaperCount)} shared · {associationPercent}% score</text>
+                  <text className="research-map-node-count" x={-MAP_NODE_WIDTH / 2 + 52} y={lines.length > 1 ? 22 : 17}>{formatNumber(edge.sharedPaperCount)} shared · {formatNumber(node.catalogPaperCount)} catalog</text>
                   <circle className="research-map-node-status" cx={MAP_NODE_WIDTH / 2 - 13} cy={-MAP_NODE_HEIGHT / 2 + 13} r="5" />
-                  <title>{node.label} · {formatNumber(edge.sharedPaperCount)} shared papers · {associationPercent}% association · {getMapStatusLabel(edge.trendStatus)}</title>
+                  <title>{node.label} · {formatNumber(edge.sharedPaperCount)} shared · {formatNumber(node.catalogPaperCount)} catalog · {associationPercent}% association · {getMapStatusLabel(edge.trendStatus)}</title>
                 </g>
               );
             })}
@@ -1719,6 +1691,9 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
             <div><small>Shared papers</small><strong>{formatNumber(selectedEdge.edge.sharedPaperCount)}</strong></div>
             <div><small>Association</small><strong>{Math.round(normalizeAssociationScore(selectedEdge.edge.associationScore) * 100)}%</strong></div>
             <div><small>Trend</small><strong>{getMapStatusLabel(selectedEdge.edge.trendStatus)}</strong></div>
+            <div><small>Recent period</small><strong>{formatNumber(selectedEdge.edge.recentPaperCount)}</strong></div>
+            <div><small>Previous period</small><strong>{formatNumber(selectedEdge.edge.previousPaperCount)}</strong></div>
+            <div><small>Growth rate</small><strong>{selectedEdge.edge.growthRate > 0 ? "+" : ""}{selectedEdge.edge.growthRate}%</strong></div>
           </div>
           {evidenceLoading ? (
             <div className="research-edge-evidence-empty"><span className="workspace-loading-spinner" /><p>Loading evidence papers…</p></div>
@@ -1727,17 +1702,25 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
               {evidencePapers.map((paper) => (
                 <li key={paper.id || paper.title}>
                   <span><FiBookOpen /></span>
-                  <div><strong>{shortTitle(paper.title, 72)}</strong><small>{paper.year || "Year unavailable"} · {formatNumber(paper.citationCount || paper.citations || 0)} citations</small></div>
+                  <div>
+                    <strong>{shortTitle(paper.title, 72)}</strong>
+                    <small>{paper.authors}</small>
+                    <small>{paper.year || "Year unavailable"} · {paper.journal} · {formatNumber(paper.citationCount || 0)} citations</small>
+                    <small>{paper.doi ? `DOI: ${paper.doi}` : "DOI unavailable"}</small>
+                  </div>
                 </li>
               ))}
             </ol>
           ) : (
             <div className="research-edge-evidence-empty">
               <FiActivity />
-              <strong>{evidenceError || "No paper records were embedded in this edge"}</strong>
-              <p>The relationship metrics are available. The backend must return evidencePapers or evidencePaperIds to list the exact intersection here.</p>
+              <strong>{evidenceError || "No evidence papers were returned for this relationship"}</strong>
+              <p>The association metrics remain visible, but this intersection currently has no paper records on the requested evidence page.</p>
             </div>
           )}
+          <button type="button" className="research-edge-explore-root" onClick={() => onExploreAsRoot(selectedEdge.node)}>
+            <FiGitBranch />Explore as root
+          </button>
           <Link className="research-inspector-action" to={selectedEdge.catalogPath}>Open filtered paper set <FiArrowRight /></Link>
         </aside>
       )}
@@ -1749,7 +1732,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
           <span className="is-stable"><i />Stable</span>
           <span className="is-declining"><i />Declining</span>
         </div>
-        <small>Thicker = more shared papers · darker = stronger association · select an edge for paper evidence</small>
+        <small>Thicker = stronger association/rank score · color = trend status · select a node or edge for papers</small>
       </footer>
     </div>
   );
@@ -1759,6 +1742,12 @@ function normalizeMindMapNode(rawNode) {
   if (!rawNode || typeof rawNode !== "object") return null;
 
   const paperCount = Number(rawNode.paperCount ?? rawNode.totalPapers ?? rawNode.paper_count ?? rawNode.count ?? 0) || 0;
+  const catalogPaperCount = Number(
+    rawNode.catalogPaperCount ?? rawNode.totalCatalogPaperCount ?? rawNode.catalogCount ?? rawNode.totalPapers ?? paperCount,
+  ) || 0;
+  const sharedPaperCount = Number(
+    rawNode.sharedPaperCount ?? rawNode.sharedCount ?? rawNode.coOccurrenceCount ?? paperCount,
+  ) || 0;
   const recentPaperCount = Number(rawNode.recentPaperCount ?? rawNode.recentCount ?? 0) || 0;
   const previousPaperCount = Number(rawNode.previousPaperCount ?? rawNode.previousCount ?? 0) || 0;
   let trendStatus = rawNode.trendStatus ? String(rawNode.trendStatus).toUpperCase() : "";
@@ -1773,8 +1762,11 @@ function normalizeMindMapNode(rawNode) {
   return {
     ...rawNode,
     paperCount,
+    catalogPaperCount,
+    sharedPaperCount,
     recentPaperCount,
     previousPaperCount,
+    growthRate: Number(rawNode.growthRate ?? rawNode.growthPercent ?? 0) || 0,
     trendStatus,
   };
 }
@@ -1835,26 +1827,17 @@ function assessMindMapNode(node) {
   return { evidence, signal, delta, percent };
 }
 
-function getMindMapIntentLabel(intent) {
-  if (intent === "EVIDENCE") return "Validate evidence strength";
-  if (intent === "ADJACENCY") return "Discover adjacent fields";
-  return "Find emerging directions";
-}
-
 function MindMapWorkspace() {
   const [rootType, setRootType] = useState("KEYWORD");
-  const [researchIntent, setResearchIntent] = useState("MOMENTUM");
-  const [evidenceStandardKey, setEvidenceStandardKey] = useState("REVIEW");
-  const [decisionContext, setDecisionContext] = useState("");
-  const [briefCopied, setBriefCopied] = useState(false);
-  const [inspectorView, setInspectorView] = useState("decision");
-  const [keywords, setKeywords] = useState([]);
-  const [topics, setTopics] = useState([]);
-  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [rootSuggestions, setRootSuggestions] = useState([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [rootQuery, setRootQuery] = useState("");
   const [selectedRootId, setSelectedRootId] = useState("");
   const [exploredRoot, setExploredRoot] = useState(null);
   const [limit, setLimit] = useState(5);
+  const [fromYear, setFromYear] = useState(CURRENT_YEAR - 4);
+  const [toYear, setToYear] = useState(CURRENT_YEAR);
   const [mapLoading, setMapLoading] = useState(false);
   const [mapData, setMapData] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -1864,67 +1847,51 @@ function MindMapWorkspace() {
 
   useEffect(() => {
     let cancelled = false;
-    setCatalogLoading(true);
-    Promise.allSettled([
-      getAllKeywords({ page: 0, size: 500 }),
-      getAllTopics(),
-    ]).then(([keywordResult, topicResult]) => {
-      if (cancelled) return;
-      const nextKeywords = keywordResult.status === "fulfilled"
-        ? toArray(keywordResult.value, ["keywords"])
-            .map(normalizeKeyword)
-            .filter((item) => Number.isFinite(Number(item.id)) && item.name !== "Untitled keyword")
-        : [];
-      const nextTopics = topicResult.status === "fulfilled"
-        ? toArray(topicResult.value, ["topics"])
-            .map(normalizeTopic)
-            .filter((item) => Number.isFinite(Number(item.id)) && item.name !== "Untitled topic")
-        : [];
-      setKeywords(nextKeywords);
-      setTopics(nextTopics);
-      if (keywordResult.status === "rejected" && topicResult.status === "rejected") {
-        setErrorMessage("Could not load keyword and topic catalogs.");
+    const query = rootQuery.trim();
+    if (query.length < 2 || rootType === "JOURNAL") return undefined;
+    if (selectedRootId && exploredRoot && query === String(exploredRoot.name || "").trim()) return undefined;
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setSuggestionsLoading(true);
+        const response = rootType === "KEYWORD"
+          ? await getKeywordSuggestions(query, 0, 10)
+          : await getTopicSuggestions(query, 0, 10);
+        if (cancelled) return;
+        const nextSuggestions = toArray(response?.data ?? response, ["suggestions", "keywords", "topics", "content", "items"])
+          .map(rootType === "KEYWORD" ? normalizeKeyword : normalizeTopic)
+          .filter((item) => Number.isFinite(Number(item.id)) && !item.name.startsWith("Untitled"))
+          .slice(0, 10);
+        setRootSuggestions(nextSuggestions);
+        setSuggestionsOpen(true);
+      } catch (error) {
+        if (!cancelled) {
+          setRootSuggestions([]);
+          setErrorMessage(error.message || "Could not load catalog suggestions.");
+        }
+      } finally {
+        if (!cancelled) setSuggestionsLoading(false);
       }
-    }).finally(() => {
-      if (!cancelled) setCatalogLoading(false);
-    });
+    }, 300);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(timeoutId);
     };
-  }, []);
+  }, [exploredRoot, rootQuery, rootType, selectedRootId]);
 
-  const rootOptions = rootType === "KEYWORD" ? keywords : rootType === "TOPIC" ? topics : [];
-  const filteredRootOptions = useMemo(() => {
-    const normalizedQuery = rootQuery.trim().toLocaleLowerCase();
-    return rootOptions
-      .filter((item) => !normalizedQuery || item.name.toLocaleLowerCase().includes(normalizedQuery))
-      .slice(0, 100);
-  }, [rootOptions, rootQuery]);
   const selectedRoot = useMemo(() => {
-    const catalogRoot = rootOptions.find((item) => String(item.id) === String(selectedRootId));
+    const catalogRoot = rootSuggestions.find((item) => String(item.id) === String(selectedRootId));
     if (catalogRoot) return catalogRoot;
     if (String(exploredRoot?.id) === String(selectedRootId)) return exploredRoot;
     return null;
-  }, [exploredRoot, rootOptions, selectedRootId]);
-  const suggestedRoots = useMemo(() => rootOptions.slice(0, 4), [rootOptions]);
-  const evidenceStandard = RESEARCH_EVIDENCE_STANDARDS[evidenceStandardKey];
-
-  // Auto-select top search match when filtering options
-  useEffect(() => {
-    if (rootQuery.trim() && filteredRootOptions.length > 0) {
-      const exists = filteredRootOptions.some((item) => String(item.id) === String(selectedRootId));
-      if (!exists) {
-        setSelectedRootId(String(filteredRootOptions[0].id));
-        setMapData(null);
-        setSelectedNode(null);
-      }
-    }
-  }, [rootQuery, filteredRootOptions, selectedRootId]);
+  }, [exploredRoot, rootSuggestions, selectedRootId]);
 
   function changeRootType(type) {
     setRootType(type);
     setExploredRoot(null);
+    setRootSuggestions([]);
+    setSuggestionsOpen(false);
     setRootQuery("");
     setSelectedRootId("");
     setMapData(null);
@@ -1932,21 +1899,14 @@ function MindMapWorkspace() {
     setErrorMessage("");
   }
 
-  function selectResearchRoot(rootId) {
-    setExploredRoot(null);
-    setSelectedRootId(rootId);
+  function selectResearchRoot(root) {
+    setExploredRoot(root);
+    setSelectedRootId(String(root.id));
+    setRootQuery(root.name);
+    setSuggestionsOpen(false);
     setMapData(null);
     setSelectedNode(null);
     setErrorMessage("");
-    setInspectorView("decision");
-  }
-
-  function changeResearchIntent(intent) {
-    setResearchIntent(intent);
-    setMapData(null);
-    setSelectedNode(null);
-    setErrorMessage("");
-    setInspectorView("decision");
   }
 
   async function loadMindMap(nextRootType, nextRootId) {
@@ -1957,6 +1917,8 @@ function MindMapWorkspace() {
         type: nextRootType,
         id: Number(nextRootId),
         limit: Number(limit),
+        fromYear: Number(fromYear),
+        toYear: Number(toYear),
       });
       const payload = response?.data ?? response;
       const laneNodes = [
@@ -1989,12 +1951,11 @@ function MindMapWorkspace() {
         root: normalizedRoot,
         nodes: normalizedNodes,
         edges: normalizedEdges,
-        intent: researchIntent,
-        intentLabel: getMindMapIntentLabel(researchIntent),
+        fromYear: Number(payload?.fromYear ?? fromYear),
+        toYear: Number(payload?.toYear ?? toYear),
       };
       setMapData(nextMap);
       setSelectedNode(normalizedRoot);
-      setInspectorView("decision");
       window.requestAnimationFrame(() => {
         mapPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       });
@@ -2014,6 +1975,10 @@ function MindMapWorkspace() {
       rootSelectRef.current?.focus();
       return;
     }
+    if (!Number.isInteger(Number(fromYear)) || !Number.isInteger(Number(toYear)) || Number(fromYear) > Number(toYear)) {
+      setErrorMessage("Choose a valid analysis period where From year is not after To year.");
+      return;
+    }
     await loadMindMap(rootType, selectedRootId);
   }
 
@@ -2024,7 +1989,8 @@ function MindMapWorkspace() {
       id: node.id,
       name: node.label,
       label: node.label,
-      paperCount: node.paperCount,
+      paperCount: node.catalogPaperCount,
+      catalogPaperCount: node.catalogPaperCount,
       type: nextType,
     };
     setRootType(nextType);
@@ -2036,132 +2002,26 @@ function MindMapWorkspace() {
     await loadMindMap(nextType, node.id);
   }
 
-  const mapInsights = useMemo(() => {
-    const nodes = Array.isArray(mapData?.nodes) ? mapData.nodes : [];
+  const relatedNodeCount = useMemo(() => {
     const rootIdentity = getMapNodeIdentity(mapData?.root);
+    return (mapData?.nodes || []).filter((node) => getMapNodeIdentity(node) !== rootIdentity).length;
+  }, [mapData]);
 
-    const relatedNodes = nodes.filter(
-      (node) => getMapNodeIdentity(node) !== rootIdentity,
-    );
-
-    const assessedNodes = relatedNodes.map((node) => ({ node, assessment: assessMindMapNode(node) }));
-    const rankedNodes = [...assessedNodes]
-      .filter(({ node }) => node.type !== "JOURNAL" && Number(node.paperCount || 0) >= evidenceStandard.minimumPapers)
-      .sort((first, second) => {
-        if (researchIntent === "EVIDENCE") {
-          return Number(second.node.paperCount || 0) - Number(first.node.paperCount || 0);
-        }
-        if (researchIntent === "ADJACENCY") {
-          const firstTypeWeight = first.node.type === "TOPIC" ? 2 : 1;
-          const secondTypeWeight = second.node.type === "TOPIC" ? 2 : 1;
-          return secondTypeWeight - firstTypeWeight
-            || Number(second.node.paperCount || 0) - Number(first.node.paperCount || 0);
-        }
-        return second.assessment.signal.priority - first.assessment.signal.priority
-          || Number(second.node.recentPaperCount || 0) - Number(first.node.recentPaperCount || 0)
-          || Number(second.node.paperCount || 0) - Number(first.node.paperCount || 0);
-      });
-    const evidencedNodes = assessedNodes.filter(({ assessment }) => assessment.evidence.key !== "none").length;
-    const qualifyingNodes = assessedNodes.filter(({ node }) => Number(node.paperCount || 0) >= evidenceStandard.minimumPapers).length;
-
-    return {
-      relatedNodes: relatedNodes.length,
-      growingNodes: relatedNodes.filter((node) =>
-        ["GROWING", "EMERGING"].includes(node.trendStatus),
-      ).length,
-      topics: relatedNodes.filter((node) => node.type === "TOPIC").length,
-      keywords: relatedNodes.filter((node) => node.type === "KEYWORD").length,
-      journals: relatedNodes.filter((node) => node.type === "JOURNAL").length,
-      evidencedNodes,
-      qualifyingNodes,
-      candidates: rankedNodes.slice(0, 3),
-    };
-  }, [evidenceStandard.minimumPapers, mapData, researchIntent]);
-
-  const selectedNodeAssessment = useMemo(
-    () => selectedNode ? assessMindMapNode(selectedNode) : null,
-    [selectedNode],
+  const selectedNodeEdge = useMemo(
+    () => selectedNode && mapData ? findEdgeForNode(mapData.edges || [], selectedNode) : null,
+    [mapData, selectedNode],
   );
 
-  const mapIntegrity = useMemo(() => {
-    if (!mapData?.root) return null;
-    const rootAssessment = assessMindMapNode(mapData.root);
-    if (rootAssessment.evidence.key === "none") {
-      return {
-        level: "warning",
-        title: "Root evidence is missing",
-        message: "Related catalog nodes may still exist, but they do not prove a research gap or opportunity for this root.",
-      };
-    }
-    if (mapInsights.qualifyingNodes === 0) {
-      return {
-        level: "warning",
-        title: `No signal meets the ${evidenceStandard.shortLabel.toLowerCase()} standard`,
-        message: `This shortlist requires at least ${evidenceStandard.minimumPapers} directly linked papers per direction. Broaden the landscape or switch to an exploratory scan.`,
-      };
-    }
-    if (mapInsights.evidencedNodes < Math.max(2, Math.ceil(mapInsights.relatedNodes / 2))) {
-      return {
-        level: "warning",
-        title: "Landscape coverage is thin",
-        message: "Treat the map as a discovery lead and validate it against the supporting paper set.",
-      };
-    }
-    return {
-      level: "ready",
-      title: "Catalog evidence available",
-      message: "Signals are grounded in direct paper counts and two backend 5-year publication windows.",
-    };
-  }, [evidenceStandard, mapData, mapInsights.evidencedNodes, mapInsights.qualifyingNodes, mapInsights.relatedNodes]);
-
-  const selectedNodeExplorePath = useMemo(() => {
-    if (!selectedNode?.label) return ROUTE_PATHS.PAPERS;
-    const type = normalizeMapType(selectedNode.type);
-    const parameter = type === "TOPIC" ? "topic" : type === "JOURNAL" ? "journal" : "keyword";
-    return `${ROUTE_PATHS.PAPERS}?${parameter}=${encodeURIComponent(selectedNode.label)}`;
-  }, [selectedNode]);
-
-  function chooseSuggestedRoot(root) {
-    setRootQuery("");
-    selectResearchRoot(String(root.id));
-    window.requestAnimationFrame(() => rootSelectRef.current?.focus());
-  }
-
-  function inspectOpportunityNode(node) {
-    setSelectedNode(node);
-    setInspectorView("decision");
-  }
-
-  useEffect(() => {
-    setBriefCopied(false);
-  }, [decisionContext, evidenceStandardKey, mapData]);
-
-  async function copyDecisionBrief() {
-    if (!mapData) return;
-    const candidateLines = mapInsights.candidates.length > 0
-      ? mapInsights.candidates.map(({ node, assessment }, index) =>
-          `${index + 1}. ${node.label} — ${assessment.signal.label}; ${formatNumber(node.paperCount)} direct papers.`,
-        )
-      : ["No direction currently meets the selected evidence standard."];
-    const brief = [
-      "RESEARCH DECISION BRIEF",
-      `Evidence root: ${mapData.root?.label || "Not available"}`,
-      decisionContext.trim() ? `Decision context: ${decisionContext.trim()}` : null,
-      `Decision goal: ${mapData.intentLabel}`,
-      `Evidence standard: ${evidenceStandard.label} (minimum ${evidenceStandard.minimumPapers} direct papers per shortlisted direction)`,
-      `Catalog coverage: ${mapInsights.evidencedNodes}/${mapInsights.relatedNodes} related signals have direct evidence; ${mapInsights.qualifyingNodes} meet the selected standard.`,
-      "",
-      "SHORTLIST",
-      ...candidateLines,
-      "",
-      "Caution: These are catalog-derived signals, not verified novelty or research-gap claims. Validate every direction against its supporting paper set.",
-    ].filter((line) => line !== null).join("\n");
-
-    try {
-      await navigator.clipboard.writeText(brief);
-      setBriefCopied(true);
-    } catch {
-      setErrorMessage("Could not copy the decision brief. Check clipboard permission and try again.");
+  function handleRootQueryChange(value) {
+    setRootQuery(value);
+    setExploredRoot(null);
+    setSelectedRootId("");
+    setMapData(null);
+    setSelectedNode(null);
+    setErrorMessage("");
+    if (value.trim().length < 2) {
+      setRootSuggestions([]);
+      setSuggestionsOpen(false);
     }
   }
 
@@ -2195,43 +2055,6 @@ function MindMapWorkspace() {
 
         <p className="research-builder-intro">Anchor the map to one indexed concept. Every lane will stay one hop from this root.</p>
 
-        <fieldset className="research-evidence-standard">
-          <legend>Evidence standard</legend>
-          <div className="research-evidence-standard-options">
-            {Object.entries(RESEARCH_EVIDENCE_STANDARDS).map(([key, standard]) => (
-              <button
-                key={key}
-                type="button"
-                className={evidenceStandardKey === key ? "active" : ""}
-                onClick={() => setEvidenceStandardKey(key)}
-                aria-pressed={evidenceStandardKey === key}
-              >
-                <strong>{standard.shortLabel}</strong>
-                <small>≥{standard.minimumPapers} papers</small>
-              </button>
-            ))}
-          </div>
-          <p>{evidenceStandard.description} This controls the shortlist, not the backend data.</p>
-        </fieldset>
-
-        <label className="research-map-field research-decision-context">
-          <span>Decision context <small>optional</small></span>
-          <input
-            value={decisionContext}
-            onChange={(event) => setDecisionContext(event.target.value)}
-            placeholder="Population, setting, institution or thesis context"
-          />
-        </label>
-
-        <label className="research-map-field">
-          <span>Decision goal</span>
-          <select value={researchIntent} onChange={(event) => changeResearchIntent(event.target.value)}>
-            <option value="MOMENTUM">Find emerging directions</option>
-            <option value="EVIDENCE">Validate evidence strength</option>
-            <option value="ADJACENCY">Discover adjacent fields</option>
-          </select>
-        </label>
-
         <div className="research-root-type-switch">
           <button type="button" className={rootType === "KEYWORD" ? "active" : ""} onClick={() => changeRootType("KEYWORD")}>
             <FiHash />Keyword root
@@ -2246,31 +2069,49 @@ function MindMapWorkspace() {
           )}
         </div>
 
-        <label className="research-map-field">
-          <span>Filter catalog</span>
-          <div><FiSearch /><input value={rootQuery} onChange={(event) => setRootQuery(event.target.value)} placeholder={`Filter ${rootType.toLowerCase()} options`} /></div>
-        </label>
-
-        <label className="research-map-field">
-          <span>Select root</span>
-          <select ref={rootSelectRef} value={selectedRootId} onChange={(event) => selectResearchRoot(event.target.value)} disabled={catalogLoading}>
-            <option value="">{catalogLoading ? "Loading catalog…" : `Choose a ${rootType.toLowerCase()}…`}</option>
-            {selectedRoot && !filteredRootOptions.some((option) => String(option.id) === String(selectedRoot.id)) && (
-              <option value={selectedRoot.id}>{selectedRoot.name}</option>
-            )}
-            {filteredRootOptions.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
-          </select>
-        </label>
+        <div className="research-root-autocomplete">
+          <label className="research-map-field">
+            <span>Search and select a {rootType.toLowerCase()}</span>
+            <div>
+              <FiSearch />
+              <input
+                ref={rootSelectRef}
+                value={rootQuery}
+                onChange={(event) => handleRootQueryChange(event.target.value)}
+                onFocus={() => rootSuggestions.length > 0 && setSuggestionsOpen(true)}
+                placeholder={`Type at least 2 characters to find a ${rootType.toLowerCase()}`}
+                autoComplete="off"
+              />
+              {suggestionsLoading && <span className="workspace-loading-spinner" aria-label="Loading suggestions" />}
+            </div>
+          </label>
+          {suggestionsOpen && (
+            <div className="research-root-suggestions" role="listbox" aria-label={`${rootType.toLowerCase()} suggestions`}>
+              {rootSuggestions.length > 0 ? rootSuggestions.map((option) => (
+                <button key={`${rootType}-${option.id}`} type="button" role="option" onClick={() => selectResearchRoot(option)}>
+                  <span>{rootType === "KEYWORD" ? <FiHash /> : <FiTag />}</span>
+                  <div><strong>{option.name}</strong><small>{formatNumber(option.paperCount || option.catalogPaperCount || 0)} catalog papers</small></div>
+                  <FiArrowRight />
+                </button>
+              )) : !suggestionsLoading && (
+                <div className="research-root-suggestions-empty">No matching catalog item found.</div>
+              )}
+            </div>
+          )}
+          {rootQuery.trim().length > 0 && rootQuery.trim().length < 2 && (
+            <small className="research-root-search-hint">Enter at least 2 characters to search the live catalog.</small>
+          )}
+        </div>
 
         <div className={`research-root-preview ${selectedRoot ? "has-selection" : ""}`}>
-          <span>{selectedRoot ? (rootType === "KEYWORD" ? <FiHash /> : <FiTag />) : <FiSearch />}</span>
+          <span>{selectedRoot ? (rootType === "KEYWORD" ? <FiHash /> : rootType === "JOURNAL" ? <FiBookOpen /> : <FiTag />) : <FiSearch />}</span>
           <div>
             <small>{selectedRoot ? "Research root selected" : "Waiting for a research root"}</small>
             <strong>{selectedRoot?.name || "Choose a catalog concept above"}</strong>
             <p>{selectedRoot
-              ? Number(selectedRoot.paperCount) > 0
-                ? `${formatNumber(selectedRoot.paperCount)} linked papers reported by the catalog list`
-                : "No paper count is reported here; the map API will verify direct evidence."
+              ? Number(selectedRoot.catalogPaperCount ?? selectedRoot.paperCount) > 0
+                ? `${formatNumber(selectedRoot.catalogPaperCount ?? selectedRoot.paperCount)} papers in the catalog`
+                : "The map API will return the catalog size for this root."
               : "Search by keyword or topic to anchor the graph in real evidence."}</p>
           </div>
         </div>
@@ -2284,14 +2125,21 @@ function MindMapWorkspace() {
           </select>
         </label>
 
-        <div className="research-evidence-window">
-          <FiActivity />
-          <div><small>Backend evidence window</small><strong>Recent 5 years vs previous 5 years</strong></div>
+        <div className="research-map-year-range">
+          <label>
+            <span>From year</span>
+            <input type="number" min="1900" max={CURRENT_YEAR} value={fromYear} onChange={(event) => setFromYear(event.target.value)} />
+          </label>
+          <span>to</span>
+          <label>
+            <span>To year</span>
+            <input type="number" min="1900" max={CURRENT_YEAR} value={toYear} onChange={(event) => setToYear(event.target.value)} />
+          </label>
         </div>
 
         {errorMessage && <div className="workspace-notice warning" role="alert">{errorMessage}</div>}
 
-        <button type="submit" className="research-run-button" disabled={mapLoading || catalogLoading}>
+        <button type="submit" className="research-run-button" disabled={mapLoading || !selectedRootId}>
           {mapLoading
             ? <><FiRefreshCw className="is-spinning" />Building map…</>
             : selectedRootId
@@ -2321,22 +2169,16 @@ function MindMapWorkspace() {
               <span className="preview-node preview-journal"><FiBookOpen /><b>Journals</b><small>Publication context</small></span>
               <span className="preview-node preview-signal"><FiTrendingUp /><b>Momentum</b><small>Growth signals</small></span>
             </div>
-            <span className="research-section-kicker">From discovery to a next move</span>
+            <span className="research-section-kicker">Verifiable relationship map</span>
             <h3>{selectedRoot ? `Ready to assess directions around “${selectedRoot.name}”` : "Choose one indexed evidence root."}</h3>
             <p>{selectedRoot
-              ? "Build three weighted lanes to separate strong associations, momentum and evidence that is still too thin to trust."
-              : "Start with a keyword or topic. The workspace will rank one-hop relationships and keep every signal tied to paper evidence."}</p>
+              ? `Build three weighted lanes using catalog evidence from ${fromYear} to ${toYear}.`
+              : "Start with a keyword or topic. Every returned association can be verified against its shared papers."}</p>
             <div className="research-map-empty-outcomes">
-              <span><FiActivity />Evidence strength</span>
-              <span><FiTrendingUp />5-year momentum</span>
-              <span><FiBookOpen />Supporting papers</span>
+              <span><FiShare2 />Shared paper count</span>
+              <span><FiTrendingUp />Association & trend</span>
+              <span><FiBookOpen />Evidence papers</span>
             </div>
-            {!selectedRoot && suggestedRoots.length > 0 && (
-              <div className="research-map-starters">
-                <small>Quick starts</small>
-                <div>{suggestedRoots.map((root) => <button key={root.id} type="button" onClick={() => chooseSuggestedRoot(root)}>{root.name}</button>)}</div>
-              </div>
-            )}
             <button type="button" onClick={() => selectedRootId ? rootSelectRef.current?.form?.requestSubmit() : rootSelectRef.current?.focus()}>
               {selectedRootId ? <><FiGitBranch />Analyze this research landscape</> : <><FiSearch />Define the research scope</>}
             </button>
@@ -2345,115 +2187,69 @@ function MindMapWorkspace() {
         )}
       </section>
 
-      <aside className="research-map-insights">
+      <aside className="research-map-insights research-map-facts">
         <div className="research-panel-heading">
           <div>
-            <span className="research-section-kicker">Decision brief</span>
-            <h3>What should I do next?</h3>
+            <span className="research-section-kicker">Verified API metrics</span>
+            <h3>Relationship evidence</h3>
           </div>
           <span className="research-panel-step">03</span>
         </div>
 
-        {mapData && (
-          <div className="research-inspector-tabs" aria-label="Decision brief views">
-            <button type="button" className={inspectorView === "decision" ? "active" : ""} onClick={() => setInspectorView("decision")}>Decision</button>
-            <button type="button" className={inspectorView === "shortlist" ? "active" : ""} onClick={() => setInspectorView("shortlist")}>Shortlist</button>
-            <button type="button" className={inspectorView === "coverage" ? "active" : ""} onClick={() => setInspectorView("coverage")}>Coverage</button>
-          </div>
-        )}
-
-        {mapData && (
-          <div className="research-protocol-readiness">
-            <div>
-              <small>Evidence protocol</small>
-              <strong>{evidenceStandard.label}</strong>
+        {mapData ? (
+          <div className="research-map-facts-body">
+            <div className="research-map-period-card">
+              <small>Analysis period</small>
+              <strong>{mapData.fromYear}-{mapData.toYear}</strong>
+              <span>Returned by the Mind Map API</span>
             </div>
-            <span>{mapInsights.qualifyingNodes}/{mapInsights.relatedNodes} meet ≥{evidenceStandard.minimumPapers}</span>
-          </div>
-        )}
+            <article className="research-map-root-fact">
+              <span>{normalizeMapType(mapData.root?.type) === "TOPIC" ? <FiTag /> : <FiHash />}</span>
+              <div><small>Research root</small><strong>{mapData.root?.label}</strong></div>
+            </article>
+            <dl className="research-node-metrics research-map-api-summary">
+              <div><dt>Root catalog</dt><dd>{formatNumber(mapData.root?.catalogPaperCount)}</dd></div>
+              <div><dt>Related nodes</dt><dd>{formatNumber(relatedNodeCount)}</dd></div>
+              <div><dt>Evidence lanes</dt><dd>3</dd></div>
+            </dl>
 
-        {inspectorView === "decision" && (
-          <div className="research-inspector-view">
-            {selectedNode ? (
-              <>
-                <article className={`research-node-detail trend-${String(selectedNode.trendStatus || "no_data").toLowerCase()}`}>
-                  <div className="research-node-detail-type">
-                    <i>{normalizeMapType(selectedNode.type) === "TOPIC" ? <FiTag /> : normalizeMapType(selectedNode.type) === "JOURNAL" ? <FiBookOpen /> : <FiHash />}</i>
-                    <span>{selectedNode.type}</span>
-                  </div>
-                  <h4>{selectedNode.label}</h4>
-                  <div className="research-node-trend"><TrendStatusIcon status={selectedNode.trendStatus} /><strong>{selectedNodeAssessment?.signal.label}</strong></div>
-                </article>
-                <div className={`research-signal-explanation is-${selectedNodeAssessment?.signal.key || "insufficient"}`}>
-                  <small>What the catalog supports</small>
-                  <strong>{selectedNodeAssessment?.signal.label}</strong>
-                  <p>{selectedNodeAssessment?.signal.reason}</p>
+            {selectedNode && getMapNodeIdentity(selectedNode) !== getMapNodeIdentity(mapData.root) && selectedNodeEdge ? (
+              <div className="research-map-selected-fact">
+                <div className="research-node-detail-type">
+                  <i>{normalizeMapType(selectedNode.type) === "TOPIC" ? <FiTag /> : normalizeMapType(selectedNode.type) === "JOURNAL" ? <FiBookOpen /> : <FiHash />}</i>
+                  <span>{normalizeMapType(selectedNode.type)}</span>
                 </div>
-                <dl className="research-node-metrics research-node-metrics-compact">
-                  <div><dt>Direct</dt><dd>{formatNumber(selectedNode.paperCount)}</dd></div>
-                  <div><dt>Recent</dt><dd>{formatNumber(selectedNode.recentPaperCount)}</dd></div>
-                  <div><dt>Previous</dt><dd>{formatNumber(selectedNode.previousPaperCount)}</dd></div>
+                <h4>{selectedNode.label}</h4>
+                <span className={`research-map-status-pill trend-${String(selectedNodeEdge.trendStatus || "STABLE").toLowerCase()}`}>
+                  <TrendStatusIcon status={selectedNodeEdge.trendStatus} />{getMapStatusLabel(selectedNodeEdge.trendStatus)}
+                </span>
+                <dl className="research-node-metrics research-map-api-detail">
+                  <div><dt>Shared papers</dt><dd>{formatNumber(selectedNodeEdge.sharedPaperCount)}</dd></div>
+                  <div><dt>Catalog papers</dt><dd>{formatNumber(selectedNode.catalogPaperCount)}</dd></div>
+                  <div><dt>Recent</dt><dd>{formatNumber(selectedNodeEdge.recentPaperCount)}</dd></div>
+                  <div><dt>Previous</dt><dd>{formatNumber(selectedNodeEdge.previousPaperCount)}</dd></div>
+                  <div><dt>Growth</dt><dd>{Number(selectedNodeEdge.growthRate) > 0 ? "+" : ""}{Number(selectedNodeEdge.growthRate || 0).toFixed(1)}%</dd></div>
+                  <div><dt>Association</dt><dd>{Math.round(normalizeAssociationScore(selectedNodeEdge.associationScore || selectedNodeEdge.rankScore) * 100)}%</dd></div>
                 </dl>
-                <div className={`research-evidence-strength is-${selectedNodeAssessment?.evidence.key || "none"}`}>
-                  <div><small>Evidence strength</small><strong>{selectedNodeAssessment?.evidence.label}</strong></div>
-                  <p>{selectedNodeAssessment?.evidence.detail}</p>
-                </div>
-                <Link className="research-inspector-action" to={selectedNodeExplorePath}>Open supporting papers <FiArrowRight /></Link>
-                <p className="research-signal-disclaimer"><FiActivity />Catalog signal only — not a verified novelty or research-gap claim.</p>
-              </>
+                <button type="button" className="research-inspector-action" onClick={() => exploreNodeAsRoot(selectedNode)}>
+                  Explore as root <FiArrowRight />
+                </button>
+              </div>
             ) : (
               <div className="research-inspector-empty">
-                <FiActivity />
-                <strong>Select a signal to test whether it is worth pursuing</strong>
-                <p>The decision brief separates evidence from interpretation.</p>
+                <FiShare2 />
+                <strong>Select a child node or edge</strong>
+                <p>The Evidence papers panel will load the publications that connect it to the root.</p>
               </div>
             )}
+            <p className="research-signal-disclaimer"><FiActivity />Only backend-provided catalog, association and trend metrics are shown.</p>
           </div>
-        )}
-
-        {inspectorView === "shortlist" && mapData && (
-          <div className="research-inspector-view research-opportunity-shortlist is-tab-view">
-            <div><small>Signal shortlist</small><strong>{mapData.intentLabel}</strong></div>
-            {mapInsights.candidates.length > 0 ? (
-              <ol>
-                {mapInsights.candidates.map(({ node, assessment }, index) => (
-                  <li key={getMapNodeIdentity(node)}>
-                    <button type="button" onClick={() => inspectOpportunityNode(node)}>
-                      <span>{String(index + 1).padStart(2, "0")}</span>
-                      <div><strong>{node.label}</strong><small>{assessment.signal.label} · {formatNumber(node.paperCount)} papers</small></div>
-                      <FiArrowRight />
-                    </button>
-                  </li>
-                ))}
-              </ol>
-            ) : <div className="research-empty-inline">No direction meets the {evidenceStandard.label.toLowerCase()} standard. Try an exploratory scan or broaden the landscape.</div>}
+        ) : (
+          <div className="research-inspector-empty">
+            <FiActivity />
+            <strong>No analysis loaded</strong>
+            <p>Choose a real catalog root and year range to inspect verifiable relationship metrics.</p>
           </div>
-        )}
-
-        {inspectorView === "coverage" && mapData && (
-          <div className="research-inspector-view">
-            {mapIntegrity && (
-              <div className={`research-integrity-banner is-${mapIntegrity.level}`}>
-                {mapIntegrity.level === "ready" ? <FiCheck /> : <FiActivity />}
-                <div><strong>{mapIntegrity.title}</strong><p>{mapIntegrity.message}</p></div>
-              </div>
-            )}
-            <div className="research-map-summary research-landscape-summary">
-              <h4>Landscape coverage</h4>
-              <div><span>Signals with evidence</span><strong>{mapInsights.evidencedNodes}/{mapInsights.relatedNodes}</strong></div>
-              <div><span>Meet {evidenceStandard.shortLabel.toLowerCase()} standard</span><strong>{mapInsights.qualifyingNodes}</strong></div>
-              <div><span>Growing or new activity</span><strong>{mapInsights.growingNodes}</strong></div>
-              <div><span>Topics / keywords</span><strong>{mapInsights.topics} / {mapInsights.keywords}</strong></div>
-              <div><span>Journal contexts</span><strong>{mapInsights.journals}</strong></div>
-            </div>
-            <p className="research-signal-disclaimer"><FiActivity />Coverage describes this catalog only and must be validated against the paper set.</p>
-          </div>
-        )}
-        {mapData && (
-          <button type="button" className={`research-copy-brief ${briefCopied ? "is-copied" : ""}`} onClick={copyDecisionBrief}>
-            {briefCopied ? <FiCheck /> : <FiCopy />}
-            {briefCopied ? "Decision brief copied" : "Copy defensible brief"}
-          </button>
         )}
       </aside>
       </div>
@@ -2465,12 +2261,10 @@ function ResearchLabPage() {
   const { role, user } = useAuth();
   const normalizedRole = String(role || user?.role || "LECTURER").toUpperCase();
   const canComparePapers = ["RESEARCHER", "ADMIN"].includes(normalizedRole);
-  const mindMapAccess = canComparePapers ? "Full" : "Basic";
-  const [activeTool, setActiveTool] = useState(() => (canComparePapers ? "compare" : "mind-map"));
+  const mindMapAccess = "Full";
+  const [activeTool, setActiveTool] = useState("compare");
 
-  useEffect(() => {
-    if (!canComparePapers && activeTool !== "mind-map") setActiveTool("mind-map");
-  }, [activeTool, canComparePapers]);
+  if (!canComparePapers) return null;
 
   return (
     <MainLayout title="Research Lab" subtitle={canComparePapers ? "Advanced evidence tools for researchers" : "Basic evidence mapping for lecturers"}>
