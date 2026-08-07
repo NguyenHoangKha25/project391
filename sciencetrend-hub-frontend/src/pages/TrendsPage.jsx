@@ -58,7 +58,7 @@ function TrendsSuggestionPortal({ anchorRef, children, id }) {
 
   return createPortal(
     <div
-      className="trends-autocomplete-menu trends-autocomplete-menu-portal"
+      className="trends-autocomplete-menu-portal"
       id={id}
       role="listbox"
       style={position}
