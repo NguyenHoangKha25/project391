@@ -881,7 +881,8 @@ html body .st-content .premium-dashboard .db-kpi-card .db-kpi-change {
 }
 
 html body .st-content .premium-dashboard .db-kpi-card:first-child .db-kpi-change {
-  -webkit-text-fill-color: var(--color-accent) !important;
+  -webkit-text-fill-color: inherit !important;
+  color: inherit !important;
 }
 
 html body .db-kpi-comparison {

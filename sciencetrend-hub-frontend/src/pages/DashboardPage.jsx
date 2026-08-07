@@ -498,8 +498,9 @@ function DashboardPage() {
 
   function renderMetricCard(stat, variant = "primary") {
     const Icon = stat.icon;
-    const TrendIcon = stat.change === "—" || stat.trendType === "neutral"
-      ? FiMinus
+    const isNeutral = stat.trendType === "neutral" || stat.change === "Current" || stat.change === "—";
+    const TrendIcon = isNeutral
+      ? null
       : stat.trendType === "negative"
         ? FiTrendingDown
         : FiTrendingUp;
@@ -521,10 +522,12 @@ function DashboardPage() {
         </div>
         <strong className="db-kpi-value">{stat.value}</strong>
         <div className="db-kpi-meta">
-          <span className={`db-kpi-change ${stat.trendType}`}>
-            <TrendIcon aria-hidden="true" />
-            {stat.change}
-          </span>
+          {stat.change && (
+            <span className={`db-kpi-change ${stat.trendType}`}>
+              {TrendIcon && <TrendIcon aria-hidden="true" />}
+              {stat.change}
+            </span>
+          )}
           <span className="db-kpi-comparison">{stat.trendText}</span>
           {stat.to && <FiArrowUpRight className="db-kpi-open" aria-hidden="true" />}
         </div>
