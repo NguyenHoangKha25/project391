@@ -1508,11 +1508,16 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
 
     try {
       setEvidenceLoading(true);
+      const rootEntityId = getMindMapEntityId(data?.root?.id);
+      const targetEntityId = getMindMapEntityId(node?.id);
+      if (!rootEntityId || !targetEntityId) {
+        throw new Error("This relationship does not contain valid catalog IDs for evidence lookup.");
+      }
       const response = await getMindMapEvidence({
         rootType: normalizeMapType(data?.root?.type),
-        rootId: getMindMapEntityId(data?.root?.id),
+        rootId: rootEntityId,
         targetType: normalizeMapType(node?.type),
-        targetId: getMindMapEntityId(node?.id),
+        targetId: targetEntityId,
         page: 0,
         size: 5,
       });
@@ -1992,9 +1997,11 @@ function MindMapWorkspace() {
     try {
       setMapLoading(true);
       setErrorMessage("");
+      const rootEntityId = getMindMapEntityId(nextRootId);
+      if (!rootEntityId) throw new Error("Select a valid catalog root before building the mind map.");
       const response = await getResearchMindMap({
         type: nextRootType,
-        id: getMindMapEntityId(nextRootId),
+        id: rootEntityId,
         limit: Number(limit),
         fromYear: Number(fromYear),
         toYear: Number(toYear),

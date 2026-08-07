@@ -3145,34 +3145,46 @@ html body .st-layout :is(.trend-compare-header, .trend-compare-search) {
   z-index: 9999999 !important;
 }
 
-/* 3. The suggestion dropdown menu itself */
-html body .st-layout .trends-autocomplete-menu {
-  position: absolute !important;
-  top: calc(100% + 6px) !important;
-  left: 0 !important;
-  width: 100% !important;
-  min-width: 320px !important;
-  max-height: 280px !important;
-  overflow-y: auto !important;
-  z-index: 99999999 !important;
+/* Fix trends search suggestion dropdown portal styling and z-index */
+body > .trends-autocomplete-menu-portal,
+.trends-autocomplete-menu-portal,
+div.trends-autocomplete-menu-portal {
+  position: fixed !important;
+  z-index: 2147483647 !important;
   background: #ffffff !important;
   background-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.45) !important;
   border: 1.5px solid rgba(148, 163, 184, 0.5) !important;
   border-radius: 14px !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  padding: 6px !important;
+  overflow-y: auto !important;
   pointer-events: auto !important;
   isolation: isolate !important;
 }
 
-/* 4. Ensure KPI cards and lower grids stay at z-index: 1 */
-html body .st-layout :is(.trends-stats-cards-row, .trends-middle-grid, .trend-stat-card, .stat-card-glass) {
-  position: relative !important;
-  z-index: 1 !important;
-  transform: none !important;
+.trends-autocomplete-menu-portal button {
+  width: 100% !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  padding: 8px 12px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  color: #172033 !important;
+  background: transparent !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+  cursor: pointer !important;
 }
 
-html body .st-layout .trends-stats-cards-row * {
-  z-index: 1 !important;
+.trends-autocomplete-menu-portal button:hover,
+.trends-autocomplete-menu-portal button:focus-visible {
+  color: #3730a3 !important;
+  background: #eef2ff !important;
+  outline: none !important;
 }

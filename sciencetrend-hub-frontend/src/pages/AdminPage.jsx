@@ -30,6 +30,7 @@ import {
 } from "../services/adminService";
 import { getDashboardOperations } from "../services/dashboardService";
 import { formatDateTime, formatNumber, normalizeOperations, normalizeReport, toArray, toObject } from "../utils/apiData";
+import { clearAnalyticsCache } from "../utils/apiCache";
 import "../styles/WorkspacePages.css";
 import "../styles/AdminPage.css";
 
@@ -207,6 +208,7 @@ function AdminPage() {
     setMessage("");
     try {
       await triggerAdminSync();
+      clearAnalyticsCache();
       setMessage("Manual OpenAlex sync was started.");
       await loadAdminData();
     } catch (error) {
@@ -269,6 +271,7 @@ function AdminPage() {
             if (trackedLog) {
               const status = String(trackedLog.status || "").toUpperCase();
               if (status === "COMPLETED" || status === "SUCCESS") {
+                clearAnalyticsCache();
                 await loadAdminData();
                 const imported = trackedLog.paperSynced ?? trackedLog.newRecords ?? trackedLog.recordsIndexed;
                 const summary = imported == null ? "" : ` ${formatNumber(imported)} new papers were indexed.`;
@@ -292,6 +295,7 @@ function AdminPage() {
 
       const importedPapers = backfillResult?.paperSynced ?? backfillResult?.newRecords ?? backfillResult?.recordsIndexed;
       const importedSummary = importedPapers == null ? "" : ` ${formatNumber(importedPapers)} new papers were indexed.`;
+      clearAnalyticsCache();
       setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} (max ${formatNumber(parsedMaxResults)} papers) completed successfully.${importedSummary}`);
     } catch (error) {
       setBackfillError(error.message || "Could not start backfill.");

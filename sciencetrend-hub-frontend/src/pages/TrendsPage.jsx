@@ -25,10 +25,11 @@ import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCa
 import "../styles/WorkspacePages.css";
 import "../styles/TrendsPage.css";
 
-function TrendsSuggestionPortal({ anchorRef, children, id }) {
+function TrendsSuggestionPortal({ anchorRef, children, id, isOpen }) {
   const [position, setPosition] = useState(null);
 
   useLayoutEffect(() => {
+    if (!isOpen) return;
     function updatePosition() {
       const anchor = anchorRef.current;
       if (!anchor) return;
@@ -50,11 +51,9 @@ function TrendsSuggestionPortal({ anchorRef, children, id }) {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [anchorRef]);
+  }, [anchorRef, isOpen]);
 
-  if (!position || typeof document === "undefined") return null;
-
-  const targetNode = document.getElementById("portal-root") || document.body;
+  if (!isOpen || !position || typeof document === "undefined") return null;
 
   return createPortal(
     <div
@@ -65,7 +64,7 @@ function TrendsSuggestionPortal({ anchorRef, children, id }) {
     >
       {children}
     </div>,
-    targetNode,
+    document.body,
   );
 }
 
@@ -864,7 +863,7 @@ function TrendsPage() {
                   />
                 </div>
                 {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                  <div className="trends-autocomplete-menu" id="trend-single-suggestions" role="listbox">
+                  <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-single-suggestions" isOpen={suggestionsOpen}>
                     {suggestionsLoading ? (
                       <span className="trends-autocomplete-state">Finding matches…</span>
                     ) : autocompleteSuggestions.length > 0 ? (
@@ -873,6 +872,10 @@ function TrendsPage() {
                           type="button"
                           role="option"
                           key={suggestion.value}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            selectAutocompleteSuggestion(suggestion.value);
+                          }}
                           onClick={() => selectAutocompleteSuggestion(suggestion.value)}
                         >
                           <span>{suggestion.value}</span>
@@ -882,7 +885,7 @@ function TrendsPage() {
                     ) : (
                       <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                     )}
-                  </div>
+                  </TrendsSuggestionPortal>
                 )}
               </div>
             )}
@@ -1036,7 +1039,7 @@ function TrendsPage() {
                     />
                   </div>
                   {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                    <div className="trends-autocomplete-menu" id="trend-compare-suggestions" role="listbox">
+                    <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-compare-suggestions" isOpen={suggestionsOpen}>
                       {suggestionsLoading ? (
                         <span className="trends-autocomplete-state">Finding matches…</span>
                       ) : autocompleteSuggestions.length > 0 ? (
@@ -1046,6 +1049,12 @@ function TrendsPage() {
                             role="option"
                             key={suggestion.value}
                             disabled={comparisonSelections.includes(suggestion.value)}
+                            onMouseDown={(e) => {
+                              if (!comparisonSelections.includes(suggestion.value)) {
+                                e.preventDefault();
+                                selectAutocompleteSuggestion(suggestion.value);
+                              }
+                            }}
                             onClick={() => selectAutocompleteSuggestion(suggestion.value)}
                           >
                             <span>{suggestion.value}</span>
@@ -1061,7 +1070,7 @@ function TrendsPage() {
                       ) : (
                         <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                       )}
-                    </div>
+                    </TrendsSuggestionPortal>
                   )}
                 </div>
 

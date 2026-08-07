@@ -90,6 +90,26 @@ export function clearPersistentCache(key) {
   savePersistentCache();
 }
 
+export function clearPersistentCacheByPrefix(prefixes = []) {
+  const normalizedPrefixes = (Array.isArray(prefixes) ? prefixes : [prefixes])
+    .map((prefix) => String(prefix || "").trim())
+    .filter(Boolean);
+  if (normalizedPrefixes.length === 0) return;
+
+  const storedCache = loadPersistentCache();
+  Object.keys(storedCache).forEach((key) => {
+    if (normalizedPrefixes.some((prefix) => key.startsWith(prefix))) {
+      delete storedCache[key];
+    }
+  });
+  savePersistentCache();
+}
+
+export function clearAnalyticsCache() {
+  clearPersistentCacheByPrefix(["dashboard_", "trends_metadata_", "trend_series_"]);
+  clearCache();
+}
+
 export function clearCache(key) {
   if (key) {
     delete cache[key];

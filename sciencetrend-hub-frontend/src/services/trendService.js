@@ -16,7 +16,12 @@ export function getTrendStats(params = {}) {
 // Connect to GET /api/topics/trending limit=10 from backend
 export function getTrendingTopics(params = {}) {
   const limit = params.limit || 10;
-  return apiRequest("/topics/trending", { params: { limit } });
+  return apiRequest("/topics/trending", {
+    params: {
+      limit,
+      ...(params.fromYear ? { fromYear: params.fromYear } : {}),
+    },
+  });
 }
 
 // Connect to GET /api/trends/top-keywords from backend

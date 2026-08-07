@@ -44,6 +44,7 @@ const DONUT_THEMES = [
   { color: "#f59e0b", bgColor: "#fffbeb", textColor: "#b45309" },
   { color: "#ec4899", bgColor: "#fdf2f8", textColor: "#be185d" },
 ];
+const ANALYTICS_CACHE_TTL_MS = 10 * 60 * 1000;
 
 function getDashboardCacheKeys(user = {}, role = "STUDENT") {
   const userId = user.id ?? user.userId ?? user.username ?? "anon";
@@ -70,8 +71,8 @@ function hasDashboardData(data) {
 
 function getInitialDashboardData(cacheKeys) {
   try {
-    const overview = getPersistentCachedData(cacheKeys.overview);
-    const topics = getPersistentCachedData(cacheKeys.topics);
+    const overview = getPersistentCachedData(cacheKeys.overview, ANALYTICS_CACHE_TTL_MS);
+    const topics = getPersistentCachedData(cacheKeys.topics, ANALYTICS_CACHE_TTL_MS);
 
     return {
       overview: hasDashboardData(overview) ? overview : null,
@@ -157,8 +158,8 @@ function DashboardPage() {
   }, []);
 
   const loadDashboard = useCallback(async (isRefresh = false) => {
-    const storedOverview = getPersistentCachedData(cacheKeys.overview);
-    const storedTopics = getPersistentCachedData(cacheKeys.topics);
+    const storedOverview = getPersistentCachedData(cacheKeys.overview, ANALYTICS_CACHE_TTL_MS);
+    const storedTopics = getPersistentCachedData(cacheKeys.topics, ANALYTICS_CACHE_TTL_MS);
     const cachedOverview = hasDashboardData(storedOverview) ? storedOverview : null;
     const cachedTopics = Array.isArray(storedTopics) && storedTopics.length > 0 ? storedTopics : [];
     const hasCachedData = Boolean(cachedOverview) || cachedTopics.length > 0;
