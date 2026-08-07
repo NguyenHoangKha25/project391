@@ -42,7 +42,8 @@ const tabs = [
 
 const CURRENT_YEAR = new Date().getFullYear();
 const DEFAULT_BACKFILL_FROM_YEAR = 2015;
-const DEFAULT_BACKFILL_MAX_RESULTS = 3500;
+const DEFAULT_BACKFILL_MAX_RESULTS = 7000;
+const RECOMMENDED_BACKFILL_BATCH = 3500;
 const MAX_BACKFILL_RESULTS = 7000;
 
 function resolveAdminTab(value) {
@@ -312,7 +313,7 @@ function AdminPage() {
                 <article className="admin-panel-detailed">
                   <div className="panel-header-row"><div><h3>OpenAlex synchronization</h3><p>Start a current sync or backfill a historical year range.</p></div><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Manual sync</button></div>
                   <form className="admin-backfill-form" onSubmit={runBackfill}>
-                    <div className="admin-backfill-copy"><span>Historical data</span><strong>Backfill publications by year</strong><p>Import missing OpenAlex records for the selected period.</p><div className="admin-backfill-recommendation"><FiCheckCircle /> Recommended batch: {formatNumber(DEFAULT_BACKFILL_MAX_RESULTS)} papers</div></div>
+                    <div className="admin-backfill-copy"><span>Historical data</span><strong>Backfill publications by year</strong><p>Import missing OpenAlex records for the selected period.</p><div className="admin-backfill-recommendation"><FiCheckCircle /> Recommended batch: {formatNumber(RECOMMENDED_BACKFILL_BATCH)} papers</div></div>
                     <div className="admin-backfill-fields">
                       <label htmlFor="backfill-from-year">From year<input id="backfill-from-year" type="number" min="1900" max={CURRENT_YEAR} value={fromYear} onChange={(event) => { setFromYear(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                       <span className="admin-year-separator" aria-hidden="true">to</span>
