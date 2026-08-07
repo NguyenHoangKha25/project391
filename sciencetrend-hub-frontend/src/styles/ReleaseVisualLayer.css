@@ -3056,7 +3056,56 @@ html body .st-layout .admin-panel .admin-compact-table td:nth-child(2) {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-  max-width: 160px !important;
+}
+
+html body .st-layout .admin-panel .admin-compact-table th:nth-child(1),
+html body .st-layout .admin-panel .admin-compact-table td:nth-child(1) {
+  width: 25% !important;
+}
+
+html body .st-layout .admin-panel .admin-compact-table th:nth-child(2),
+html body .st-layout .admin-panel .admin-compact-table td:nth-child(2) {
+  width: 32% !important;
+}
+
+html body .st-layout .admin-panel .admin-compact-table th:nth-child(3),
+html body .st-layout .admin-panel .admin-compact-table td:nth-child(3) {
+  width: 23% !important;
+}
+
+html body .st-layout .admin-panel .admin-compact-table th:nth-child(4),
+html body .st-layout .admin-panel .admin-compact-table td:nth-child(4) {
+  width: 20% !important;
+  min-width: 72px !important;
+  text-align: right !important;
+}
+
+html body .st-layout .admin-panel .admin-compact-table td select {
+  width: 100% !important;
+  max-width: 95px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 4px !important;
+  font-size: 10.5px !important;
+  border-radius: 7px !important;
+}
+
+html body .st-layout .admin-panel .admin-compact-table .admin-row-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 4px !important;
+  width: 100% !important;
+}
+
+html body .st-layout .admin-panel .admin-compact-table .admin-row-actions button {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  flex: 0 0 28px !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  padding: 0 !important;
 }
 
 html body .st-layout .admin-panel .admin-sync-failure-summary {
