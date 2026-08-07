@@ -1,75 +1,75 @@
 /* ==========================================================================
-   ScienceTrend Hub - Register Page Perfect Symmetrical 1-Page Light Theme
+   ScienceTrend Hub - Create Account (Register) Page Ultra-Modern UI Design System
    ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
-/* Force page to fill 1 viewport without scrollbar */
+/* Main Page Container */
 html body .register-page {
   min-height: 100vh !important;
-  height: 100vh !important;
-  max-height: 100vh !important;
-  position: relative !important;
-  overflow: hidden !important;
-  padding: clamp(10px, 2vh, 20px) 16px !important;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+  width: 100% !important;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  margin: 0 !important;
+  padding: clamp(16px, 3vh, 32px) clamp(16px, 3vw, 32px) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15), transparent 35rem),
+    radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.12), transparent 35rem),
+    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05), transparent 40rem),
+    linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%) !important;
   color: #0f172a !important;
   box-sizing: border-box !important;
+  position: relative !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
 }
 
-/* Outer Window Container (630px Height for Perfect Vertical Padding) */
+/* Central Wrapper Outer Window */
 html body .register-page .register-wrapper {
   position: relative !important;
-  z-index: 1 !important;
-  width: min(1040px, 100%) !important;
-  height: min(630px, calc(100vh - 24px)) !important;
-  max-height: calc(100vh - 24px) !important;
+  z-index: 2 !important;
+  width: min(1120px, 100%) !important;
+  min-height: min(680px, calc(100vh - 48px)) !important;
   display: grid !important;
-  grid-template-columns: 1.1fr 1fr !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 24px !important;
-  background: #ffffff !important;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12) !important;
+  grid-template-columns: 1.15fr 1fr !important;
+  border-radius: 28px !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    0 10px 30px rgba(79, 70, 229, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
   overflow: hidden !important;
+  backdrop-filter: blur(20px) !important;
 }
 
-/* Remove any unwanted lines or pseudo elements */
-html body .register-page .register-wrapper::before,
-html body .register-page .register-wrapper::after,
-html body .register-page .register-premium-card-box::before,
-html body .register-page .register-premium-card-box::after,
-html body .register-page .register-header::before,
-html body .register-page .register-header::after {
-  display: none !important;
-  content: none !important;
-}
-
-/* Left Branding Column - Perfectly Balanced Full Height Layout */
+/* LEFT BRANDING SHOWCASE PANEL */
 html body .register-page .register-left {
   position: relative !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
-  gap: 16px !important;
-  padding: clamp(28px, 3.5vw, 38px) !important;
-  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
+  gap: 24px !important;
+  padding: clamp(32px, 4vw, 44px) !important;
+  background: linear-gradient(145deg, #0b0f19 0%, #0f172a 50%, #1e1b4b 100%) !important;
   color: #ffffff !important;
   overflow: hidden !important;
-  text-align: left !important;
 }
-html body .register-page .register-left::before {
-  content: "" !important;
+
+/* Ambient glow orb on left panel */
+html body .register-page .register-left-ambient-glow {
   position: absolute !important;
-  inset: -40px !important;
+  top: -100px !important;
+  left: -100px !important;
+  width: 300px !important;
+  height: 300px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%) !important;
+  filter: blur(40px) !important;
   pointer-events: none !important;
-  opacity: 0.08 !important;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px) !important;
-  background-size: 36px 36px !important;
-  transform: rotate(-4deg) scale(1.1) !important;
 }
+
 html body .register-page .register-left > * {
   position: relative !important;
   z-index: 2 !important;
@@ -79,43 +79,46 @@ html body .register-page .register-left > * {
 html body .register-page .register-brand {
   display: flex !important;
   align-items: center !important;
-  gap: 10px !important;
+  gap: 14px !important;
   text-decoration: none !important;
   width: fit-content !important;
-  margin-bottom: 0 !important;
+  transition: transform 0.25s ease !important;
 }
+html body .register-page .register-brand:hover {
+  transform: translateY(-2px) !important;
+}
+
 html body .register-page .register-logo-box {
-  width: 44px !important;
-  height: 44px !important;
+  width: 48px !important;
+  height: 48px !important;
   display: grid !important;
   place-items: center !important;
-  flex: 0 0 44px !important;
-  border-radius: 12px !important;
-  border: none !important;
-  background: transparent !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
   overflow: hidden !important;
 }
+
 html body .register-page .register-logo-img {
-  width: 100% !important;
-  height: 100% !important;
+  width: 32px !important;
+  height: 32px !important;
   object-fit: contain !important;
-  border-radius: 12px !important;
 }
+
 html body .register-page .register-brand-text h1 {
   color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  font-size: 19px !important;
-  line-height: 1.1 !important;
+  font-size: 20px !important;
   font-weight: 800 !important;
-  letter-spacing: -0.03em !important;
+  letter-spacing: -0.025em !important;
   margin: 0 !important;
-  background: none !important;
+  line-height: 1.2 !important;
 }
+
 html body .register-page .register-brand-text p {
   margin: 2px 0 0 0 !important;
   color: #94a3b8 !important;
-  font-size: 11px !important;
+  font-size: 11.5px !important;
   font-weight: 500 !important;
 }
 
@@ -123,62 +126,51 @@ html body .register-page .register-brand-text p {
 html body .register-page .reg-left-body {
   display: flex !important;
   flex-direction: column !important;
-  gap: 16px !important;
-  margin-top: 0 !important;
-}
-
-html body .register-page .reg-hero-box {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 6px !important;
+  gap: 22px !important;
 }
 
 html body .register-page .reg-badge-tag {
-  width: fit-content !important;
-  min-height: 24px !important;
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-  padding: 0 10px !important;
-  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  padding: 5px 12px !important;
   border-radius: 999px !important;
-  color: #38bdf8 !important;
-  background: rgba(56, 189, 248, 0.12) !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.08em !important;
+  background: rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  color: #818cf8 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
+  width: fit-content !important;
 }
 
 html body .register-page .reg-main-title {
-  margin: 4px 0 2px 0 !important;
+  margin: 10px 0 8px 0 !important;
   color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  font-size: 24px !important;
-  line-height: 1.18 !important;
-  font-weight: 830 !important;
+  font-size: clamp(22px, 2.2vw, 28px) !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
   letter-spacing: -0.03em !important;
-  background: none !important;
-  filter: none !important;
 }
 
 html body .register-page .reg-main-desc {
-  max-width: 400px !important;
   color: #94a3b8 !important;
-  font-size: 13px !important;
-  line-height: 1.5 !important;
+  font-size: 13.5px !important;
+  line-height: 1.55 !important;
   margin: 0 !important;
 }
 
-/* Glassmorphic Stats & Benefits Preview Card */
+/* Glassmorphic Stats & Perks Card */
 html body .register-page .reg-stats-card {
-  padding: 16px !important;
-  border-radius: 16px !important;
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  padding: 20px !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 12px !important;
+  gap: 16px !important;
 }
 
 html body .register-page .reg-stats-header {
@@ -188,159 +180,191 @@ html body .register-page .reg-stats-header {
 }
 
 html body .register-page .reg-stats-title {
-  color: #38bdf8 !important;
-  font-size: 10px !important;
-  font-weight: 850 !important;
+  color: #818cf8 !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
   letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
 }
 
 html body .register-page .reg-stats-badge {
-  color: #ffffff !important;
-  font-size: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  color: #10b981 !important;
+  font-size: 10.5px !important;
   font-weight: 700 !important;
-  background: rgba(56, 189, 248, 0.18) !important;
-  border: 1px solid rgba(56, 189, 248, 0.3) !important;
-  padding: 2px 8px !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  padding: 3px 10px !important;
   border-radius: 999px !important;
 }
 
 html body .register-page .reg-stats-row {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
-  gap: 8px !important;
+  gap: 10px !important;
 }
 
 html body .register-page .reg-stat-item {
-  background: rgba(0, 0, 0, 0.2) !important;
-  border-radius: 10px !important;
-  padding: 8px 6px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border-radius: 12px !important;
+  padding: 10px 8px !important;
   text-align: center !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 html body .register-page .reg-stat-item strong {
   display: block !important;
   color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
-  font-size: 14px !important;
+  font-size: 15px !important;
   font-weight: 800 !important;
 }
 
 html body .register-page .reg-stat-item small {
   display: block !important;
   color: #94a3b8 !important;
-  font-size: 9.5px !important;
-  margin-top: 1px !important;
+  font-size: 10px !important;
+  margin-top: 2px !important;
 }
 
 /* Feature Checklist */
 html body .register-page .reg-checklist-container {
   display: flex !important;
   flex-direction: column !important;
-  gap: 8px !important;
-  padding-top: 10px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  gap: 10px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 html body .register-page .reg-check-row {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  gap: 10px !important;
   color: #cbd5e1 !important;
-  font-size: 11.5px !important;
-  font-weight: 550 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
 }
 
 html body .register-page .reg-check-bullet {
-  width: 18px !important;
-  height: 18px !important;
-  border-radius: 5px !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 6px !important;
   display: grid !important;
   place-items: center !important;
-  background: rgba(56, 189, 248, 0.18) !important;
-  color: #38bdf8 !important;
-  font-size: 10px !important;
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #818cf8 !important;
+  font-size: 11px !important;
   flex-shrink: 0 !important;
 }
 
-/* Left Footer Status Bar */
+/* Left Footer Status */
 html body .register-page .reg-left-footer {
   display: inline-flex !important;
   align-items: center !important;
   gap: 8px !important;
   color: #94a3b8 !important;
-  font-size: 11.5px !important;
+  font-size: 12px !important;
   font-weight: 600 !important;
 }
 
 html body .register-page .reg-status-dot {
-  width: 7px !important;
-  height: 7px !important;
+  width: 8px !important;
+  height: 8px !important;
   border-radius: 50% !important;
-  background: #38bdf8 !important;
-  box-shadow: 0 0 8px #38bdf8 !important;
+  background: #10b981 !important;
+  box-shadow: 0 0 10px #10b981 !important;
 }
 
-/* Right Form Panel (Clean White Panel - Centered Vertically with Generous Padding) */
+/* RIGHT FORM PANEL */
 html body .register-page .register-right {
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
-  align-items: center !important;
-  padding: clamp(24px, 3.5vw, 36px) clamp(20px, 3vw, 32px) !important;
+  padding: clamp(28px, 4vw, 44px) clamp(24px, 3.5vw, 40px) !important;
   background: #ffffff !important;
-  overflow: hidden !important;
-  height: 100% !important;
-  box-sizing: border-box !important;
+  overflow-y: auto !important;
 }
 
-/* Form Container Card */
 html body .register-page .register-premium-card-box {
   width: 100% !important;
-  max-width: 380px !important;
-  margin: 0 auto !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 10px !important;
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  padding: 0 !important;
+  gap: 18px !important;
 }
 
-/* Create Account Title Styling */
+/* Form Header */
 html body .register-page .register-header {
-  border: none !important;
-  border-top: none !important;
-  padding: 0 !important;
-  margin: 0 0 4px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
 }
+
+html body .register-page .register-kicker {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  background: #f1f5f9 !important;
+  color: #4f46e5 !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  width: fit-content !important;
+}
+
 html body .register-page .register-header h2 {
   color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
-  font-size: 24px !important;
-  font-weight: 850 !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
   letter-spacing: -0.03em !important;
-  white-space: nowrap !important;
-  margin: 0 0 2px 0 !important;
-  line-height: 1.15 !important;
-  border: none !important;
-  background: none !important;
-  filter: none !important;
+  margin: 2px 0 0 0 !important;
+  line-height: 1.2 !important;
 }
+
 html body .register-page .register-subtitle {
   color: #64748b !important;
-  font-size: 12px !important;
-  line-height: 1.35 !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
   margin: 0 !important;
 }
 
-/* Alert messages */
-html body .register-page .register-msg-alert {
-  padding: 6px 10px !important;
-  border-radius: 8px !important;
+html body .register-page .register-benefit-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 4px !important;
+}
+
+html body .register-page .register-benefit-row span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: #475569 !important;
   font-size: 11.5px !important;
   font-weight: 600 !important;
+  background: #f8fafc !important;
+  padding: 4px 10px !important;
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* Alert Messages */
+html body .register-page .register-msg-alert {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  border-radius: 12px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+}
+html body .register-page .register-msg-alert .msg-icon {
+  font-size: 16px !important;
+  flex-shrink: 0 !important;
 }
 html body .register-page .register-msg-alert.error-msg {
   background: #fef2f2 !important;
@@ -348,23 +372,29 @@ html body .register-page .register-msg-alert.error-msg {
   color: #dc2626 !important;
 }
 html body .register-page .register-msg-alert.success-msg {
-  background: #f0fdf4 !important;
-  border: 1px solid #bbf7d0 !important;
-  color: #16a34a !important;
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #059669 !important;
 }
 
 /* Form Stack */
 html body .register-page .register-form {
   display: flex !important;
   flex-direction: column !important;
-  gap: 6px !important;
+  gap: 16px !important;
+}
+
+/* 2-Column Grid Layout */
+html body .register-page .form-grid-2 {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
 }
 
 html body .register-page .form-group {
   display: flex !important;
   flex-direction: column !important;
-  gap: 2px !important;
-  margin-bottom: 0 !important;
+  gap: 6px !important;
 }
 
 html body .register-page .form-label-row {
@@ -372,518 +402,340 @@ html body .register-page .form-label-row {
   align-items: center !important;
   justify-content: space-between !important;
 }
+
 html body .register-page .form-group label {
   color: #334155 !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.06em !important;
-  margin: 0 !important;
-}
-html body .register-page .field-error-text {
-  color: #ef4444 !important;
-  font-size: 9.5px !important;
+  font-size: 11.5px !important;
   font-weight: 700 !important;
-}
-html body .register-page .strength-badge {
-  color: #94a3b8 !important;
-  font-size: 9.5px !important;
   text-transform: uppercase !important;
-  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
 }
 
-/* Input Fields & Select Wrap */
-html body .register-page .input-wrap,
-html body .register-page .select-wrap {
+html body .register-page .field-error-text {
+  color: #ef4444 !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+}
+
+/* Input Wrappers & Style */
+html body .register-page .input-wrap {
   position: relative !important;
   width: 100% !important;
 }
 
-html body .register-page .input-wrap input,
-html body .register-page .select-wrap select {
+html body .register-page .input-wrap input {
   width: 100% !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 0 10px 0 34px !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 9px !important;
+  height: 42px !important;
+  padding: 0 12px 0 38px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 12px !important;
   color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
-  background: #ffffff !important;
-  font-size: 12.5px !important;
+  background: #f8fafc !important;
+  font-size: 13px !important;
   font-weight: 600 !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-sizing: border-box !important;
 }
+
 html body .register-page .input-wrap input::placeholder {
   color: #94a3b8 !important;
-  -webkit-text-fill-color: #94a3b8 !important;
-  opacity: 1 !important;
+  font-weight: 500 !important;
 }
-html body .register-page .input-wrap input:focus,
-html body .register-page .select-wrap select:focus {
-  border-color: #2563eb !important;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+
+html body .register-page .input-wrap input:hover:not(:focus) {
+  border-color: #cbd5e1 !important;
   background: #ffffff !important;
+}
+
+html body .register-page .input-wrap input:focus {
+  border-color: #4f46e5 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12) !important;
   outline: none !important;
 }
-html body .register-page .form-group.has-error .input-wrap input,
-html body .register-page .form-group.has-error .select-wrap select {
+
+html body .register-page .form-group.has-error .input-wrap input {
   border-color: #ef4444 !important;
+  background: #fff5f5 !important;
 }
+
 html body .register-page .form-group.is-valid .input-wrap input {
   border-color: #10b981 !important;
 }
 
-html body .register-page .input-wrap input[type="password"] {
-  padding-right: 36px !important;
-}
-
-html body .register-page .select-wrap select {
-  cursor: pointer !important;
-  appearance: none !important;
-}
-html body .register-page .select-wrap select option {
-  background: #ffffff !important;
-  color: #0f172a !important;
-}
-html body .register-page .select-wrap::after {
-  content: "" !important;
-  position: absolute !important;
-  right: 10px !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  width: 8px !important;
-  height: 5px !important;
-  background-color: #64748b !important;
-  clip-path: polygon(100% 0, 0 0, 50% 100%) !important;
-  pointer-events: none !important;
-}
-
-/* Left Icon in Inputs */
 html body .register-page .input-field-icon {
   position: absolute !important;
-  left: 10px !important;
+  left: 12px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
   color: #94a3b8 !important;
-  font-size: 13.5px !important;
+  font-size: 15px !important;
   pointer-events: none !important;
   transition: color 0.2s ease !important;
   z-index: 2 !important;
 }
-html body .register-page .input-wrap:focus-within .input-field-icon,
-html body .register-page .select-wrap:focus-within .input-field-icon {
-  color: #2563eb !important;
+
+html body .register-page .input-wrap:focus-within .input-field-icon {
+  color: #4f46e5 !important;
 }
 
-/* Toggle eye button */
 html body .register-page .eye-toggle {
   position: absolute !important;
-  right: 4px !important;
+  right: 6px !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
-  width: 26px !important;
-  height: 26px !important;
+  width: 30px !important;
+  height: 30px !important;
   display: grid !important;
   place-items: center !important;
-  border-radius: 6px !important;
+  border-radius: 8px !important;
   color: #94a3b8 !important;
   background: transparent !important;
   border: none !important;
   cursor: pointer !important;
   transition: all 0.2s ease !important;
 }
+
 html body .register-page .eye-toggle:hover {
-  color: #2563eb !important;
+  color: #4f46e5 !important;
   background: #f1f5f9 !important;
 }
 
-/* Primary Blue Action Button */
+/* Password Strength Progress Bar */
+html body .register-page .password-strength-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  margin-top: -4px !important;
+}
+
+html body .register-page .strength-bar-track {
+  width: 100% !important;
+  height: 4px !important;
+  background: #e2e8f0 !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+
+html body .register-page .strength-bar-fill {
+  height: 100% !important;
+  transition: width 0.3s ease, background-color 0.3s ease !important;
+  border-radius: 999px !important;
+}
+
+html body .register-page .strength-text {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  text-align: right !important;
+}
+
+/* INTERACTIVE ROLE CARDS SELECTOR */
+html body .register-page .role-cards-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
+}
+
+html body .register-page .role-card-item {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 12px 8px !important;
+  border-radius: 14px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  background: #f8fafc !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  outline: none !important;
+}
+
+html body .register-page .role-card-item:hover {
+  border-color: #cbd5e1 !important;
+  background: #ffffff !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05) !important;
+}
+
+html body .register-page .role-card-item.selected {
+  border-color: #4f46e5 !important;
+  background: linear-gradient(135deg, #eef2ff 0%, #ffffff 100%) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15), 0 8px 20px rgba(79, 70, 229, 0.12) !important;
+  transform: translateY(-2px) !important;
+}
+
+html body .register-page .role-card-icon-wrap {
+  width: 32px !important;
+  height: 32px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: #64748b !important;
+  font-size: 16px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+  margin-bottom: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+html body .register-page .role-card-item.selected .role-card-icon-wrap {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+html body .register-page .role-card-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+html body .register-page .role-card-title {
+  color: #0f172a !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+}
+
+html body .register-page .role-card-sub {
+  color: #64748b !important;
+  font-size: 9.5px !important;
+  font-weight: 500 !important;
+}
+
+html body .register-page .role-card-check {
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  color: #4f46e5 !important;
+  font-size: 13px !important;
+}
+
+/* Primary Action Submit Button */
 html body .register-page .register-submit-btn {
   width: 100% !important;
-  height: 40px !important;
-  border: 1px solid #2563eb !important;
-  border-radius: 10px !important;
-  font-size: 13.5px !important;
+  height: 46px !important;
+  border: none !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
   font-weight: 750 !important;
   color: #ffffff !important;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
+  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%) !important;
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3) !important;
   cursor: pointer !important;
-  margin-top: 8px !important;
-  margin-bottom: 0 !important;
-  transition: all 0.25s ease !important;
+  margin-top: 6px !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  gap: 8px !important;
 }
+
 html body .register-page .register-submit-btn:hover:not(:disabled) {
-  transform: translateY(-1px) !important;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 14px 30px rgba(79, 70, 229, 0.4) !important;
+  background: linear-gradient(135deg, #4338ca 0%, #1d4ed8 100%) !important;
 }
+
+html body .register-page .register-submit-arrow {
+  font-size: 16px !important;
+  transition: transform 0.2s ease !important;
+}
+
+html body .register-page .register-submit-btn:hover:not(:disabled) .register-submit-arrow {
+  transform: translateX(4px) !important;
+}
+
 html body .register-page .register-submit-btn:disabled {
-  opacity: 0.6 !important;
+  opacity: 0.65 !important;
   cursor: not-allowed !important;
 }
 
-/* Spinner */
 html body .register-page .register-btn-spinner {
-  width: 16px !important;
-  height: 16px !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  width: 20px !important;
+  height: 20px !important;
+  border: 2.5px solid rgba(255, 255, 255, 0.3) !important;
   border-top-color: #ffffff !important;
   border-radius: 50% !important;
   animation: register-spin 0.8s linear infinite !important;
 }
+
 @keyframes register-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Redirect Link - Always visible at bottom of form with margin */
+/* Trust Note & Sign In Redirect */
+html body .register-page .register-trust-note {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  color: #64748b !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+}
+
+html body .register-page .register-trust-note svg {
+  color: #10b981 !important;
+  font-size: 14px !important;
+}
+
 html body .register-page .register-signin-redirect {
-  font-size: 12.5px !important;
+  font-size: 13px !important;
   color: #64748b !important;
   text-align: center !important;
-  margin: 8px 0 0 0 !important;
-  display: block !important;
-}
-html body .register-page .register-signin-redirect .login-link {
-  color: #2563eb !important;
-  font-weight: 750 !important;
-  margin-left: 4px !important;
-  text-decoration: none !important;
-  transition: color 0.2s ease !important;
-}
-html body .register-page .register-signin-redirect .login-link:hover {
-  text-decoration: underline !important;
-  color: #1d4ed8 !important;
+  margin: 4px 0 0 0 !important;
 }
 
-/* Responsive Media Queries */
-@media (max-width: 960px) {
+html body .register-page .register-signin-redirect .login-link {
+  color: #4f46e5 !important;
+  font-weight: 750 !important;
+  text-decoration: none !important;
+  margin-left: 4px !important;
+  transition: color 0.2s ease !important;
+}
+
+html body .register-page .register-signin-redirect .login-link:hover {
+  color: #3730a3 !important;
+  text-decoration: underline !important;
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+@media (max-width: 980px) {
   html body .register-page .register-wrapper {
     grid-template-columns: 1fr !important;
-    max-width: 420px !important;
-    height: auto !important;
-    max-height: calc(100vh - 20px) !important;
+    max-width: 540px !important;
   }
   html body .register-page .register-left {
     display: none !important;
   }
   html body .register-page .register-right {
-    padding: 24px 20px !important;
+    padding: 32px 24px !important;
   }
 }
 
-/* ==========================================================================
-   Refined single-column registration form
-   ========================================================================== */
-
-html body .register-page {
-  background:
-    radial-gradient(circle at 88% 8%, rgba(87, 100, 245, 0.18), transparent 28rem),
-    radial-gradient(circle at 8% 92%, rgba(26, 184, 214, 0.12), transparent 26rem),
-    linear-gradient(145deg, #edf2fa 0%, #f7f9fd 48%, #e9eef8 100%) !important;
-}
-
-html body .register-page .register-wrapper {
-  width: min(1080px, 100%) !important;
-  height: min(650px, calc(100vh - 24px)) !important;
-  max-height: calc(100vh - 24px) !important;
-  border-color: rgba(180, 194, 220, 0.72) !important;
-  border-radius: 24px !important;
-  box-shadow:
-    0 30px 80px rgba(30, 45, 83, 0.16),
-    0 3px 10px rgba(30, 45, 83, 0.06) !important;
-  overflow: hidden !important;
-}
-
-html body .register-page .register-right {
-  position: relative !important;
-  isolation: isolate !important;
-  padding: clamp(16px, 2.2vw, 24px) clamp(16px, 2vw, 24px) !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important;
-  align-items: center !important;
-  height: 100% !important;
-  background:
-    linear-gradient(rgba(106, 120, 164, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(106, 120, 164, 0.04) 1px, transparent 1px),
-    radial-gradient(circle at 100% 0%, rgba(79, 92, 247, 0.12), transparent 22rem),
-    #f7f9fd !important;
-  background-size: 30px 30px, 30px 30px, auto, auto !important;
-  scrollbar-width: none !important;
-}
-
-html body .register-page .register-right::-webkit-scrollbar {
-  display: none !important;
-}
-
-html body .register-page .register-right::before,
-html body .register-page .register-right::after {
-  content: "" !important;
-  position: absolute !important;
-  z-index: -1 !important;
-  width: 190px !important;
-  height: 190px !important;
-  border-radius: 50% !important;
-  filter: blur(4px) !important;
-  pointer-events: none !important;
-}
-
-html body .register-page .register-right::before {
-  top: -96px !important;
-  right: -72px !important;
-  background: rgba(92, 103, 246, 0.12) !important;
-}
-
-html body .register-page .register-right::after {
-  bottom: -112px !important;
-  left: -90px !important;
-  background: rgba(25, 181, 211, 0.09) !important;
-}
-
-html body .register-page .register-premium-card-box {
-  position: relative !important;
-  z-index: 1 !important;
-  width: 100% !important;
-  max-width: 420px !important;
-  gap: 8px !important;
-  padding: clamp(10px, 1.4vw, 14px) clamp(14px, 1.8vw, 18px) !important;
-  border: 1px solid rgba(207, 217, 236, 0.92) !important;
-  border-radius: 18px !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  box-shadow:
-    0 14px 36px rgba(44, 58, 102, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(18px) !important;
-}
-
-html body .register-page .register-header {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
-  gap: 5px !important;
-  margin: 0 !important;
-}
-
-html body .register-page .register-kicker {
-  min-height: 24px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  padding: 0 9px !important;
-  border: 1px solid rgba(79, 92, 247, 0.16) !important;
-  border-radius: 999px !important;
-  color: #4f5cf7 !important;
-  background: linear-gradient(135deg, rgba(79, 92, 247, 0.09), rgba(24, 183, 215, 0.06)) !important;
-  font-size: 9px !important;
-  font-weight: 850 !important;
-  letter-spacing: 0.07em !important;
-  text-transform: uppercase !important;
-}
-
-html body .register-page .register-kicker svg {
-  width: 12px !important;
-  height: 12px !important;
-}
-
-html body .register-page .register-header h2 {
-  margin: 1px 0 0 !important;
-  font-size: clamp(24px, 2.5vw, 30px) !important;
-  font-weight: 880 !important;
-  line-height: 1.05 !important;
-  letter-spacing: -0.045em !important;
-  white-space: normal !important;
-}
-
-html body .register-page .register-subtitle {
-  max-width: 360px !important;
-  color: #68758d !important;
-  font-size: 11.5px !important;
-  line-height: 1.4 !important;
-}
-
-html body .register-page .register-benefit-row {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 6px !important;
-  margin-top: 2px !important;
-}
-
-html body .register-page .register-benefit-row span {
-  min-height: 25px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  padding: 0 8px !important;
-  border: 1px solid #dde4f1 !important;
-  border-radius: 8px !important;
-  color: #526078 !important;
-  background: rgba(249, 251, 255, 0.94) !important;
-  box-shadow: 0 2px 6px rgba(44, 58, 102, 0.04) !important;
-  font-size: 9.5px !important;
-  font-weight: 700 !important;
-}
-
-html body .register-page .register-benefit-row svg {
-  color: #5361f5 !important;
-}
-
-html body .register-page .register-form {
-  gap: 6px !important;
-}
-
-html body .register-page .form-group {
-  gap: 2px !important;
-}
-
-html body .register-page .form-group label {
-  color: #25324a !important;
-  font-size: 9.5px !important;
-  letter-spacing: 0.065em !important;
-}
-
-html body .register-page .input-wrap input,
-html body .register-page .select-wrap select {
-  height: 38px !important;
-  min-height: 38px !important;
-  padding-left: 36px !important;
-  border-color: #d8e0ee !important;
-  border-radius: 10px !important;
-  background: #f9faff !important;
-  box-shadow:
-    0 1px 2px rgba(25, 39, 78, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.86) !important;
-  font-size: 12px !important;
-  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease !important;
-}
-
-html body .register-page :is(.input-wrap, .select-wrap):hover :is(input, select):not(:focus) {
-  border-color: #bdc9dc !important;
-}
-
-html body .register-page .input-wrap input:focus,
-html body .register-page .select-wrap select:focus {
-  border-color: rgba(79, 92, 247, 0.58) !important;
-  background: #ffffff !important;
-  box-shadow:
-    0 0 0 3px rgba(79, 92, 247, 0.1),
-    0 6px 14px rgba(52, 66, 126, 0.06) !important;
-}
-
-html body .register-page .input-field-icon {
-  left: 12px !important;
-  color: #7c89a2 !important;
-  font-size: 14px !important;
-}
-
-html body .register-page .eye-toggle {
-  right: 5px !important;
-  width: 28px !important;
-  height: 28px !important;
-  border-radius: 8px !important;
-  background: transparent !important;
-}
-
-html body .register-page .eye-toggle:hover {
-  color: #4f5cf7 !important;
-  background: #eef1ff !important;
-}
-
-html body .register-page .register-submit-btn {
-  height: 42px !important;
-  min-height: 42px !important;
-  gap: 8px !important;
-  margin-top: 4px !important;
-  border: 0 !important;
-  border-radius: 11px !important;
-  background: linear-gradient(115deg, #5966f7 0%, #4350dc 56%, #2579c7 118%) !important;
-  box-shadow:
-    0 10px 20px rgba(66, 78, 208, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
-  font-size: 13px !important;
-  letter-spacing: -0.01em !important;
-}
-
-html body .register-page .register-submit-arrow {
-  width: 15px !important;
-  height: 15px !important;
-  transition: transform 180ms ease !important;
-}
-
-html body .register-page .register-submit-btn:hover:not(:disabled) .register-submit-arrow {
-  transform: translateX(3px) !important;
-}
-
-html body .register-page .register-trust-note {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 5px !important;
-  margin: -1px 0 0 !important;
-  color: #8793a8 !important;
-  font-size: 9.5px !important;
-  font-weight: 650 !important;
-  text-align: center !important;
-}
-
-html body .register-page .register-trust-note svg {
-  color: #18a9a4 !important;
-}
-
-html body .register-page .register-signin-redirect {
-  margin-top: 0 !important;
-  color: #66738b !important;
-  font-size: 11px !important;
-}
-
-@media (max-width: 960px) {
+@media (max-width: 600px) {
   html body .register-page {
-    height: auto !important;
-    max-height: none !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
+    padding: 12px !important;
   }
-
-  html body .register-page .register-wrapper {
-    width: min(520px, 100%) !important;
-    max-width: 520px !important;
-    height: auto !important;
-    max-height: none !important;
+  html body .register-page .form-grid-2 {
+    grid-template-columns: 1fr !important;
   }
-
-  html body .register-page .register-right {
-    min-height: calc(100vh - 24px) !important;
-    padding: 22px !important;
-    overflow: visible !important;
+  html body .register-page .role-cards-grid {
+    grid-template-columns: 1fr !important;
   }
-}
-
-@media (max-width: 560px) {
-  html body .register-page {
-    padding: 0 !important;
+  html body .register-page .role-card-item {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    text-align: left !important;
+    padding: 10px 14px !important;
   }
-
-  html body .register-page .register-wrapper {
-    border: 0 !important;
-    border-radius: 0 !important;
-  }
-
-  html body .register-page .register-right {
-    min-height: 100vh !important;
-    padding: 18px 14px !important;
-  }
-
-  html body .register-page .register-premium-card-box {
-    padding: 21px 18px !important;
-    border-radius: 20px !important;
-  }
-
-  html body .register-page .register-header h2 {
-    font-size: 31px !important;
+  html body .register-page .role-card-icon-wrap {
+    margin-bottom: 0 !important;
   }
 }
