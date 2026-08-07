@@ -53,27 +53,17 @@ function TrendsSuggestionPortal({ anchorRef, children, id, isOpen }) {
       window.removeEventListener("resize", updatePosition);
       window.removeEventListener("scroll", updatePosition, true);
     };
-  }, [anchorRef, isOpen, children]);
+  }, [anchorRef, isOpen]);
 
   if (!isOpen || typeof document === "undefined") return null;
-
-  const activeStyle = position || (anchorRef?.current ? {
-    position: "fixed",
-    top: `${anchorRef.current.getBoundingClientRect().bottom + 6}px`,
-    left: `${anchorRef.current.getBoundingClientRect().left}px`,
-    width: `${Math.max(340, anchorRef.current.getBoundingClientRect().width)}px`,
-    maxHeight: `${Math.max(160, Math.min(320, window.innerHeight - anchorRef.current.getBoundingClientRect().bottom - 18))}px`,
-    zIndex: 2147483647,
-  } : null);
-
-  if (!activeStyle) return null;
+  if (!position) return null;
 
   return createPortal(
     <div
       className="trends-autocomplete-menu-portal"
       id={id}
       role="listbox"
-      style={activeStyle}
+      style={position}
     >
       {children}
     </div>,
@@ -839,7 +829,7 @@ function TrendsPage() {
         {toast && <div className={`papers-toast papers-toast--${toast.type}`}>{toast.message}</div>}
         
         {/* Sub-toolbar for filters, search, and switch tab buttons */}
-        <div className="trends-controls-bar">
+        <div className={`trends-controls-bar ${!canCompare && suggestionsOpen && suggestionQuery.trim().length >= 2 ? "has-inline-suggestions" : ""}`}>
           <div className="trends-tab-buttons-group">
             <button
               type="button"
@@ -883,7 +873,7 @@ function TrendsPage() {
                   />
                 </div>
                 {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                  <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-single-suggestions" isOpen={suggestionsOpen}>
+                  <div className="trends-inline-suggestions" id="trend-single-suggestions" role="listbox">
                     {suggestionsLoading ? (
                       <span className="trends-autocomplete-state">Finding matches…</span>
                     ) : autocompleteSuggestions.length > 0 ? (
@@ -914,7 +904,7 @@ function TrendsPage() {
                     ) : (
                       <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                     )}
-                  </TrendsSuggestionPortal>
+                  </div>
                 )}
               </div>
             )}

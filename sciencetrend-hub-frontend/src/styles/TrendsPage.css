@@ -1219,3 +1219,116 @@ body > .trends-autocomplete-menu-portal {
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35) !important;
   pointer-events: auto !important;
 }
+
+/* Student/Lecturer suggestions stay in document flow so no card or browser
+   compositor layer can cover the options or intercept their clicks. */
+html body .st-layout .trends-controls-bar.has-inline-suggestions {
+  align-items: flex-start !important;
+}
+
+html body .st-layout .trends-controls-bar.has-inline-suggestions .trends-filter-inputs-group {
+  align-items: flex-start !important;
+}
+
+html body .st-layout .trends-single-select {
+  width: min(430px, 48vw);
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  overflow: visible !important;
+}
+
+html body .st-layout .trends-single-select .trends-search-box-wrap,
+html body .st-layout .trends-single-select .trends-search-box-wrap input {
+  width: 100% !important;
+}
+
+html body .st-layout .trends-inline-suggestions {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  max-height: 278px;
+  display: grid;
+  gap: 3px;
+  margin-top: 7px;
+  padding: 7px;
+  overflow-y: auto;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 15px;
+  background: #ffffff !important;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.16);
+  opacity: 1 !important;
+  isolation: isolate;
+  pointer-events: auto !important;
+}
+
+html body .st-layout .trends-inline-suggestions .trends-portal-suggestion-item {
+  width: 100% !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 9px 11px !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  color: #0f172a !important;
+  background: #ffffff !important;
+  text-align: left !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+html body .st-layout .trends-inline-suggestions .trends-portal-suggestion-item:hover,
+html body .st-layout .trends-inline-suggestions .trends-portal-suggestion-item:focus-visible {
+  color: #3730a3 !important;
+  background: #eef2ff !important;
+  outline: none !important;
+}
+
+html body .st-layout .trends-inline-suggestions .trends-suggestion-icon-wrap {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #4f46e5;
+  background: #eef2ff;
+}
+
+html body .st-layout .trends-inline-suggestions .trends-suggestion-text-wrap {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: grid;
+  gap: 2px;
+}
+
+html body .st-layout .trends-inline-suggestions .trends-suggestion-title {
+  overflow: hidden;
+  color: #0f172a !important;
+  font-size: 12.5px;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html body .st-layout .trends-inline-suggestions .trends-suggestion-sub {
+  color: #64748b !important;
+  font-size: 10.5px;
+  font-weight: 550;
+}
+
+html body .st-layout .trends-inline-suggestions .trends-suggestion-arrow {
+  flex: 0 0 auto;
+  color: #64748b;
+}
+
+@media (max-width: 760px) {
+  html body .st-layout .trends-single-select {
+    width: 100%;
+  }
+
+  html body .st-layout .trends-controls-bar.has-inline-suggestions .trends-filter-inputs-group {
+    width: 100%;
+  }
+}
