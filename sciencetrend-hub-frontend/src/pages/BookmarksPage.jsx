@@ -453,7 +453,96 @@ function BookmarksPage() {
 
                 </div>
 
+                {/* Bottom section split: Following Journals & Following Topics */}
+                <div className="lib-overview-bottom-row">
+                  
+                  {/* Left bottom panel: Following Journals grid */}
+                  <article className="lib-overview-panel">
+                    <div className="lib-panel-header">
+                      <h3>Following Journals</h3>
+                      <button type="button" className="lib-tab-link" onClick={() => setActiveTab("journals")}>
+                        View all followed journals <FiArrowRight />
+                      </button>
+                    </div>
+                    <div className="lib-horizontal-grid">
+                      {followedJournals.slice(0, 4).map((journal) => (
+                        <div key={journal.id} className="lib-horizontal-card">
+                          <Link className="lib-card-shortcut" to={getJournalShortcut(journal)} title={`Open ${journal.name}`}>
+                            <div className="lib-card-icon-box bg-teal">
+                              <FiBookOpen />
+                            </div>
+                            <FiArrowRight className="lib-card-shortcut-arrow" />
+                            <div className="lib-card-copy">
+                              <h4>{journal.name}</h4>
+                              <p>{journal.publisher}</p>
+                            </div>
+                          </Link>
+                          <button
+                            type="button"
+                            className="lib-card-untrack"
+                            disabled={untrackProcessing.has(`journal-${journal.id}`)}
+                            onClick={() => handleUnfollowJournal(journal.id)}
+                          >
+                            {untrackProcessing.has(`journal-${journal.id}`) ? "..." : "Untrack"}
+                          </button>
+                        </div>
+                      ))}
+                      {followedJournals.length > 4 && (
+                        <button type="button" className="lib-horizontal-card-more" onClick={() => setActiveTab("journals")}>
+                          <strong>+{followedJournals.length - 4}</strong>
+                          <span>more journals</span>
+                        </button>
+                      )}
+                      {followedJournals.length === 0 && (
+                        <div className="lib-empty-state">Not tracking any journals yet.</div>
+                      )}
+                    </div>
+                  </article>
 
+                  {/* Right bottom panel: Following Topics grid */}
+                  <article className="lib-overview-panel">
+                    <div className="lib-panel-header">
+                      <h3>Following Topics</h3>
+                      <button type="button" className="lib-tab-link" onClick={() => setActiveTab("topics")}>
+                        View all followed topics <FiArrowRight />
+                      </button>
+                    </div>
+                    <div className="lib-horizontal-grid">
+                      {followedTopics.slice(0, 4).map((topic) => (
+                        <div key={topic.id} className="lib-horizontal-card">
+                          <Link className="lib-card-shortcut" to={getTopicShortcut(topic)} title={`Open ${topic.name}`}>
+                            <div className="lib-card-icon-box bg-purple">
+                              <FiTag />
+                            </div>
+                            <FiArrowRight className="lib-card-shortcut-arrow" />
+                            <div className="lib-card-copy">
+                              <h4>{topic.name}</h4>
+                              <p>{topic.paperCount}</p>
+                            </div>
+                          </Link>
+                          <button
+                            type="button"
+                            className="lib-card-untrack"
+                            disabled={untrackProcessing.has(`topic-${topic.id}`)}
+                            onClick={() => handleUnfollowTopic(topic.id)}
+                          >
+                            {untrackProcessing.has(`topic-${topic.id}`) ? "..." : "Untrack"}
+                          </button>
+                        </div>
+                      ))}
+                      {followedTopics.length > 4 && (
+                        <button type="button" className="lib-horizontal-card-more" onClick={() => setActiveTab("topics")}>
+                          <strong>+{followedTopics.length - 4}</strong>
+                          <span>more topics</span>
+                        </button>
+                      )}
+                      {followedTopics.length === 0 && (
+                        <div className="lib-empty-state">Not following any topics yet.</div>
+                      )}
+                    </div>
+                  </article>
+
+                </div>
 
               </div>
             )}
