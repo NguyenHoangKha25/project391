@@ -190,7 +190,7 @@ function useToast() {
 function TrendsPage() {
   const { role, user } = useAuth();
   const normalizedRole = String(role || user?.role || "STUDENT").toUpperCase();
-  const canCompareTrends = ["RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const canCompareTrends = ["LECTURER", "RESEARCHER", "ADMIN"].includes(normalizedRole);
   const advancedAccess = ["RESEARCHER", "ADMIN"].includes(normalizedRole)
     ? "FULL"
     : normalizedRole === "LECTURER"
@@ -415,9 +415,9 @@ function TrendsPage() {
     if (!canCompareTrends) return;
     setComparisonSelections((current) => {
       const available = new Set(availableComparisonNames);
-      const retained = current.filter((name) => available.has(name)).slice(0, 4);
+      const retained = current.filter((name) => available.has(name)).slice(0, 5);
       if (retained.length >= 2) return retained;
-      return availableComparisonNames.slice(0, 4);
+      return availableComparisonNames.slice(0, 5);
     });
   }, [availableComparisonNames, canCompareTrends, trendTab]);
 
@@ -431,8 +431,8 @@ function TrendsPage() {
       showToast("Select at least two items for Compare Trends.", "warning");
       return;
     }
-    if (!isSelected && comparisonSelections.length >= 4) {
-      showToast("Compare Trends supports up to four items.", "warning");
+    if (!isSelected && comparisonSelections.length >= 5) {
+      showToast("Compare Trends supports up to 5 items.", "warning");
       return;
     }
     setComparisonSelections(isSelected
@@ -779,17 +779,17 @@ function TrendsPage() {
               <h3>{canCompareTrends
                 ? `${trendTab === "keyword" ? "Keyword" : "Topic"} Comparison`
                 : `${trendTab === "keyword" ? "Keyword" : "Topic"} Publication Trend`}</h3>
-              <span className="badge-chip badge-cyan">{canCompareTrends ? "Compare 2–4 series" : "Basic trend access"}</span>
+              <span className="badge-chip badge-cyan">{canCompareTrends ? "Compare 2–5 series" : "Basic trend access"}</span>
             </div>
 
             {canCompareTrends && (
               <div className="trend-compare-picker" aria-label="Choose trend series to compare">
                 <div>
                   <span>Comparison set</span>
-                  <strong>{comparisonSelections.length}/4 selected</strong>
+                  <strong>{comparisonSelections.length}/5 selected</strong>
                 </div>
                 <div className="trend-compare-options">
-                  {availableComparisonNames.slice(0, 8).map((term) => {
+                  {availableComparisonNames.slice(0, 10).map((term) => {
                     const selected = comparisonSelections.includes(term);
                     return (
                       <button
