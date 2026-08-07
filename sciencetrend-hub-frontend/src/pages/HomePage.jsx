@@ -6,6 +6,7 @@ import {
   FiBookOpen,
   FiBookmark,
   FiCheckCircle,
+  FiCompass,
   FiDatabase,
   FiFileText,
   FiLayers,
