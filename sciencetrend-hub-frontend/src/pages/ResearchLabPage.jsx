@@ -2102,6 +2102,18 @@ function MindMapWorkspace() {
     return (mapData?.nodes || []).filter((node) => getMapNodeIdentity(node) !== rootIdentity).length;
   }, [mapData]);
 
+  const evidenceLaneCount = useMemo(() => {
+    if (!mapData) return 0;
+    const contractLanes = (mapData.lanes || []).filter((lane) => Number(lane.displayedCount) > 0);
+    if (contractLanes.length > 0) return contractLanes.length;
+    return new Set(
+      (mapData.nodes || [])
+        .filter((node) => getMapNodeIdentity(node) !== getMapNodeIdentity(mapData.root))
+        .map((node) => normalizeMapType(node.type))
+        .filter((type) => MAP_TYPE_ORDER.includes(type)),
+    ).size;
+  }, [mapData]);
+
   const selectedNodeEdge = useMemo(
     () => selectedNode && mapData ? findEdgeForNode(mapData.edges || [], selectedNode) : null,
     [mapData, selectedNode],
@@ -2272,7 +2284,7 @@ function MindMapWorkspace() {
             <span className="research-section-kicker">Verifiable relationship map</span>
             <h3>{selectedRoot ? `Ready to assess directions around “${selectedRoot.name}”` : "Choose one indexed evidence root."}</h3>
             <p>{selectedRoot
-              ? `Build three weighted lanes using catalog evidence from ${fromYear} to ${toYear}.`
+              ? `Build only the evidence-backed lanes returned for ${fromYear} to ${toYear}.`
               : "Start with a keyword or topic. Every returned association can be verified against its shared papers."}</p>
             <div className="research-map-empty-outcomes">
               <span><FiShare2 />Shared paper count</span>
@@ -2310,7 +2322,7 @@ function MindMapWorkspace() {
             <dl className="research-node-metrics research-map-api-summary">
               <div><dt>Root catalog</dt><dd>{formatNumber(mapData.root?.catalogPaperCount)}</dd></div>
               <div><dt>Related nodes</dt><dd>{formatNumber(relatedNodeCount)}</dd></div>
-              <div><dt>Evidence lanes</dt><dd>3</dd></div>
+              <div><dt>Evidence lanes</dt><dd>{formatNumber(evidenceLaneCount)}</dd></div>
             </dl>
 
             {selectedNode && getMapNodeIdentity(selectedNode) !== getMapNodeIdentity(mapData.root) && selectedNodeEdge ? (
