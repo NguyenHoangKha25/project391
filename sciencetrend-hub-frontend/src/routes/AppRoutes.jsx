@@ -143,7 +143,7 @@ function AppRoutes() {
       <Route
         path={ROUTE_PATHS.TRENDS}
         element={
-          <RoleRoute allowedRoles={["LECTURER", "RESEARCHER", "ADMIN"]}>
+          <RoleRoute allowedRoles={["STUDENT", "LECTURER", "RESEARCHER", "ADMIN"]}>
             <TrendsPage />
           </RoleRoute>
         }
