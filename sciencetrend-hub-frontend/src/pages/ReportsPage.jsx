@@ -61,12 +61,12 @@ const REPORT_SCOPES = [
   {
     value: "keyword",
     label: "Keyword focus",
-    description: "Add keyword trend evidence for a specific research focus.",
+    description: "Filter the selected report sections by one research keyword.",
   },
   {
     value: "topic",
     label: "Topic focus",
-    description: "Add topic trend evidence for a selected research domain.",
+    description: "Filter the selected report sections by one research topic.",
   },
 ];
 
@@ -636,7 +636,6 @@ function ReportsPage() {
   useEffect(() => {
     if (!isResearcherOrAdmin) {
       setAdvancedSections([]);
-      setReportScope("catalog");
     }
   }, [isResearcherOrAdmin]);
 
@@ -690,11 +689,14 @@ function ReportsPage() {
 
   function selectReportScope(scope) {
     setReportScope(scope);
+    if (scope !== "keyword") setReportKeyword("");
+    if (scope !== "topic") setReportTopic("");
     setValidationErrors((current) => ({ ...current, keyword: "", topic: "" }));
     setAdvancedSections((current) => {
       const remaining = current.filter(
         (section) => section !== "KEYWORD_TREND" && section !== "TOPIC_TREND",
       );
+      if (!isResearcherOrAdmin) return remaining;
       if (scope === "keyword") return [...remaining, "KEYWORD_TREND"];
       if (scope === "topic") return [...remaining, "TOPIC_TREND"];
       return remaining;
@@ -740,8 +742,8 @@ function ReportsPage() {
       setValidationErrors({});
       const payload = {
         title: reportTitle.trim(),
-        keyword: reportScope === "keyword" ? reportKeyword.trim() : undefined,
-        topic: reportScope === "topic" ? reportTopic.trim() : undefined,
+        keyword: reportKeyword.trim() || undefined,
+        topic: reportTopic.trim() || undefined,
         timeHorizonYears,
         sections,
         format: "TXT",
@@ -752,7 +754,7 @@ function ReportsPage() {
       setReportTitle("");
       setReportKeyword("");
       setReportTopic("");
-      setReportScope(isResearcherOrAdmin ? "keyword" : "catalog");
+      setReportScope("keyword");
       setReportTimeHorizonYears("5");
       setSelectedSections([...BASIC_SECTIONS]);
       setAdvancedSections([]);
@@ -930,38 +932,31 @@ function ReportsPage() {
                     )}
                   </div>
 
-                  {isResearcherOrAdmin ? (
-                    <fieldset className="report-scope-fieldset">
-                      <legend>Research scope *</legend>
-                      <div className="report-scope-grid">
-                        {REPORT_SCOPES.map((scope) => (
-                          <label
-                            key={scope.value}
-                            className={`report-scope-option${reportScope === scope.value ? " active" : ""}`}
-                          >
-                            <input
-                              type="radio"
-                              name="report-scope"
-                              value={scope.value}
-                              checked={reportScope === scope.value}
-                              onChange={() => selectReportScope(scope.value)}
-                            />
-                            <span>
-                              <strong>{scope.label}</strong>
-                              <small>{scope.description}</small>
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </fieldset>
-                  ) : (
-                    <div className="report-catalog-notice">
-                      <strong>Catalog overview report</strong>
-                      <span>Lecturer reports summarize the shared catalog. Identical years and sections intentionally produce identical evidence.</span>
+                  <fieldset className="report-scope-fieldset">
+                    <legend>Research scope *</legend>
+                    <div className="report-scope-grid">
+                      {REPORT_SCOPES.map((scope) => (
+                        <label
+                          key={scope.value}
+                          className={`report-scope-option${reportScope === scope.value ? " active" : ""}`}
+                        >
+                          <input
+                            type="radio"
+                            name="report-scope"
+                            value={scope.value}
+                            checked={reportScope === scope.value}
+                            onChange={() => selectReportScope(scope.value)}
+                          />
+                          <span>
+                            <strong>{scope.label}</strong>
+                            <small>{scope.description}</small>
+                          </span>
+                        </label>
+                      ))}
                     </div>
-                  )}
+                  </fieldset>
 
-                  {reportScope === "keyword" && isResearcherOrAdmin && (
+                  {reportScope === "keyword" && (
                     <ReportAutocomplete
                       inputId="report-keyword"
                       icon={<FiTag />}
@@ -979,7 +974,7 @@ function ReportsPage() {
                     />
                   )}
 
-                  {reportScope === "topic" && isResearcherOrAdmin && (
+                  {reportScope === "topic" && (
                     <ReportAutocomplete
                       inputId="report-topic"
                       icon={<FiLayers />}
@@ -997,7 +992,7 @@ function ReportsPage() {
                     />
                   )}
 
-                  {reportScope === "catalog" && isResearcherOrAdmin && (
+                  {reportScope === "catalog" && (
                     <div className="report-catalog-notice warning">
                       <strong>Catalog-wide evidence</strong>
                       <span>This mode is intentionally repeatable. Changing only the report title will not change its statistics.</span>

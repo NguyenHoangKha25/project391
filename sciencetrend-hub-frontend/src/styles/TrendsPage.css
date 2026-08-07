@@ -67,6 +67,9 @@
   outline: none;
   box-shadow: var(--sh-xs);
 }
+.trends-single-select input {
+  width: min(330px, 42vw);
+}
 .trends-search-box-wrap input:focus {
   border-color: rgba(21, 127, 145, 0.4);
   box-shadow: var(--sh-ring);
@@ -310,6 +313,9 @@
   grid-template-columns: 1.55fr 1fr;
   gap: 16px;
   margin-bottom: 32px;
+}
+.trends-middle-grid.student-basic {
+  grid-template-columns: minmax(0, 1fr);
 }
 .trends-chart-panel,
 .trends-table-panel {

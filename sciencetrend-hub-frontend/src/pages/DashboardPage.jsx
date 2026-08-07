@@ -14,7 +14,6 @@ import {
   FiArrowRight,
   FiTrendingUp,
   FiTrendingDown,
-  FiMinus,
   FiGitBranch,
   FiAward,
   FiClock,
@@ -32,6 +31,7 @@ import {
   formatNumber,
   normalizeDashboardHome,
   normalizeTopic,
+  toArray,
 } from "../utils/apiData";
 
 import { getPersistentCachedData, setPersistentCachedData } from "../utils/apiCache";
@@ -128,7 +128,7 @@ function DashboardPage() {
     ?? ["RESEARCHER", "ADMIN"].includes(normalizedRole);
   const mindMapAccess = String(
     capabilitiesData?.mindMapAccess
-      ?? (normalizedRole === "LECTURER" ? "BASIC" : ["RESEARCHER", "ADMIN"].includes(normalizedRole) ? "FULL" : "NONE"),
+      ?? (["RESEARCHER", "ADMIN"].includes(normalizedRole) ? "FULL" : "NONE"),
   ).toUpperCase();
 
   const [vietnamClock, setVietnamClock] = useState(() => {
@@ -206,7 +206,9 @@ function DashboardPage() {
               .map(normalizeTopic)
               .filter((t) => t.name !== "Untitled topic")
               .slice(0, 5);
-          } catch {}
+          } catch {
+            // Dashboard remains usable without optional topic metadata.
+          }
         }
       }
       setTrendingTopics(normTopics);
@@ -387,10 +389,7 @@ function DashboardPage() {
 
   const featuredPaper = useMemo(() => {
     if (!Array.isArray(topCitedPapers) || topCitedPapers.length === 0) return null;
-    // Rotate daily: pick a different paper based on current date
-    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-    const idx = dayOfYear % topCitedPapers.length;
-    const pick = topCitedPapers[idx];
+    const pick = topCitedPapers[0];
     if (!pick || typeof pick !== "object" || !pick.title) return topCitedPapers[0] || null;
     return pick;
   }, [topCitedPapers]);
@@ -482,7 +481,7 @@ function DashboardPage() {
       : normalizedRole === "LECTURER"
         ? "Lecturer evidence workspace"
         : "Research discovery workspace";
-  const briefingAction = canAccessResearchLab && (mindMapAccess === "BASIC" || mindMapAccess === "FULL")
+  const briefingAction = canAccessResearchLab && mindMapAccess === "FULL"
     ? { label: "Open Research Lab", to: "/research-lab" }
     : { label: "Explore Papers", to: "/papers" };
   const researchBriefs = [

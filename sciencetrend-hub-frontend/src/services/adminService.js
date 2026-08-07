@@ -26,6 +26,10 @@ export function getAdminSyncLogs(params = {}) {
   return apiRequest("/admin/sync/logs", { params });
 }
 
+export function getAdminSyncLog(syncLogId) {
+  return apiRequest(`/admin/sync/logs/${syncLogId}`);
+}
+
 export function triggerAdminSync() {
   return apiRequest("/admin/sync", { method: "POST" });
 }

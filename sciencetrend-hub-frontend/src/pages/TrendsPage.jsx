@@ -4,6 +4,7 @@ import {
   FiLayers,
   FiCalendar,
   FiChevronDown,
+  FiSearch,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
@@ -40,7 +41,7 @@ function hasUsableMetadata(metadata) {
     );
 }
 
-const TRENDS_METADATA_CACHE_KEY = "trends_metadata_v7";
+const TRENDS_METADATA_CACHE_PREFIX = "trends_metadata_v8";
 const COMPARISON_CHART_WIDTH = 760;
 const COMPARISON_CHART_HEIGHT = 300;
 const COMPARISON_PLOT_HEIGHT = 250;
@@ -154,8 +155,22 @@ function sortCatalogTopics(topics) {
     ));
 }
 
-function getInitialTrendData() {
-  const storedMetadata = getPersistentCachedData(TRENDS_METADATA_CACHE_KEY);
+function mergeTrendItemsByName(primary = [], fallback = []) {
+  const seen = new Set();
+  return [...primary, ...fallback].filter((item) => {
+    const name = String(item?.name || item?.keyword || item?.topic || item || "").trim().toLocaleLowerCase();
+    if (!name || seen.has(name)) return false;
+    seen.add(name);
+    return true;
+  });
+}
+
+function getTrendsMetadataCacheKey(role) {
+  return `${TRENDS_METADATA_CACHE_PREFIX}_${String(role || "STUDENT").toUpperCase()}`;
+}
+
+function getInitialTrendData(role) {
+  const storedMetadata = getPersistentCachedData(getTrendsMetadataCacheKey(role));
   const metadata = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
   const keywords = Array.isArray(metadata?.dbKeywords) && metadata.dbKeywords.length > 0
     ? metadata.dbKeywords
@@ -190,13 +205,13 @@ function useToast() {
 function TrendsPage() {
   const { role, user } = useAuth();
   const normalizedRole = String(role || user?.role || "STUDENT").toUpperCase();
-  const canCompareTrends = ["LECTURER", "RESEARCHER", "ADMIN"].includes(normalizedRole);
+  const canCompareTrends = ["RESEARCHER", "ADMIN"].includes(normalizedRole);
   const advancedAccess = ["RESEARCHER", "ADMIN"].includes(normalizedRole)
     ? "FULL"
     : normalizedRole === "LECTURER"
       ? "BASIC"
       : "NONE";
-  const [initialTrendData] = useState(getInitialTrendData);
+  const [initialTrendData] = useState(() => getInitialTrendData(normalizedRole));
 
   // Navigation tab: 'keyword' | 'topic'
   const [trendTab, setTrendTab] = useState("keyword");
@@ -214,6 +229,7 @@ function TrendsPage() {
     const first = initialTrendData.topics[0];
     return typeof first === "string" ? first : (first?.name || first?.topic || "");
   });
+  const [singleSelectQuery, setSingleSelectQuery] = useState("");
   
   const [chartData, setChartData] = useState([]);
   const [dashboard, setDashboard] = useState(initialTrendData.metadata?.dashboard ?? null);
@@ -230,7 +246,7 @@ function TrendsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    const cacheKey = TRENDS_METADATA_CACHE_KEY;
+    const cacheKey = getTrendsMetadataCacheKey(normalizedRole);
     const storedMetadata = getPersistentCachedData(cacheKey);
     const cached = hasUsableMetadata(storedMetadata) ? storedMetadata : null;
 
@@ -255,10 +271,10 @@ function TrendsPage() {
 
     async function loadMetadata() {
       const [topicTrendResult, keywordTrendResult, dashboardResult, keywordCatalogResult, topicCatalogResult] = await Promise.allSettled([
-        getTrendingTopics({ limit: 10 }),
-        getTrendingKeywords({ limit: 10 }),
-        getDashboardOverview(),
-        getAllKeywords(),
+        advancedAccess !== "NONE" ? getTrendingTopics({ limit: 10 }) : Promise.resolve(null),
+        advancedAccess !== "NONE" ? getTrendingKeywords({ limit: 10 }) : Promise.resolve(null),
+        advancedAccess !== "NONE" ? getDashboardOverview() : Promise.resolve(null),
+        getAllKeywords({ page: 0, size: 200 }),
         getAllTopics(),
       ]);
 
@@ -282,14 +298,10 @@ function TrendsPage() {
       const dashboardKeywords = getDashboardKeywordFallback(nextDashboard);
 
       const keywordFallback = dashboardKeywords.length > 0
-        ? dashboardKeywords
-        : catalogKeywords.slice(0, 10);
-      const nextKeywords = liveKeywords.length > 0
-        ? liveKeywords
-        : keywordFallback;
-      const nextTopics = liveTopics.length > 0
-        ? liveTopics
-        : catalogTopics.slice(0, 10);
+        ? mergeTrendItemsByName(dashboardKeywords, catalogKeywords)
+        : catalogKeywords;
+      const nextKeywords = mergeTrendItemsByName(liveKeywords, keywordFallback);
+      const nextTopics = mergeTrendItemsByName(liveTopics, catalogTopics);
       const nextMetadata = {
         dbKeywords: nextKeywords.length > 0 ? nextKeywords : (cached?.dbKeywords ?? []),
         trendingTopics: nextTopics.length > 0 ? nextTopics : (cached?.trendingTopics ?? []),
@@ -313,7 +325,7 @@ function TrendsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [advancedAccess, normalizedRole]);
 
   useEffect(() => {
     const names = dbKeywords
@@ -412,6 +424,10 @@ function TrendsPage() {
     .filter(Boolean), [trendItems]);
 
   useEffect(() => {
+    if (!canCompareTrends) setSingleSelectQuery(activeTrendTerm);
+  }, [activeTrendTerm, canCompareTrends, trendTab]);
+
+  useEffect(() => {
     if (!canCompareTrends) return;
     setComparisonSelections((current) => {
       const available = new Set(availableComparisonNames);
@@ -438,6 +454,21 @@ function TrendsPage() {
     setComparisonSelections(isSelected
       ? comparisonSelections.filter((item) => item !== term)
       : [...comparisonSelections, term]);
+  }
+
+  function chooseSingleTrendTerm(value, useClosestMatch = false) {
+    setSingleSelectQuery(value);
+    const normalizedValue = value.trim().toLocaleLowerCase();
+    if (!normalizedValue) return;
+    const selectedTerm = availableComparisonNames.find(
+      (name) => name.toLocaleLowerCase() === normalizedValue,
+    ) || (useClosestMatch
+      ? availableComparisonNames.find((name) => name.toLocaleLowerCase().includes(normalizedValue))
+      : "");
+    if (!selectedTerm) return;
+    setSingleSelectQuery(selectedTerm);
+    if (trendTab === "keyword") setActiveKeyword(selectedTerm);
+    else setActiveTopicState(selectedTerm);
   }
 
   useEffect(() => {
@@ -706,6 +737,28 @@ function TrendsPage() {
           </div>
 
           <div className="trends-filter-inputs-group">
+            {!canCompareTrends && (
+              <div className="trends-search-box-wrap trends-single-select">
+                <FiSearch />
+                <input
+                  type="text"
+                  list={`trend-${trendTab}-options`}
+                  value={singleSelectQuery}
+                  onChange={(event) => chooseSingleTrendTerm(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      chooseSingleTrendTerm(event.currentTarget.value, true);
+                    }
+                  }}
+                  placeholder={`Search and select a ${trendTab}…`}
+                  aria-label={`Search and select one ${trendTab}`}
+                />
+                <datalist id={`trend-${trendTab}-options`}>
+                  {availableComparisonNames.map((term) => <option value={term} key={term} />)}
+                </datalist>
+              </div>
+            )}
             <div className="trends-select-wrapper-custom">
               <FiCalendar style={{ left: "12px", right: "auto", position: "absolute", color: "var(--st-primary)" }} />
               <select 
@@ -750,7 +803,8 @@ function TrendsPage() {
           </div>
         </div>
 
-        {/* 4 Stats Cards row */}
+        {/* Summary analytics are available from Lecturer upward. */}
+        {advancedAccess !== "NONE" && (
         <div className="trends-stats-cards-row">
           <div className="trend-stat-card card-accent-blue">
             <span className="stat-card-label">Total Publications</span>
@@ -791,9 +845,10 @@ function TrendsPage() {
             </span>
           </div>
         </div>
+        )}
 
         {/* Middle row: Multi-line comparison chart and top trending table */}
-        <div className="trends-middle-grid">
+        <div className={`trends-middle-grid${advancedAccess === "NONE" ? " student-basic" : ""}`}>
 
           {/* Card 2: Keyword/Topic Comparison */}
           <article className="trends-chart-panel glassmorphic-panel multi-line-comp-panel">

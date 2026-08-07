@@ -18,6 +18,7 @@ import MainLayout from "../components/layout/MainLayout";
 import {
   deleteAdminUser,
   getAdminReports,
+  getAdminSyncLog,
   getAdminSyncLogs,
   getAdminSystemConfig,
   getAdminUser,
@@ -90,6 +91,11 @@ function syncLogDetails(log) {
 
 function syncLogType(log) {
   return String(log.sourceApi || "").toLowerCase().includes("backfill") ? "Backfill" : "Sync";
+}
+
+function getSyncLogId(log) {
+  const id = log?.syncLogId ?? log?.id ?? log?.logId;
+  return id === null || id === undefined || id === "" ? null : String(id);
 }
 
 function AdminPage() {
@@ -238,10 +244,12 @@ function AdminPage() {
     setBackfillError("");
     try {
       const result = await triggerAdminBackfill({ fromYear: parsedFromYear, toYear: parsedToYear, maxResults: parsedMaxResults });
+      const backfillResult = result?.data ?? result;
+      const targetSyncLogId = getSyncLogId(backfillResult);
       await loadAdminData();
-      const resultStatus = String(result?.status || "").toUpperCase();
+      const resultStatus = String(backfillResult?.status || "").toUpperCase();
       if (["FAILED", "ERROR"].includes(resultStatus)) {
-        setBackfillError(syncLogDetails(result) || "The backend could not complete this backfill. Check Sync history for details.");
+        setBackfillError(syncLogDetails(backfillResult) || "The backend could not complete this backfill. Check Sync history for details.");
         return;
       }
 
@@ -252,21 +260,24 @@ function AdminPage() {
           await new Promise((resolve) => setTimeout(resolve, 3000));
           attempts++;
           try {
-            const logsRes = await getAdminSyncLogs({ page: 0, size: 5 });
-            const logsList = toArray(logsRes, ["logs", "syncLogs"]);
-            const latest = logsList[0];
-            if (latest) {
-              const status = String(latest.status || "").toUpperCase();
+            if (!targetSyncLogId) {
+              setBackfillError("The backend started the backfill without returning a syncLogId, so this run cannot be tracked safely.");
+              return;
+            }
+            const trackedLogResponse = await getAdminSyncLog(targetSyncLogId);
+            const trackedLog = trackedLogResponse?.data ?? trackedLogResponse;
+            if (trackedLog) {
+              const status = String(trackedLog.status || "").toUpperCase();
               if (status === "COMPLETED" || status === "SUCCESS") {
                 await loadAdminData();
-                const imported = latest.paperSynced ?? latest.newRecords ?? latest.recordsIndexed;
+                const imported = trackedLog.paperSynced ?? trackedLog.newRecords ?? trackedLog.recordsIndexed;
                 const summary = imported == null ? "" : ` ${formatNumber(imported)} new papers were indexed.`;
                 setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} completed successfully.${summary}`);
                 return;
               }
               if (status === "FAILED" || status === "ERROR") {
                 await loadAdminData();
-                setBackfillError(syncLogDetails(latest) || "Backfill failed according to SyncLog.");
+                setBackfillError(syncLogDetails(trackedLog) || "Backfill failed according to SyncLog.");
                 return;
               }
             }
@@ -279,7 +290,7 @@ function AdminPage() {
         return;
       }
 
-      const importedPapers = result?.paperSynced ?? result?.newRecords ?? result?.recordsIndexed;
+      const importedPapers = backfillResult?.paperSynced ?? backfillResult?.newRecords ?? backfillResult?.recordsIndexed;
       const importedSummary = importedPapers == null ? "" : ` ${formatNumber(importedPapers)} new papers were indexed.`;
       setMessage(`Historical backfill ${parsedFromYear}–${parsedToYear} (max ${formatNumber(parsedMaxResults)} papers) completed successfully.${importedSummary}`);
     } catch (error) {

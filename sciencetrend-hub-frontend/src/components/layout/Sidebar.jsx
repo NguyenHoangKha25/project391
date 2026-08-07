@@ -8,7 +8,6 @@ import {
   FiGrid,
   FiSearch,
   FiTag,
-  FiUsers,
   FiBookOpen,
   FiKey,
   FiGitBranch,

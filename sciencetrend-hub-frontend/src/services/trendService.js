@@ -2,10 +2,14 @@ import { apiRequest } from "./api";
 
 // Connect to GET /api/trends/keyword or GET /api/trends/topic from backend
 export function getTrendStats(params = {}) {
-  if (params.topic) {
-    return apiRequest("/trends/topic", { params: { topic: params.topic } });
+  const topic = String(params.topic || "").trim();
+  if (topic) {
+    return apiRequest("/trends/topic", { params: { topic } });
   }
-  const keyword = params.keyword || "computer science";
+  const keyword = String(params.keyword || "").trim();
+  if (!keyword) {
+    return Promise.reject(new Error("Select a keyword or topic before loading trend data."));
+  }
   return apiRequest("/trends/keyword", { params: { keyword } });
 }
 
