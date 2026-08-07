@@ -2815,3 +2815,165 @@ html body .st-layout .clickable-bar:hover .bar-label {
   font-weight: 900 !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MY ACCOUNT PAGE — Full Color Harmony Override
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Hero card: restore dark gradient, remove ProductTheme white override */
+html body .st-layout .account-page .account-hero-card {
+  color: #ffffff !important;
+  border: 1px solid rgba(128, 158, 224, 0.3) !important;
+  border-radius: 32px !important;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(circle at 88% 0%, rgba(25, 190, 221, 0.24), transparent 26rem),
+    radial-gradient(circle at 6% 100%, rgba(112, 91, 247, 0.3), transparent 24rem),
+    linear-gradient(118deg, #18245d 0%, #1c2e68 52%, #105b72 135%) !important;
+  background-size: 34px 34px, 34px 34px, auto, auto, auto !important;
+  box-shadow: 0 30px 72px rgba(22, 36, 88, 0.25) !important;
+  backdrop-filter: none !important;
+}
+
+/* Hero headings: pure white with text-fill override */
+html body .st-layout .account-page .account-hero-card h2,
+html body .st-layout .account-page .account-hero-card h1,
+html body .st-layout .account-page .account-hero-card h3,
+html body .st-layout .account-page .account-hero-card strong {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Hero description text */
+html body .st-layout .account-page .account-hero-card p {
+  color: #b9c8e3 !important;
+  -webkit-text-fill-color: #b9c8e3 !important;
+}
+
+/* Hero eyebrow badge */
+html body .st-layout .account-page .account-hero-card .account-hero-eyebrow,
+html body .st-layout .account-page .account-hero-card .account-eyebrow {
+  color: #93f3dc !important;
+  -webkit-text-fill-color: #93f3dc !important;
+  border-color: rgba(92, 231, 202, 0.24) !important;
+  background: rgba(29, 190, 157, 0.12) !important;
+}
+
+/* Hero meta badges (Admin access, email) */
+html body .st-layout .account-page .account-hero-card .account-hero-meta span {
+  color: #dbe7f8 !important;
+  -webkit-text-fill-color: #dbe7f8 !important;
+  border-color: rgba(185, 209, 243, 0.14) !important;
+  background: rgba(4, 13, 46, 0.2) !important;
+}
+
+html body .st-layout .account-page .account-hero-card .account-hero-meta svg {
+  color: #72def1 !important;
+}
+
+/* Workspace Access / Session Card: glassmorphic dark card inside hero */
+html body .st-layout .account-page .account-session-card {
+  border: 1px solid rgba(182, 209, 246, 0.18) !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(64, 215, 225, 0.12), transparent 12rem),
+    rgba(7, 18, 54, 0.31) !important;
+  box-shadow:
+    0 22px 44px rgba(3, 11, 39, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+  backdrop-filter: blur(16px) !important;
+  color: #ffffff !important;
+}
+
+/* Session card heading label */
+html body .st-layout .account-page .account-session-heading > span {
+  color: #88a0c5 !important;
+  -webkit-text-fill-color: #88a0c5 !important;
+}
+
+html body .st-layout .account-page .account-session-heading > span svg {
+  color: #62e1f2 !important;
+}
+
+/* Session card role name */
+html body .st-layout .account-page .account-session-heading strong {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Session status chips */
+html body .st-layout .account-page .account-session-status span {
+  color: #b7c6df !important;
+  -webkit-text-fill-color: #b7c6df !important;
+  border: 1px solid rgba(184, 207, 242, 0.12) !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+}
+
+html body .st-layout .account-page .account-session-status svg {
+  color: #57dfa9 !important;
+}
+
+/* Sync account details button */
+html body .st-layout .account-page .account-refresh-btn {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  background: linear-gradient(135deg, #626fff, #4654df 58%, #2386be) !important;
+  box-shadow: 0 14px 28px rgba(20, 29, 89, 0.34) !important;
+}
+
+/* Notice banner */
+html body .st-layout .account-page .account-notice {
+  border-color: rgba(32, 183, 154, 0.22) !important;
+  color: #08795f !important;
+  -webkit-text-fill-color: #08795f !important;
+  background: rgba(233, 252, 246, 0.92) !important;
+}
+
+/* Below-hero panels: keep light theme but harmonize */
+html body .st-layout .account-page .account-panel {
+  border: 1px solid rgba(195, 208, 234, 0.82) !important;
+  border-radius: 26px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(86, 99, 247, 0.05), transparent 17rem),
+    rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 22px 54px rgba(32, 46, 94, 0.08) !important;
+  backdrop-filter: none !important;
+}
+
+/* Panel headings */
+html body .st-layout .account-page .account-panel h3 {
+  color: #111a34 !important;
+  -webkit-text-fill-color: #111a34 !important;
+}
+
+html body .st-layout .account-page .account-panel p {
+  color: #63718d !important;
+  -webkit-text-fill-color: #63718d !important;
+}
+
+/* Panel eyebrow badges */
+html body .st-layout .account-page .account-panel .account-eyebrow {
+  color: #4e5ae3 !important;
+  -webkit-text-fill-color: #4e5ae3 !important;
+  border-color: rgba(86, 99, 247, 0.13) !important;
+  background: rgba(86, 99, 247, 0.075) !important;
+}
+
+/* Detail row cards */
+html body .st-layout .account-page .account-detail-row {
+  border: 1px solid rgba(204, 215, 235, 0.86) !important;
+  border-radius: 19px !important;
+  background: linear-gradient(145deg, #fff, #f8faff) !important;
+  box-shadow: 0 10px 26px rgba(35, 50, 94, 0.055) !important;
+}
+
+html body .st-layout .account-page .account-detail-row small {
+  color: #8490a8 !important;
+  -webkit-text-fill-color: #8490a8 !important;
+}
+
+html body .st-layout .account-page .account-detail-row strong {
+  color: #111a34 !important;
+  -webkit-text-fill-color: #111a34 !important;
+}
