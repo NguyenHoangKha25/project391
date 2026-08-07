@@ -178,12 +178,22 @@ function getMapNodeIdentity(node) {
   return rawId.toUpperCase().startsWith(`${type}:`) ? rawId : `${type}:${rawId}`;
 }
 
+function getMindMapEntityId(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const rawValue = String(value).trim();
+  const idPart = rawValue.includes(":") ? rawValue.slice(rawValue.lastIndexOf(":") + 1) : rawValue;
+  const numericId = Number(idPart);
+  return Number.isSafeInteger(numericId) && numericId > 0 ? numericId : null;
+}
+
 function getMapEdgeTargetIdentity(edge) {
   if (!edge) return "";
   const targetId = edge.targetId ?? edge.target?.id ?? edge.nodeId ?? edge.relatedNodeId;
   if (targetId === null || targetId === undefined) return "";
+  const rawTargetId = String(targetId);
+  if (rawTargetId.includes(":")) return rawTargetId.toUpperCase();
   const targetType = normalizeMapType(edge.targetType ?? edge.target?.type ?? edge.nodeType);
-  return `${targetType}:${String(targetId)}`;
+  return `${targetType}:${rawTargetId}`;
 }
 
 function normalizeAssociationScore(value) {
@@ -197,6 +207,21 @@ function normalizeMindMapEdge(rawEdge, targetNode, root, index) {
   const trendStatus = String(
     edge.trendStatus ?? edge.status ?? edge.growthStatus ?? targetNode?.trendStatus ?? "STABLE",
   ).toUpperCase();
+
+  const recentSharedPaperCount = Number(
+    edge.recentSharedPaperCount
+      ?? edge.recentPaperCount
+      ?? edge.recentCount
+      ?? targetNode?.recentPaperCount
+      ?? 0,
+  ) || 0;
+  const previousSharedPaperCount = Number(
+    edge.previousSharedPaperCount
+      ?? edge.previousPaperCount
+      ?? edge.previousCount
+      ?? targetNode?.previousPaperCount
+      ?? 0,
+  ) || 0;
 
   return {
     ...edge,
@@ -214,8 +239,9 @@ function normalizeMindMapEdge(rawEdge, targetNode, root, index) {
     rankScore: normalizeAssociationScore(edge.rankScore ?? edge.associationScore ?? edge.score ?? targetNode?.rankScore ?? targetNode?.associationScore ?? 0),
     trendStatus,
     growthRate: Number(edge.growthRate ?? edge.growthPercent ?? targetNode?.growthRate ?? 0) || 0,
-    recentPaperCount: Number(edge.recentPaperCount ?? edge.recentCount ?? targetNode?.recentPaperCount ?? 0) || 0,
-    previousPaperCount: Number(edge.previousPaperCount ?? edge.previousCount ?? targetNode?.previousPaperCount ?? 0) || 0,
+    recentSharedPaperCount,
+    previousSharedPaperCount,
+    evidenceLevel: String(edge.evidenceLevel ?? targetNode?.evidenceLevel ?? "STRONG").toUpperCase(),
   };
 }
 
@@ -229,7 +255,7 @@ function findEdgeForNode(edges, node) {
   });
 }
 
-function getMapLayout(nodes = [], root) {
+function getMapLayout(nodes = [], root, lanes = []) {
   const rootNodeKey = getMapNodeIdentity(root);
   const nonRootNodes = nodes.filter((node) => getMapNodeIdentity(node) !== rootNodeKey);
   const groupedNodes = nonRootNodes.reduce((groups, node) => {
@@ -246,7 +272,13 @@ function getMapLayout(nodes = [], root) {
   const laneGap = 18;
   const laneTop = 28;
   const nodeColumns = [laneLeft + 190, laneLeft + 430, laneLeft + 670];
-  const groups = MAP_TYPE_ORDER.map((type, groupIndex) => {
+  const laneByType = new Map(
+    (Array.isArray(lanes) ? lanes : [])
+      .filter((lane) => MAP_TYPE_ORDER.includes(normalizeMapType(lane?.type)))
+      .map((lane) => [normalizeMapType(lane.type), lane]),
+  );
+  const renderedTypes = MAP_TYPE_ORDER.filter((type) => (groupedNodes.get(type) || []).length > 0);
+  const groups = renderedTypes.map((type, groupIndex) => {
     const groupTop = laneTop + groupIndex * (laneHeight + laneGap);
     const groupNodes = (groupedNodes.get(type) || []).slice(0, 5);
     return {
@@ -256,6 +288,7 @@ function getMapLayout(nodes = [], root) {
       laneHeight,
       laneLeft,
       laneWidth,
+      lane: laneByType.get(type) || null,
       nodes: groupNodes.map((node, nodeIndex) => ({
         node,
         x: nodeColumns[nodeIndex % 3],
@@ -263,7 +296,8 @@ function getMapLayout(nodes = [], root) {
       })),
     };
   });
-  const height = laneTop * 2 + laneHeight * 3 + laneGap * 2;
+  const renderedLaneCount = Math.max(1, groups.length);
+  const height = laneTop * 2 + laneHeight * renderedLaneCount + laneGap * Math.max(0, renderedLaneCount - 1);
 
   return {
     width: MAP_WIDTH,
@@ -1383,7 +1417,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
   const selectedNodeKey = getMapNodeIdentity(selectedNode);
   const nodes = useMemo(() => (Array.isArray(data?.nodes) ? data.nodes : []), [data]);
   const edges = useMemo(() => (Array.isArray(data?.edges) ? data.edges : []), [data]);
-  const layout = useMemo(() => getMapLayout(nodes, data?.root), [nodes, data?.root]);
+  const layout = useMemo(() => getMapLayout(nodes, data?.root, data?.lanes), [data?.lanes, data?.root, nodes]);
   const [zoom, setZoom] = useState(100);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState(null);
@@ -1393,6 +1427,9 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
   const evidenceRequestRef = useRef(0);
   const rootType = normalizeMapType(data?.root?.type);
   const rootLines = splitMapLabel(data?.root?.label, 25);
+  const unavailableLanes = useMemo(() => (Array.isArray(data?.lanes) ? data.lanes : [])
+    .filter((lane) => Number(lane?.displayedCount) === 0), [data?.lanes]);
+  const visibleLaneCount = layout.groups.length;
   const fitZoomRatio = 100 / zoom;
   const viewBoxWidth = layout.width * fitZoomRatio;
   const viewBoxHeight = layout.height * fitZoomRatio;
@@ -1473,9 +1510,9 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
       setEvidenceLoading(true);
       const response = await getMindMapEvidence({
         rootType: normalizeMapType(data?.root?.type),
-        rootId: data?.root?.id,
+        rootId: getMindMapEntityId(data?.root?.id),
         targetType: normalizeMapType(node?.type),
-        targetId: node?.id,
+        targetId: getMindMapEntityId(node?.id),
         page: 0,
         size: 5,
       });
@@ -1535,7 +1572,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
         <div className="research-map-toolbar-meta">
           <span><b>{data?.fromYear}-{data?.toYear}</b> analysis period</span>
           <span><b>{renderedEdges.length}</b> ranked associations</span>
-          <span><b>3</b> evidence lanes</span>
+          <span><b>{visibleLaneCount}</b> evidence lane{visibleLaneCount === 1 ? "" : "s"}</span>
         </div>
         <div className="research-map-zoom" aria-label="Mind map zoom controls">
           <button type="button" onClick={() => setZoom((current) => Math.max(MAP_ZOOM_MIN, current - MAP_ZOOM_STEP))} disabled={zoom <= MAP_ZOOM_MIN} aria-label="Zoom out"><FiMinus /></button>
@@ -1550,6 +1587,20 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
         <div><small>Evidence model</small><strong>One-hop associations ranked by shared papers, strength and publication momentum</strong></div>
         <span>{data?.fromYear}-{data?.toYear} · click an edge for papers</span>
       </div>
+
+      {unavailableLanes.length > 0 && (
+        <div className="research-map-lane-notices" aria-label="Unavailable evidence lanes">
+          {unavailableLanes.map((lane) => {
+            const type = normalizeMapType(lane.type);
+            return (
+              <div key={type} className={`type-${type.toLowerCase()}`}>
+                <strong>{lane.label || MAP_TYPE_META[type].label}</strong>
+                <span>{lane.message || "No evidence relationships were returned for this lane."}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="research-map-canvas">
         <svg
@@ -1581,7 +1632,9 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
                 <text className="research-weighted-lane-index" x={group.laneLeft + 22} y={group.laneTop + 31}>{String(MAP_TYPE_ORDER.indexOf(group.type) + 1).padStart(2, "0")}</text>
                 <text className="research-weighted-lane-title" x={group.laneLeft + 54} y={group.laneTop + 30}>{group.meta.label}</text>
                 <text className="research-weighted-lane-count" textAnchor="end" x={group.laneLeft + group.laneWidth - 20} y={group.laneTop + 30}>{group.nodes.length} ranked nodes</text>
-                {group.nodes.length === 0 && <text className="research-weighted-lane-empty" x={group.laneLeft + 54} y={group.laneTop + 112}>No ranked associations returned for this lane</text>}
+                {String(group.lane?.evidenceLevel || "").toUpperCase() === "LIMITED" && (
+                  <text className="research-weighted-lane-empty is-limited" x={group.laneLeft + 54} y={group.laneTop + 50}>Limited evidence: 1–2 shared papers</text>
+                )}
               </g>
             ))}
           </g>
@@ -1595,7 +1648,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
               return (
                 <g
                   key={edgeKey}
-                  className={`research-weighted-edge trend-${status} ${isSelected ? "is-selected" : ""}`}
+                  className={`research-weighted-edge trend-${status} evidence-${String(edge.evidenceLevel || "strong").toLowerCase()} ${isSelected ? "is-selected" : ""}`}
                   onClick={() => openEdgeEvidence(edge, node)}
                   onKeyDown={(event) => handleEdgeKeyDown(event, edge, node)}
                   role="button"
@@ -1605,7 +1658,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
                   <path className="research-weighted-edge-hit" d={edgePath(x, y)} />
                   <path className="research-weighted-edge-line" d={edgePath(x, y)} style={style} />
                   <title>
-                    {`${formatNumber(edge.sharedPaperCount)} shared papers · recent ${formatNumber(edge.recentPaperCount)} vs previous ${formatNumber(edge.previousPaperCount)} · growth ${edge.growthRate > 0 ? "+" : ""}${edge.growthRate}% · association ${Math.round(normalizeAssociationScore(edge.associationScore || edge.rankScore) * 100)}%`}
+                    {`${formatNumber(edge.sharedPaperCount)} shared papers · recent ${formatNumber(edge.recentSharedPaperCount)} vs previous ${formatNumber(edge.previousSharedPaperCount)} · growth ${edge.growthRate > 0 ? "+" : ""}${edge.growthRate}% · association ${Math.round(normalizeAssociationScore(edge.associationScore || edge.rankScore) * 100)}%${edge.evidenceLevel === "LIMITED" ? " · Limited evidence" : ""}`}
                   </title>
                   <g className="research-weighted-edge-badge" transform={`translate(${x - MAP_NODE_WIDTH / 2 - 31} ${y})`}>
                     <rect x="-25" y="-11" width="50" height="22" rx="11" />
@@ -1644,7 +1697,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
               return (
                 <g
                   key={nodeKey}
-                  className={`research-map-node research-weighted-node type-${type.toLowerCase()} trend-${String(edge.trendStatus || node.trendStatus || "stable").toLowerCase()} ${isSelected ? "is-selected" : ""}`}
+                  className={`research-map-node research-weighted-node type-${type.toLowerCase()} trend-${String(edge.trendStatus || node.trendStatus || "stable").toLowerCase()} evidence-${String(edge.evidenceLevel || "strong").toLowerCase()} ${isSelected ? "is-selected" : ""}`}
                   transform={`translate(${x} ${y})`}
                   onClick={(event) => chooseNode(event, node)}
                   onKeyDown={(event) => handleNodeKeyDown(event, node)}
@@ -1661,7 +1714,13 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
                   </text>
                   <text className="research-map-node-count" x={-MAP_NODE_WIDTH / 2 + 52} y={lines.length > 1 ? 22 : 17}>{formatNumber(edge.sharedPaperCount)} shared · {formatNumber(node.catalogPaperCount)} catalog</text>
                   <circle className="research-map-node-status" cx={MAP_NODE_WIDTH / 2 - 13} cy={-MAP_NODE_HEIGHT / 2 + 13} r="5" />
-                  <title>{node.label} · {formatNumber(edge.sharedPaperCount)} shared · {formatNumber(node.catalogPaperCount)} catalog · {associationPercent}% association · {getMapStatusLabel(edge.trendStatus)}</title>
+                  {edge.evidenceLevel === "LIMITED" && (
+                    <g className="research-map-node-evidence-badge" transform={`translate(${MAP_NODE_WIDTH / 2 - 67} ${-MAP_NODE_HEIGHT / 2 - 8})`}>
+                      <rect width="68" height="18" rx="9" />
+                      <text x="34" y="12" textAnchor="middle">LIMITED</text>
+                    </g>
+                  )}
+                  <title>{node.label} · {formatNumber(edge.sharedPaperCount)} shared · {formatNumber(node.catalogPaperCount)} catalog · {associationPercent}% association · {getMapStatusLabel(edge.trendStatus)}{edge.evidenceLevel === "LIMITED" ? " · Limited evidence: 1–2 shared papers" : ""}</title>
                 </g>
               );
             })}
@@ -1691,10 +1750,16 @@ function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
             <div><small>Shared papers</small><strong>{formatNumber(selectedEdge.edge.sharedPaperCount)}</strong></div>
             <div><small>Association</small><strong>{Math.round(normalizeAssociationScore(selectedEdge.edge.associationScore) * 100)}%</strong></div>
             <div><small>Trend</small><strong>{getMapStatusLabel(selectedEdge.edge.trendStatus)}</strong></div>
-            <div><small>Recent period</small><strong>{formatNumber(selectedEdge.edge.recentPaperCount)}</strong></div>
-            <div><small>Previous period</small><strong>{formatNumber(selectedEdge.edge.previousPaperCount)}</strong></div>
+            <div><small>Recent period</small><strong>{formatNumber(selectedEdge.edge.recentSharedPaperCount)}</strong></div>
+            <div><small>Previous period</small><strong>{formatNumber(selectedEdge.edge.previousSharedPaperCount)}</strong></div>
             <div><small>Growth rate</small><strong>{selectedEdge.edge.growthRate > 0 ? "+" : ""}{selectedEdge.edge.growthRate}%</strong></div>
           </div>
+          {selectedEdge.edge.evidenceLevel === "LIMITED" && (
+            <div className="research-edge-evidence-level is-limited">
+              <FiAlertCircle />
+              <span><strong>Limited evidence:</strong> 1–2 shared papers. Verify the supporting papers before using this relationship.</span>
+            </div>
+          )}
           {evidenceLoading ? (
             <div className="research-edge-evidence-empty"><span className="workspace-loading-spinner" /><p>Loading evidence papers…</p></div>
           ) : evidencePapers.length > 0 ? (
@@ -1929,7 +1994,7 @@ function MindMapWorkspace() {
       setErrorMessage("");
       const response = await getResearchMindMap({
         type: nextRootType,
-        id: Number(nextRootId),
+        id: getMindMapEntityId(nextRootId),
         limit: Number(limit),
         fromYear: Number(fromYear),
         toYear: Number(toYear),
@@ -1967,6 +2032,22 @@ function MindMapWorkspace() {
         edges: normalizedEdges,
         fromYear: Number(payload?.fromYear ?? fromYear),
         toYear: Number(payload?.toYear ?? toYear),
+        previousFromYear: Number(payload?.previousFromYear) || null,
+        previousToYear: Number(payload?.previousToYear) || null,
+        lanes: (Array.isArray(payload?.lanes) ? payload.lanes : [])
+          .map((lane) => ({
+            ...lane,
+            type: normalizeMapType(lane?.type),
+            label: lane?.label || MAP_TYPE_META[normalizeMapType(lane?.type)].label,
+            candidateCount: Number(lane?.candidateCount) || 0,
+            strongCandidateCount: Number(lane?.strongCandidateCount) || 0,
+            limitedCandidateCount: Number(lane?.limitedCandidateCount) || 0,
+            displayedCount: Number(lane?.displayedCount) || 0,
+            evidenceLevel: String(lane?.evidenceLevel || "NO_DATA").toUpperCase(),
+            message: String(lane?.message || "").trim(),
+          }))
+          .filter((lane) => MAP_TYPE_ORDER.includes(lane.type)),
+        minStrongSharedPapers: Number(payload?.minStrongSharedPapers) || 3,
       };
       setMapData(nextMap);
       setSelectedNode(normalizedRoot);
@@ -2245,8 +2326,8 @@ function MindMapWorkspace() {
                 <dl className="research-node-metrics research-map-api-detail">
                   <div><dt>Shared papers</dt><dd>{formatNumber(selectedNodeEdge.sharedPaperCount)}</dd></div>
                   <div><dt>Catalog papers</dt><dd>{formatNumber(selectedNode.catalogPaperCount)}</dd></div>
-                  <div><dt>Recent</dt><dd>{formatNumber(selectedNodeEdge.recentPaperCount)}</dd></div>
-                  <div><dt>Previous</dt><dd>{formatNumber(selectedNodeEdge.previousPaperCount)}</dd></div>
+                  <div><dt>Recent shared</dt><dd>{formatNumber(selectedNodeEdge.recentSharedPaperCount)}</dd></div>
+                  <div><dt>Previous shared</dt><dd>{formatNumber(selectedNodeEdge.previousSharedPaperCount)}</dd></div>
                   <div><dt>Growth</dt><dd>{Number(selectedNodeEdge.growthRate) > 0 ? "+" : ""}{Number(selectedNodeEdge.growthRate || 0).toFixed(1)}%</dd></div>
                   <div><dt>Association</dt><dd>{Math.round(normalizeAssociationScore(selectedNodeEdge.associationScore || selectedNodeEdge.rankScore) * 100)}%</dd></div>
                 </dl>

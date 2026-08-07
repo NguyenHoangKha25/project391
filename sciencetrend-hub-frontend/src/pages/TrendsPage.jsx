@@ -864,7 +864,7 @@ function TrendsPage() {
                   />
                 </div>
                 {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                  <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-single-suggestions">
+                  <div className="trends-autocomplete-menu" id="trend-single-suggestions" role="listbox">
                     {suggestionsLoading ? (
                       <span className="trends-autocomplete-state">Finding matches…</span>
                     ) : autocompleteSuggestions.length > 0 ? (
@@ -882,7 +882,7 @@ function TrendsPage() {
                     ) : (
                       <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                     )}
-                  </TrendsSuggestionPortal>
+                  </div>
                 )}
               </div>
             )}
@@ -1036,7 +1036,7 @@ function TrendsPage() {
                     />
                   </div>
                   {suggestionsOpen && suggestionQuery.trim().length >= 2 && (
-                    <TrendsSuggestionPortal anchorRef={suggestionAnchorRef} id="trend-compare-suggestions">
+                    <div className="trends-autocomplete-menu" id="trend-compare-suggestions" role="listbox">
                       {suggestionsLoading ? (
                         <span className="trends-autocomplete-state">Finding matches…</span>
                       ) : autocompleteSuggestions.length > 0 ? (
@@ -1061,7 +1061,7 @@ function TrendsPage() {
                       ) : (
                         <span className="trends-autocomplete-state">No matching {trendTab}s found.</span>
                       )}
-                    </TrendsSuggestionPortal>
+                    </div>
                   )}
                 </div>
 
