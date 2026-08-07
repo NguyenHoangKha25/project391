@@ -28,12 +28,13 @@ import {
   FiTrash2,
   FiTrendingDown,
   FiTrendingUp,
+  FiX,
   FiZap,
 } from "react-icons/fi";
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
-import { comparePapers, getPapers } from "../services/paperService";
+import { comparePapers, getPaperById, getPapers } from "../services/paperService";
 import { getResearchMindMap } from "../services/researchService";
 import { getAllTopics } from "../services/topicService";
 import { ROUTE_PATHS } from "../routes/routePaths";
@@ -50,13 +51,13 @@ const MAX_COMPARISON_PAPERS = 4;
 const MIN_COMPARISON_PAPERS = 2;
 const COMPARATOR_PAGE_SIZE = 4;
 const MAP_WIDTH = 1180;
-const MAP_MIN_HEIGHT = 640;
+const MAP_MIN_HEIGHT = 760;
 const MAP_ZOOM_MIN = 60;
 const MAP_ZOOM_MAX = 180;
 const MAP_ZOOM_STEP = 10;
-const MAP_NODE_WIDTH = 240;
-const MAP_NODE_HEIGHT = 68;
-const MAP_TYPE_ORDER = ["TOPIC", "KEYWORD", "JOURNAL", "UNKNOWN"];
+const MAP_NODE_WIDTH = 206;
+const MAP_NODE_HEIGHT = 66;
+const MAP_TYPE_ORDER = ["TOPIC", "KEYWORD", "JOURNAL"];
 const MAP_TYPE_META = {
   TOPIC: { label: "Topics", shortLabel: "T", relation: "Related topics" },
   KEYWORD: { label: "Keywords", shortLabel: "K", relation: "Related keywords" },
@@ -199,123 +200,98 @@ function getMapNodeIdentity(node) {
   return rawId.toUpperCase().startsWith(`${type}:`) ? rawId : `${type}:${rawId}`;
 }
 
-function getMapLayout(nodes = [], root, edges = []) {
-  const rootId = root?.id;
+function getMapEdgeTargetIdentity(edge) {
+  if (!edge) return "";
+  const targetId = edge.targetId ?? edge.target?.id ?? edge.nodeId ?? edge.relatedNodeId;
+  if (targetId === null || targetId === undefined) return "";
+  const targetType = normalizeMapType(edge.targetType ?? edge.target?.type ?? edge.nodeType);
+  return `${targetType}:${String(targetId)}`;
+}
+
+function normalizeAssociationScore(value) {
+  const score = Number(value);
+  if (!Number.isFinite(score) || score <= 0) return 0;
+  return Math.min(1, score > 1 ? score / 100 : score);
+}
+
+function normalizeMindMapEdge(rawEdge, targetNode, root, index) {
+  const edge = rawEdge && typeof rawEdge === "object" ? rawEdge : {};
+  const evidencePapers = edge.evidencePapers ?? edge.sharedPapers ?? edge.papers ?? edge.evidence ?? [];
+  const evidencePaperIds = edge.evidencePaperIds ?? edge.sharedPaperIds ?? edge.paperIds ?? [];
+  const trendStatus = String(
+    edge.trendStatus ?? edge.status ?? edge.growthStatus ?? targetNode?.trendStatus ?? "STABLE",
+  ).toUpperCase();
+
+  return {
+    ...edge,
+    id: edge.id ?? `${getMapNodeIdentity(root)}-${getMapNodeIdentity(targetNode)}-${index}`,
+    sourceId: edge.sourceId ?? edge.source?.id ?? root?.id,
+    sourceType: normalizeMapType(edge.sourceType ?? edge.source?.type ?? root?.type),
+    targetId: edge.targetId ?? edge.target?.id ?? edge.nodeId ?? edge.relatedNodeId ?? targetNode?.id,
+    targetType: normalizeMapType(edge.targetType ?? edge.target?.type ?? edge.nodeType ?? targetNode?.type),
+    sharedPaperCount: Number(
+      edge.sharedPaperCount ?? edge.sharedCount ?? edge.coOccurrenceCount ?? edge.paperCount ?? edge.weight ?? 0,
+    ) || 0,
+    associationScore: normalizeAssociationScore(
+      edge.associationScore ?? edge.score ?? edge.strength ?? edge.normalizedWeight ?? 0,
+    ),
+    trendStatus,
+    growthRate: Number(edge.growthRate ?? edge.growthPercent ?? targetNode?.growthRate ?? 0) || 0,
+    evidencePapers: Array.isArray(evidencePapers) ? evidencePapers : [],
+    evidencePaperIds: Array.isArray(evidencePaperIds) ? evidencePaperIds : [],
+  };
+}
+
+function findEdgeForNode(edges, node) {
+  const nodeKey = getMapNodeIdentity(node);
+  return edges.find((edge) => {
+    const targetKey = getMapEdgeTargetIdentity(edge);
+    if (targetKey === nodeKey) return true;
+    return String(edge.targetId) === String(node.id)
+      && (!edge.targetType || normalizeMapType(edge.targetType) === normalizeMapType(node.type));
+  });
+}
+
+function getMapLayout(nodes = [], root) {
   const rootNodeKey = getMapNodeIdentity(root);
-  const relationByTarget = new Map(
-    edges.map((edge) => [String(edge.targetId), String(edge.relation || "RELATED")]),
-  );
-
-  const parentByChild = new Map(
-    edges
-      .filter((edge) => String(edge.sourceId) !== String(rootId))
-      .map((edge) => [String(edge.targetId), String(edge.sourceId)]),
-  );
-
   const nonRootNodes = nodes.filter((node) => getMapNodeIdentity(node) !== rootNodeKey);
-
   const groupedNodes = nonRootNodes.reduce((groups, node) => {
     const type = normalizeMapType(node.type);
+    if (!MAP_TYPE_ORDER.includes(type)) return groups;
     if (!groups.has(type)) groups.set(type, []);
     groups.get(type).push(node);
     return groups;
   }, new Map());
 
-  const visibleTypes = MAP_TYPE_ORDER.filter((type) => groupedNodes.has(type));
-  const groupCount = Math.max(1, visibleTypes.length);
-  const groupSideInset = groupCount === 2 ? 300 : 160;
-  const firstGroupX = groupCount === 1 ? MAP_WIDTH / 2 : groupSideInset;
-  const lastGroupX = groupCount === 1 ? MAP_WIDTH / 2 : MAP_WIDTH - groupSideInset;
-  const groupGap = groupCount > 1 ? (lastGroupX - firstGroupX) / (groupCount - 1) : 0;
-  const hubY = 224;
-  const nodeStartY = 352;
-  const nodeGapY = 84;
-  const laneTop = 286;
-  const laneWidth = groupCount >= 4 ? 252 : groupCount === 3 ? 292 : 330;
-
-  const groups = visibleTypes.map((type, groupIndex) => {
-      const groupNodes = groupedNodes.get(type);
-      const groupCenterX = firstGroupX + groupGap * groupIndex;
-
-      const level1 = [];
-      const level2ByParent = new Map();
-
-      groupNodes.forEach((node) => {
-        const parentId = parentByChild.get(String(node.id));
-        const parentExistsInGroup = parentId && groupNodes.some((p) => String(p.id) === String(parentId));
-        if (parentExistsInGroup) {
-          if (!level2ByParent.has(String(parentId))) level2ByParent.set(String(parentId), []);
-          level2ByParent.get(String(parentId)).push(node);
-        } else {
-          level1.push(node);
-        }
-      });
-
-      const orderedNodes = [];
-
-      level1.forEach((node) => {
-        const children = level2ByParent.get(String(node.id)) || [];
-        orderedNodes.push({
-          node,
-          relation: relationByTarget.get(String(node.id)) || MAP_TYPE_META[type].relation,
-          isLevel2: false,
-          parentId: null,
-        });
-
-        children.forEach((childNode) => {
-          orderedNodes.push({
-            node: childNode,
-            relation: relationByTarget.get(String(childNode.id)) || "SUB_TOPIC",
-            isLevel2: true,
-            parentId: String(node.id),
-          });
-        });
-      });
-
-      const placedIds = new Set(orderedNodes.map((item) => String(item.node.id)));
-      groupNodes.forEach((node) => {
-        if (!placedIds.has(String(node.id))) {
-          orderedNodes.push({
-            node,
-            relation: relationByTarget.get(String(node.id)) || MAP_TYPE_META[type].relation,
-            isLevel2: false,
-            parentId: null,
-          });
-        }
-      });
-
-      const laidOutNodes = orderedNodes.map((item, nodeIndex) => ({
-        ...item,
-        x: groupCenterX + (item.isLevel2 ? 12 : 0),
-        y: nodeStartY + nodeIndex * nodeGapY,
-      }));
-      const groupLaneHeight = Math.max(
-        236,
-        (Math.max(1, laidOutNodes.length) - 1) * nodeGapY + MAP_NODE_HEIGHT + 114,
-      );
-
-      return {
-        type,
-        meta: MAP_TYPE_META[type],
-        hub: { x: groupCenterX, y: hubY },
-        laneTop,
-        laneHeight: groupLaneHeight,
-        laneLeft: groupCenterX - laneWidth / 2,
-        laneWidth,
-        nodes: laidOutNodes,
-      };
-    });
-
-  const contentBottom = groups.reduce(
-    (maximum, group) => Math.max(maximum, group.laneTop + group.laneHeight),
-    MAP_MIN_HEIGHT,
-  );
-  const height = Math.max(MAP_MIN_HEIGHT, contentBottom + 34);
+  const laneLeft = 338;
+  const laneWidth = MAP_WIDTH - laneLeft - 24;
+  const laneHeight = 222;
+  const laneGap = 18;
+  const laneTop = 28;
+  const nodeColumns = [laneLeft + 190, laneLeft + 430, laneLeft + 670];
+  const groups = MAP_TYPE_ORDER.map((type, groupIndex) => {
+    const groupTop = laneTop + groupIndex * (laneHeight + laneGap);
+    const groupNodes = (groupedNodes.get(type) || []).slice(0, 5);
+    return {
+      type,
+      meta: MAP_TYPE_META[type],
+      laneTop: groupTop,
+      laneHeight,
+      laneLeft,
+      laneWidth,
+      nodes: groupNodes.map((node, nodeIndex) => ({
+        node,
+        x: nodeColumns[nodeIndex % 3],
+        y: groupTop + (nodeIndex < 3 ? 70 : 152),
+      })),
+    };
+  });
+  const height = laneTop * 2 + laneHeight * 3 + laneGap * 2;
 
   return {
     width: MAP_WIDTH,
-    height,
-    root: { x: MAP_WIDTH / 2, y: 88 },
+    height: Math.max(MAP_MIN_HEIGHT, height),
+    root: { x: 166, y: height / 2 },
     groups,
   };
 }
@@ -979,7 +955,9 @@ function PaperComparator() {
   );
 }
 
-function MindMapGraph({ data, selectedNode, onSelectNode }) {
+// Kept temporarily while the weighted one-hop renderer below replaces the old hierarchical canvas.
+// eslint-disable-next-line no-unused-vars
+function LegacyMindMapGraph({ data, selectedNode, onSelectNode }) {
   const rootId = data?.root?.id;
   const rootNodeKey = getMapNodeIdentity(data?.root);
   const selectedNodeKey = getMapNodeIdentity(selectedNode);
@@ -1423,6 +1401,360 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   );
 }
 
+function MindMapGraph({ data, selectedNode, onSelectNode, onExploreAsRoot }) {
+  const rootNodeKey = getMapNodeIdentity(data?.root);
+  const selectedNodeKey = getMapNodeIdentity(selectedNode);
+  const nodes = useMemo(() => (Array.isArray(data?.nodes) ? data.nodes : []), [data]);
+  const edges = useMemo(() => (Array.isArray(data?.edges) ? data.edges : []), [data]);
+  const layout = useMemo(() => getMapLayout(nodes, data?.root), [nodes, data?.root]);
+  const [zoom, setZoom] = useState(100);
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const [selectedEdge, setSelectedEdge] = useState(null);
+  const [evidencePapers, setEvidencePapers] = useState([]);
+  const [evidenceLoading, setEvidenceLoading] = useState(false);
+  const [evidenceError, setEvidenceError] = useState("");
+  const evidenceRequestRef = useRef(0);
+  const rootType = normalizeMapType(data?.root?.type);
+  const rootLines = splitMapLabel(data?.root?.label, 25);
+  const fitZoomRatio = 100 / zoom;
+  const viewBoxWidth = layout.width * fitZoomRatio;
+  const viewBoxHeight = layout.height * fitZoomRatio;
+  const viewBoxX = (layout.width - viewBoxWidth) / 2;
+  const viewBoxY = (layout.height - viewBoxHeight) / 2;
+  const mapViewBox = isFocusMode
+    ? `0 0 ${layout.width} ${layout.height}`
+    : `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`;
+
+  const renderedEdges = useMemo(() => layout.groups.flatMap((group) => group.nodes.map((item, index) => {
+    const edge = findEdgeForNode(edges, item.node)
+      || normalizeMindMapEdge({}, item.node, data?.root, `${group.type}-${index}`);
+    return { ...item, group, edge };
+  })), [data?.root, edges, layout.groups]);
+
+  const maximumSharedPapers = useMemo(
+    () => Math.max(1, ...renderedEdges.map(({ edge }) => Number(edge.sharedPaperCount) || 0)),
+    [renderedEdges],
+  );
+
+  useEffect(() => {
+    evidenceRequestRef.current += 1;
+    setZoom(100);
+    setSelectedEdge(null);
+    setEvidencePapers([]);
+  }, [data?.root?.id, data?.root?.type]);
+
+  useEffect(() => {
+    if (!isFocusMode) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setIsFocusMode(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isFocusMode]);
+
+  function edgePath(targetX, targetY) {
+    const sourceX = layout.root.x + 136;
+    const sourceY = layout.root.y;
+    const destinationX = targetX - MAP_NODE_WIDTH / 2 - 6;
+    const bendX = sourceX + (destinationX - sourceX) * 0.52;
+    return `M ${sourceX} ${sourceY} C ${bendX} ${sourceY}, ${bendX} ${targetY}, ${destinationX} ${targetY}`;
+  }
+
+  function getEdgeStyle(edge) {
+    const sharedRatio = Math.sqrt(Math.max(0, Number(edge.sharedPaperCount) || 0) / maximumSharedPapers);
+    const associationScore = normalizeAssociationScore(edge.associationScore);
+    return {
+      strokeWidth: 1.8 + sharedRatio * 5.2,
+      opacity: 0.34 + associationScore * 0.66,
+    };
+  }
+
+  function getEvidenceCatalogPath(edge, node) {
+    const params = new URLSearchParams();
+    const filters = [data?.root, node];
+    const usedTypes = new Set();
+    filters.forEach((item) => {
+      const type = normalizeMapType(item?.type);
+      if (!item?.label || usedTypes.has(type)) return;
+      usedTypes.add(type);
+      if (type === "TOPIC") params.set("topic", item.label);
+      else if (type === "JOURNAL") params.set("journal", item.label);
+      else if (type === "KEYWORD") params.set("keyword", item.label);
+    });
+    if (!params.toString() && node?.label) params.set("search", node.label);
+    return `${ROUTE_PATHS.PAPERS}?${params.toString()}`;
+  }
+
+  async function openEdgeEvidence(edge, node) {
+    const requestId = evidenceRequestRef.current + 1;
+    evidenceRequestRef.current = requestId;
+    const nextSelection = { edge, node, catalogPath: getEvidenceCatalogPath(edge, node) };
+    setSelectedEdge(nextSelection);
+    setEvidenceError("");
+    setEvidenceLoading(false);
+
+    const embeddedPapers = edge.evidencePapers
+      .filter((paper) => paper && typeof paper === "object")
+      .map((paper, index) => normalizePaper(paper, index));
+    if (embeddedPapers.length > 0) {
+      setEvidencePapers(embeddedPapers.slice(0, 6));
+      return;
+    }
+
+    const paperIds = edge.evidencePaperIds
+      .map((paperId) => typeof paperId === "object" ? paperId.id : paperId)
+      .filter((paperId) => paperId !== null && paperId !== undefined)
+      .slice(0, 6);
+    if (paperIds.length === 0) {
+      setEvidencePapers([]);
+      return;
+    }
+
+    try {
+      setEvidenceLoading(true);
+      const responses = await Promise.allSettled(paperIds.map((paperId) => getPaperById(paperId)));
+      if (evidenceRequestRef.current !== requestId) return;
+      const hydratedPapers = responses
+        .filter((result) => result.status === "fulfilled")
+        .map((result, index) => normalizePaper(result.value?.data ?? result.value, index));
+      setEvidencePapers(hydratedPapers);
+      if (hydratedPapers.length === 0) setEvidenceError("The evidence paper records could not be loaded.");
+    } catch (error) {
+      if (evidenceRequestRef.current !== requestId) return;
+      setEvidencePapers([]);
+      setEvidenceError(error.message || "The evidence paper records could not be loaded.");
+    } finally {
+      if (evidenceRequestRef.current === requestId) setEvidenceLoading(false);
+    }
+  }
+
+  function chooseNode(event, node) {
+    event?.preventDefault();
+    event?.stopPropagation();
+    evidenceRequestRef.current += 1;
+    setSelectedEdge(null);
+    onSelectNode(node);
+  }
+
+  function handleNodeKeyDown(event, node) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    chooseNode(event, node);
+  }
+
+  function handleEdgeKeyDown(event, edge, node) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    openEdgeEvidence(edge, node);
+  }
+
+  return (
+    <div className={`research-map-explorer research-weighted-map ${isFocusMode ? "is-focus-mode" : "is-fit-mode"}`}>
+      <header className="research-map-toolbar">
+        <div>
+          <span className={`research-map-toolbar-mark type-${rootType.toLowerCase()}`}>
+            {MAP_TYPE_META[rootType].shortLabel}
+          </span>
+          <div>
+            <small>Weighted evidence map</small>
+            <strong>{data?.root?.label || "Research root"}</strong>
+          </div>
+        </div>
+        <div className="research-map-toolbar-meta">
+          <span><b>{renderedEdges.length}</b> ranked associations</span>
+          <span><b>3</b> evidence lanes</span>
+        </div>
+        <div className="research-map-zoom" aria-label="Mind map zoom controls">
+          <button type="button" onClick={() => setZoom((current) => Math.max(MAP_ZOOM_MIN, current - MAP_ZOOM_STEP))} disabled={zoom <= MAP_ZOOM_MIN} aria-label="Zoom out"><FiMinus /></button>
+          <button type="button" className="research-map-zoom-value" onClick={() => setZoom(100)} aria-label={`Reset zoom. Current zoom ${zoom} percent`}>{zoom}%</button>
+          <button type="button" onClick={() => setZoom((current) => Math.min(MAP_ZOOM_MAX, current + MAP_ZOOM_STEP))} disabled={zoom >= MAP_ZOOM_MAX} aria-label="Zoom in"><FiPlus /></button>
+          <button type="button" onClick={() => setIsFocusMode((current) => !current)} aria-label={isFocusMode ? "Exit focus mode" : "Open focus mode"}>{isFocusMode ? <FiMinimize2 /> : <FiMaximize2 />}</button>
+        </div>
+      </header>
+
+      <div className="research-map-decision-bar research-map-model-bar">
+        <FiShare2 />
+        <div><small>Evidence model</small><strong>One-hop associations ranked by shared papers, strength and publication momentum</strong></div>
+        <span>Click an edge for papers</span>
+      </div>
+
+      <div className="research-map-canvas">
+        <svg
+          viewBox={mapViewBox}
+          style={isFocusMode ? { width: `${zoom}%`, minWidth: `${Math.round(860 * zoom / 100)}px` } : { width: "100%", minWidth: 0, height: "100%" }}
+          role="img"
+          aria-label={`Weighted evidence map for ${data?.root?.label || "selected root"}`}
+        >
+          <defs>
+            <linearGradient id="research-weighted-root-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#4f5cf2" />
+              <stop offset="54%" stopColor="#3846ba" />
+              <stop offset="100%" stopColor="#0e91aa" />
+            </linearGradient>
+            <pattern id="research-weighted-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.05" fill="#7182b5" fillOpacity="0.12" />
+            </pattern>
+            <filter id="research-weighted-shadow" x="-35%" y="-50%" width="170%" height="200%">
+              <feDropShadow dx="0" dy="8" stdDeviation="9" floodColor="#26355f" floodOpacity="0.14" />
+            </filter>
+          </defs>
+
+          <rect width={layout.width} height={layout.height} fill="url(#research-weighted-grid)" />
+
+          <g className="research-map-lanes">
+            {layout.groups.map((group) => (
+              <g key={group.type} className={`research-weighted-lane type-${group.type.toLowerCase()}`}>
+                <rect className="research-map-lane" x={group.laneLeft} y={group.laneTop} width={group.laneWidth} height={group.laneHeight} rx="26" />
+                <text className="research-weighted-lane-index" x={group.laneLeft + 22} y={group.laneTop + 31}>{String(MAP_TYPE_ORDER.indexOf(group.type) + 1).padStart(2, "0")}</text>
+                <text className="research-weighted-lane-title" x={group.laneLeft + 54} y={group.laneTop + 30}>{group.meta.label}</text>
+                <text className="research-weighted-lane-count" textAnchor="end" x={group.laneLeft + group.laneWidth - 20} y={group.laneTop + 30}>{group.nodes.length} ranked nodes</text>
+                {group.nodes.length === 0 && <text className="research-weighted-lane-empty" x={group.laneLeft + 54} y={group.laneTop + 112}>No ranked associations returned for this lane</text>}
+              </g>
+            ))}
+          </g>
+
+          <g className="research-weighted-edges">
+            {renderedEdges.map(({ node, x, y, edge }) => {
+              const status = String(edge.trendStatus || node.trendStatus || "STABLE").toLowerCase();
+              const style = getEdgeStyle(edge);
+              const edgeKey = `${edge.id}-${getMapNodeIdentity(node)}`;
+              const isSelected = selectedEdge?.edge?.id === edge.id && getMapNodeIdentity(selectedEdge?.node) === getMapNodeIdentity(node);
+              return (
+                <g
+                  key={edgeKey}
+                  className={`research-weighted-edge trend-${status} ${isSelected ? "is-selected" : ""}`}
+                  onClick={() => openEdgeEvidence(edge, node)}
+                  onKeyDown={(event) => handleEdgeKeyDown(event, edge, node)}
+                  role="button"
+                  tabIndex="0"
+                  aria-label={`Open ${edge.sharedPaperCount} shared evidence papers between ${data?.root?.label} and ${node.label}`}
+                >
+                  <path className="research-weighted-edge-hit" d={edgePath(x, y)} />
+                  <path className="research-weighted-edge-line" d={edgePath(x, y)} style={style} />
+                  <g className="research-weighted-edge-badge" transform={`translate(${x - MAP_NODE_WIDTH / 2 - 31} ${y})`}>
+                    <rect x="-25" y="-11" width="50" height="22" rx="11" />
+                    <text textAnchor="middle" y="4">{formatNumber(edge.sharedPaperCount)}</text>
+                  </g>
+                </g>
+              );
+            })}
+          </g>
+
+          <g
+            className={`research-map-root research-weighted-root type-${rootType.toLowerCase()} ${selectedNodeKey === rootNodeKey ? "is-selected" : ""}`}
+            transform={`translate(${layout.root.x} ${layout.root.y})`}
+            onClick={(event) => chooseNode(event, data?.root)}
+            onKeyDown={(event) => handleNodeKeyDown(event, data?.root)}
+            role="button"
+            tabIndex="0"
+            aria-pressed={selectedNodeKey === rootNodeKey}
+          >
+            <circle className="research-map-root-orbit" r="104" />
+            <rect x="-136" y="-69" width="272" height="138" rx="31" fill="url(#research-weighted-root-gradient)" filter="url(#research-weighted-shadow)" />
+            <text className="research-map-root-kicker" textAnchor="middle" y="-39">RESEARCH ROOT</text>
+            <text className="research-map-root-label" textAnchor="middle" y={rootLines.length > 1 ? -11 : 0}>
+              {rootLines.map((line, index) => <tspan key={`${line}-${index}`} x="0" dy={index === 0 ? 0 : 20}>{line}</tspan>)}
+            </text>
+            <text className="research-map-root-count" textAnchor="middle" y="45">{Number(data?.root?.paperCount) > 0 ? `${formatNumber(data.root.paperCount)} indexed papers` : "Evidence root"}</text>
+          </g>
+
+          <g className="research-map-nodes">
+            {renderedEdges.map(({ node, x, y, edge }) => {
+              const type = normalizeMapType(node.type);
+              const nodeKey = getMapNodeIdentity(node);
+              const lines = splitMapLabel(node.label, 22);
+              const isSelected = selectedNodeKey === nodeKey;
+              const associationPercent = Math.round(normalizeAssociationScore(edge.associationScore) * 100);
+              return (
+                <g
+                  key={nodeKey}
+                  className={`research-map-node research-weighted-node type-${type.toLowerCase()} trend-${String(edge.trendStatus || node.trendStatus || "stable").toLowerCase()} ${isSelected ? "is-selected" : ""}`}
+                  transform={`translate(${x} ${y})`}
+                  onClick={(event) => chooseNode(event, node)}
+                  onKeyDown={(event) => handleNodeKeyDown(event, node)}
+                  role="button"
+                  tabIndex="0"
+                  aria-pressed={isSelected}
+                >
+                  <rect className="research-map-node-card" x={-MAP_NODE_WIDTH / 2} y={-MAP_NODE_HEIGHT / 2} width={MAP_NODE_WIDTH} height={MAP_NODE_HEIGHT} rx="17" filter="url(#research-weighted-shadow)" />
+                  <rect className="research-map-node-accent" x={-MAP_NODE_WIDTH / 2} y="-22" width="5" height="44" rx="3" />
+                  <circle className="research-map-node-badge" cx={-MAP_NODE_WIDTH / 2 + 29} cy="0" r="15" />
+                  <text className="research-map-node-code" textAnchor="middle" x={-MAP_NODE_WIDTH / 2 + 29} y="4">{MAP_TYPE_META[type].shortLabel}</text>
+                  <text className="research-map-node-label" x={-MAP_NODE_WIDTH / 2 + 52} y={lines.length > 1 ? -12 : -4}>
+                    {lines.map((line, index) => <tspan key={`${line}-${index}`} x={-MAP_NODE_WIDTH / 2 + 52} dy={index === 0 ? 0 : 14}>{line}</tspan>)}
+                  </text>
+                  <text className="research-map-node-count" x={-MAP_NODE_WIDTH / 2 + 52} y={lines.length > 1 ? 22 : 17}>{formatNumber(edge.sharedPaperCount)} shared · {associationPercent}% score</text>
+                  <circle className="research-map-node-status" cx={MAP_NODE_WIDTH / 2 - 13} cy={-MAP_NODE_HEIGHT / 2 + 13} r="5" />
+                  <title>{node.label} · {formatNumber(edge.sharedPaperCount)} shared papers · {associationPercent}% association · {getMapStatusLabel(edge.trendStatus)}</title>
+                </g>
+              );
+            })}
+          </g>
+        </svg>
+      </div>
+
+      {selectedNode && selectedNodeKey !== rootNodeKey && !selectedEdge && (
+        <div className="research-map-node-quick-action">
+          <div>
+            <small>Selected node</small>
+            <strong>{selectedNode.label}</strong>
+          </div>
+          <button type="button" onClick={() => onExploreAsRoot(selectedNode)}>
+            <FiGitBranch />Explore as root
+          </button>
+        </div>
+      )}
+
+      {selectedEdge && (
+        <aside className="research-edge-evidence-panel" aria-label="Edge evidence papers">
+          <header>
+            <div><small>Edge evidence</small><strong>{data?.root?.label} ↔ {selectedEdge.node.label}</strong></div>
+            <button type="button" onClick={() => setSelectedEdge(null)} aria-label="Close evidence panel"><FiX /></button>
+          </header>
+          <div className="research-edge-evidence-metrics">
+            <div><small>Shared papers</small><strong>{formatNumber(selectedEdge.edge.sharedPaperCount)}</strong></div>
+            <div><small>Association</small><strong>{Math.round(normalizeAssociationScore(selectedEdge.edge.associationScore) * 100)}%</strong></div>
+            <div><small>Trend</small><strong>{getMapStatusLabel(selectedEdge.edge.trendStatus)}</strong></div>
+          </div>
+          {evidenceLoading ? (
+            <div className="research-edge-evidence-empty"><span className="workspace-loading-spinner" /><p>Loading evidence papers…</p></div>
+          ) : evidencePapers.length > 0 ? (
+            <ol className="research-edge-paper-list">
+              {evidencePapers.map((paper) => (
+                <li key={paper.id || paper.title}>
+                  <span><FiBookOpen /></span>
+                  <div><strong>{shortTitle(paper.title, 72)}</strong><small>{paper.year || "Year unavailable"} · {formatNumber(paper.citationCount || paper.citations || 0)} citations</small></div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="research-edge-evidence-empty">
+              <FiActivity />
+              <strong>{evidenceError || "No paper records were embedded in this edge"}</strong>
+              <p>The relationship metrics are available. The backend must return evidencePapers or evidencePaperIds to list the exact intersection here.</p>
+            </div>
+          )}
+          <Link className="research-inspector-action" to={selectedEdge.catalogPath}>Open filtered paper set <FiArrowRight /></Link>
+        </aside>
+      )}
+
+      <footer className="research-map-legend research-weighted-legend">
+        <div className="research-map-status-legend">
+          <span className="is-growing"><i />Growing</span>
+          <span className="is-emerging"><i />Emerging</span>
+          <span className="is-stable"><i />Stable</span>
+          <span className="is-declining"><i />Declining</span>
+        </div>
+        <small>Thicker = more shared papers · darker = stronger association · select an edge for paper evidence</small>
+      </footer>
+    </div>
+  );
+}
+
 function normalizeMindMapNode(rawNode) {
   if (!rawNode || typeof rawNode !== "object") return null;
 
@@ -1511,19 +1843,18 @@ function getMindMapIntentLabel(intent) {
 
 function MindMapWorkspace() {
   const [rootType, setRootType] = useState("KEYWORD");
-  const [researchQuestion, setResearchQuestion] = useState("");
   const [researchIntent, setResearchIntent] = useState("MOMENTUM");
   const [evidenceStandardKey, setEvidenceStandardKey] = useState("REVIEW");
   const [decisionContext, setDecisionContext] = useState("");
   const [briefCopied, setBriefCopied] = useState(false);
-  const [isQuestionEditing, setIsQuestionEditing] = useState(true);
   const [inspectorView, setInspectorView] = useState("decision");
   const [keywords, setKeywords] = useState([]);
   const [topics, setTopics] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [rootQuery, setRootQuery] = useState("");
   const [selectedRootId, setSelectedRootId] = useState("");
-  const [limit, setLimit] = useState(6);
+  const [exploredRoot, setExploredRoot] = useState(null);
+  const [limit, setLimit] = useState(5);
   const [mapLoading, setMapLoading] = useState(false);
   const [mapData, setMapData] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -1563,17 +1894,19 @@ function MindMapWorkspace() {
     };
   }, []);
 
-  const rootOptions = rootType === "KEYWORD" ? keywords : topics;
+  const rootOptions = rootType === "KEYWORD" ? keywords : rootType === "TOPIC" ? topics : [];
   const filteredRootOptions = useMemo(() => {
     const normalizedQuery = rootQuery.trim().toLocaleLowerCase();
     return rootOptions
       .filter((item) => !normalizedQuery || item.name.toLocaleLowerCase().includes(normalizedQuery))
       .slice(0, 100);
   }, [rootOptions, rootQuery]);
-  const selectedRoot = useMemo(
-    () => rootOptions.find((item) => String(item.id) === String(selectedRootId)) ?? null,
-    [rootOptions, selectedRootId],
-  );
+  const selectedRoot = useMemo(() => {
+    const catalogRoot = rootOptions.find((item) => String(item.id) === String(selectedRootId));
+    if (catalogRoot) return catalogRoot;
+    if (String(exploredRoot?.id) === String(selectedRootId)) return exploredRoot;
+    return null;
+  }, [exploredRoot, rootOptions, selectedRootId]);
   const suggestedRoots = useMemo(() => rootOptions.slice(0, 4), [rootOptions]);
   const evidenceStandard = RESEARCH_EVIDENCE_STANDARDS[evidenceStandardKey];
 
@@ -1591,6 +1924,7 @@ function MindMapWorkspace() {
 
   function changeRootType(type) {
     setRootType(type);
+    setExploredRoot(null);
     setRootQuery("");
     setSelectedRootId("");
     setMapData(null);
@@ -1599,6 +1933,7 @@ function MindMapWorkspace() {
   }
 
   function selectResearchRoot(rootId) {
+    setExploredRoot(null);
     setSelectedRootId(rootId);
     setMapData(null);
     setSelectedNode(null);
@@ -1614,44 +1949,51 @@ function MindMapWorkspace() {
     setInspectorView("decision");
   }
 
-  async function buildMindMap(event) {
-    event.preventDefault();
-    if (!selectedRootId) {
-      setErrorMessage(`Select a ${rootType.toLowerCase()} root first.`);
-      rootSelectRef.current?.focus();
-      return;
-    }
-
+  async function loadMindMap(nextRootType, nextRootId) {
     try {
       setMapLoading(true);
       setErrorMessage("");
       const response = await getResearchMindMap({
-        type: rootType,
-        id: Number(selectedRootId),
+        type: nextRootType,
+        id: Number(nextRootId),
         limit: Number(limit),
       });
       const payload = response?.data ?? response;
-      const rawNodes = Array.isArray(payload?.nodes) ? payload.nodes : [];
+      const laneNodes = [
+        ...(Array.isArray(payload?.topics) ? payload.topics.map((node) => ({ ...node, type: node.type || "TOPIC" })) : []),
+        ...(Array.isArray(payload?.keywords) ? payload.keywords.map((node) => ({ ...node, type: node.type || "KEYWORD" })) : []),
+        ...(Array.isArray(payload?.journals) ? payload.journals.map((node) => ({ ...node, type: node.type || "JOURNAL" })) : []),
+      ];
+      const rawNodes = Array.isArray(payload?.nodes) ? payload.nodes : laneNodes;
       if (!payload?.root) {
         throw new Error("No research root was returned for this item.");
       }
 
-      const normalizedNodes = rawNodes.map((n) => normalizeMindMapNode(n));
+      const normalizedNodes = rawNodes.map((node) => normalizeMindMapNode(node)).filter(Boolean);
       const normalizedRoot = normalizeMindMapNode(payload.root);
-      const framedQuestion = researchQuestion.trim()
-        || `Where are the strongest evidence-backed directions around ${normalizedRoot.label}?`;
+      const rawEdges = Array.isArray(payload?.edges)
+        ? payload.edges
+        : Array.isArray(payload?.associations)
+          ? payload.associations
+          : Array.isArray(payload?.relationships)
+            ? payload.relationships
+            : [];
+      const normalizedEdges = normalizedNodes
+        .filter((node) => getMapNodeIdentity(node) !== getMapNodeIdentity(normalizedRoot))
+        .map((node, index) => {
+          const matchingEdge = findEdgeForNode(rawEdges, node);
+          return normalizeMindMapEdge(matchingEdge || node.association || node.edge || node, node, normalizedRoot, index);
+        });
 
       const nextMap = {
         root: normalizedRoot,
         nodes: normalizedNodes,
-        edges: Array.isArray(payload?.edges) ? payload.edges : [],
-        question: framedQuestion,
+        edges: normalizedEdges,
         intent: researchIntent,
         intentLabel: getMindMapIntentLabel(researchIntent),
       };
       setMapData(nextMap);
       setSelectedNode(normalizedRoot);
-      setIsQuestionEditing(false);
       setInspectorView("decision");
       window.requestAnimationFrame(() => {
         mapPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1665,12 +2007,41 @@ function MindMapWorkspace() {
     }
   }
 
+  async function buildMindMap(event) {
+    event.preventDefault();
+    if (!selectedRootId) {
+      setErrorMessage(`Select a ${rootType.toLowerCase()} root first.`);
+      rootSelectRef.current?.focus();
+      return;
+    }
+    await loadMindMap(rootType, selectedRootId);
+  }
+
+  async function exploreNodeAsRoot(node) {
+    const nextType = normalizeMapType(node?.type);
+    if (!node?.id || !MAP_TYPE_ORDER.includes(nextType)) return;
+    const nextRoot = {
+      id: node.id,
+      name: node.label,
+      label: node.label,
+      paperCount: node.paperCount,
+      type: nextType,
+    };
+    setRootType(nextType);
+    setExploredRoot(nextRoot);
+    setSelectedRootId(String(node.id));
+    setRootQuery("");
+    setMapData(null);
+    setSelectedNode(null);
+    await loadMindMap(nextType, node.id);
+  }
+
   const mapInsights = useMemo(() => {
     const nodes = Array.isArray(mapData?.nodes) ? mapData.nodes : [];
-    const rootId = mapData?.root?.id;
+    const rootIdentity = getMapNodeIdentity(mapData?.root);
 
     const relatedNodes = nodes.filter(
-      (node) => String(node.id) !== String(rootId),
+      (node) => getMapNodeIdentity(node) !== rootIdentity,
     );
 
     const assessedNodes = relatedNodes.map((node) => ({ node, assessment: assessMindMapNode(node) }));
@@ -1774,7 +2145,6 @@ function MindMapWorkspace() {
       : ["No direction currently meets the selected evidence standard."];
     const brief = [
       "RESEARCH DECISION BRIEF",
-      `Question: ${mapData.question}`,
       `Evidence root: ${mapData.root?.label || "Not available"}`,
       decisionContext.trim() ? `Decision context: ${decisionContext.trim()}` : null,
       `Decision goal: ${mapData.intentLabel}`,
@@ -1801,15 +2171,15 @@ function MindMapWorkspace() {
         <div className="research-mind-brief-icon"><FiMap /></div>
         <div>
           <span className="research-section-kicker">Research opportunity workspace</span>
-          <h3>Turn a research question into an evidence-backed next move</h3>
-          <p>Frame the decision, inspect catalog momentum and leave with a defensible paper-reading path.</p>
+          <h3>Turn one research concept into a weighted evidence landscape</h3>
+          <p>Inspect shared papers, association strength and publication momentum without a noisy multi-level graph.</p>
         </div>
         <div className="research-mind-progress" aria-label="Mind map progress">
-          <span className={selectedRoot ? "is-complete" : "is-active"}><b>01</b>Frame</span>
+          <span className={selectedRoot ? "is-complete" : "is-active"}><b>01</b>Select</span>
           <i />
-          <span className={mapData ? "is-complete" : selectedRoot ? "is-active" : ""}><b>02</b>Analyze</span>
+          <span className={mapData ? "is-complete" : selectedRoot ? "is-active" : ""}><b>02</b>Map</span>
           <i />
-          <span className={selectedNode && mapData ? "is-active" : ""}><b>03</b>Decide</span>
+          <span className={selectedNode && mapData ? "is-active" : ""}><b>03</b>Evidence</span>
         </div>
       </section>
 
@@ -1817,31 +2187,13 @@ function MindMapWorkspace() {
       <form className="research-map-builder" onSubmit={buildMindMap}>
         <div className="research-panel-heading">
           <div>
-            <span className="research-section-kicker">Research framing</span>
-            <h3>Define the decision</h3>
+            <span className="research-section-kicker">Evidence scope</span>
+            <h3>Choose the research root</h3>
           </div>
           <span className="research-panel-step">01</span>
         </div>
 
-        <p className="research-builder-intro">Tell the workspace what decision you are trying to make, then anchor it to one indexed concept.</p>
-
-        {mapData && !isQuestionEditing ? (
-          <div className="research-question-summary">
-            <div><small>Research question</small><strong>{mapData.question}</strong></div>
-            <button type="button" onClick={() => setIsQuestionEditing(true)}>Edit</button>
-          </div>
-        ) : (
-          <label className="research-map-field research-question-field">
-            <span>Research question</span>
-            <textarea
-              value={researchQuestion}
-              onChange={(event) => setResearchQuestion(event.target.value)}
-              placeholder="Example: Which directions show new activity and enough evidence to investigate?"
-              rows="2"
-            />
-            <small>{researchQuestion.trim() ? "Attached to the next evidence map." : "Optional — a default question will be framed from the selected root."}</small>
-          </label>
-        )}
+        <p className="research-builder-intro">Anchor the map to one indexed concept. Every lane will stay one hop from this root.</p>
 
         <fieldset className="research-evidence-standard">
           <legend>Evidence standard</legend>
@@ -1887,6 +2239,11 @@ function MindMapWorkspace() {
           <button type="button" className={rootType === "TOPIC" ? "active" : ""} onClick={() => changeRootType("TOPIC")}>
             <FiTag />Topic root
           </button>
+          {rootType === "JOURNAL" && (
+            <button type="button" className="active" aria-label="Current journal root">
+              <FiBookOpen />Journal root
+            </button>
+          )}
         </div>
 
         <label className="research-map-field">
@@ -1898,6 +2255,9 @@ function MindMapWorkspace() {
           <span>Select root</span>
           <select ref={rootSelectRef} value={selectedRootId} onChange={(event) => selectResearchRoot(event.target.value)} disabled={catalogLoading}>
             <option value="">{catalogLoading ? "Loading catalog…" : `Choose a ${rootType.toLowerCase()}…`}</option>
+            {selectedRoot && !filteredRootOptions.some((option) => String(option.id) === String(selectedRoot.id)) && (
+              <option value={selectedRoot.id}>{selectedRoot.name}</option>
+            )}
             {filteredRootOptions.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
           </select>
         </label>
@@ -1918,9 +2278,9 @@ function MindMapWorkspace() {
         <label className="research-map-field">
           <span>Landscape breadth</span>
           <select value={limit} onChange={(event) => setLimit(Number(event.target.value))}>
-            <option value={3}>Focused — 3 signals per branch</option>
-            <option value={6}>Balanced — 6 signals per branch</option>
-            <option value={10}>Expanded — 10 signals per branch</option>
+            <option value={3}>Focused — top 3 nodes per lane</option>
+            <option value={4}>Balanced — top 4 nodes per lane</option>
+            <option value={5}>Expanded — top 5 nodes per lane</option>
           </select>
         </label>
 
@@ -1945,12 +2305,12 @@ function MindMapWorkspace() {
         {mapLoading ? (
           <div className="research-tool-empty"><span className="workspace-loading-spinner" /><h3>Mapping research relationships…</h3></div>
         ) : mapData ? (
-          <MindMapGraph data={mapData} selectedNode={selectedNode} onSelectNode={setSelectedNode} />
+          <MindMapGraph data={mapData} selectedNode={selectedNode} onSelectNode={setSelectedNode} onExploreAsRoot={exploreNodeAsRoot} />
         ) : (
           <div className="research-map-empty-shell">
             <header className="research-map-empty-toolbar">
               <div><span><FiCompass /></span><div><small>Decision-support canvas</small><strong>Opportunity preview</strong></div></div>
-              <span className={selectedRoot ? "is-ready" : ""}>{selectedRoot ? "Question framed" : "Waiting for scope"}</span>
+              <span className={selectedRoot ? "is-ready" : ""}>{selectedRoot ? "Root selected" : "Waiting for scope"}</span>
             </header>
             <div className="research-tool-empty research-map-empty-state">
             <div className="research-map-preview-network" aria-hidden="true">
@@ -1962,10 +2322,10 @@ function MindMapWorkspace() {
               <span className="preview-node preview-signal"><FiTrendingUp /><b>Momentum</b><small>Growth signals</small></span>
             </div>
             <span className="research-section-kicker">From discovery to a next move</span>
-            <h3>{selectedRoot ? `Ready to assess directions around “${selectedRoot.name}”` : "Do not browse another graph. Frame a decision."}</h3>
+            <h3>{selectedRoot ? `Ready to assess directions around “${selectedRoot.name}”` : "Choose one indexed evidence root."}</h3>
             <p>{selectedRoot
-              ? "Analyze the network to separate momentum, established evidence and signals that are still too thin to trust."
-              : "Start with a research question and an indexed concept. The workspace will turn catalog relationships into an evidence-reading path."}</p>
+              ? "Build three weighted lanes to separate strong associations, momentum and evidence that is still too thin to trust."
+              : "Start with a keyword or topic. The workspace will rank one-hop relationships and keep every signal tied to paper evidence."}</p>
             <div className="research-map-empty-outcomes">
               <span><FiActivity />Evidence strength</span>
               <span><FiTrendingUp />5-year momentum</span>
