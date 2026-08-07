@@ -7,6 +7,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://su26swp06-be-production-8747.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
