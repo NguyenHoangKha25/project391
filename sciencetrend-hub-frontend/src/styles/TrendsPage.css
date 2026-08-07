@@ -398,6 +398,14 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   transition: transform 0.25s var(--ease-out), box-shadow 0.25s ease;
 }
+
+/* Keep the release accent inside the rounded panel corners. */
+html body .st-layout .trends-middle-grid :is(.trends-chart-panel, .trends-table-panel)::before {
+  top: 0 !important;
+  right: 22px !important;
+  left: 22px !important;
+  border-radius: 0 0 999px 999px;
+}
 .trends-chart-panel:hover,
 .trends-table-panel:hover,
 .trends-bottom-panel:hover {
