@@ -541,6 +541,9 @@ function PaperComparator() {
   const [query, setQuery] = useState("");
   const [appliedQuery, setAppliedQuery] = useState("");
   const [paperOptions, setPaperOptions] = useState([]);
+  const [paperSuggestions, setPaperSuggestions] = useState([]);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const [selectedPapers, setSelectedPapers] = useState([]);
   const [searching, setSearching] = useState(true);
   const [comparing, setComparing] = useState(false);
@@ -548,7 +551,9 @@ function PaperComparator() {
   const [errorMessage, setErrorMessage] = useState("");
   const [candidatePage, setCandidatePage] = useState(0);
   const builderPanelRef = useRef(null);
+  const searchShellRef = useRef(null);
   const searchInputRef = useRef(null);
+  const suggestionRequestRef = useRef(0);
   const resultsRef = useRef(null);
 
   const loadPaperOptions = useCallback(async (searchTerm = "") => {
@@ -581,6 +586,57 @@ function PaperComparator() {
   useEffect(() => {
     loadPaperOptions();
   }, [loadPaperOptions]);
+
+  useEffect(() => {
+    function closeSuggestions(event) {
+      if (!searchShellRef.current?.contains(event.target)) setSuggestionsOpen(false);
+    }
+    document.addEventListener("pointerdown", closeSuggestions);
+    return () => document.removeEventListener("pointerdown", closeSuggestions);
+  }, []);
+
+  useEffect(() => {
+    const normalizedSearchTerm = query.trim();
+    if (!suggestionsOpen || normalizedSearchTerm.length < 2) {
+      setSuggestionsLoading(false);
+      setPaperSuggestions([]);
+      return undefined;
+    }
+
+    const requestId = suggestionRequestRef.current + 1;
+    suggestionRequestRef.current = requestId;
+    setSuggestionsLoading(true);
+    const timerId = window.setTimeout(async () => {
+      try {
+        const response = await getPapers({
+          search: normalizedSearchTerm,
+          page: 0,
+          size: 6,
+          sortBy: "citationCount",
+          sortDir: "desc",
+        });
+        if (suggestionRequestRef.current !== requestId) return;
+        setPaperSuggestions(
+          toArray(response)
+            .map(normalizePaper)
+            .filter((paper) => paper.id && paper.title !== "Untitled paper")
+            .slice(0, 6),
+        );
+      } catch {
+        if (suggestionRequestRef.current === requestId) setPaperSuggestions([]);
+      } finally {
+        if (suggestionRequestRef.current === requestId) setSuggestionsLoading(false);
+      }
+    }, 320);
+
+    return () => window.clearTimeout(timerId);
+  }, [query, suggestionsOpen]);
+
+  async function choosePaperSuggestion(paper) {
+    setQuery(paper.title);
+    setSuggestionsOpen(false);
+    await loadPaperOptions(paper.title);
+  }
 
   function addPaper(paper) {
     if (selectedPapers.some((item) => String(item.id) === String(paper.id))) return;
@@ -653,6 +709,9 @@ function PaperComparator() {
     100,
     Math.round((selectedPapers.length / MIN_COMPARISON_PAPERS) * 100),
   );
+  const visibleSuggestions = query.trim().length >= 2
+    ? paperSuggestions
+    : paperOptions.slice(0, 6);
 
   return (
     <div className="research-comparator-shell">
@@ -697,24 +756,65 @@ function PaperComparator() {
           <strong>{paperOptions.length}<small>papers scanned</small></strong>
         </div>
 
-        <form
-          className="research-search-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            loadPaperOptions(query);
-          }}
-        >
-          <FiSearch />
-          <input
-            ref={searchInputRef}
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search title, author or keyword"
-            aria-label="Search research papers by title, author or keyword"
-          />
-          <button type="submit" disabled={searching}>{searching ? "Searching…" : "Search"}</button>
-        </form>
+        <div className="research-search-shell" ref={searchShellRef}>
+          <form
+            className="research-search-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setSuggestionsOpen(false);
+              loadPaperOptions(query);
+            }}
+          >
+            <FiSearch />
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={query}
+              onFocus={() => setSuggestionsOpen(true)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setSuggestionsOpen(true);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setSuggestionsOpen(false);
+              }}
+              placeholder="Search title, author or keyword"
+              aria-label="Search research papers by title, author or keyword"
+              aria-autocomplete="list"
+              aria-controls="research-paper-suggestions"
+              aria-expanded={suggestionsOpen}
+            />
+            <button type="submit" disabled={searching}>{searching ? "Searching…" : "Search"}</button>
+          </form>
+
+          {suggestionsOpen && (
+            <div className="research-paper-suggestions" id="research-paper-suggestions" role="listbox" aria-label="Suggested research papers">
+              <header>
+                <span>{query.trim().length >= 2 ? "Catalog suggestions" : "Top cited papers"}</span>
+                <small>{suggestionsLoading ? "Finding matches…" : "Select to search"}</small>
+              </header>
+              {suggestionsLoading ? (
+                <div className="research-suggestion-loading"><span className="workspace-loading-spinner" />Searching indexed papers…</div>
+              ) : visibleSuggestions.length > 0 ? (
+                <div className="research-suggestion-list">
+                  {visibleSuggestions.map((paper) => (
+                    <button key={paper.id} type="button" role="option" aria-selected="false" onClick={() => choosePaperSuggestion(paper)}>
+                      <span><FiBookOpen /></span>
+                      <div>
+                        <strong>{paper.title}</strong>
+                        <small>{paper.authors || "Unknown author"}{paper.year ? ` · ${paper.year}` : ""}</small>
+                      </div>
+                      <b>{formatNumber(paper.citationCount)} cites</b>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="research-suggestion-empty">No paper suggestions yet. Press Enter to search the full catalog.</div>
+              )}
+              <footer><FiSearch /> Press Enter anytime to search all matching papers</footer>
+            </div>
+          )}
+        </div>
 
         <div className="research-catalog-status" aria-live="polite">
           <span>{searching
