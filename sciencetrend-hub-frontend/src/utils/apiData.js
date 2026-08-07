@@ -338,7 +338,7 @@ export function parseChartsFromContent(content = "") {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    const sectionMatch = trimmed.match(/^(?:#+\s*)?(?:\d+\.|\d+\:|[A-Z][a-z]+\s+\d+:?)\s*([^\n:]+)/i);
+    const sectionMatch = trimmed.match(/^(?:#+\s*)?(?:\d+\.|\d+:|[A-Z][a-z]+\s+\d+:?)\s*([^\n:]+)/i);
     if (sectionMatch && !trimmed.startsWith("-") && !trimmed.startsWith("*") && !trimmed.includes(": ")) {
       if (currentSection && currentPoints.length > 0) {
         charts.push({ title: currentSection, data: currentPoints });
@@ -348,9 +348,9 @@ export function parseChartsFromContent(content = "") {
       continue;
     }
 
-    const itemMatch = trimmed.match(/^(?:[-\*\u2022]\s*)?([^:\n]+)[:\s]+([\d,.]+)\s*$/);
+    const itemMatch = trimmed.match(/^(?:[-*\u2022]\s*)?([^:\n]+)[:\s]+([\d,.]+)\s*$/);
     if (itemMatch && currentSection) {
-      const label = itemMatch[1].replace(/^[-\*\u2022\s]+/, "").trim();
+      const label = itemMatch[1].replace(/^[-*\u2022\s]+/, "").trim();
       const value = Number(itemMatch[2].replace(/,/g, "")) || 0;
       if (label && !isNaN(value) && label.length < 60) {
         currentPoints.push({ label, value });
@@ -379,60 +379,6 @@ export function parseChartsFromContent(content = "") {
   });
 }
 
-export function getReportChartsForReport(report = {}) {
-  const seedStr = String(report.id || "") + String(report.title || "") + String(report.keyword || report.topic || "");
-  const seed = seedStr.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) || 123;
-  const hash = (n, mod) => Math.abs((seed * n * 9301 + 49297) % 233280) % mod;
-
-  const title = report.title || "Report";
-  const kw = report.keyword || report.topic || title;
-
-  const totalPapers = 150 + hash(1, 1200);
-  const totalJournals = 12 + hash(2, 60);
-  const totalKeywords = 45 + hash(3, 220);
-  const openAlexCount = Math.floor(totalPapers * 0.88);
-
-  const papersByYear = [
-    { label: "2022", value: 10 + hash(4, 40) },
-    { label: "2023", value: 20 + hash(5, 75) },
-    { label: "2024", value: 35 + hash(6, 140) },
-    { label: "2025", value: 55 + hash(7, 210) },
-    { label: "2026", value: 40 + hash(8, 160) },
-  ];
-
-  const topKeywords = [
-    { label: kw !== title ? kw : "Artificial Intelligence", value: 45 + hash(9, 90) },
-    { label: "Machine Learning", value: 35 + hash(10, 70) },
-    { label: "Neural Networks", value: 25 + hash(11, 50) },
-    { label: "Deep Learning", value: 18 + hash(12, 35) },
-  ];
-
-  const topJournals = [
-    { label: "IEEE Access", value: 28 + hash(13, 55) },
-    { label: "Nature Machine Intelligence", value: 20 + hash(14, 40) },
-    { label: "ACM Computing Surveys", value: 14 + hash(15, 30) },
-  ];
-
-  return [
-    {
-      title: "1. Overall statistics",
-      data: [
-        { label: "Total papers", value: totalPapers },
-        { label: "Total journals", value: totalJournals },
-        { label: "Total keywords", value: totalKeywords },
-        { label: "OpenAlex papers", value: openAlexCount },
-      ],
-    },
-    { title: "2. Papers by year", data: papersByYear },
-    { title: "3. Top keywords", data: topKeywords },
-    { title: "4. Top journals", data: topJournals },
-  ];
-}
-
-export function getFallbackReportCharts(report = {}) {
-  return getReportChartsForReport(report);
-}
-
 // Report:
 export function normalizeReport(report = {}, index = 0) {
   const API_BASE_URL = (
@@ -445,25 +391,18 @@ export function normalizeReport(report = {}, index = 0) {
     downloadUrl = `${API_BASE_URL}${cleanUrl.startsWith("/") ? "" : "/"}${cleanUrl}`;
   }
 
-  let rawContent = report.content ?? report.description ?? report.summary ?? "";
-  let parsedCharts = Array.isArray(report.charts) && report.charts.length > 0 
+  const rawContent = report.content ?? report.description ?? report.summary ?? "";
+  const parsedCharts = Array.isArray(report.charts) && report.charts.length > 0
     ? report.charts 
     : parseChartsFromContent(rawContent);
 
-  // Calculate sum of values across all parsed charts
-  const totalValueSum = parsedCharts.reduce((sum, chart) => {
-    if (!Array.isArray(chart.data)) return sum;
-    return sum + chart.data.reduce((ptSum, pt) => ptSum + (Number(pt.value) || 0), 0);
-  }, 0);
-
-  // If report charts are empty or have total sum of 0 (empty report from backend), generate report-specific metrics
-  if (parsedCharts.length === 0 || totalValueSum === 0) {
-    parsedCharts = getReportChartsForReport(report);
-    if (parsedCharts.length > 0 && (!rawContent || rawContent.includes("19980") || rawContent.length < 50)) {
-      const stats = parsedCharts[0]?.data || [];
-      rawContent = `SCIENTIFIC JOURNAL PUBLICATION TREND REPORT: ${report.title || "Report"}\n\n1. Overall statistics\n${stats.map(s => `- ${s.label}: ${s.value}`).join("\n")}\n\n2. Papers by year\n${parsedCharts[1].data.map(p => `- ${p.label}: ${p.value}`).join("\n")}\n\n3. Top keywords\n${parsedCharts[2].data.map(k => `- ${k.label}: ${k.value}`).join("\n")}`;
-    }
-  }
+  const keywordScope = rawContent.match(/Keyword trend:\s*([^\n]+)/i)?.[1]?.trim();
+  const topicScope = rawContent.match(/Topic trend:\s*([^\n]+)/i)?.[1]?.trim();
+  const scope = keywordScope
+    ? { type: "keyword", label: keywordScope }
+    : topicScope
+      ? { type: "topic", label: topicScope }
+      : { type: "catalog", label: "Catalog overview" };
 
   return {
     id: report.id ?? report.reportId ?? report.dashboardReportId ?? index,
@@ -475,6 +414,7 @@ export function normalizeReport(report = {}, index = 0) {
     status: report.status ?? "Ready",
     downloadUrl,
     charts: parsedCharts,
+    scope,
     ownerName: report.ownerName ?? report.user?.username ?? "",
     username: report.username ?? "",
     email: report.email ?? report.user?.email ?? "",

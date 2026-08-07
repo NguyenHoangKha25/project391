@@ -15,7 +15,7 @@ import {
 import MainLayout from "../components/layout/MainLayout";
 import { useAuth } from "../context/useAuth";
 import { getAllKeywords } from "../services/keywordService";
-import { deleteReport, generateReport, getReports, getAdminReports, searchReports } from "../services/reportService";
+import { deleteReport, generateReport, getReportById, getReports, getAdminReports, searchReports } from "../services/reportService";
 import { getAllTopics } from "../services/topicService";
 import {
   formatDateTime,
@@ -51,6 +51,24 @@ const SECTION_LABELS = {
   TOPIC_TREND: "Topic Trend",
   TOP_TRENDING_TOPICS: "Top Trending Topics",
 };
+
+const REPORT_SCOPES = [
+  {
+    value: "catalog",
+    label: "Catalog overview",
+    description: "Platform-wide snapshot. The same years and sections produce the same data.",
+  },
+  {
+    value: "keyword",
+    label: "Keyword focus",
+    description: "Add keyword trend evidence for a specific research focus.",
+  },
+  {
+    value: "topic",
+    label: "Topic focus",
+    description: "Add topic trend evidence for a selected research domain.",
+  },
+];
 
 function uniqueSuggestionNames(items = []) {
   const seen = new Set();
@@ -554,6 +572,7 @@ function ReportsPage() {
   const [reportTitle, setReportTitle] = useState("");
   const [reportKeyword, setReportKeyword] = useState("");
   const [reportTopic, setReportTopic] = useState("");
+  const [reportScope, setReportScope] = useState("keyword");
   const [reportTimeHorizonYears, setReportTimeHorizonYears] = useState("5");
   const [selected, setSelected] = useState(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -615,7 +634,10 @@ function ReportsPage() {
   }, [loadReports]);
 
   useEffect(() => {
-    if (!isResearcherOrAdmin) setAdvancedSections([]);
+    if (!isResearcherOrAdmin) {
+      setAdvancedSections([]);
+      setReportScope("catalog");
+    }
   }, [isResearcherOrAdmin]);
 
   useEffect(() => {
@@ -666,23 +688,42 @@ function ReportsPage() {
     }));
   }
 
+  function selectReportScope(scope) {
+    setReportScope(scope);
+    setValidationErrors((current) => ({ ...current, keyword: "", topic: "" }));
+    setAdvancedSections((current) => {
+      const remaining = current.filter(
+        (section) => section !== "KEYWORD_TREND" && section !== "TOPIC_TREND",
+      );
+      if (scope === "keyword") return [...remaining, "KEYWORD_TREND"];
+      if (scope === "topic") return [...remaining, "TOPIC_TREND"];
+      return remaining;
+    });
+  }
+
   async function handleCreateReport(event) {
     event.preventDefault();
     if (!reportTitle.trim()) return;
 
-    const sections = [
+    const scopeSection = isResearcherOrAdmin && reportScope === "keyword"
+      ? "KEYWORD_TREND"
+      : isResearcherOrAdmin && reportScope === "topic"
+        ? "TOPIC_TREND"
+        : null;
+    const sections = [...new Set([
       ...selectedSections,
       ...(isResearcherOrAdmin ? advancedSections : []),
-    ];
+      ...(scopeSection ? [scopeSection] : []),
+    ])];
     const nextErrors = {};
     if (sections.length === 0) {
       nextErrors.sections = "Select at least one report section.";
     }
-    if (sections.includes("KEYWORD_TREND") && !reportKeyword.trim()) {
-      nextErrors.keyword = "A keyword is required for Keyword Trend analysis.";
+    if (reportScope === "keyword" && !reportKeyword.trim()) {
+      nextErrors.keyword = "Choose a keyword to create a distinct research report.";
     }
-    if (sections.includes("TOPIC_TREND") && !reportTopic.trim()) {
-      nextErrors.topic = "A topic is required for Topic Trend analysis.";
+    if (reportScope === "topic" && !reportTopic.trim()) {
+      nextErrors.topic = "Choose a topic to create a distinct research report.";
     }
     const timeHorizonYears = Number(reportTimeHorizonYears);
     if (!Number.isInteger(timeHorizonYears) || timeHorizonYears < 1 || timeHorizonYears > 30) {
@@ -699,8 +740,8 @@ function ReportsPage() {
       setValidationErrors({});
       const payload = {
         title: reportTitle.trim(),
-        keyword: sections.includes("KEYWORD_TREND") ? reportKeyword.trim() : undefined,
-        topic: sections.includes("TOPIC_TREND") ? reportTopic.trim() : undefined,
+        keyword: reportScope === "keyword" ? reportKeyword.trim() : undefined,
+        topic: reportScope === "topic" ? reportTopic.trim() : undefined,
         timeHorizonYears,
         sections,
         format: "TXT",
@@ -711,6 +752,7 @@ function ReportsPage() {
       setReportTitle("");
       setReportKeyword("");
       setReportTopic("");
+      setReportScope(isResearcherOrAdmin ? "keyword" : "catalog");
       setReportTimeHorizonYears("5");
       setSelectedSections([...BASIC_SECTIONS]);
       setAdvancedSections([]);
@@ -806,7 +848,11 @@ function ReportsPage() {
                 <span className="report-row-icon"><FiBarChart2 /></span>
                 <button type="button" className="report-row-main" onClick={() => handleOpenPreview(report)}>
                   <strong>{report.title}</strong>
-                  <span>{report.description ? report.description.substring(0, 110) + "..." : "Click to view analytical report breakdown & charts"}</span>
+                  <span>
+                    {report.scope?.type === "catalog"
+                      ? "Catalog-wide snapshot · same years and sections produce the same evidence"
+                      : `${report.scope?.type === "topic" ? "Topic" : "Keyword"} focus: ${report.scope?.label}`}
+                  </span>
                 </button>
                 <div className="report-row-meta">
                   <span className="workspace-status">{report.status || "Ready"}</span>
@@ -858,6 +904,9 @@ function ReportsPage() {
                       placeholder="e.g. AI & Deep Learning Research Trend Report 2026"
                       required
                     />
+                    <p className="modal-form-help report-title-help">
+                      The title is only a label. Choose a research scope below to change the evidence.
+                    </p>
                   </div>
 
                   <div className="modal-form-group">
@@ -881,38 +930,79 @@ function ReportsPage() {
                     )}
                   </div>
 
-                  <div className="modal-form-grid-2">
+                  {isResearcherOrAdmin ? (
+                    <fieldset className="report-scope-fieldset">
+                      <legend>Research scope *</legend>
+                      <div className="report-scope-grid">
+                        {REPORT_SCOPES.map((scope) => (
+                          <label
+                            key={scope.value}
+                            className={`report-scope-option${reportScope === scope.value ? " active" : ""}`}
+                          >
+                            <input
+                              type="radio"
+                              name="report-scope"
+                              value={scope.value}
+                              checked={reportScope === scope.value}
+                              onChange={() => selectReportScope(scope.value)}
+                            />
+                            <span>
+                              <strong>{scope.label}</strong>
+                              <small>{scope.description}</small>
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                  ) : (
+                    <div className="report-catalog-notice">
+                      <strong>Catalog overview report</strong>
+                      <span>Lecturer reports summarize the shared catalog. Identical years and sections intentionally produce identical evidence.</span>
+                    </div>
+                  )}
+
+                  {reportScope === "keyword" && isResearcherOrAdmin && (
                     <ReportAutocomplete
                       inputId="report-keyword"
                       icon={<FiTag />}
-                      label={advancedSections.includes("KEYWORD_TREND") ? "Filter Keyword *" : "Filter Keyword (Optional)"}
+                      label="Research Keyword *"
                       value={reportKeyword}
                       onChange={(value) => {
                         setReportKeyword(value);
                         setValidationErrors((current) => ({ ...current, keyword: "" }));
                       }}
                       options={keywordSuggestions}
-                      placeholder="Type to search keywords…"
+                      placeholder="Choose a keyword from the catalog…"
                       loading={suggestionsLoading}
                       optionType="Keyword"
                       error={validationErrors.keyword}
                     />
+                  )}
+
+                  {reportScope === "topic" && isResearcherOrAdmin && (
                     <ReportAutocomplete
                       inputId="report-topic"
                       icon={<FiLayers />}
-                      label={advancedSections.includes("TOPIC_TREND") ? "Filter Topic *" : "Filter Topic (Optional)"}
+                      label="Research Topic *"
                       value={reportTopic}
                       onChange={(value) => {
                         setReportTopic(value);
                         setValidationErrors((current) => ({ ...current, topic: "" }));
                       }}
                       options={topicSuggestions}
-                      placeholder="Type to search topics…"
+                      placeholder="Choose a topic from the catalog…"
                       loading={suggestionsLoading}
                       optionType="Topic"
                       error={validationErrors.topic}
                     />
-                  </div>
+                  )}
+
+                  {reportScope === "catalog" && isResearcherOrAdmin && (
+                    <div className="report-catalog-notice warning">
+                      <strong>Catalog-wide evidence</strong>
+                      <span>This mode is intentionally repeatable. Changing only the report title will not change its statistics.</span>
+                    </div>
+                  )}
 
                   <fieldset className="report-sections-fieldset">
                     <legend>Report Sections</legend>
@@ -943,7 +1033,10 @@ function ReportsPage() {
                           <label key={section} className="report-section-option report-section-option-advanced">
                             <input
                               type="checkbox"
-                              checked={advancedSections.includes(section)}
+                              checked={advancedSections.includes(section)
+                                || (section === "KEYWORD_TREND" && reportScope === "keyword")
+                                || (section === "TOPIC_TREND" && reportScope === "topic")}
+                              disabled={section === "KEYWORD_TREND" || section === "TOPIC_TREND"}
                               onChange={() => toggleSection(section, true)}
                             />
                             <span>{SECTION_LABELS[section]}</span>
@@ -988,6 +1081,11 @@ function ReportsPage() {
                   <span className="catalog-kicker">Generated Analytical Report</span>
                   <h2>{selected.title}</h2>
                   <p className="report-preview-meta">{selected.period ? formatDateTime(selected.period) : "Recently generated"}</p>
+                  <span className={`report-preview-scope ${selected.scope?.type || "catalog"}`}>
+                    {selected.scope?.type === "catalog"
+                      ? "Catalog-wide snapshot"
+                      : `${selected.scope?.type === "topic" ? "Topic" : "Keyword"}: ${selected.scope?.label}`}
+                  </span>
                 </div>
                 <button type="button" className="report-preview-close" onClick={() => setSelected(null)} aria-label="Close report preview"><FiX /></button>
               </div>
@@ -995,10 +1093,16 @@ function ReportsPage() {
 
 
               <div className="report-content-card">
-                <ReportFormattedNarrative content={selected.content || selected.description} />
+                {loadingPreview ? (
+                  <div className="report-preview-loading">
+                    <span className="workspace-loading-spinner" /> Loading authoritative report data…
+                  </div>
+                ) : (
+                  <ReportFormattedNarrative content={selected.content || selected.description} />
+                )}
               </div>
 
-              {selected.charts && selected.charts.length > 0 && (
+              {!loadingPreview && selected.charts && selected.charts.length > 0 && (
                 <div className="report-charts">
                   {selected.charts.map((chart, index) => <ReportChart key={chart.id ?? chart.title ?? index} chart={chart} />)}
                 </div>
