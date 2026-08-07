@@ -183,6 +183,15 @@ function normalizeMapType(type) {
   return MAP_TYPE_META[normalizedType] ? normalizedType : "UNKNOWN";
 }
 
+function getMapStatusLabel(status) {
+  const normalizedStatus = String(status || "NO_DATA").toUpperCase();
+  if (normalizedStatus === "EMERGING") return "Emerging";
+  if (normalizedStatus === "GROWING") return "Growing";
+  if (normalizedStatus === "STABLE") return "Stable";
+  if (normalizedStatus === "DECLINING") return "Cooling";
+  return "No trend";
+}
+
 function getMapNodeIdentity(node) {
   if (!node || node.id === null || node.id === undefined) return "";
   const type = normalizeMapType(node.type);
@@ -212,12 +221,21 @@ function getMapLayout(nodes = [], root, edges = []) {
     return groups;
   }, new Map());
 
-  let cursorY = 42;
+  const visibleTypes = MAP_TYPE_ORDER.filter((type) => groupedNodes.has(type));
+  const groupCount = Math.max(1, visibleTypes.length);
+  const groupSideInset = groupCount === 2 ? 300 : 160;
+  const firstGroupX = groupCount === 1 ? MAP_WIDTH / 2 : groupSideInset;
+  const lastGroupX = groupCount === 1 ? MAP_WIDTH / 2 : MAP_WIDTH - groupSideInset;
+  const groupGap = groupCount > 1 ? (lastGroupX - firstGroupX) / (groupCount - 1) : 0;
+  const hubY = 224;
+  const nodeStartY = 352;
+  const nodeGapY = 84;
+  const laneTop = 286;
+  const laneWidth = groupCount >= 4 ? 252 : groupCount === 3 ? 292 : 330;
 
-  const groups = MAP_TYPE_ORDER
-    .filter((type) => groupedNodes.has(type))
-    .map((type) => {
+  const groups = visibleTypes.map((type, groupIndex) => {
       const groupNodes = groupedNodes.get(type);
+      const groupCenterX = firstGroupX + groupGap * groupIndex;
 
       const level1 = [];
       const level2ByParent = new Map();
@@ -233,86 +251,71 @@ function getMapLayout(nodes = [], root, edges = []) {
         }
       });
 
-      const laidOutNodes = [];
-      let currentY = cursorY + 58;
+      const orderedNodes = [];
 
       level1.forEach((node) => {
         const children = level2ByParent.get(String(node.id)) || [];
-        const parentY = currentY;
-
-        laidOutNodes.push({
+        orderedNodes.push({
           node,
           relation: relationByTarget.get(String(node.id)) || MAP_TYPE_META[type].relation,
-          x: 650,
-          y: parentY,
           isLevel2: false,
           parentId: null,
         });
 
-        children.forEach((childNode, childIdx) => {
-          const childY = parentY + childIdx * 78;
-          laidOutNodes.push({
+        children.forEach((childNode) => {
+          orderedNodes.push({
             node: childNode,
             relation: relationByTarget.get(String(childNode.id)) || "SUB_TOPIC",
-            x: 955,
-            y: childY,
             isLevel2: true,
             parentId: String(node.id),
           });
         });
-
-        const numRows = Math.max(1, children.length);
-        currentY += numRows * 78;
       });
 
-      const placedIds = new Set(laidOutNodes.map((item) => String(item.node.id)));
+      const placedIds = new Set(orderedNodes.map((item) => String(item.node.id)));
       groupNodes.forEach((node) => {
         if (!placedIds.has(String(node.id))) {
-          laidOutNodes.push({
+          orderedNodes.push({
             node,
             relation: relationByTarget.get(String(node.id)) || MAP_TYPE_META[type].relation,
-            x: 650,
-            y: currentY,
             isLevel2: false,
             parentId: null,
           });
-          currentY += 78;
         }
       });
 
-      const laneHeight = Math.max(166, currentY - cursorY + 16);
-      const laneTop = cursorY;
-      const hubY = laneTop + laneHeight / 2;
-
-      cursorY += laneHeight + 20;
+      const laidOutNodes = orderedNodes.map((item, nodeIndex) => ({
+        ...item,
+        x: groupCenterX + (item.isLevel2 ? 12 : 0),
+        y: nodeStartY + nodeIndex * nodeGapY,
+      }));
+      const groupLaneHeight = Math.max(
+        236,
+        (Math.max(1, laidOutNodes.length) - 1) * nodeGapY + MAP_NODE_HEIGHT + 114,
+      );
 
       return {
         type,
         meta: MAP_TYPE_META[type],
-        hub: { x: 405, y: hubY },
+        hub: { x: groupCenterX, y: hubY },
         laneTop,
-        laneHeight,
+        laneHeight: groupLaneHeight,
+        laneLeft: groupCenterX - laneWidth / 2,
+        laneWidth,
         nodes: laidOutNodes,
       };
     });
 
-  const rawHeight = cursorY + 24;
-  const height = Math.max(MAP_MIN_HEIGHT, rawHeight);
-  const verticalOffset = Math.max(0, (height - rawHeight) / 2);
-  if (verticalOffset > 0) {
-    groups.forEach((group) => {
-      group.hub.y += verticalOffset;
-      group.laneTop += verticalOffset;
-      group.nodes.forEach((item) => {
-        item.y += verticalOffset;
-      });
-    });
-  }
+  const contentBottom = groups.reduce(
+    (maximum, group) => Math.max(maximum, group.laneTop + group.laneHeight),
+    MAP_MIN_HEIGHT,
+  );
+  const height = Math.max(MAP_MIN_HEIGHT, contentBottom + 34);
 
   return {
     width: MAP_WIDTH,
     height,
-    root: { x: 145, y: height / 2 },
+    root: { x: MAP_WIDTH / 2, y: 88 },
     groups,
   };
 }
@@ -980,9 +983,15 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   const rootId = data?.root?.id;
   const rootNodeKey = getMapNodeIdentity(data?.root);
   const selectedNodeKey = getMapNodeIdentity(selectedNode);
-  const nodes = useMemo(() => (Array.isArray(data?.nodes) ? data.nodes : []), [data?.nodes]);
-  const edges = useMemo(() => (Array.isArray(data?.edges) ? data.edges : []), [data?.edges]);
-  const layout = useMemo(() => getMapLayout(nodes, data?.root, edges), [nodes, data?.root, edges]);
+  const nodes = useMemo(() => (Array.isArray(data.nodes) ? data.nodes : []), [data.nodes]);
+  const edges = useMemo(() => (Array.isArray(data.edges) ? data.edges : []), [data.edges]);
+  const layout = useMemo(() => getMapLayout(nodes, data.root, edges), [nodes, data.root, edges]);
+  const prioritySignals = useMemo(() => nodes
+    .filter((node) => getMapNodeIdentity(node) !== rootNodeKey)
+    .map((node) => ({ node, assessment: assessMindMapNode(node) }))
+    .sort((first, second) => second.assessment.signal.priority - first.assessment.signal.priority
+      || Number(second.node.paperCount || 0) - Number(first.node.paperCount || 0))
+    .slice(0, 3), [nodes, rootNodeKey]);
   const [zoom, setZoom] = useState(100);
   const [viewMode, setViewMode] = useState("structure");
   const [isFocusMode, setIsFocusMode] = useState(false);
@@ -991,13 +1000,12 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   const restoreFrameRef = useRef([]);
   const rootType = normalizeMapType(data?.root?.type);
   const rootLines = splitMapLabel(data?.root?.label, 24);
-  const baseViewBoxY = -110;
-  const baseViewBoxHeight = layout.height + 220;
+  const baseViewBoxY = -18;
+  const baseViewBoxHeight = layout.height + 62;
   const fitZoomRatio = 100 / zoom;
   const fitViewBoxWidth = layout.width * fitZoomRatio;
   const fitViewBoxHeight = baseViewBoxHeight * fitZoomRatio;
-  const zoomInProgress = Math.max(0, zoom - 100) / (MAP_ZOOM_MAX - 100);
-  const fitViewBoxCenterX = layout.width / 2 - zoomInProgress * 180;
+  const fitViewBoxCenterX = layout.width / 2;
   const fitViewBoxCenterY = baseViewBoxY + baseViewBoxHeight / 2;
   const fitViewBoxX = fitViewBoxCenterX - fitViewBoxWidth / 2;
   const fitViewBoxY = fitViewBoxCenterY - fitViewBoxHeight / 2;
@@ -1088,6 +1096,10 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
   }, []);
 
   function curvePath(sourceX, sourceY, targetX, targetY) {
+    if (Math.abs(targetY - sourceY) > Math.abs(targetX - sourceX)) {
+      const bendY = sourceY + (targetY - sourceY) * 0.52;
+      return `M ${sourceX} ${sourceY} C ${sourceX} ${bendY}, ${targetX} ${bendY}, ${targetX} ${targetY}`;
+    }
     const bendX = sourceX + (targetX - sourceX) * 0.52;
     return `M ${sourceX} ${sourceY} C ${bendX} ${sourceY}, ${bendX} ${targetY}, ${targetX} ${targetY}`;
   }
@@ -1207,6 +1219,33 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
         <span>{data.intentLabel}</span>
       </div>
 
+      {prioritySignals.length > 0 && (
+        <div className="research-map-signal-strip" aria-label="Priority research signals">
+          <div className="research-map-signal-strip-label">
+            <FiZap />
+            <div><small>Priority signals</small><strong>Jump to evidence</strong></div>
+          </div>
+          <div className="research-map-signal-list">
+            {prioritySignals.map(({ node, assessment }, index) => {
+              const nodeKey = getMapNodeIdentity(node);
+              const type = normalizeMapType(node.type).toLowerCase();
+              return (
+                <button
+                  key={nodeKey}
+                  type="button"
+                  className={`type-${type} ${selectedNodeKey === nodeKey ? "is-active" : ""}`}
+                  onClick={(event) => selectMapNode(event, node)}
+                >
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <div><strong>{node.label}</strong><small>{assessment.signal.label} · {formatNumber(node.paperCount)} papers</small></div>
+                  <FiArrowRight />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="research-map-canvas" ref={canvasRef}>
         <svg
           viewBox={mapViewBox}
@@ -1235,16 +1274,16 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
             ))}
           </defs>
 
-          <rect x="0" y="-110" width={layout.width} height={layout.height + 220} fill="url(#research-map-dot-grid)" />
+          <rect x="0" y={baseViewBoxY} width={layout.width} height={baseViewBoxHeight} fill="url(#research-map-dot-grid)" />
 
           <g className="research-map-lanes" aria-hidden="true">
             {layout.groups.map((group) => (
               <rect
                 key={group.type}
                 className={`research-map-lane type-${group.type.toLowerCase()}`}
-                x="520"
+                x={group.laneLeft}
                 y={group.laneTop + 8}
-                width="520"
+                width={group.laneWidth}
                 height={group.laneHeight - 16}
                 rx="25"
               />
@@ -1258,7 +1297,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
                 <g key={group.type} className={`type-${typeClass}`}>
                   <path
                     className="research-map-primary-branch"
-                    d={curvePath(layout.root.x + 116, layout.root.y, group.hub.x - 66, group.hub.y)}
+                    d={curvePath(layout.root.x, layout.root.y + 54, group.hub.x, group.hub.y - 28)}
                   />
                   {group.nodes.map((item) => {
                     if (item.isLevel2 && item.parentId) {
@@ -1268,7 +1307,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
                           <path
                             key={item.node.id}
                             className="research-map-secondary-branch level-2"
-                            d={curvePath(parentNode.x + MAP_NODE_WIDTH / 2, parentNode.y, item.x - MAP_NODE_WIDTH / 2 - 6, item.y)}
+                            d={curvePath(parentNode.x, parentNode.y + MAP_NODE_HEIGHT / 2, item.x, item.y - MAP_NODE_HEIGHT / 2 - 6)}
                             markerEnd={`url(#research-arrow-${typeClass})`}
                           />
                         );
@@ -1278,7 +1317,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
                       <path
                         key={item.node.id}
                         className="research-map-secondary-branch"
-                        d={curvePath(group.hub.x + 66, group.hub.y, item.x - MAP_NODE_WIDTH / 2 - 6, item.y)}
+                        d={curvePath(group.hub.x, group.hub.y + 28, item.x, item.y - MAP_NODE_HEIGHT / 2 - 6)}
                         markerEnd={`url(#research-arrow-${typeClass})`}
                       />
                     );
@@ -1327,6 +1366,7 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
               const type = normalizeMapType(node.type);
               const typeClass = type.toLowerCase();
               const statusClass = String(node.trendStatus || "no_data").toLowerCase();
+              const statusLabel = getMapStatusLabel(node.trendStatus);
               const lines = splitMapLabel(node.label, 26);
               const nodeKey = getMapNodeIdentity(node);
               const isSelected = selectedNodeKey === nodeKey;
@@ -1356,7 +1396,8 @@ function MindMapGraph({ data, selectedNode, onSelectNode }) {
                     {lines.map((line, index) => <tspan key={`${line}-${index}`} x={labelStartX} dy={index === 0 ? 0 : 15}>{line}</tspan>)}
                   </text>
                   <text className="research-map-node-count" textAnchor="start" x={labelStartX} y={lines.length > 1 ? 21 : 16}>{formatNumber(node.paperCount)} papers</text>
-                  <circle className="research-map-node-status" cx={MAP_NODE_WIDTH / 2 - 14} cy="-18" r="5" />
+                  <text className="research-map-node-status-label" textAnchor="end" x={MAP_NODE_WIDTH / 2 - 25} y="20">{statusLabel}</text>
+                  <circle className="research-map-node-status" cx={MAP_NODE_WIDTH / 2 - 14} cy="17" r="5" />
                   <title>{node.label} · {MAP_TYPE_META[type].label} · {String(node.trendStatus || "NO_DATA").replaceAll("_", " ")} · {formatNumber(node.paperCount)} papers</title>
                 </g>
               );
