@@ -50,8 +50,8 @@ html body .register-page .register-left {
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
-  gap: 24px !important;
-  padding: clamp(32px, 4vw, 44px) !important;
+  gap: 20px !important;
+  padding: clamp(28px, 3.5vw, 38px) clamp(28px, 3.5vw, 38px) !important;
   background: linear-gradient(145deg, #0b0f19 0%, #0f172a 50%, #1e1b4b 100%) !important;
   color: #ffffff !important;
   overflow: hidden !important;
@@ -68,9 +68,10 @@ html body .register-page .register-left-ambient-glow {
   background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%) !important;
   filter: blur(40px) !important;
   pointer-events: none !important;
+  z-index: 1 !important;
 }
 
-html body .register-page .register-left > * {
+html body .register-page .register-left > :not(.register-left-ambient-glow) {
   position: relative !important;
   z-index: 2 !important;
 }
@@ -281,8 +282,9 @@ html body .register-page .reg-status-dot {
 html body .register-page .register-right {
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important;
-  padding: clamp(28px, 4vw, 44px) clamp(24px, 3.5vw, 40px) !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  padding: clamp(28px, 3.5vw, 38px) clamp(28px, 3.5vw, 38px) !important;
   background: #ffffff !important;
   overflow-y: auto !important;
 }
