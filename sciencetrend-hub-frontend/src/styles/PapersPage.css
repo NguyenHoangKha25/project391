@@ -613,6 +613,92 @@
   border: 1px solid rgba(21, 127, 145, 0.18);
 }
 
+.papers-catalog-error {
+  min-height: 340px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: clamp(28px, 5vw, 52px);
+  border: 1px solid rgba(231, 171, 66, 0.32);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 193, 72, 0.14), transparent 18rem),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(255, 249, 237, 0.92));
+  box-shadow: 0 18px 42px rgba(93, 67, 25, 0.08);
+}
+
+.papers-catalog-error-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(225, 156, 38, 0.2);
+  border-radius: 18px;
+  color: #c7790f;
+  background: rgba(255, 242, 214, 0.92);
+}
+
+.papers-catalog-error-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.papers-catalog-error-copy {
+  min-width: 0;
+}
+
+.papers-catalog-error-copy > span {
+  color: #b66c0b;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.papers-catalog-error-copy h3 {
+  margin: 6px 0 0;
+  color: var(--st-heading);
+  font-size: clamp(20px, 2vw, 27px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+.papers-catalog-error-copy p {
+  max-width: 620px;
+  margin: 7px 0 0;
+  color: var(--st-muted-strong);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.papers-catalog-error > button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 13px;
+  color: #fff;
+  background: linear-gradient(135deg, #5966f6, #3e78dd);
+  box-shadow: 0 12px 26px rgba(62, 81, 185, 0.2);
+  font-size: 12px;
+  font-weight: 800;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.papers-catalog-error > button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(62, 81, 185, 0.28);
+}
+
+.papers-catalog-error > button svg {
+  width: 15px;
+  height: 15px;
+}
+
 /* Responsive constraints */
 @media (max-width: 1080px) {
   .search-papers-grid {
@@ -624,6 +710,15 @@
   }
 }
 @media (max-width: 600px) {
+  .papers-catalog-error {
+    grid-template-columns: 1fr;
+    align-content: center;
+  }
+
+  .papers-catalog-error > button {
+    width: 100%;
+  }
+
   .results-chips-toolbar {
     align-items: stretch;
   }

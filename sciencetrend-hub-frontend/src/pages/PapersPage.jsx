@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { FiSearch, FiX, FiFilter, FiChevronDown } from "react-icons/fi";
+import {
+  FiAlertTriangle,
+  FiChevronDown,
+  FiFilter,
+  FiRefreshCw,
+  FiSearch,
+  FiX,
+} from "react-icons/fi";
 import PaperCard from "../components/PaperCard";
 import MainLayout from "../components/layout/MainLayout";
 import { getPapers } from "../services/paperService";
@@ -674,7 +681,11 @@ function PapersPage() {
 
               <div className="results-toolbar-actions">
                 <span className="results-found-count">
-                  {loading ? "Searching..." : `${formatNumber(totalElements)} results found`}
+                  {loading
+                    ? "Searching..."
+                    : errorMessage
+                      ? "Catalog temporarily unavailable"
+                      : `${formatNumber(totalElements)} results found`}
                 </span>
                 <label className="results-page-size">
                   <span>Per page</span>
@@ -691,13 +702,6 @@ function PapersPage() {
               </div>
             </div>
 
-            {/* Error notifications */}
-            {errorMessage && (
-              <div className="workspace-notice warning" style={{ marginBottom: 16 }}>
-                {errorMessage}
-              </div>
-            )}
-
             {/* Toast overlay */}
             {toast && (
               <div className={`papers-toast papers-toast--${toast.type}`}>
@@ -710,6 +714,23 @@ function PapersPage() {
               <div className="page-loading-state">
                 <span className="workspace-loading-spinner" />
                 Loading research papers…
+              </div>
+            ) : errorMessage ? (
+              <div className="papers-catalog-error" role="alert">
+                <span className="papers-catalog-error-icon" aria-hidden="true">
+                  <FiAlertTriangle />
+                </span>
+                <div className="papers-catalog-error-copy">
+                  <span>Public catalog connection</span>
+                  <h3>We couldn't load the paper directory</h3>
+                  <p>
+                    Your filters are still here. Retry the public catalog without leaving this page.
+                  </p>
+                </div>
+                <button type="button" onClick={() => loadPapers(page, searchVal)}>
+                  <FiRefreshCw />
+                  Try again
+                </button>
               </div>
             ) : papers.length === 0 ? (
               <div className="workspace-empty" style={{ minHeight: 340 }}>
@@ -730,7 +751,7 @@ function PapersPage() {
             )}
 
             {/* Pagination controls */}
-            {!loading && totalPages > 1 && (
+            {!loading && !errorMessage && totalPages > 1 && (
               <div className="cm-pagination" style={{ marginTop: 24 }}>
                 <button
                   type="button"
