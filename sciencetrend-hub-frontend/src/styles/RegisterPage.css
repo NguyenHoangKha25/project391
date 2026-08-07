@@ -294,6 +294,23 @@ html body .register-page .register-premium-card-box {
   display: flex !important;
   flex-direction: column !important;
   gap: 18px !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  backdrop-filter: none !important;
+  transform: none !important;
+}
+
+html body .register-page .register-premium-card-box::before,
+html body .register-page .register-premium-card-box::after {
+  display: none !important;
+  content: none !important;
+  height: 0 !important;
+  border: none !important;
+  background: transparent !important;
 }
 
 /* Form Header */
