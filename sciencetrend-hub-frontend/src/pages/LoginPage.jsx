@@ -16,7 +16,7 @@ import {
 import logo from "../assets/images/logo-login.svg";
 import { ROUTE_PATHS } from "../routes/routePaths";
 import { useAuth } from "../context/useAuth";
-import { login } from "../services/authService";
+import { login, warmAuthService } from "../services/authService";
 import { getCurrentUser } from "../services/userService";
 import { getDefaultAuthenticatedPath } from "../utils/authStorage";
 import { getSafeInternalPath, storePostLoginRedirect } from "../utils/postLoginRedirect";
@@ -59,6 +59,7 @@ function LoginPage() {
 
   useEffect(() => {
     document.title = "Sign in | ScienceTrend Hub";
+    warmAuthService();
   }, []);
 
   const handleLogin = async (event) => {
