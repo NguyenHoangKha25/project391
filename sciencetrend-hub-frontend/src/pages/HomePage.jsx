@@ -368,7 +368,9 @@ function HomePage() {
               reloadDocument
               className="home-catalog-main-link"
             >
-              Open publication directory <FiArrowRight aria-hidden="true" />
+              <FiCompass aria-hidden="true" />
+              <span>Open publication directory</span>
+              <FiArrowRight className="btn-arrow" aria-hidden="true" />
             </Link>
           </div>
 
