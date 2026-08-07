@@ -42,6 +42,8 @@ const tabs = [
 
 const CURRENT_YEAR = new Date().getFullYear();
 const DEFAULT_BACKFILL_FROM_YEAR = 2015;
+const DEFAULT_BACKFILL_MAX_RESULTS = 3500;
+const MAX_BACKFILL_RESULTS = 7000;
 
 function resolveAdminTab(value) {
   return tabs.some(([tabValue]) => tabValue === value) ? value : "overview";
@@ -65,7 +67,7 @@ function syncLogDetails(log) {
     || normalizedMessage.includes("timed out")
     || normalizedMessage.includes("timeout")
   ) {
-    return "OpenAlex took too long to respond. Retry with a smaller batch (100–500 papers) or try again later.";
+    return "OpenAlex took too long to respond. Retry with fewer papers or try again later.";
   }
   if (normalizedMessage.includes("openalex_api_key") || normalizedMessage.includes("openalex api key")) {
     return "The OpenAlex API key is not configured on the backend. Add it to the Railway environment before retrying.";
@@ -77,7 +79,7 @@ function syncLogDetails(log) {
     return "Another synchronization is already running. Wait for it to finish before starting a new backfill.";
   }
   if (normalizedMessage.includes("outofmemory") || normalizedMessage.includes("heap space")) {
-    return "The backend ran out of memory while processing this batch. Retry with 100–500 papers.";
+    return "The backend ran out of memory while processing this batch. Retry with fewer papers.";
   }
   if (/(?:java\.|reactor\.|org\.)[\w.$]+|\b(?:exception|error)\b.*(?:flatmap|stack|signal)/i.test(rawMessage)) {
     return "The backend could not complete this backfill. Retry with a smaller batch or review the backend logs.";
@@ -105,7 +107,7 @@ function AdminPage() {
   const [userSearch, setUserSearch] = useState("");
   const [fromYear, setFromYear] = useState(String(DEFAULT_BACKFILL_FROM_YEAR));
   const [toYear, setToYear] = useState(String(CURRENT_YEAR));
-  const [maxResults, setMaxResults] = useState("500");
+  const [maxResults, setMaxResults] = useState(String(DEFAULT_BACKFILL_MAX_RESULTS));
   const [backfillError, setBackfillError] = useState("");
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState("");
@@ -225,8 +227,8 @@ function AdminPage() {
       setBackfillError("The start year cannot be later than the end year.");
       return;
     }
-    if (!Number.isInteger(parsedMaxResults) || parsedMaxResults < 1 || parsedMaxResults > 5000) {
-      setBackfillError("Maximum papers must be between 1 and 5,000.");
+    if (!Number.isInteger(parsedMaxResults) || parsedMaxResults < 1 || parsedMaxResults > MAX_BACKFILL_RESULTS) {
+      setBackfillError(`Maximum papers must be between 1 and ${formatNumber(MAX_BACKFILL_RESULTS)}.`);
       return;
     }
 
@@ -310,13 +312,13 @@ function AdminPage() {
                 <article className="admin-panel-detailed">
                   <div className="panel-header-row"><div><h3>OpenAlex synchronization</h3><p>Start a current sync or backfill a historical year range.</p></div><button className="admin-header-trigger-sync-btn" type="button" onClick={runSync} disabled={working === "sync"}><FiRefreshCw className={working === "sync" ? "is-spinning" : ""} /> Manual sync</button></div>
                   <form className="admin-backfill-form" onSubmit={runBackfill}>
-                    <div className="admin-backfill-copy"><span>Historical data</span><strong>Backfill publications by year</strong><p>Import missing OpenAlex records for the selected period.</p><div className="admin-backfill-recommendation"><FiCheckCircle /> Recommended batch: 100–500 papers</div></div>
+                    <div className="admin-backfill-copy"><span>Historical data</span><strong>Backfill publications by year</strong><p>Import missing OpenAlex records for the selected period.</p><div className="admin-backfill-recommendation"><FiCheckCircle /> Recommended batch: {formatNumber(DEFAULT_BACKFILL_MAX_RESULTS)} papers</div></div>
                     <div className="admin-backfill-fields">
                       <label htmlFor="backfill-from-year">From year<input id="backfill-from-year" type="number" min="1900" max={CURRENT_YEAR} value={fromYear} onChange={(event) => { setFromYear(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                       <span className="admin-year-separator" aria-hidden="true">to</span>
                       <label htmlFor="backfill-to-year">To year<input id="backfill-to-year" type="number" min="1900" max={CURRENT_YEAR} value={toYear} onChange={(event) => { setToYear(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                       <span className="admin-year-separator" aria-hidden="true">·</span>
-                      <label htmlFor="backfill-max-results">Max papers<input id="backfill-max-results" type="number" min="1" max="5000" value={maxResults} onChange={(event) => { setMaxResults(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
+                      <label htmlFor="backfill-max-results">Max papers<input id="backfill-max-results" type="number" min="1" max={MAX_BACKFILL_RESULTS} value={maxResults} onChange={(event) => { setMaxResults(event.target.value); setBackfillError(""); }} disabled={working === "backfill"} required /></label>
                     </div>
                     <button className="workspace-button primary admin-backfill-submit" type="submit" disabled={working === "backfill"}>{working === "backfill" ? <><FiRefreshCw className="is-spinning" /> Starting backfill…</> : <><FiDownload /> Start backfill</>}</button>
                     {backfillError && <p className="admin-backfill-error" role="alert"><FiAlertTriangle /> {backfillError}</p>}
