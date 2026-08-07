@@ -30,6 +30,20 @@ export function getTrendingKeywords(params = {}) {
   });
 }
 
+export function getKeywordSuggestions(q, page = 0, size = 10) {
+  return apiRequest("/keywords/suggestions", {
+    params: { q, page, size },
+    auth: false,
+  });
+}
+
+export function getTopicSuggestions(q, page = 0, size = 10) {
+  return apiRequest("/topics/suggestions", {
+    params: { q, page, size },
+    auth: false,
+  });
+}
+
 // Helper endpoints
 export function getTrendByKeyword(keyword) {
   return apiRequest("/trends/keyword", { params: { keyword } });
