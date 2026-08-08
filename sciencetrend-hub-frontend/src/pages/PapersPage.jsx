@@ -354,6 +354,10 @@ function PapersPage() {
   // Handle advanced filter submit
   function handleFilterSubmit(e) {
     e.preventDefault();
+    if (yearFrom && yearTo && Number(yearFrom) > Number(yearTo)) {
+      showToast("Minimum year cannot be later than maximum year.", "warning");
+      return;
+    }
     loadPapers(0);
   }
 
@@ -496,13 +500,6 @@ function PapersPage() {
     activeChips.push({ type: "sort", label: `Sort: ${sortLabel}` });
   }
 
-  // Years options list
-  const currentYear = new Date().getFullYear() + 1;
-  const yearsList = [];
-  for (let y = currentYear; y >= 2000; y--) {
-    yearsList.push(y);
-  }
-
   return (
     <MainLayout title="Search Papers" subtitle="Discover and explore scientific research papers">
       <div className="search-papers-container">
@@ -606,28 +603,34 @@ function PapersPage() {
                 <div className="filter-form-group">
                 <label>Year Range</label>
                 <div className="filter-year-range-row">
-                  <div className="filter-select-wrapper">
-                    <select value={yearFrom} onChange={(e) => setYearFrom(e.target.value)}>
-                      <option value="">Min</option>
-                      {yearsList.map((y) => (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      ))}
-                    </select>
-                    <FiChevronDown />
+                  <div className="filter-input-wrapper filter-year-input-wrapper">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]{4}"
+                      minLength={4}
+                      maxLength={4}
+                      placeholder="Min"
+                      aria-label="Minimum publication year"
+                      title="Enter a 4-digit year"
+                      value={yearFrom}
+                      onChange={(e) => setYearFrom(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                    />
                   </div>
                   <span className="year-separator">to</span>
-                  <div className="filter-select-wrapper">
-                    <select value={yearTo} onChange={(e) => setYearTo(e.target.value)}>
-                      <option value="">Max</option>
-                      {yearsList.map((y) => (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      ))}
-                    </select>
-                    <FiChevronDown />
+                  <div className="filter-input-wrapper filter-year-input-wrapper">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]{4}"
+                      minLength={4}
+                      maxLength={4}
+                      placeholder="Max"
+                      aria-label="Maximum publication year"
+                      title="Enter a 4-digit year"
+                      value={yearTo}
+                      onChange={(e) => setYearTo(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                    />
                   </div>
                 </div>
                 </div>
