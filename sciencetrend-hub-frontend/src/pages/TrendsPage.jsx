@@ -179,29 +179,6 @@ function normalizeGrowthPoint(item, index) {
   };
 }
 
-function deriveGrowthData(yearlyData) {
-  const rawPoints = toArray(yearlyData)
-    .map(normalizeChartPoint)
-    .filter((point) => /^\d{4}$/.test(String(point?.label ?? "")))
-    .sort((left, right) => Number(left.label) - Number(right.label));
-
-  return rawPoints.map((point, index) => {
-    const paperCount = Number(point.value) || 0;
-    const previousPaperCount = index > 0 ? Number(rawPoints[index - 1]?.value) || 0 : 0;
-    const growthRate = previousPaperCount > 0
-      ? (paperCount - previousPaperCount) / previousPaperCount
-      : index > 0 && paperCount > 0 ? 1 : 0;
-    return {
-      label: point.label,
-      value: growthRate * 100,
-      growthRate,
-      paperCount,
-      previousPaperCount,
-      trendScore: 0,
-    };
-  });
-}
-
 function normalizeTrendAnalysis(response, fallbackName = "") {
   const payload = response?.data ?? response ?? {};
   const trendType = String(payload.trendType || "INSUFFICIENT_DATA").toUpperCase();
@@ -218,6 +195,7 @@ function normalizeTrendAnalysis(response, fallbackName = "") {
     totalPapers: Number(payload.totalPapers) || 0,
     fromYear: Number(payload.fromYear) || null,
     toYear: Number(payload.toYear) || null,
+    yearlyData: toArray(payload.yearlyData).map(normalizeChartPoint),
     yearlyGrowthData: toArray(payload.yearlyGrowthData).map(normalizeGrowthPoint),
   };
 }
@@ -275,7 +253,8 @@ function normalizeTrendComparison(response) {
     series: Array.isArray(payload.series)
       ? payload.series.map((item) => {
           const trendType = String(item?.trendType || "INSUFFICIENT_DATA").toUpperCase();
-          const backendGrowthData = toArray(item?.yearlyGrowthData);
+          const yearlyData = toArray(item?.yearlyData).map(normalizeChartPoint);
+          const chartData = item?.yearlyGrowthData ?? [];
           return {
           name: String(item?.name || "").trim(),
           totalPapers: Number(item?.totalPapers) || 0,
@@ -286,9 +265,8 @@ function normalizeTrendComparison(response) {
           trendType,
           sufficientData: item?.sufficientData !== false
             && trendType !== "INSUFFICIENT_DATA",
-          points: backendGrowthData.length > 0
-            ? backendGrowthData.map(normalizeGrowthPoint)
-            : deriveGrowthData(item?.yearlyData),
+          yearlyData,
+          points: toArray(chartData).map(normalizeGrowthPoint),
         };
         }).filter((item) => item.name)
       : [],
